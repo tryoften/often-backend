@@ -1,0 +1,1 @@
+{"version":3,"sources":["app/Services/Search.js"],"names":[],"mappings":";;;;;;;;IAAM,MAAM,GACA,SADN,MAAM,GACG;uBADT,MAAM;;AAEV,QAAO,CAAC,GAAG,CAAC,IAAI,CAAC,CAAC;CAClB;;qBAGa,MAAM","file":"app/Services/Search.js","sourcesContent":["class Search {\n\tconstructor() {\n\t\tconsole.log('hi');\n\t}\n}\n\nexport default Search;"]}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["app/config.js"],"names":[],"mappings":";;;;;AAAO,IAAI,OAAO,GAAG,gCAAgC,CAAC;QAA3C,OAAO,GAAP,OAAO","file":"app/config.js","sourcesContent":["export var BaseURL = 'https://asterix.firebaseio.com';\n"]}

@@ -1,0 +1,47 @@
+{
+  "name": "october-backend",
+  "version": "0.0.0",
+  "description": "Backend service for October.",
+  "homepage": "drizzyapp.com",
+  "author": {
+    "name": "Jakub",
+    "email": "jakub@drizzyapp.com",
+    "url": "archipelacode.com"
+  },
+  "repository": "october-labs/october-backend",
+  "license": "MIT",
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "october-backend",
+    ""
+  ],
+  "dependencies": {
+    "backbone": "^1.1.2",
+    "backbone-relational": "~0.9.0",
+    "backbonefire": "file:../../../../../var/folders/6x/txx_f67502xd08c4bskn4f_40000gn/T/npm-9866-fb430456/git-cache-6b839f29609c/953104f12601b3440fc8703660738918d99ea401",
+    "firebase": "^2.2.4",
+    "jquery": "^2.1.4",
+    "restler": "^3.2.2",
+    "spotify-web-api-node": "^2.0.2",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "babelify": "^6.1.0",
+    "grunt-babel": "^5.0.0",
+    "grunt-browserify": "~3.8.0",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-cli": "^1.12.0",
+    "grunt-serve": "~0.1.6",
+    "jshint-stylish": "^1.0.1",
+    "load-grunt-tasks": "^3.1.0",
+    "time-grunt": "^1.1.0"
+  },
+  "scripts": {
+    "test": "grunt"
+  }
+}
