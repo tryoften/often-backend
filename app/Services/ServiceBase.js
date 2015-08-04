@@ -1,42 +1,56 @@
 import 'backbone-relational';
 import 'backbonefire';
 import { RelationalModel, HasOne, HasMany } from 'backbone';
-import QueryResult from '../Models/QueryResult';
+import CachedResultsManager from '../Models/CachedResultsManager';
 
 class ServiceBase {
+
 	constructor() {
-		this.queryResult = new QueryResult();
+		this.cachedResultsManager = new CachedResultsManager();
 	}
+
+	isCacheValid(queryProviderCompletedTime) {
+		if (!queryProviderCompletedTime) return false;
+		return Date.now() - this.fetch_interval < queryProviderCompletedTime;
+	}
+
 	execute(request) {
 		// Executes the request with the provider 
 		return new Promise((resolve, reject) => {
-			var cachedQuery = this.queryResult.get(request.get('query'));
+			var queryString = request.get('query');
+			var requestId = request.id;
+
 			//Check if the check hasn't expired, and resolve cached data
-			if(cachedQuery && (Date.now() - this.fetch_interval > cachedQuery.get(this.provider_id).get('meta').get('time_completed'))) {
-				resolve(cachedQuery.get(this.provider_id));
-			} else {
-				this.fetchData(request).then((contents) => {
-					var resp = {
-						id : `${request.id}/${this.provider_id}`,
-						meta : {
-							time_completed : Date.now(),
-						},
-						results : {
-							contents : contents
-						}
-					};
-					// update the cache
-					var providerResultMap = {};
-					providerResultMap[this.provider_id] = resp;
+			this.cachedResultsManager.once('sync', (crm) => {
+				var providerResultCompletedTime = this.cachedResultsManager.queryProviderCompletedTime(queryString, this.provider_id);
 
-					var queryProviderResultMap = {};
-					queryProviderResultMap[request.get('query')] = providerResultMap;
-
-					this.queryResult.set(queryProviderResultMap);
-
+				if (this.isCacheValid(providerResultCompletedTime)) {
+					var resp = this.cachedResultsManager.providerResult(queryString, this.provider_id);
+					resp.id = `${requestId}/${this.provider_id}`;
 					resolve(resp);
-				});
-			}
+				} else {
+					this.fetchData(queryString).then((contents) => {
+						var resp = {
+							id : `${request.id}/${this.provider_id}`,
+							meta : {
+								time_completed : Date.now(),
+							},
+							results : contents
+						};
+						// update the cache
+						var providerResultMap = {};
+						providerResultMap[this.provider_id] = resp;
+
+						var queryProviderResultMap = {};
+						queryProviderResultMap[queryString] = providerResultMap;
+
+						this.cachedResultsManager.set(queryProviderResultMap);
+						this.cachedResultsManager.save();
+						resolve(resp);
+					});
+				}
+			});
+			this.cachedResultsManager.fetch();
 		});
 		
 	}

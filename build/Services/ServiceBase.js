@@ -16,50 +16,63 @@ require('backbonefire');
 
 var _backbone = require('backbone');
 
-var _ModelsQueryResult = require('../Models/QueryResult');
+var _ModelsCachedResultsManager = require('../Models/CachedResultsManager');
 
-var _ModelsQueryResult2 = _interopRequireDefault(_ModelsQueryResult);
+var _ModelsCachedResultsManager2 = _interopRequireDefault(_ModelsCachedResultsManager);
 
 var ServiceBase = (function () {
 	function ServiceBase() {
 		_classCallCheck(this, ServiceBase);
 
-		this.queryResult = new _ModelsQueryResult2['default']();
+		this.cachedResultsManager = new _ModelsCachedResultsManager2['default']();
 	}
 
 	_createClass(ServiceBase, [{
+		key: 'isCacheValid',
+		value: function isCacheValid(queryProviderCompletedTime) {
+			if (!queryProviderCompletedTime) return false;
+			return Date.now() - this.fetch_interval < queryProviderCompletedTime;
+		}
+	}, {
 		key: 'execute',
 		value: function execute(request) {
 			var _this = this;
 
 			// Executes the request with the provider
 			return new Promise(function (resolve, reject) {
-				var cachedQuery = _this.queryResult.get(request.get('query'));
+				var queryString = request.get('query');
+				var requestId = request.id;
+
 				//Check if the check hasn't expired, and resolve cached data
-				if (cachedQuery && Date.now() - _this.fetch_interval > cachedQuery.get(_this.provider_id).get('meta').get('time_completed')) {
-					resolve(cachedQuery.get(_this.provider_id));
-				} else {
-					_this.fetchData(request).then(function (contents) {
-						var resp = {
-							id: '' + request.id + '/' + _this.provider_id,
-							meta: {
-								time_completed: Date.now() },
-							results: {
-								contents: contents
-							}
-						};
-						// update the cache
-						var providerResultMap = {};
-						providerResultMap[_this.provider_id] = resp;
+				_this.cachedResultsManager.once('sync', function (crm) {
+					var providerResultCompletedTime = _this.cachedResultsManager.queryProviderCompletedTime(queryString, _this.provider_id);
 
-						var queryProviderResultMap = {};
-						queryProviderResultMap[request.get('query')] = providerResultMap;
-
-						_this.queryResult.set(queryProviderResultMap);
-
+					if (_this.isCacheValid(providerResultCompletedTime)) {
+						var resp = _this.cachedResultsManager.providerResult(queryString, _this.provider_id);
+						resp.id = '' + requestId + '/' + _this.provider_id;
 						resolve(resp);
-					});
-				}
+					} else {
+						_this.fetchData(queryString).then(function (contents) {
+							var resp = {
+								id: '' + request.id + '/' + _this.provider_id,
+								meta: {
+									time_completed: Date.now() },
+								results: contents
+							};
+							// update the cache
+							var providerResultMap = {};
+							providerResultMap[_this.provider_id] = resp;
+
+							var queryProviderResultMap = {};
+							queryProviderResultMap[queryString] = providerResultMap;
+
+							_this.cachedResultsManager.set(queryProviderResultMap);
+							_this.cachedResultsManager.save();
+							resolve(resp);
+						});
+					}
+				});
+				_this.cachedResultsManager.fetch();
 			});
 		}
 	}]);

@@ -9,7 +9,6 @@ class Responses extends Firebase.Collection {
 		this.url = `${BaseURL}/responses`;
 		this.autoSync = true;
 	}
-
 }
 
 export default Responses;

@@ -12,6 +12,7 @@ class ClientRequestDispatcher {
 
 	process() {
 		this.clientRequests.on('add', (incomingRequest) => {
+			console.log("Adding a new client request");
 			//get a list of providers that the user is subscribed to
 			var user_providers = incomingRequest.get('user').get('providers');
 			Object.keys(user_providers).forEach((providerName) => {

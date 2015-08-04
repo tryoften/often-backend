@@ -16,28 +16,28 @@ var _backbone = require('backbone');
 
 var _config = require('../config');
 
-var QueryResult = (function (_Firebase$Model) {
-	function QueryResult() {
-		_classCallCheck(this, QueryResult);
+var CachedResult = (function (_Firebase$Model) {
+	function CachedResult() {
+		_classCallCheck(this, CachedResult);
 
 		if (_Firebase$Model != null) {
 			_Firebase$Model.apply(this, arguments);
 		}
 	}
 
-	_inherits(QueryResult, _Firebase$Model);
+	_inherits(CachedResult, _Firebase$Model);
 
-	_createClass(QueryResult, [{
+	_createClass(CachedResult, [{
 		key: 'initialize',
 		value: function initialize(models, opts) {
-			this.url = '' + _config.BaseURL + '/query-results';
+			this.url = '' + _config.BaseURL + '/cached-results';
 			this.autoSync = true;
 		}
 	}]);
 
-	return QueryResult;
+	return CachedResult;
 })(_backbone.Firebase.Model);
 
-exports['default'] = QueryResult;
+exports['default'] = CachedResult;
 module.exports = exports['default'];
 //# sourceMappingURL=QueryResult.js.map

@@ -35,19 +35,19 @@ var SpotifyService = (function (_ServiceBase) {
 
 		_get(Object.getPrototypeOf(SpotifyService.prototype), 'constructor', this).call(this);
 		this.provider_id = 'spotify';
-		this.fetch_interval = 400000; //in milliseconds
+		this.fetch_interval = 4000; //in milliseconds
 	}
 
 	_inherits(SpotifyService, _ServiceBase);
 
 	_createClass(SpotifyService, [{
 		key: 'fetchData',
-		value: function fetchData(request) {
+		value: function fetchData(queryString) {
 			var _this2 = this;
 
 			return new Promise(function (resolve, reject) {
 				var response = {};
-				_this2.getSpotifyData(request.get('query'), response).then(function (data) {
+				_this2.getSpotifyData(queryString, response).then(function (data) {
 					resolve(response);
 				});
 			});

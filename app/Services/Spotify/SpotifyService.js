@@ -10,13 +10,13 @@ class SpotifyService extends ServiceBase {
 	constructor(){
 		super();
 		this.provider_id = 'spotify';
-		this.fetch_interval = 400000; //in milliseconds
+		this.fetch_interval = 4000; //in milliseconds
 	}
 	
-	fetchData(request) {
+	fetchData(queryString) {
 		return new Promise((resolve, reject) => {
 			var response = {};
-			this.getSpotifyData(request.get('query'), response).then(function(data){
+			this.getSpotifyData(queryString, response).then(function(data){
 				resolve(response);
 			});
 		});
