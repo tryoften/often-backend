@@ -7,5 +7,6 @@ var _ServicesClientRequestDispatcher = require('./Services/ClientRequestDispatch
 var _ServicesClientRequestDispatcher2 = _interopRequireDefault(_ServicesClientRequestDispatcher);
 
 var crd = new _ServicesClientRequestDispatcher2['default']();
+
 crd.process();
 //# sourceMappingURL=app.js.map

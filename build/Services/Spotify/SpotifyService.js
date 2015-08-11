@@ -28,6 +28,13 @@ var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
 
 var SpotifyService = (function (_ServiceBase) {
+
+	/* 
+ 	Description: Initializes the spotify service provider.
+ 	Parameters: Models (supporting models)
+ 	Signature: (Object) -> Void
+ */
+
 	function SpotifyService(models) {
 		_classCallCheck(this, SpotifyService);
 
@@ -38,36 +45,65 @@ var SpotifyService = (function (_ServiceBase) {
 
 	_createClass(SpotifyService, [{
 		key: 'fetchData',
-		value: function fetchData(queryString) {
+
+		/* 
+  	Description: Main method for obtaining results from the service provider's API. Results are returned as a promise.
+  	Parameters: Query (search term)
+  	Signature: (String) -> Promise
+  */
+
+		value: function fetchData(query) {
 			var _this2 = this;
 
 			return new Promise(function (resolve, reject) {
-				var response = {};
-				_this2.getSpotifyData(queryString, response).then(function (data) {
-					resolve(response);
+
+				var results = {};
+				_this2.getSpotifyData(query, results).then(function (data) {
+
+					resolve(results);
 				});
 			});
 		}
 	}, {
 		key: 'getSpotifyData',
-		value: function getSpotifyData(searchTerm, resObj) {
-			return Promise.all([this.searchArtists(searchTerm, resObj), this.searchAlbums(searchTerm, resObj), this.searchTracks(searchTerm, resObj), this.searchPlaylists(searchTerm, resObj)]);
+
+		/* 
+  	Description: Barrier method for collecting results from multiple service provider API calls. Returns a promise when all sub-promises are fulfilled.
+  	Parameters: Query (search term), results (object for storing data from the service provider's)
+  	Signature: (String, Object) -> Promise
+  */
+
+		value: function getSpotifyData(query, results) {
+
+			return Promise.all([this.searchArtists(query, results), this.searchAlbums(query, results), this.searchTracks(query, results), this.searchPlaylists(query, results)]);
 		}
 	}, {
 		key: 'searchPlaylists',
-		value: function searchPlaylists(searchTerm, resObj) {
+
+		/* 
+  	Description: Searches spotify playlists using query and populates the results object with playlist information. Returns a promise.
+  	Parameters: Query (search term), results (object for storing data from the service provider's)
+  	Signature: (String, Object) -> Promise
+  */
+
+		value: function searchPlaylists(query, results) {
+
 			return new Promise(function (resolve, reject) {
-				spotifyApi.searchPlaylists(searchTerm).then(function (data) {
+
+				spotifyApi.searchPlaylists(query).then(function (data) {
+
 					var playlistItems = data.body.playlists.items;
 					var playlists = [];
 					for (var pi in playlistItems) {
+
 						playlists.push({
 							playlist_name: playlistItems[pi].name
 						});
 					}
-					resObj.playlists = playlists;
+					results.playlists = playlists;
 					resolve(true);
 				}, function (error) {
+
 					console.log('Error detected ' + error);
 					reject(false);
 				});
@@ -75,12 +111,21 @@ var SpotifyService = (function (_ServiceBase) {
 		}
 	}, {
 		key: 'searchTracks',
-		value: function searchTracks(searchTerm, resObj) {
+
+		/* 
+  	Description: Searches spotify tracks using query and populates the results object with tracks information. Returns a promise.
+  	Parameters: Query (search term), results (object for storing data from the service provider's)
+  	Signature: (String, Object) -> Promise
+  */
+
+		value: function searchTracks(query, resObj) {
 			return new Promise(function (resolve, reject) {
-				spotifyApi.searchTracks(searchTerm).then(function (data) {
+				spotifyApi.searchTracks(query).then(function (data) {
+
 					var trackItems = data.body.tracks.items;
 					var tracks = [];
 					for (var ti in trackItems) {
+
 						tracks.push({
 							track_name: trackItems[ti].name,
 							track_image_large: trackItems[ti].album.images[0].url
@@ -89,6 +134,7 @@ var SpotifyService = (function (_ServiceBase) {
 					resObj.tracks = tracks;
 					resolve(true);
 				}, function (error) {
+
 					console.log('Error detected ' + error);
 					reject(false);
 				});
@@ -96,20 +142,32 @@ var SpotifyService = (function (_ServiceBase) {
 		}
 	}, {
 		key: 'searchAlbums',
-		value: function searchAlbums(searchTerm, resObj) {
+
+		/* 
+  	Description: Searches spotify albums using query and populates the results object with albums information. Returns a promise.
+  	Parameters: Query (search term), results (object for storing data from the service provider's)
+  	Signature: (String, Object) -> Promise
+  */
+
+		value: function searchAlbums(query, resObj) {
+
 			return new Promise(function (resolve, reject) {
-				spotifyApi.searchAlbums(searchTerm).then(function (data) {
+
+				spotifyApi.searchAlbums(query).then(function (data) {
+
 					var albumItems = data.body.albums.items;
 					var albums = [];
 					for (var ai in albumItems) {
+
 						albums.push({
 							album_name: albumItems[ai].name,
-							album_image_large: albumItems[ai].images[0].url
+							album_image_large: albumItems[ai].images.length > 0 ? albumItems[ai].images[0].url : ''
 						});
 					}
 					resObj.albums = albums;
 					resolve(true);
 				}, function (error) {
+
 					console.log('Error detected ' + error);
 					reject(false);
 				});
@@ -117,23 +175,33 @@ var SpotifyService = (function (_ServiceBase) {
 		}
 	}, {
 		key: 'searchArtists',
-		value: function searchArtists(searchTerm, resObj) {
+
+		/* 
+  	Description: Searches spotify artists using query and populates the results object with artists information. Returns a promise.
+  	Parameters: Query (search term), results (object for storing data from the service provider's)
+  	Signature: (String, Object) -> Promise
+  */
+
+		value: function searchArtists(query, resObj) {
+
 			return new Promise(function (resolve, reject) {
-				spotifyApi.searchArtists(searchTerm).then(function (data) {
+
+				spotifyApi.searchArtists(query).then(function (data) {
+
 					var artistItems = data.body.artists.items;
 					var artists = [];
 					for (var ai in artistItems) {
-						//console.log(artistItems[ai]);
-						//console.log('artist ' + aristItems[ai].images[0]);
+						console.log(artistItems[ai].images.length);
 						artists.push({
 							artist_name: artistItems[ai].name,
-							artist_popularity: artistItems[ai].popularity
-							//artist_image_large : aristItems[ai].images[0].url
+							artist_popularity: artistItems[ai].popularity,
+							artist_image_large: artistItems[ai].images.length > 0 ? artistItems[ai].images[0].url : ''
 						});
 					}
 					resObj.artists = artists;
 					resolve(true);
 				}, function (error) {
+
 					console.log('Error detected ' + error);
 					reject(false);
 				});
