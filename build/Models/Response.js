@@ -1,37 +1,33 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-  value: true
+	value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-require('backbone-relational');
-
-require('backbonefire');
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
 var _backbone = require('backbone');
 
-var _ModelsUser = require('../Models/User');
+/*
+	This class is responsible for providing granular functionalities (mostly accessors) for cached responses.
+*/
 
-var _ModelsUser2 = _interopRequireDefault(_ModelsUser);
+var Response = (function (_Model) {
+	function Response() {
+		_classCallCheck(this, Response);
 
-var Response = _backbone.RelationalModel.extend({});
+		if (_Model != null) {
+			_Model.apply(this, arguments);
+		}
+	}
+
+	_inherits(Response, _Model);
+
+	return Response;
+})(_backbone.Model);
 
 exports['default'] = Response;
 module.exports = exports['default'];
-
-/*
-	idAttribute : '_id',
-    relations:[{
-      type: HasOne,
-      key: 'user',
-      relatedModel: User,
-      reverseRelation: {
-        key: 'response',
-        type: HasMany,
-        includeInJSON: 'id'
-      }
-    }] 
-*/
 //# sourceMappingURL=Response.js.map

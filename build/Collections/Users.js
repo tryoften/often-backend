@@ -22,6 +22,10 @@ var _ModelsUser = require('../Models/User');
 
 var _ModelsUser2 = _interopRequireDefault(_ModelsUser);
 
+/*
+	This class is responsible for maintaining the users collection.
+*/
+
 var Users = (function (_Firebase$Collection) {
 	function Users() {
 		_classCallCheck(this, Users);
@@ -35,7 +39,15 @@ var Users = (function (_Firebase$Collection) {
 
 	_createClass(Users, [{
 		key: 'initialize',
+
+		/* 
+  	Description: Initializes the users collection.
+  	Parameters: Models (supporting models), options (supporting options)
+  	Signature: (Object, Object) -> Void
+  */
+
 		value: function initialize(models, opts) {
+
 			this.model = _ModelsUser2['default'];
 			this.url = '' + _config.BaseURL + '/users';
 			this.autoSync = true;
@@ -46,6 +58,5 @@ var Users = (function (_Firebase$Collection) {
 })(_backbone.Firebase.Collection);
 
 exports['default'] = Users;
-var users = new Users();
-exports.users = users;
+module.exports = exports['default'];
 //# sourceMappingURL=Users.js.map

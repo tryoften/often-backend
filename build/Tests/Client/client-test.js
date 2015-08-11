@@ -12,7 +12,7 @@ app.get('/', function (req, res) {
 });
 
 function sendQuery(queryText) {
-	var pushRef = ref.child('client-requests').push({
+	var pushRef = ref.child('requests').push({
 		query: queryText,
 		time_made: Date.now(),
 		user: '-JuXf23K7JyEzYBfXDSv'

@@ -18,33 +18,38 @@ var _backbone = require('backbone');
 
 var _config = require('../config');
 
-var _ModelsClientRequest = require('../Models/ClientRequest');
+var _ModelsRequest = require('../Models/Request');
 
-var _ModelsClientRequest2 = _interopRequireDefault(_ModelsClientRequest);
+var _ModelsRequest2 = _interopRequireDefault(_ModelsRequest);
 
-var ClientRequests = (function (_Firebase$Collection) {
-	function ClientRequests() {
-		_classCallCheck(this, ClientRequests);
+/*
+	This class is responsible for maintaining and syncing Request collection.
+*/
+
+var Requests = (function (_Firebase$Collection) {
+	function Requests() {
+		_classCallCheck(this, Requests);
 
 		if (_Firebase$Collection != null) {
 			_Firebase$Collection.apply(this, arguments);
 		}
 	}
 
-	_inherits(ClientRequests, _Firebase$Collection);
+	_inherits(Requests, _Firebase$Collection);
 
-	_createClass(ClientRequests, [{
+	_createClass(Requests, [{
 		key: 'initialize',
 		value: function initialize(models, opts) {
-			this.model = _ModelsClientRequest2['default'];
-			this.url = '' + _config.BaseURL + '/client-requests';
+
+			this.model = _ModelsRequest2['default'];
+			this.url = '' + _config.BaseURL + '/requests';
 			this.autoSync = true;
 		}
 	}]);
 
-	return ClientRequests;
+	return Requests;
 })(_backbone.Firebase.Collection);
 
-exports['default'] = ClientRequests;
+exports['default'] = Requests;
 module.exports = exports['default'];
 //# sourceMappingURL=ClientRequests.js.map

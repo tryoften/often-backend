@@ -10,7 +10,8 @@ module.exports = function (grunt) {
       options: {
         reporter: require('jshint-stylish'),
         node: true,
-        esnext: true
+        esnext: true,
+        debug: true
       },
       gruntfile: {
         src: ['Gruntfile.js']

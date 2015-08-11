@@ -4,30 +4,26 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-require('backbone-relational');
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
 var _backbone = require('backbone');
 
-var _ModelsUser = require('../Models/User');
+var Request = (function (_Model) {
+  function Request() {
+    _classCallCheck(this, Request);
 
-var _ModelsUser2 = _interopRequireDefault(_ModelsUser);
-
-var ClientRequest = _backbone.RelationalModel.extend({
-  idAttribute: '_id',
-  relations: [{
-    type: _backbone.HasOne,
-    key: 'user',
-    relatedModel: _ModelsUser2['default'],
-    reverseRelation: {
-      key: 'clientRequests',
-      type: _backbone.HasMany,
-      includeInJSON: 'id'
+    if (_Model != null) {
+      _Model.apply(this, arguments);
     }
-  }]
-});
+  }
 
-exports['default'] = ClientRequest;
+  _inherits(Request, _Model);
+
+  return Request;
+})(_backbone.Model);
+
+exports['default'] = Request;
 module.exports = exports['default'];
 //# sourceMappingURL=ClientRequest.js.map

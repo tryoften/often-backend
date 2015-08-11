@@ -10,70 +10,73 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-require('backbone-relational');
+var _CollectionsCachedResponses = require('../Collections/CachedResponses');
 
-require('backbonefire');
+var _CollectionsCachedResponses2 = _interopRequireDefault(_CollectionsCachedResponses);
 
-var _backbone = require('backbone');
-
-var _ModelsCachedResultsManager = require('../Models/CachedResultsManager');
-
-var _ModelsCachedResultsManager2 = _interopRequireDefault(_ModelsCachedResultsManager);
+/* 
+	This class is a base class for all service providers. 
+	It has an instance of the results collection to which it adds a response after processing.
+	It also keeps tracks of a cache for the derived class's responses.
+*/
 
 var ServiceBase = (function () {
-	function ServiceBase() {
+
+	/* 
+ 	Description: Initializes the service base.
+ 	Parameters: Models (supporting models), options (supporting options)
+ 	Signature: (Object, Object) -> Void
+ */
+
+	function ServiceBase(models, opts) {
 		_classCallCheck(this, ServiceBase);
 
-		this.cachedResultsManager = new _ModelsCachedResultsManager2['default']();
+		this.responses = models.responses;
+		this.provider_id = opts.provider_name;
+		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
+		this.cachedResponses = new _CollectionsCachedResponses2['default']({ provider: opts.provider_name });
 	}
 
 	_createClass(ServiceBase, [{
-		key: 'isCacheValid',
-		value: function isCacheValid(queryProviderCompletedTime) {
-			if (!queryProviderCompletedTime) return false;
-			return Date.now() - this.fetch_interval < queryProviderCompletedTime;
-		}
-	}, {
 		key: 'execute',
+
+		/* 
+  	Description: 
+  		If response for the request has been cached and the cache for that response is still valid, then cached response is returned.
+  		Else, the request is processed in the derived class, the cache of the response is updated, and a new response is returned.
+  	Parameter: Datetime in milliseconds from the start of the epoch.
+  	Signature: (Object) -> Void
+  */
+
 		value: function execute(request) {
 			var _this = this;
 
-			// Executes the request with the provider
-			return new Promise(function (resolve, reject) {
-				var queryString = request.get('query');
-				var requestId = request.id;
+			var query = request.get('query');
+			var requestId = request.id;
 
-				//Check if the check hasn't expired, and resolve cached data
-				_this.cachedResultsManager.once('sync', function (crm) {
-					var providerResultCompletedTime = _this.cachedResultsManager.queryProviderCompletedTime(queryString, _this.provider_id);
+			/* Sync the cache */
+			this.cachedResponses.once('sync', function (cr) {
 
-					if (_this.isCacheValid(providerResultCompletedTime)) {
-						var resp = _this.cachedResultsManager.providerResult(queryString, _this.provider_id);
-						resp.id = '' + requestId + '/' + _this.provider_id;
-						resolve(resp);
-					} else {
-						_this.fetchData(queryString).then(function (contents) {
-							var resp = {
-								id: '' + request.id + '/' + _this.provider_id,
-								meta: {
-									time_completed: Date.now() },
-								results: contents
-							};
-							// update the cache
-							var providerResultMap = {};
-							providerResultMap[_this.provider_id] = resp;
+				/* Check if the cache for the query is valid */
+				if (_this.cachedResponses.isCacheValid(_this.fetch_interval, query)) {
 
-							var queryProviderResultMap = {};
-							queryProviderResultMap[queryString] = providerResultMap;
+					/* If so create a response based off of cached results */
+					var results = _this.cachedResponses.getResults(query);
+					_this.responses.createResponse(requestId, _this.provider_id, results);
+				} else {
 
-							_this.cachedResultsManager.set(queryProviderResultMap);
-							_this.cachedResultsManager.save();
-							resolve(resp);
-						});
-					}
-				});
-				_this.cachedResultsManager.fetch();
+					/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
+					_this.fetchData(query).then(function (results) {
+
+						/* Create a response based off of returned results and update the cache */
+						var response = _this.responses.createResponse(requestId, _this.provider_id, results);
+						_this.cachedResponses.cacheResponse(query, response);
+					});
+				}
 			});
+
+			/* Force the sync event to occur in case the cache is empty */
+			this.cachedResponses.fetch();
 		}
 	}]);
 

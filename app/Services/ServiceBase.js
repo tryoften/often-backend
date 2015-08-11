@@ -1,58 +1,68 @@
-import 'backbone-relational';
-import 'backbonefire';
-import { RelationalModel, HasOne, HasMany } from 'backbone';
-import CachedResultsManager from '../Models/CachedResultsManager';
+import CachedResponses from '../Collections/CachedResponses';
+
+/* 
+	This class is a base class for all service providers. 
+	It has an instance of the results collection to which it adds a response after processing.
+	It also keeps tracks of a cache for the derived class's responses.
+*/
 
 class ServiceBase {
 
-	constructor() {
-		this.cachedResultsManager = new CachedResultsManager();
+	/* 
+		Description: Initializes the service base.
+		Parameters: Models (supporting models), options (supporting options)
+		Signature: (Object, Object) -> Void
+	*/
+
+	constructor (models, opts) {
+
+		this.responses = models.responses;
+		this.provider_id = opts.provider_name;
+		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
+		this.cachedResponses = new CachedResponses({provider : opts.provider_name});
+
 	}
 
-	isCacheValid(queryProviderCompletedTime) {
-		if (!queryProviderCompletedTime) return false;
-		return Date.now() - this.fetch_interval < queryProviderCompletedTime;
-	}
+	/* 
+		Description: 
+			If response for the request has been cached and the cache for that response is still valid, then cached response is returned.
+			Else, the request is processed in the derived class, the cache of the response is updated, and a new response is returned.
+		Parameter: Datetime in milliseconds from the start of the epoch.
+		Signature: (Object) -> Void
+	*/
 
-	execute(request) {
-		// Executes the request with the provider 
-		return new Promise((resolve, reject) => {
-			var queryString = request.get('query');
-			var requestId = request.id;
+	execute (request) {
 
-			//Check if the check hasn't expired, and resolve cached data
-			this.cachedResultsManager.once('sync', (crm) => {
-				var providerResultCompletedTime = this.cachedResultsManager.queryProviderCompletedTime(queryString, this.provider_id);
+		var query = request.get('query');
+		var requestId = request.id;
 
-				if (this.isCacheValid(providerResultCompletedTime)) {
-					var resp = this.cachedResultsManager.providerResult(queryString, this.provider_id);
-					resp.id = `${requestId}/${this.provider_id}`;
-					resolve(resp);
-				} else {
-					this.fetchData(queryString).then((contents) => {
-						var resp = {
-							id : `${request.id}/${this.provider_id}`,
-							meta : {
-								time_completed : Date.now(),
-							},
-							results : contents
-						};
-						// update the cache
-						var providerResultMap = {};
-						providerResultMap[this.provider_id] = resp;
+		/* Sync the cache */
+		this.cachedResponses.once('sync', (cr) => {
 
-						var queryProviderResultMap = {};
-						queryProviderResultMap[queryString] = providerResultMap;
+			/* Check if the cache for the query is valid */
+			if (this.cachedResponses.isCacheValid(this.fetch_interval, query)) {
 
-						this.cachedResultsManager.set(queryProviderResultMap);
-						this.cachedResultsManager.save();
-						resolve(resp);
-					});
-				}
-			});
-			this.cachedResultsManager.fetch();
+				/* If so create a response based off of cached results */
+				var results = this.cachedResponses.getResults(query);
+				this.responses.createResponse(requestId, this.provider_id, results);
+
+			} else {
+
+				/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
+				this.fetchData(query).then((results) => {
+
+					/* Create a response based off of returned results and update the cache */
+					var response = this.responses.createResponse(requestId, this.provider_id, results);
+					this.cachedResponses.cacheResponse(query, response);
+
+				});
+
+			}
+
 		});
-		
+
+		/* Force the sync event to occur in case the cache is empty */
+		this.cachedResponses.fetch();	
 	}
 }
 

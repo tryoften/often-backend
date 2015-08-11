@@ -1,8 +1,5 @@
-import 'backbonefire';
-import ClientRequestDispatcher from './Services/ClientRequestDispatcher';
-import users from './Collections/Users';
-import CachedResultsManager from './Models/CachedResultsManager';
 
+import ClientRequestDispatcher from './Services/ClientRequestDispatcher';
 
 var crd = new ClientRequestDispatcher();
 crd.process();

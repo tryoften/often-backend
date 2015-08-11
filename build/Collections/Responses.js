@@ -22,6 +22,10 @@ var _ModelsResponse = require('../Models/Response');
 
 var _ModelsResponse2 = _interopRequireDefault(_ModelsResponse);
 
+/*
+	This class is responsible for maintaining the responses collection.
+*/
+
 var Responses = (function (_Firebase$Collection) {
 	function Responses() {
 		_classCallCheck(this, Responses);
@@ -35,10 +39,38 @@ var Responses = (function (_Firebase$Collection) {
 
 	_createClass(Responses, [{
 		key: 'initialize',
+
+		/* 
+  	Description: Initializes the responses collection.
+  	Parameters: Models (supporting models), options (supporting options)
+  	Signature: (Object, Object) -> Void
+  */
+
 		value: function initialize(models, opts) {
+
 			this.model = _ModelsResponse2['default'];
 			this.url = '' + _config.BaseURL + '/responses';
 			this.autoSync = true;
+		}
+	}, {
+		key: 'createResponse',
+
+		/* 
+  	Description: Creates and adds a Response model to the collection, and then returns it.
+  	Parameters: reqId (used in conjuction with provider to generate an id, 
+  				provider (used in conjuction with reqId to generate an id, 
+  				contents (object containing results info)
+  	Signature: (String, String, Object) -> Object
+  */
+
+		value: function createResponse(reqId, provider, contents) {
+
+			return this.create({
+				id: '' + reqId + '/' + provider,
+				meta: {
+					time_completed: Date.now() },
+				results: contents
+			});
 		}
 	}]);
 

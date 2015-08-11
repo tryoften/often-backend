@@ -1,9 +1,11 @@
-import 'backbone-relational';
-import 'backbonefire';
-import { RelationalModel, HasOne, HasMany } from 'backbone';
+import { Model } from 'backbone';
 
-var User = RelationalModel.extend({  
+/*
+	This class is responsible for providing granular functionalities (mostly accessors) for users.
+*/
 
-});
+class User extends Model {
+
+}
 
 export default User;

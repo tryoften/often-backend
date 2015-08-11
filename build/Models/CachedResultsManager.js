@@ -30,8 +30,8 @@ var CachedResultsManager = (function (_Firebase$Model) {
 	_createClass(CachedResultsManager, [{
 		key: 'initialize',
 		value: function initialize(models, opts) {
-			this.url = '' + _config.BaseURL + '/cached-results';
-			this.autoSync = false;
+			this.url = '' + _config.BaseURL + '/cached-results/{models.provider}';
+			this.autoSync = true;
 		}
 	}, {
 		key: 'queryProviderCompletedTime',
@@ -50,6 +50,5 @@ var CachedResultsManager = (function (_Firebase$Model) {
 })(_backbone.Firebase.Model);
 
 exports['default'] = CachedResultsManager;
-var cachedResultsManager = new CachedResultsManager();
-exports.cachedResultsManager = cachedResultsManager;
+module.exports = exports['default'];
 //# sourceMappingURL=CachedResultsManager.js.map

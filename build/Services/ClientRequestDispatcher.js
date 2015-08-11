@@ -10,9 +10,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var _CollectionsClientRequests = require('../Collections/ClientRequests');
+var _CollectionsRequests = require('../Collections/Requests');
 
-var _CollectionsClientRequests2 = _interopRequireDefault(_CollectionsClientRequests);
+var _CollectionsRequests2 = _interopRequireDefault(_CollectionsRequests);
 
 var _CollectionsResponses = require('../Collections/Responses');
 
@@ -22,34 +22,69 @@ var _SpotifySpotifyService = require('./Spotify/SpotifyService');
 
 var _SpotifySpotifyService2 = _interopRequireDefault(_SpotifySpotifyService);
 
+var _CollectionsUsers = require('../Collections/Users');
+
+var _CollectionsUsers2 = _interopRequireDefault(_CollectionsUsers);
+
+/*
+	This class is responsible for figuring out which service provider must handle a given incoming request.
+	This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
+*/
+
 var ClientRequestDispatcher = (function () {
-	function ClientRequestDispatcher() {
+
+	/* 
+ 	Description: Initializes the cached responses collection.
+ 	Parameters: Models (supporting models), options (supporting options)
+ 	Signature: (Object, Object) -> Void
+ */
+
+	function ClientRequestDispatcher(models, opts) {
 		_classCallCheck(this, ClientRequestDispatcher);
 
-		this.clientRequests = new _CollectionsClientRequests2['default']();
-		this.serviceProviders = {};
-		this.serviceProviders.spotify = new _SpotifySpotifyService2['default']();
+		this.requests = new _CollectionsRequests2['default']();
 		this.responses = new _CollectionsResponses2['default']();
+		this.serviceProviders = {};
+		this.serviceProviders.spotify = new _SpotifySpotifyService2['default']({ responses: this.responses });
+		this.users = new _CollectionsUsers2['default']();
 	}
 
 	_createClass(ClientRequestDispatcher, [{
 		key: 'process',
+
+		/* 
+  	Description: Determines which service provider the request should be executed with and executes it.
+  	Parameters: Models (supporting models), options (supporting options)
+  	Signature: () -> Void
+  */
+
 		value: function process() {
 			var _this = this;
 
-			this.clientRequests.on('add', function (incomingRequest) {
-				console.log('Adding a new client request');
-				//get a list of providers that the user is subscribed to
-				var user_providers = incomingRequest.get('user').get('providers');
-				Object.keys(user_providers).forEach(function (providerName) {
-					if (!_this.serviceProviders[providerName]) {
-						console.log('No service handlers found for the following provider: ' + providerName);
-					} else {
-						console.log('Provider handler found');
-						_this.serviceProviders[providerName].execute(incomingRequest).then(function (resp) {
-							_this.responses.add(resp);
-						});
-					}
+			/* Sync up the user collection to retrieve a list of all users and the servides they are subscribed to */
+			this.users.once('sync', function (x) {
+
+				/* Set up an event listener for new requests */
+				_this.requests.on('add', function (incomingRequest) {
+
+					/* Obtain a list of all the providers the user is subscribed to */
+					var user_id = incomingRequest.get('user');
+					var user_providers = _this.users.get(user_id).get('providers');
+
+					/* For every user provider that the user is subscribed to */
+					Object.keys(user_providers).forEach(function (providerName) {
+
+						/* In the unlikely event that the provider for the user request is not found, just write to stdout */
+						if (!_this.serviceProviders[providerName]) {
+
+							console.log('No service handlers found for the following provider: ' + providerName);
+						} else {
+
+							/* If the provider is found, then execute the incoming request using the instance of an appropriate provider handler */
+							console.log('Provider handler found');
+							_this.serviceProviders[providerName].execute(incomingRequest);
+						}
+					});
 				});
 			});
 		}

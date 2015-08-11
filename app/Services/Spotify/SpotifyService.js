@@ -1,16 +1,14 @@
-import 'backbone-relational';
 import 'backbonefire';
-import { RelationalModel, HasOne, HasMany } from 'backbone';
 import ServiceBase from '../ServiceBase';
+import { Settings as settings } from './config';
 
 var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
 
 class SpotifyService extends ServiceBase {
-	constructor(){
-		super();
-		this.provider_id = 'spotify';
-		this.fetch_interval = 4000; //in milliseconds
+	
+	constructor(models){
+		super(models, settings);
 	}
 	
 	fetchData(queryString) {

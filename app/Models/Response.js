@@ -1,22 +1,11 @@
-import 'backbone-relational';
-import 'backbonefire';
-import { RelationalModel, HasOne, HasMany } from 'backbone';
-import User from '../Models/User';
+import { Model } from 'backbone';
 
-var Response = RelationalModel.extend({
 /*
-	idAttribute : '_id',
-    relations:[{
-      type: HasOne,
-      key: 'user',
-      relatedModel: User,
-      reverseRelation: {
-        key: 'response',
-        type: HasMany,
-        includeInJSON: 'id'
-      }
-    }] 
-*/ 
-});
+	This class is responsible for providing granular functionalities (mostly accessors) for cached responses.
+*/
+
+class Response extends Model {
+
+}
 
 export default Response;

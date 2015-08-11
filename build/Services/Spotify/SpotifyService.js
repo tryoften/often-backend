@@ -16,26 +16,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-require('backbone-relational');
-
 require('backbonefire');
-
-var _backbone = require('backbone');
 
 var _ServiceBase2 = require('../ServiceBase');
 
 var _ServiceBase3 = _interopRequireDefault(_ServiceBase2);
 
+var _config = require('./config');
+
 var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
 
 var SpotifyService = (function (_ServiceBase) {
-	function SpotifyService() {
+	function SpotifyService(models) {
 		_classCallCheck(this, SpotifyService);
 
-		_get(Object.getPrototypeOf(SpotifyService.prototype), 'constructor', this).call(this);
-		this.provider_id = 'spotify';
-		this.fetch_interval = 4000; //in milliseconds
+		_get(Object.getPrototypeOf(SpotifyService.prototype), 'constructor', this).call(this, models, _config.Settings);
 	}
 
 	_inherits(SpotifyService, _ServiceBase);
