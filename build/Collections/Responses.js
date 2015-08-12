@@ -22,9 +22,9 @@ var _ModelsResponse = require('../Models/Response');
 
 var _ModelsResponse2 = _interopRequireDefault(_ModelsResponse);
 
-/*
-	This class is responsible for maintaining the responses collection.
-*/
+/**
+ * This class is responsible for maintaining the responses collection.
+ */
 
 var Responses = (function (_Firebase$Collection) {
 	function Responses() {
@@ -40,12 +40,13 @@ var Responses = (function (_Firebase$Collection) {
 	_createClass(Responses, [{
 		key: 'initialize',
 
-		/* 
-  	Description: Initializes the responses collection.
-  	Parameters: Models (supporting models), options (supporting options)
-  	Signature: (Object, Object) -> Void
-  */
-
+		/**
+   * Initializes the responses collection.
+   * @param {object} models - supporting models
+   * @param {object} opts - supporting options
+   *
+   * @return {void}
+   */
 		value: function initialize(models, opts) {
 
 			this.model = _ModelsResponse2['default'];
@@ -55,14 +56,14 @@ var Responses = (function (_Firebase$Collection) {
 	}, {
 		key: 'createResponse',
 
-		/* 
-  	Description: Creates and adds a Response model to the collection, and then returns it.
-  	Parameters: reqId (used in conjuction with provider to generate an id, 
-  				provider (used in conjuction with reqId to generate an id, 
-  				contents (object containing results info)
-  	Signature: (String, String, Object) -> Object
-  */
-
+		/**
+   * Creates and adds a Response model to the collection, and then returns it.
+   * @param {string} reqId - used in conjuction with provider to generate an id of new model
+   * @param {string} provider - used in conjuction with reqId to generate an id of new model
+   * @param {object} contents - object containing results to be added to the response 
+   *
+   * @return {object} - returns a Response object
+   */
 		value: function createResponse(reqId, provider, contents) {
 
 			return this.create({

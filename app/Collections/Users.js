@@ -3,18 +3,18 @@ import { Firebase } from 'backbone';
 import { BaseURL } from '../config';
 import User from '../Models/User';
 
-/*
-	This class is responsible for maintaining the users collection.
-*/
-
+/**
+ * This class is responsible for maintaining the users collection.
+ */
 class Users extends Firebase.Collection {
 
-	/* 
-		Description: Initializes the users collection.
-		Parameters: Models (supporting models), options (supporting options)
-		Signature: (Object, Object) -> Void
-	*/
-
+	/**
+	 * Initializes the users collection.
+	 * @param {object} models - supporting models
+	 * @param {object} opts - supporting options
+	 *
+	 * @return {void}
+	 */
 	initialize (models, opts) {
 
 		this.model = User;

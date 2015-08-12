@@ -12,9 +12,9 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 
 var _backbone = require('backbone');
 
-/*
-	This class is responsible for providing granular functionalities (mostly accessors) for cached responses.
-*/
+/**
+ * This class is responsible for providing granular functionalities (mostly accessors) for cached responses.
+ */
 
 var CachedResponse = (function (_Model) {
 	function CachedResponse() {
@@ -30,12 +30,11 @@ var CachedResponse = (function (_Model) {
 	_createClass(CachedResponse, [{
 		key: 'getTimeCompleted',
 
-		/* 
-  	Description: Return the time the cached response was last generated.
-  	Parameters: N/A
-  	Signature: () -> Integer
-  */
-
+		/**
+   * Return the time the cached response was last completed (generated).
+   *
+   * @return {int} - time the response was completed
+   */
 		value: function getTimeCompleted() {
 
 			return this.get('meta').time_completed;
@@ -43,12 +42,11 @@ var CachedResponse = (function (_Model) {
 	}, {
 		key: 'getResults',
 
-		/* 
-  	Description: Returns the results of the cached response.
-  	Parameters: N/A
-  	Signature: () -> Object
-  */
-
+		/**
+   * Returns the results of the cached response.
+   *
+   * @return {object} - object containing 
+   */
 		value: function getResults() {
 
 			return this.get('results');

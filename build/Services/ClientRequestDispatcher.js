@@ -22,22 +22,32 @@ var _SpotifySpotifyService = require('./Spotify/SpotifyService');
 
 var _SpotifySpotifyService2 = _interopRequireDefault(_SpotifySpotifyService);
 
+var _GiphyGiphyService = require('./Giphy/GiphyService');
+
+var _GiphyGiphyService2 = _interopRequireDefault(_GiphyGiphyService);
+
+var _YouTubeYouTubeService = require('./YouTube/YouTubeService');
+
+var _YouTubeYouTubeService2 = _interopRequireDefault(_YouTubeYouTubeService);
+
 var _CollectionsUsers = require('../Collections/Users');
 
 var _CollectionsUsers2 = _interopRequireDefault(_CollectionsUsers);
 
-/*
-	This class is responsible for figuring out which service provider must handle a given incoming request.
-	This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
-*/
+/**
+ * This class is responsible for figuring out which service provider must handle a given incoming request.
+ * This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
+ */
 
 var ClientRequestDispatcher = (function () {
 
-	/* 
- 	Description: Initializes the cached responses collection.
- 	Parameters: Models (supporting models), options (supporting options)
- 	Signature: (Object, Object) -> Void
- */
+	/**
+  * Initializes the client request dispatcher.
+  * @param {object} models - supporting models
+  * @param {object} opts - supporting options
+  *
+  * @return {void}
+  */
 
 	function ClientRequestDispatcher(models, opts) {
 		_classCallCheck(this, ClientRequestDispatcher);
@@ -46,18 +56,19 @@ var ClientRequestDispatcher = (function () {
 		this.responses = new _CollectionsResponses2['default']();
 		this.serviceProviders = {};
 		this.serviceProviders.spotify = new _SpotifySpotifyService2['default']({ responses: this.responses });
+		this.serviceProviders.giphy = new _GiphyGiphyService2['default']({ responses: this.responses });
+		this.serviceProviders.youtube = new _YouTubeYouTubeService2['default']({ responses: this.responses });
 		this.users = new _CollectionsUsers2['default']();
 	}
 
 	_createClass(ClientRequestDispatcher, [{
 		key: 'process',
 
-		/* 
-  	Description: Determines which service provider the request should be executed with and executes it.
-  	Parameters: Models (supporting models), options (supporting options)
-  	Signature: () -> Void
-  */
-
+		/**
+   * Determines which service provider the request should be executed with and executes it.
+   *
+   * @return {void}
+   */
 		value: function process() {
 			var _this = this;
 

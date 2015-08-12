@@ -27,13 +27,18 @@ var _config = require('./config');
 var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
 
+/** 
+ * This class is responsible for fetching data from the Spotify API
+ */
+
 var SpotifyService = (function (_ServiceBase) {
 
-	/* 
- 	Description: Initializes the spotify service provider.
- 	Parameters: Models (supporting models)
- 	Signature: (Object) -> Void
- */
+	/**
+  * Initializes the spotify service provider.
+  * @param {object} models - supporting models
+  *
+  * @return {void}
+  */
 
 	function SpotifyService(models) {
 		_classCallCheck(this, SpotifyService);
@@ -46,12 +51,12 @@ var SpotifyService = (function (_ServiceBase) {
 	_createClass(SpotifyService, [{
 		key: 'fetchData',
 
-		/* 
-  	Description: Main method for obtaining results from the service provider's API. Results are returned as a promise.
-  	Parameters: Query (search term)
-  	Signature: (String) -> Promise
-  */
-
+		/**
+   * Main method for obtaining results from the service provider's API.
+   * @param {object} query - search term
+   *
+   * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
+   */
 		value: function fetchData(query) {
 			var _this2 = this;
 
@@ -67,12 +72,13 @@ var SpotifyService = (function (_ServiceBase) {
 	}, {
 		key: 'getSpotifyData',
 
-		/* 
-  	Description: Barrier method for collecting results from multiple service provider API calls. Returns a promise when all sub-promises are fulfilled.
-  	Parameters: Query (search term), results (object for storing data from the service provider's)
-  	Signature: (String, Object) -> Promise
-  */
-
+		/**
+   * Barrier method for collecting results from multiple service provider API calls.
+   * @param {string} query - search term
+   * @results {object} results - object for storing data from the service provider's
+   *
+   * @return {promise} - Returns a promise when all sub-promises are resolved or an error on rejection.
+   */
 		value: function getSpotifyData(query, results) {
 
 			return Promise.all([this.searchArtists(query, results), this.searchAlbums(query, results), this.searchTracks(query, results), this.searchPlaylists(query, results)]);
@@ -80,12 +86,13 @@ var SpotifyService = (function (_ServiceBase) {
 	}, {
 		key: 'searchPlaylists',
 
-		/* 
-  	Description: Searches spotify playlists using query and populates the results object with playlist information. Returns a promise.
-  	Parameters: Query (search term), results (object for storing data from the service provider's)
-  	Signature: (String, Object) -> Promise
-  */
-
+		/**
+   * Searches spotify playlists using query and populates the results object with playlist information.
+   * @param {string} query - search term
+   * @param {object} results - object for storing data from the service provider's
+   *
+   * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+   */
 		value: function searchPlaylists(query, results) {
 
 			return new Promise(function (resolve, reject) {
@@ -112,12 +119,13 @@ var SpotifyService = (function (_ServiceBase) {
 	}, {
 		key: 'searchTracks',
 
-		/* 
-  	Description: Searches spotify tracks using query and populates the results object with tracks information. Returns a promise.
-  	Parameters: Query (search term), results (object for storing data from the service provider's)
-  	Signature: (String, Object) -> Promise
-  */
-
+		/**
+   * Searches spotify playlists using query and populates the results object with track information.
+   * @param {string} query - search term
+   * @param {object} results - object for storing data from the service provider's
+   *
+   * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+   */
 		value: function searchTracks(query, resObj) {
 			return new Promise(function (resolve, reject) {
 				spotifyApi.searchTracks(query).then(function (data) {
@@ -143,12 +151,13 @@ var SpotifyService = (function (_ServiceBase) {
 	}, {
 		key: 'searchAlbums',
 
-		/* 
-  	Description: Searches spotify albums using query and populates the results object with albums information. Returns a promise.
-  	Parameters: Query (search term), results (object for storing data from the service provider's)
-  	Signature: (String, Object) -> Promise
-  */
-
+		/**
+   * Searches spotify playlists using query and populates the results object with album information.
+   * @param {string} query - search term
+   * @param {object} results - object for storing data from the service provider's
+   *
+   * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+   */
 		value: function searchAlbums(query, resObj) {
 
 			return new Promise(function (resolve, reject) {
@@ -176,12 +185,13 @@ var SpotifyService = (function (_ServiceBase) {
 	}, {
 		key: 'searchArtists',
 
-		/* 
-  	Description: Searches spotify artists using query and populates the results object with artists information. Returns a promise.
-  	Parameters: Query (search term), results (object for storing data from the service provider's)
-  	Signature: (String, Object) -> Promise
-  */
-
+		/**
+   * Searches spotify playlists using query and populates the results object with artist information.
+   * @param {string} query - search term
+   * @param {object} results - object for storing data from the service provider's
+   *
+   * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+   */
 		value: function searchArtists(query, resObj) {
 
 			return new Promise(function (resolve, reject) {

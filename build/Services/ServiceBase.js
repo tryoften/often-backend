@@ -14,19 +14,21 @@ var _CollectionsCachedResponses = require('../Collections/CachedResponses');
 
 var _CollectionsCachedResponses2 = _interopRequireDefault(_CollectionsCachedResponses);
 
-/* 
-	This class is a base class for all service providers. 
-	It has an instance of the results collection to which it adds a response after processing.
-	It also keeps tracks of a cache for the derived class's responses.
-*/
+/** 
+ *	This class is a base class for all service providers. 
+ *	It has an instance of the results collection to which it adds a response after processing.
+ *	It also keeps tracks of a cache for the derived class's responses.
+ */
 
 var ServiceBase = (function () {
 
-	/* 
- 	Description: Initializes the service base.
- 	Parameters: Models (supporting models), options (supporting options)
- 	Signature: (Object, Object) -> Void
- */
+	/**
+  * Initializes the service base.
+  * @param {object} models - supporting models
+  * @param {object} opts - supporting options
+  *
+  * @return {Void}
+  */
 
 	function ServiceBase(models, opts) {
 		_classCallCheck(this, ServiceBase);
@@ -40,14 +42,12 @@ var ServiceBase = (function () {
 	_createClass(ServiceBase, [{
 		key: 'execute',
 
-		/* 
-  	Description: 
-  		If response for the request has been cached and the cache for that response is still valid, then cached response is returned.
-  		Else, the request is processed in the derived class, the cache of the response is updated, and a new response is returned.
-  	Parameter: Datetime in milliseconds from the start of the epoch.
-  	Signature: (Object) -> Void
-  */
-
+		/**
+   * Method for executing a request with a service provider.
+   * @param {object} request - request to be processed
+   *
+   * @return {Void}
+   */
 		value: function execute(request) {
 			var _this = this;
 
@@ -62,9 +62,11 @@ var ServiceBase = (function () {
 
 					/* If so create a response based off of cached results */
 					var results = _this.cachedResponses.getResults(query);
+					console.log('about to print results');
+					console.log('results are: ' + results);
 					_this.responses.createResponse(requestId, _this.provider_id, results);
 				} else {
-
+					console.log('non cache');
 					/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
 					_this.fetchData(query).then(function (results) {
 

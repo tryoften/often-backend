@@ -22,9 +22,9 @@ var _ModelsRequest = require('../Models/Request');
 
 var _ModelsRequest2 = _interopRequireDefault(_ModelsRequest);
 
-/*
-	This class is responsible for maintaining and syncing Request collection.
-*/
+/**
+ * This class is responsible for maintaining and syncing Request collection.
+ */
 
 var Requests = (function (_Firebase$Collection) {
 	function Requests() {
@@ -40,12 +40,13 @@ var Requests = (function (_Firebase$Collection) {
 	_createClass(Requests, [{
 		key: 'initialize',
 
-		/* 
-  	Description: Initializes the requests collection.
-  	Parameters: Models (supporting models), options (supporting options)
-  	Signature: (Object, Object) -> Void
-  */
-
+		/**
+   * Initializes the requests collection.
+   * @param {object} models - supporting models
+   * @param {object} opts - supporting options
+   *
+   * @return {void}
+   */
 		value: function initialize(models, opts) {
 
 			this.model = _ModelsRequest2['default'];

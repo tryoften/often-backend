@@ -3,18 +3,18 @@ import { Firebase } from 'backbone';
 import { BaseURL } from '../config';
 import CachedResponse from '../Models/CachedResponse';
 
-/*
-	This class is responsible for maintaining provider-level response cache.
-*/
-
+/**
+ * This class is responsible for maintaining provider-level response cache.
+ */
 class CachedResponses extends Firebase.Collection {
 
-	/* 
-		Description: Initializes the cached responses collection.
-		Parameters: Models (supporting models), options (supporting options)
-		Signature: (Object, Object) -> Void
-	*/
-
+	/**
+	 * Initializes the cached responses collection.
+	 * @param {object} models - supporting models
+	 * @param {object} options - supporting options
+	 *
+	 * @return {void}
+	 */
 	initialize (models, opts) {
 
 		this.model = CachedResponse;
@@ -23,25 +23,27 @@ class CachedResponses extends Firebase.Collection {
 
 	}
 
-	/* 
-		Description: Retrieves the results body of the response.
-		Parameters: Query (new key), response (contains results and metadata info)
-		Signature: (String, Object) -> Object
-	*/
 
+	/**
+	 * Adds the response to the cache and returns it.
+	 * @param {string} query - search term (used as key in the cache)
+	 * @param {object} response - response containing results info and relevant meta (used as value)
+	 *
+	 * @return {void}
+	 */
 	cacheResponse (query, response) {
 
 		response.id = query;
-		return this.add(response);
+		this.add(response);
 
 	}
 
-	/* 
-		Description: Retrieves the results body of the response.
-		Parameter: Query (key) for the cache.
-		Signature: (String) -> Object
-	*/
-
+	/**
+	 * Description: Retrieves the results body of the cached response.
+	 * @param {string} query - search term (used as key in the cache)
+	 *
+	 * @return {object} - results body of the response
+	 */
 	getResults (query) {
 
 		var cachedResult = this.get(query);
@@ -49,12 +51,12 @@ class CachedResponses extends Firebase.Collection {
 
 	}
 
-	/* 
-		Description: Retrieves the time when the response was generated.
-		Parameter: Query (key) for the cache.
-		Signature: (String) -> Integer
-	*/
-
+	/**
+	 * Retrieves the time when the response was generated.
+	 * @param {string} query - search term (used as key in the cache)
+	 *
+	 * @return {int} - time the response was completed
+	 */
 	getTimeCompleted (query) {
 
 		var cachedResult = this.get(query);
@@ -62,12 +64,13 @@ class CachedResponses extends Firebase.Collection {
 
 	}
 
-	/* 
-		Description: Checks if the cache is valid (hasn't expired).
-		Parameter: Datetime in milliseconds from the start of the epoch.
-		Signature: (Integer) -> Bool
-	*/
-
+	/**
+	 * Checks if the cache is valid (hasn't expired).
+	 * @param {integer} expirationInterval - Cache longevity in milliseconds.
+	 * @param {string} query - search term (used as key in the cache)
+	 *
+	 * @return {int} - time the response was completed
+	 */
 	isCacheValid (expirationInterval, query) {
 
 		var timeCompleted = this.getTimeCompleted(query);

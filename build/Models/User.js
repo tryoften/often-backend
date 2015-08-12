@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-	value: true
+  value: true
 });
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -10,22 +10,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 
 var _backbone = require('backbone');
 
-/*
-	This class is responsible for providing granular functionalities (mostly accessors) for users.
-*/
+/**
+ * This class is responsible for providing granular functionalities (mostly accessors) for users.
+ */
 
 var User = (function (_Model) {
-	function User() {
-		_classCallCheck(this, User);
+  function User() {
+    _classCallCheck(this, User);
 
-		if (_Model != null) {
-			_Model.apply(this, arguments);
-		}
-	}
+    if (_Model != null) {
+      _Model.apply(this, arguments);
+    }
+  }
 
-	_inherits(User, _Model);
+  _inherits(User, _Model);
 
-	return User;
+  return User;
 })(_backbone.Model);
 
 exports['default'] = User;

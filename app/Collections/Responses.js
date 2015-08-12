@@ -3,18 +3,19 @@ import { Firebase } from 'backbone';
 import { BaseURL } from '../config';
 import Response from '../Models/Response';
 
-/*
-	This class is responsible for maintaining the responses collection.
-*/
+/**
+ * This class is responsible for maintaining the responses collection.
+ */
 
 class Responses extends Firebase.Collection {
 
-	/* 
-		Description: Initializes the responses collection.
-		Parameters: Models (supporting models), options (supporting options)
-		Signature: (Object, Object) -> Void
-	*/
-
+	/**
+	 * Initializes the responses collection.
+	 * @param {object} models - supporting models
+	 * @param {object} opts - supporting options
+	 *
+	 * @return {void}
+	 */
 	initialize (models, opts) {
 
 		this.model = Response;
@@ -23,14 +24,14 @@ class Responses extends Firebase.Collection {
 
 	}
 
-	/* 
-		Description: Creates and adds a Response model to the collection, and then returns it.
-		Parameters: reqId (used in conjuction with provider to generate an id, 
-					provider (used in conjuction with reqId to generate an id, 
-					contents (object containing results info)
-		Signature: (String, String, Object) -> Object
-	*/
-
+	/**
+	 * Creates and adds a Response model to the collection, and then returns it.
+	 * @param {string} reqId - used in conjuction with provider to generate an id of new model
+	 * @param {string} provider - used in conjuction with reqId to generate an id of new model
+	 * @param {object} contents - object containing results to be added to the response 
+	 *
+	 * @return {object} - returns a Response object
+	 */
 	createResponse (reqId, provider, contents) {
 
 		return this.create({

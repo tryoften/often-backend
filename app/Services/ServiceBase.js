@@ -1,19 +1,20 @@
 import CachedResponses from '../Collections/CachedResponses';
 
-/* 
-	This class is a base class for all service providers. 
-	It has an instance of the results collection to which it adds a response after processing.
-	It also keeps tracks of a cache for the derived class's responses.
-*/
-
+/** 
+ *	This class is a base class for all service providers. 
+ *	It has an instance of the results collection to which it adds a response after processing.
+ *	It also keeps tracks of a cache for the derived class's responses.
+ */
 class ServiceBase {
 
-	/* 
-		Description: Initializes the service base.
-		Parameters: Models (supporting models), options (supporting options)
-		Signature: (Object, Object) -> Void
-	*/
 
+	/**
+	 * Initializes the service base.
+	 * @param {object} models - supporting models
+	 * @param {object} opts - supporting options
+	 *
+	 * @return {Void}
+	 */
 	constructor (models, opts) {
 
 		this.responses = models.responses;
@@ -23,14 +24,13 @@ class ServiceBase {
 
 	}
 
-	/* 
-		Description: 
-			If response for the request has been cached and the cache for that response is still valid, then cached response is returned.
-			Else, the request is processed in the derived class, the cache of the response is updated, and a new response is returned.
-		Parameter: Datetime in milliseconds from the start of the epoch.
-		Signature: (Object) -> Void
-	*/
 
+	/**
+	 * Method for executing a request with a service provider.
+	 * @param {object} request - request to be processed
+	 *
+	 * @return {Void}
+	 */
 	execute (request) {
 
 		var query = request.get('query');
