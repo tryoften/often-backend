@@ -3,6 +3,7 @@ import Responses from '../Collections/Responses';
 import SpotifyService from './Spotify/SpotifyService';
 import GiphyService from './Giphy/GiphyService';
 import YouTubeService from './YouTube/YouTubeService';
+import SoundCloudService from './SoundCloud/SoundCloudService';
 import Users from '../Collections/Users';
 
 /**
@@ -26,6 +27,7 @@ class ClientRequestDispatcher {
 		this.serviceProviders.spotify = new SpotifyService({responses : this.responses});
 		this.serviceProviders.giphy = new GiphyService({responses : this.responses});
 		this.serviceProviders.youtube = new YouTubeService({responses : this.responses});
+		this.serviceProviders.soundcloud = new SoundCloudService({responses : this.responses});
 		this.users = new Users();
 		
 	}

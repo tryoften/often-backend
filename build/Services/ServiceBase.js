@@ -62,11 +62,9 @@ var ServiceBase = (function () {
 
 					/* If so create a response based off of cached results */
 					var results = _this.cachedResponses.getResults(query);
-					console.log('about to print results');
-					console.log('results are: ' + results);
 					_this.responses.createResponse(requestId, _this.provider_id, results);
 				} else {
-					console.log('non cache');
+
 					/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
 					_this.fetchData(query).then(function (results) {
 

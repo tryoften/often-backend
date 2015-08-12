@@ -45,7 +45,7 @@ var CachedResponse = (function (_Model) {
 		/**
    * Returns the results of the cached response.
    *
-   * @return {object} - object containing 
+   * @return {[object]} - arry of result objects
    */
 		value: function getResults() {
 

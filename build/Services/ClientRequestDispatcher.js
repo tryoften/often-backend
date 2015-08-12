@@ -30,6 +30,10 @@ var _YouTubeYouTubeService = require('./YouTube/YouTubeService');
 
 var _YouTubeYouTubeService2 = _interopRequireDefault(_YouTubeYouTubeService);
 
+var _SoundCloudSoundCloudService = require('./SoundCloud/SoundCloudService');
+
+var _SoundCloudSoundCloudService2 = _interopRequireDefault(_SoundCloudSoundCloudService);
+
 var _CollectionsUsers = require('../Collections/Users');
 
 var _CollectionsUsers2 = _interopRequireDefault(_CollectionsUsers);
@@ -58,6 +62,7 @@ var ClientRequestDispatcher = (function () {
 		this.serviceProviders.spotify = new _SpotifySpotifyService2['default']({ responses: this.responses });
 		this.serviceProviders.giphy = new _GiphyGiphyService2['default']({ responses: this.responses });
 		this.serviceProviders.youtube = new _YouTubeYouTubeService2['default']({ responses: this.responses });
+		this.serviceProviders.soundcloud = new _SoundCloudSoundCloudService2['default']({ responses: this.responses });
 		this.users = new _CollectionsUsers2['default']();
 	}
 

@@ -120,14 +120,15 @@ var SpotifyService = (function (_ServiceBase) {
 		key: 'searchTracks',
 
 		/**
-   * Searches spotify playlists using query and populates the results object with track information.
+   * Searches spotify tracks using query and populates the results object with track information.
    * @param {string} query - search term
    * @param {object} results - object for storing data from the service provider's
    *
    * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
    */
-		value: function searchTracks(query, resObj) {
+		value: function searchTracks(query, results) {
 			return new Promise(function (resolve, reject) {
+
 				spotifyApi.searchTracks(query).then(function (data) {
 
 					var trackItems = data.body.tracks.items;
@@ -139,7 +140,7 @@ var SpotifyService = (function (_ServiceBase) {
 							track_image_large: trackItems[ti].album.images[0].url
 						});
 					}
-					resObj.tracks = tracks;
+					results.tracks = tracks;
 					resolve(true);
 				}, function (error) {
 
@@ -152,13 +153,13 @@ var SpotifyService = (function (_ServiceBase) {
 		key: 'searchAlbums',
 
 		/**
-   * Searches spotify playlists using query and populates the results object with album information.
+   * Searches spotify albums using query and populates the results object with album information.
    * @param {string} query - search term
    * @param {object} results - object for storing data from the service provider's
    *
    * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
    */
-		value: function searchAlbums(query, resObj) {
+		value: function searchAlbums(query, results) {
 
 			return new Promise(function (resolve, reject) {
 
@@ -173,7 +174,7 @@ var SpotifyService = (function (_ServiceBase) {
 							album_image_large: albumItems[ai].images.length > 0 ? albumItems[ai].images[0].url : ''
 						});
 					}
-					resObj.albums = albums;
+					results.albums = albums;
 					resolve(true);
 				}, function (error) {
 
@@ -186,13 +187,13 @@ var SpotifyService = (function (_ServiceBase) {
 		key: 'searchArtists',
 
 		/**
-   * Searches spotify playlists using query and populates the results object with artist information.
+   * Searches spotify artists using query and populates the results object with artist information.
    * @param {string} query - search term
    * @param {object} results - object for storing data from the service provider's
    *
    * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
    */
-		value: function searchArtists(query, resObj) {
+		value: function searchArtists(query, results) {
 
 			return new Promise(function (resolve, reject) {
 
@@ -208,7 +209,7 @@ var SpotifyService = (function (_ServiceBase) {
 							artist_image_large: artistItems[ai].images.length > 0 ? artistItems[ai].images[0].url : ''
 						});
 					}
-					resObj.artists = artists;
+					results.artists = artists;
 					resolve(true);
 				}, function (error) {
 

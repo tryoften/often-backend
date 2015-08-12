@@ -100,14 +100,15 @@ class SpotifyService extends ServiceBase {
 	}
 	
 	/**
-	 * Searches spotify playlists using query and populates the results object with track information.
+	 * Searches spotify tracks using query and populates the results object with track information.
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
 	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
 	 */
-	searchTracks (query, resObj) {
+	searchTracks (query, results) {
 		return new Promise(function (resolve, reject){
+
 			spotifyApi.searchTracks(query).then(function (data) {
 
 				var trackItems = data.body.tracks.items;
@@ -120,7 +121,7 @@ class SpotifyService extends ServiceBase {
 					});
 
 				}
-				resObj.tracks = tracks;
+				results.tracks = tracks;
 				resolve(true);
 
 			}, function (error) {
@@ -134,13 +135,13 @@ class SpotifyService extends ServiceBase {
 	}
 
 	/**
-	 * Searches spotify playlists using query and populates the results object with album information.
+	 * Searches spotify albums using query and populates the results object with album information.
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
 	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
 	 */
-	searchAlbums (query, resObj) {
+	searchAlbums (query, results) {
 
 		return new Promise(function (resolve, reject) {
 
@@ -156,7 +157,7 @@ class SpotifyService extends ServiceBase {
 					});
 
 				}
-				resObj.albums = albums;
+				results.albums = albums;
 				resolve(true);
 
 			}, function (error) {
@@ -171,13 +172,13 @@ class SpotifyService extends ServiceBase {
 	}
 
 	/**
-	 * Searches spotify playlists using query and populates the results object with artist information.
+	 * Searches spotify artists using query and populates the results object with artist information.
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
 	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
 	 */
-	searchArtists (query, resObj) {
+	searchArtists (query, results) {
 
 		return new Promise(function (resolve, reject) {
 
@@ -194,7 +195,7 @@ class SpotifyService extends ServiceBase {
 					});
 
 				}
-				resObj.artists = artists;
+				results.artists = artists;
 				resolve(true);
 
 			}, function (error) {
