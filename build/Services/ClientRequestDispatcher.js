@@ -88,7 +88,7 @@ var ClientRequestDispatcher = (function () {
 					var user_providers = _this.users.get(user_id).get('providers');
 
 					/* For every user provider that the user is subscribed to */
-					Object.keys(user_providers).forEach(function (providerName) {
+					for (var providerName in user_providers) {
 
 						/* In the unlikely event that the provider for the user request is not found, just write to stdout */
 						if (!_this.serviceProviders[providerName]) {
@@ -100,7 +100,7 @@ var ClientRequestDispatcher = (function () {
 							console.log('Provider handler found');
 							_this.serviceProviders[providerName].execute(incomingRequest);
 						}
-					});
+					}
 				});
 			});
 		}

@@ -50,10 +50,10 @@ class ClientRequestDispatcher {
 				var user_providers = this.users.get(user_id).get('providers');
 
 				/* For every user provider that the user is subscribed to */
-				Object.keys(user_providers).forEach((providerName) => {
+				for (let providerName in user_providers){
 
 					/* In the unlikely event that the provider for the user request is not found, just write to stdout */
-					if(!this.serviceProviders[providerName]) {
+					if (!this.serviceProviders[providerName]) {
 						
 						console.log("No service handlers found for the following provider: " + providerName);
 					
@@ -65,7 +65,7 @@ class ClientRequestDispatcher {
 					
 					}
 
-				});
+				}
 
 			});
 
