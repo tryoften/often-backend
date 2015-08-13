@@ -3,18 +3,19 @@ import { Firebase } from 'backbone';
 import { BaseURL } from '../config';
 import Request from '../Models/Request';
 
-/*
-	This class is responsible for maintaining and syncing Request collection.
-*/
+/**
+ * This class is responsible for maintaining and syncing Request collection.
+ */
 
 class Requests extends Firebase.Collection {
 
-	/* 
-		Description: Initializes the requests collection.
-		Parameters: Models (supporting models), options (supporting options)
-		Signature: (Object, Object) -> Void
-	*/
-
+	/**
+	 * Initializes the requests collection.
+	 * @param {object} models - supporting models
+	 * @param {object} opts - supporting options
+	 *
+	 * @return {void}
+	 */
 	initialize (models, opts) {
 
 		this.model = Request;
