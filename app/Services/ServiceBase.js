@@ -15,12 +15,10 @@ class ServiceBase {
 	*/
 
 	constructor (models, opts) {
-
 		this.responses = models.responses;
 		this.provider_id = opts.provider_name;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
 		this.cachedResponses = new CachedResponses({provider : opts.provider_name});
-
 	}
 
 	/* 
