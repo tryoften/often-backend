@@ -1,1 +1,0 @@
-{"version":3,"sources":["app/Models/ClientRequest.js"],"names":[],"mappings":";;;;;;;;;;wBAAsB,UAAU;;IAE1B,OAAO;WAAP,OAAO;0BAAP,OAAO;;;;;;;YAAP,OAAO;;SAAP,OAAO;aAFJ,KAAK;;qBAMC,OAAO","file":"app/Models/ClientRequest.js","sourcesContent":["import { Model } from 'backbone';\n\nclass Request extends Model {\n\n}\n\nexport default Request;"]}
