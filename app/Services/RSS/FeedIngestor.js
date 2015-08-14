@@ -18,20 +18,20 @@ class FeedIngestor {
 
 	ingest () {
 		for (let feed of this.feeds) {
-			feed.request(feed.url, (err, items) => {
-				for (let item of items) {
-					// console.log("item: ", item);
-					this.search.create({
-						'index': 'article',
-						'id': item.guid,
-						'type': 'rss',
-						'body': item
-					});
-				}
-			}, (err, response) => {
-
-			});
+			feed.queueJobs();
 		}
+	}
+
+	/**
+		stores the rss feed item in elastic search and indexes it
+	*/
+	indexItemInSearchEngine(item) {
+		this.search.create({
+			'index': 'article',
+			'id': item.guid,
+			'type': 'rss',
+			'body': item
+		});
 	}
 }
 
