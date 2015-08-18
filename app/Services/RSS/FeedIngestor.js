@@ -6,34 +6,24 @@ class FeedIngestor {
 	constructor () {
 		this.feeds = [];
 		this.search = new elasticsearch.Client({
-		  host: 'localhost:9200',
-		  log: 'trace'
+		  host: 'localhost:9200'
 		});
 
 		for (let source of sources) {
 			let feed = new RSSFeed(source);
+			feed.ingestor = this;
 			this.feeds.push(feed);
 		}
 	}
 
-	ingest () {
+	ingest (backfill = false) {
 		for (let feed of this.feeds) {
-			feed.queueJobs();
+			feed.processPages(backfill);
 		}
-	}
-
-	/**
-		stores the rss feed item in elastic search and indexes it
-	*/
-	indexItemInSearchEngine(item) {
-		this.search.create({
-			'index': 'article',
-			'id': item.guid,
-			'type': 'rss',
-			'body': item
-		});
 	}
 }
 
 var ingestor = new FeedIngestor();
-ingestor.ingest();
+ingestor.ingest(true);
+
+export default FeedIngestor;
