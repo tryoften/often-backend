@@ -42,9 +42,4 @@ export var sources = [
 	}
 ];
 
-<<<<<<< HEAD
 export default sources;
-=======
-export default sources
->>>>>>> master
-
