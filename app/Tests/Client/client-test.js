@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var express = require('../../../node_modules/express');
 var Firebase = require('../../../node_modules/firebase');
 var ref = new Firebase('https://asterix.firebaseio.com');
@@ -24,6 +25,8 @@ app.listen(7777, function() {
 
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> master
 
 app.get('/', function(req, res){
 	var query = req.query.query;
