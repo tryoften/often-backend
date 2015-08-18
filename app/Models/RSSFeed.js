@@ -32,13 +32,13 @@ class RSSFeed {
 	}
 
 	queueBackfillData(data) {
-		let pageCount = 0
-		let baseURL = ""
+		let pageCount = 0;
+		let baseURL = "";
 
 		if (this.paginationType == 'link') {
 			let meta = data.meta;
 			let lastPage = _.find(meta['atom:link'], s => s['@'].rel == 'last');
-			let lastPageURL = lastPage != null ? lastPage['@'].href : '';
+			let lastPageURL = lastPage !== null ? lastPage['@'].href : '';
 			let equalPosition = lastPageURL.indexOf('=') + 1;
 			
 			baseURL = lastPageURL.substring(0, equalPosition);
@@ -46,7 +46,7 @@ class RSSFeed {
 		} 
 		else if (this.paginationType == 'paged') {
 			baseURL = `${this.url}?paged=`;
-			pageCount = 10
+			pageCount = 10;
 		}
 
 		console.log('Total Pages: ' + pageCount);
@@ -64,8 +64,7 @@ class RSSFeed {
 	}
 
 	queueRequests () {
-		while (this.ongoingRequests < this.concurrentRequests 
-			&& this.processedIndex < this.pages.length) {
+		while (this.ongoingRequests < this.concurrentRequests && this.processedIndex < this.pages.length) {
 			let job = this.pages[this.processedIndex++];
 
 			if (job && !job.processing || !job.done) {
@@ -135,7 +134,7 @@ class RSSFeed {
 		  let stream = this, item;
 		  meta = this.meta;
 
-		  while (item = stream.read()) {
+		  while ((item = stream.read())) {
 		  	items.push(item);
 		  }
 		});
@@ -156,7 +155,7 @@ class RSSFeed {
 		console.log("Processed: ", job.URL);
 		this.ongoingRequests--;
 
-		if (err == null) {
+		if (err === null) {
 			this.ingestData(data);
 			this.queueRequests();
 		} else {

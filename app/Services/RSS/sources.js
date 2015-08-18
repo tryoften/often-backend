@@ -42,5 +42,4 @@ export var sources = [
 	}
 ];
 
-export default sources
-
+export default sources;
