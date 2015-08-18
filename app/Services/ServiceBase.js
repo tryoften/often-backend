@@ -1,4 +1,6 @@
+import CachedResponses from '../Collections/CachedResponses';
 import Search from '../Search/Search';
+
 /** 
  *	This class is a base class for all service providers. 
  *	It has an instance of the results collection to which it adds a response after processing.
@@ -15,10 +17,9 @@ class ServiceBase {
 	 * @return {Void}
 	 */
 	constructor (models, opts) {
-
 		this.provider_id = opts.provider_name;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
-		//this.search = new Search();
+		this.search = new Search();
 	}
 
 
@@ -28,17 +29,20 @@ class ServiceBase {
 	 *
 	 * @return {Void}
 	 */
-	execute (request) {
+	execute (request, response) {
 
 		var query = request.get('query');
+		var requestId = request.id;
 
 		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
 		this.fetchData(query).then((results) => {
 
-			/* Create a response based off of returned results and update the search index */
-			//this.search.index(this.provider_id, results).then((f) =>{
-				/* Emit an update event */
-			//});		
+			/* Create a response based off of returned results and update the cache */
+			this.search.index(this.provider_id, results).then((f) => {
+				/* Finished indexing */
+				console.log('Finished indexing');
+				response.set('time_modified', Date.now()); 
+			});
 
 		});
 
