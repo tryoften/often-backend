@@ -56,7 +56,7 @@ class SpotifyService extends ServiceBase {
 
 			this.searchArtists(query, results),
 			this.searchAlbums(query, results),
-			this.searchTracks(query, results),
+			this.searchTracks(query, results)
 			this.searchPlaylists(query, results)
 
 		]);
@@ -186,14 +186,12 @@ class SpotifyService extends ServiceBase {
 
 				var artistItems = data.body.artists.items;
 				var artists = [];
-				for(let ai in artistItems) {
-					console.log(artistItems[ai].images.length);
+				for (let ai in artistItems) {
 					artists.push({
 						artist_name : artistItems[ai].name,
 						artist_popularity : artistItems[ai].popularity,
 						artist_image_large : (artistItems[ai].images.length > 0) ? artistItems[ai].images[0].url : ""
 					});
-
 				}
 				results.artists = artists;
 				resolve(true);

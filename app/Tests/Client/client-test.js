@@ -1,5 +1,5 @@
-var express = require('../../../node_modules/express');
-var Firebase = require('../../../node_modules/firebase');
+var express = require('express');
+var Firebase = require('firebase');
 var ref = new Firebase('https://asterix.firebaseio.com');
 var app = express();
 

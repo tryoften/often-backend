@@ -87,13 +87,21 @@ class Search {
 						}
 					},
 					aggs: {
-						provider: {
+						'top-providers': {
 							terms: {
 								field: '_index',
-								size: 3
+								size: 10
+							},
+							aggs: {
+								'top-provider-hits': {
+									'top-hits': {
+										size : 2
+									}
+								}
 							}
 						}
-					}			}
+					}
+				}
 			}, (error, response) => {
 				if(error){
 					console.log('error' + error);

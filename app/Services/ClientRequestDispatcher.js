@@ -61,7 +61,6 @@ class ClientRequestDispatcher {
 				/* query search */
 				var searchTerm = this.requests.get(updatedResponse.id).get('query');
 				console.log('search term is: '+ searchTerm);
-				debugger;
 				this.search.query(searchTerm).then((data) => {
 					console.log('got data back');
 					updatedResponse.set('results', data.hits.hits);
