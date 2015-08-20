@@ -77,7 +77,33 @@ class Search {
 	}
 
 	query (searchTerm) {
-
+		console.log('querying');
+		return new Promise((resolve, reject) => {
+			this.es.search({
+				body: {
+					query: {
+						match: {
+							'_all': searchTerm
+						}
+					},
+					aggs: {
+						provider: {
+							terms: {
+								field: '_index',
+								size: 3
+							}
+						}
+					}			}
+			}, (error, response) => {
+				if(error){
+					console.log('error' + error);
+					reject(error);
+				} else {
+					console.log('resolving' + response);
+					resolve(response);
+				}
+			});
+		});
 	}
 }
 
