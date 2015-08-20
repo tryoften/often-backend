@@ -59,9 +59,13 @@ class ClientRequestDispatcher {
 			this.responses.on('change:time_modified', (updatedResponse) => {
 
 				/* query search */
-
-				/* set response object */
-
+				var searchTerm = this.requests.get(updatedResponse.id).get('query');
+				console.log('search term is: '+ searchTerm);
+				debugger;
+				this.search.query(searchTerm).then((data) => {
+					console.log('got data back');
+					updatedResponse.set('results', data.hits.hits);
+				});
 			});
 
 	}
