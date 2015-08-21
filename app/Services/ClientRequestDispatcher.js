@@ -40,7 +40,7 @@ class ClientRequestDispatcher {
 	process () {
 
 			/* Set up an event listener for new requests */
-			this.requests.on('add', (incomingRequest) => {				
+			this.requests.on('add', (incomingRequest) => {		
 
 				/* For every user provider that the user is subscribed to */
 				var providers = Object.keys(this.serviceProviders);
@@ -60,14 +60,37 @@ class ClientRequestDispatcher {
 
 				/* query search */
 				var searchTerm = this.requests.get(updatedResponse.id).get('query');
-				console.log('search term is: '+ searchTerm);
 				this.search.query(searchTerm).then((data) => {
-					console.log('got data back');
-					updatedResponse.set('results', data.hits.hits);
+					var results = this.serializeAndSortResults(data);
+					updatedResponse.set('results', results);
 				});
 			});
 
 	}
+
+	serializeAndSortResults(data){
+		var results = [];
+		let buckets = data.aggregations['top-providers'].buckets;
+		for (let i in buckets) {
+			var indResults = buckets[i]['top-provider-hits'].hits.hits;
+			for (let j in indResults) {
+				var singleResult = {
+					'_index' : indResults[j]._index,
+					'_type' : indResults[j]._type,
+					'_score' : indResults[j]._score,
+					'_id' : indResults[j]._id
+				};
+				var source = indResults[j]._source;
+				for (let k in source){
+					singleResult[k] = source[k];
+				}
+				results.push(singleResult);
+			}
+		}
+		//sort array by score
+		results.sort(function(a,b){return b._score - a._score;});
+		return results;
+	}	
 }
 
 export default ClientRequestDispatcher;

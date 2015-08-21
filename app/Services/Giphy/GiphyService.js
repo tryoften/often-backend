@@ -32,19 +32,22 @@ class GiphyService extends ServiceBase {
 
 		return new Promise((resolve, reject) => {
 
-			var results = [];
+			var results = {};
 			this.rest.get(settings.base_url, {
 				query: {
 					q : query,
 					api_key: settings.api_key
 				}
 			}).on('success', data => {
+				var gifs = [];
 				var gifsArray = data.data;
 				for (let i in gifsArray) {
-					results.push({
+					gifs.push({
+						id : gifsArray[i].id,
 						embed_url : gifsArray[i].embed_url
 					});
 				}
+				results.gif = gifs;
 				resolve(results);
 			}).on('error', err => {
 				console.log('err' + err);

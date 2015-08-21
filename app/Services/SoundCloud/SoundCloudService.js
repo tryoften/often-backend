@@ -83,13 +83,14 @@ class SoundCloudService extends ServiceBase {
 				var users = [];
 				for (let i in userResults) {
 					users.push({
+						id : userResults[i].id,
 						first_name : userResults[i].first_name,
 						last_name : userResults[i].last_name,
 						followings_count : userResults[i].followings_count,
 						track_count : userResults[i].track_count
 					});
 				}
-				results.users = users;
+				results.user = users;
 				resolve(true);
 			}).on('error', err => {
 				console.log('err' + err);
@@ -121,12 +122,13 @@ class SoundCloudService extends ServiceBase {
 				var tracks = [];
 				for (let i in trackResults) {
 					tracks.push({
+						id : trackResults[i].id,
 						title : trackResults[i].title,
 						url : trackResults[i].uri,
 						duration : trackResults[i].duration
 					});
 				}
-				results.tracks = tracks;
+				results.track = tracks;
 				resolve(true);
 			}).on('error', err => {
 				console.log('err' + err);

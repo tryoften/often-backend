@@ -56,6 +56,7 @@ class Search {
 				body : formattedResults
 			}, (err, resp) => {
 				if(err){
+					console.log('Failed to index: ' + err);
 					reject(err);
 				} else {
 					/* Refresh the index and give back the response */
@@ -65,7 +66,6 @@ class Search {
 						if(err){
 							reject(err);
 						} else {
-							console.log('Refreshing');
 							resolve(resp);
 						}
 					});
@@ -77,7 +77,7 @@ class Search {
 	}
 
 	query (searchTerm) {
-		console.log('querying');
+
 		return new Promise((resolve, reject) => {
 			this.es.search({
 				body: {
@@ -91,10 +91,9 @@ class Search {
 							terms: {
 								field: '_index',
 								size: 10
-							},
-							aggs: {
+							}, aggs: {
 								'top-provider-hits': {
-									'top-hits': {
+									'top_hits': {
 										size : 2
 									}
 								}
@@ -107,7 +106,7 @@ class Search {
 					console.log('error' + error);
 					reject(error);
 				} else {
-					console.log('resolving' + response);
+					//console.log('resolving' + response);
 					resolve(response);
 				}
 			});
