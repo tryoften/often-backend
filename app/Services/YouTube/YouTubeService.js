@@ -52,7 +52,7 @@ class YouTubeService extends ServiceBase {
 						thumbnail : videoResults[i].snippet.thumbnails.default.url
 					});
 				}
-				results.videos = videos;
+				results.video = videos;
 				resolve(results);
 			}).on('error', err => {
 				console.log('err' + err);

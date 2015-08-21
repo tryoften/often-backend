@@ -19,7 +19,7 @@ class Responses extends Firebase.Collection {
 	initialize (models, opts) {
 
 		this.model = Response;
-		this.url = `${BaseURL}/responses`;
+		this.url =`${BaseURL}/responses`;
 		this.autoSync = true;
 
 	}

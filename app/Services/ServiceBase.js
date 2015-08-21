@@ -40,7 +40,6 @@ class ServiceBase {
 			/* Create a response based off of returned results and update the cache */
 			this.search.index(this.provider_id, results).then((f) => {
 				/* Finished indexing */
-				console.log('Finished indexing');
 				response.set('time_modified', Date.now()); 
 			});
 

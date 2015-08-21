@@ -56,7 +56,7 @@ class SpotifyService extends ServiceBase {
 
 			this.searchArtists(query, results),
 			this.searchAlbums(query, results),
-			this.searchTracks(query, results)
+			this.searchTracks(query, results),
 			this.searchPlaylists(query, results)
 
 		]);
@@ -81,11 +81,15 @@ class SpotifyService extends ServiceBase {
 				for (let pi in playlistItems) {
 
 					playlists.push({
-						playlist_name : playlistItems[pi].name
+						id : playlistItems[pi].id,
+						name : playlistItems[pi].name,
+						image : playlistItems[pi].images[0].url,
+						owner_name : playlistItems[pi].owner.id,
+						uri : playlistItems[pi].uri
 					});
 
 				}
-				results.playlists = playlists;
+				results.playlist = playlists;
 				resolve(true);
 
 			}, function (error) {
@@ -116,12 +120,13 @@ class SpotifyService extends ServiceBase {
 				for(let ti in trackItems) {
 
 					tracks.push({
-						track_name : trackItems[ti].name,
-						track_image_large : trackItems[ti].album.images[0].url
+						id : trackItems[ti].id,
+						name : trackItems[ti].name,
+						image_large : trackItems[ti].album.images[0].url
 					});
 
 				}
-				results.tracks = tracks;
+				results.track = tracks;
 				resolve(true);
 
 			}, function (error) {
@@ -152,12 +157,13 @@ class SpotifyService extends ServiceBase {
 				for(let ai in albumItems) {
 
 					albums.push({
-						album_name : albumItems[ai].name,
-						album_image_large :(albumItems[ai].images.length > 0) ? albumItems[ai].images[0].url : ""
+						id : albumItems[ai].id,
+						name : albumItems[ai].name,
+						image_large :(albumItems[ai].images.length > 0) ? albumItems[ai].images[0].url : ""
 					});
 
 				}
-				results.albums = albums;
+				results.album = albums;
 				resolve(true);
 
 			}, function (error) {
@@ -188,12 +194,13 @@ class SpotifyService extends ServiceBase {
 				var artists = [];
 				for (let ai in artistItems) {
 					artists.push({
-						artist_name : artistItems[ai].name,
-						artist_popularity : artistItems[ai].popularity,
-						artist_image_large : (artistItems[ai].images.length > 0) ? artistItems[ai].images[0].url : ""
+						id : artistItems[ai].id,
+						name : artistItems[ai].name,
+						popularity : artistItems[ai].popularity,
+						image_large : (artistItems[ai].images.length > 0) ? artistItems[ai].images[0].url : ""
 					});
 				}
-				results.artists = artists;
+				results.artist = artists;
 				resolve(true);
 
 			}, function (error) {
