@@ -1,6 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { BaseURL } from '../config';
+import { FirebaseConfig } from '../config';
 import User from '../Models/User';
 
 /**
@@ -18,7 +18,7 @@ class Users extends Firebase.Collection {
 	initialize (models, opts) {
 
 		this.model = User;
-		this.url = `${BaseURL}/users`;
+		this.url = `${FirebaseConfig.BaseURL}/users`;
 		this.autoSync = true;
 
 	}

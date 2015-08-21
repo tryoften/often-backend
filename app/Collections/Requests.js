@@ -1,6 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { BaseURL } from '../config';
+import { FirebaseConfig } from '../config';
 import Request from '../Models/Request';
 
 /**
@@ -19,7 +19,7 @@ class Requests extends Firebase.Collection {
 	initialize (models, opts) {
 
 		this.model = Request;
-		this.url = `${BaseURL}/requests`;
+		this.url = `${FirebaseConfig.BaseURL}/requests`;
 		this.autoSync = true;
 
 	}

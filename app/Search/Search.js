@@ -1,4 +1,6 @@
 import { Client } from 'elasticsearch';
+import { ElasticSearchConfig } from '../config';
+
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -18,7 +20,8 @@ class Search {
 	 */
 	constructor (models, opts) {
 		this.es = new Client({
-			host : 'localhost:9200'
+			host: ElasticSearchConfig.BaseURL,
+			log: 'trace'
 		});
 	}
 
