@@ -1,6 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { BaseURL } from '../config';
+import { FirebaseConfig } from '../config';
 import CachedResponse from '../Models/CachedResponse';
 
 /**
@@ -18,7 +18,7 @@ class CachedResponses extends Firebase.Collection {
 	initialize (models, opts) {
 
 		this.model = CachedResponse;
-		this.url = `${BaseURL}/cached-responses/${models.provider}`;
+		this.url = `${FirebaseConfig.BaseURL}/cached-responses/${models.provider}`;
 		this.autoSync = true;
 
 	}

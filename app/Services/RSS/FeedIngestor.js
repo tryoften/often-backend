@@ -1,12 +1,14 @@
 import elasticsearch from 'elasticsearch';
 import sources from './sources';
 import RSSFeed from '../../Models/RSSFeed';
+import { ElasticSearchConfig } from '../../config';
 
 class FeedIngestor {
 	constructor () {
 		this.feeds = [];
 		this.search = new elasticsearch.Client({
-		  host: 'localhost:9200'
+		  host: ElasticSearchConfig.BaseUrl,
+		  log: 'trace'
 		});
 
 		for (let source of sources) {
