@@ -41,6 +41,8 @@ class Search {
 			for (let type in results) {
 				let individualResults = results[type];
 				for (let item in individualResults) {
+
+					/* Put action in */
 					formattedResults.push({
 						index : {
 							_index : index,
@@ -48,7 +50,8 @@ class Search {
 							_id : individualResults[item].id
 						}
 					});
-
+					
+					/* Put data in */
 					formattedResults.push(
 						individualResults[item]
 					);
