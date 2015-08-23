@@ -41,7 +41,7 @@ class ClientRequestDispatcher {
 
 			/* Set up an event listener for new requests */
 			this.requests.on('add', (incomingRequest) => {		
-
+				console.log('adding new');
 				/* For every user provider that the user is subscribed to */
 				var providers = Object.keys(this.serviceProviders);
 				for (let i in providers){					
@@ -68,6 +68,12 @@ class ClientRequestDispatcher {
 
 	}
 
+	/**
+	 * Creates a formatted results array using data returned from search and sorts it using the score.
+	 * @param {object} data - object containing data from search
+	 *
+	 * @return {[object]} - array of objects
+	 */
 	serializeAndSortResults(data){
 		var results = [];
 		let buckets = data.aggregations['top-providers'].buckets;

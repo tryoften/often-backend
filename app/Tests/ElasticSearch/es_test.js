@@ -1,5 +1,11 @@
-var artist = {};
-console.log(artist.k.b || "s");
+debugger;
+import Requests from '../../Collections/Requests';
+
+var reqs = new Requests();
+
+reqs.once('sync',(d) => {
+	console.log(d);
+});
 /*
 import Search from '../../Search/search';
 
