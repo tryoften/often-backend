@@ -24,12 +24,20 @@ class ClientRequestDispatcher {
 		this.requests = new Requests();
 		this.responses = new Responses();
 		this.search = new Search();
+
+		/* service provider name to service instances map */
 		this.serviceProviders = {};
 		this.serviceProviders.spotify = new SpotifyService({responses : this.responses});
 		this.serviceProviders.giphy = new GiphyService({responses : this.responses});
 		this.serviceProviders.youtube = new YouTubeService({responses : this.responses});
 		this.serviceProviders.soundcloud = new SoundCloudService({responses : this.responses});
 		
+		/* service provider name to service icons  */
+		//this.serviceProviderFavicons = {};
+		//this.serviceProviders.spotify = "https://d2c87l0yth4zbw-2.global.ssl.fastly.net/i/_global/touch-icon-114.png";
+		//this.serviceProviders.giphy = "http://giphy.com/static/img/favicon.png";
+		
+
 	}
 
 	/**
@@ -89,6 +97,7 @@ class ClientRequestDispatcher {
 				var source = indResults[j]._source;
 				for (let k in source){
 					singleResult[k] = source[k];
+					/* set image content type */
 				}
 				results.push(singleResult);
 			}
