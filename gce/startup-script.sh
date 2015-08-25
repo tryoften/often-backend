@@ -94,6 +94,9 @@ npm install -g grunt-cli
 echo "Launching grunt"
 grunt
 
+echo "Node version: "
+node --version
+
 echo "Launching app"
 node build/app.js
 
