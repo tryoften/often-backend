@@ -89,7 +89,7 @@ supervisorctl update
 # Application should now be running under supervisor
 # [END startup]
 echo "Installing grunt"
-npm install grunt-cli
+npm install -g grunt-cli
 
 echo "Launching grunt"
 grunt
