@@ -51,7 +51,7 @@ service google-fluentd restart &
 # [END logging]
 
 # Add nodejs repository (NodeSource)
-curl -sL https://deb.nodesource.com/setup | bash -
+curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
 
 # Install dependencies from apt
 apt-get install -y git nodejs build-essential supervisor
@@ -88,10 +88,6 @@ supervisorctl update
 
 # Application should now be running under supervisor
 # [END startup]
-echo "Update node"
-sudo npm cache clean -f
-sudo npm install -g n
-sudo n stable
 
 echo "Installing grunt"
 npm install -g grunt-cli
