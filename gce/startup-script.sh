@@ -64,13 +64,13 @@ git clone https://source.developers.google.com/p/$PROJECTID /opt/app
 cd /opt/app
 npm install
 
-console.log("NPM install finished");
+echo "NPM install finished"
 
 # Create a nodeapp user. The application will run as this user.
 useradd -m -d /home/nodeapp nodeapp
+echo "Node app user created"
 chown -R nodeapp:nodeapp /opt/app
-
-console.log("Added an app user");
+echo "Node app users owner changed"
 
 # Configure supervisor to run the node app.
 cat >/etc/supervisor/conf.d/node-app.conf << EOF
@@ -88,3 +88,8 @@ supervisorctl update
 
 # Application should now be running under supervisor
 # [END startup]
+
+echo "Launching grunt"
+grunt
+echo "Grunt completed"
+ls
