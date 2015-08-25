@@ -64,9 +64,13 @@ git clone https://source.developers.google.com/p/$PROJECTID /opt/app
 cd /opt/app
 npm install
 
+console.log("NPM install finished");
+
 # Create a nodeapp user. The application will run as this user.
 useradd -m -d /home/nodeapp nodeapp
 chown -R nodeapp:nodeapp /opt/app
+
+console.log("Added an app user");
 
 # Configure supervisor to run the node app.
 cat >/etc/supervisor/conf.d/node-app.conf << EOF
