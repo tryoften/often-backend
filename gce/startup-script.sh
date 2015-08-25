@@ -51,7 +51,7 @@ service google-fluentd restart &
 # [END logging]
 
 # Add nodejs repository (NodeSource)
-curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 
 # Install dependencies from apt
 apt-get install -y git nodejs build-essential supervisor
