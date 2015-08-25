@@ -94,5 +94,8 @@ npm install -g grunt-cli
 echo "Launching grunt"
 grunt
 
-echo "Grunt completed"
-ls
+echo "Launching app"
+node build/app.js
+
+echo "Finished setup."
+
