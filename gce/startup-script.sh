@@ -88,6 +88,11 @@ supervisorctl update
 
 # Application should now be running under supervisor
 # [END startup]
+echo "Update node"
+sudo npm cache clean -f
+sudo npm install -g n
+sudo n stable
+
 echo "Installing grunt"
 npm install -g grunt-cli
 
