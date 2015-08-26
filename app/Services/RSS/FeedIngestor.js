@@ -7,7 +7,7 @@ class FeedIngestor {
 	constructor () {
 		this.feeds = [];
 		this.search = new elasticsearch.Client({
-		  host: ElasticSearchConfig.BaseUrl,
+		  host: ElasticSearchConfig.BaseURL,
 		  log: 'trace'
 		});
 

@@ -74,7 +74,7 @@ class ClientRequestDispatcher {
 	 *
 	 * @return {[object]} - array of objects
 	 */
-	serializeAndSortResults(data){
+	serializeAndSortResults (data) {
 		var results = [];
 		let buckets = data.aggregations['top-providers'].buckets;
 		for (let i in buckets) {

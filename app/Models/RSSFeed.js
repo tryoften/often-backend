@@ -2,6 +2,7 @@ import Feedparser from 'feedparser';
 import request from 'request';
 import URL from 'url';
 import _ from 'underscore';
+import cheerio from 'cheerio';
 
 class RSSFeed {
 	constructor (opts) {
@@ -195,6 +196,33 @@ class RSSFeed {
 	}
 
 	processItem (item) {
+		function getImage(o) {
+			if (o.image.url !== undefined) {
+				return o.image.url;
+			}
+
+			if (o.enclosures.length > 0 && o.enclosures[0].url !== undefined) {
+				return o.enclosures[0].url;
+			}
+
+			if (o["media:content"] !== undefined && 
+				o["media:content"]["@"] !== undefined && 
+				o["media:content"]["@"].url !== undefined && 
+				o["media:content"]["@"].medium === "image") {
+				return o["media:content"]["@"].url;
+			}
+			try {
+				let $description = cheerio.load(o.description);
+				let $image = $description('img');
+
+				if ($image.length) {
+					return $image.attr("src");
+				}
+			} catch (e) {}
+
+			return null;
+		}
+
 		return {
 			"title": item.title,
 			"author": item.author,
@@ -204,6 +232,7 @@ class RSSFeed {
 			"link": item.link,
 			"summary": item.summary,
 			"categories": item.categories,
+			"image": getImage(item),
 			"source": {
 				"id": this.id,
 				"name": this.name
