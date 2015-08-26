@@ -31,12 +31,6 @@ class ClientRequestDispatcher {
 		this.serviceProviders.giphy = new GiphyService({responses : this.responses});
 		this.serviceProviders.youtube = new YouTubeService({responses : this.responses});
 		this.serviceProviders.soundcloud = new SoundCloudService({responses : this.responses});
-		
-		/* service provider name to service icons  */
-		//this.serviceProviderFavicons = {};
-		//this.serviceProviders.spotify = "https://d2c87l0yth4zbw-2.global.ssl.fastly.net/i/_global/touch-icon-114.png";
-		//this.serviceProviders.giphy = "http://giphy.com/static/img/favicon.png";
-		
 
 	}
 
