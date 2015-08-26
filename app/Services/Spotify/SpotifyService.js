@@ -17,9 +17,7 @@ class SpotifyService extends ServiceBase {
 	 * @return {void}
 	 */
 	constructor (models) {
-
 		super(models, settings);
-
 	}
 	
 	/**
@@ -34,9 +32,7 @@ class SpotifyService extends ServiceBase {
 
 			var results = {};
 			this.getSpotifyData(query, results).then(function (data) {
-
 				resolve(results);
-
 			});
 
 		});
@@ -78,8 +74,8 @@ class SpotifyService extends ServiceBase {
 
 				var playlistItems = data.body.playlists.items;
 				var playlists = [];
-				for (let pi in playlistItems) {
 
+				for (let pi in playlistItems) {
 					playlists.push({
 						id : playlistItems[pi].id,
 						name : playlistItems[pi].name,
@@ -87,8 +83,8 @@ class SpotifyService extends ServiceBase {
 						owner_name : playlistItems[pi].owner.id,
 						uri : playlistItems[pi].uri
 					});
-
 				}
+
 				results.playlist = playlists;
 				resolve(true);
 
@@ -117,15 +113,20 @@ class SpotifyService extends ServiceBase {
 
 				var trackItems = data.body.tracks.items;
 				var tracks = [];
-				for(let ti in trackItems) {
 
+				for (let trackData of trackItems) {
 					tracks.push({
-						id : trackItems[ti].id,
-						name : trackItems[ti].name,
-						image_large : trackItems[ti].album.images[0].url
+						id: trackData.id,
+						name: trackData.name,
+						image_large: trackData.album.images[0].url,
+						album_name: trackData.album.name,
+						artist_name: trackData.artists[0].name,
+						url: trackData.href,
+						uri: trackData.uri,
+						explicit: trackData.explicit
 					});
-
 				}
+
 				results.track = tracks;
 				resolve(true);
 
@@ -154,15 +155,15 @@ class SpotifyService extends ServiceBase {
 
 				var albumItems = data.body.albums.items;
 				var albums = [];
-				for(let ai in albumItems) {
 
+				for (let albumData of albumItems) {
 					albums.push({
-						id : albumItems[ai].id,
-						name : albumItems[ai].name,
-						image_large :(albumItems[ai].images.length > 0) ? albumItems[ai].images[0].url : ""
+						id: albumData.id,
+						name: albumData.name,
+						image_large: (albumData.images.length > 0) ? albumData.images[0].url : ""
 					});
-
 				}
+
 				results.album = albums;
 				resolve(true);
 
@@ -192,14 +193,16 @@ class SpotifyService extends ServiceBase {
 
 				var artistItems = data.body.artists.items;
 				var artists = [];
-				for (let ai in artistItems) {
+
+				for (let artistData of artistItems) {
 					artists.push({
-						id : artistItems[ai].id,
-						name : artistItems[ai].name,
-						popularity : artistItems[ai].popularity,
-						image_large : (artistItems[ai].images.length > 0) ? artistItems[ai].images[0].url : ""
+						id : artistData.id,
+						name : artistData.name,
+						popularity : artistData.popularity,
+						image_large : (artistData.images.length > 0) ? artistData.images[0].url : ""
 					});
 				}
+
 				results.artist = artists;
 				resolve(true);
 

@@ -204,6 +204,7 @@ class RSSFeed {
 			"link": item.link,
 			"summary": item.summary,
 			"categories": item.categories,
+			"image": item.image.url,
 			"source": {
 				"id": this.id,
 				"name": this.name

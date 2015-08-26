@@ -35,9 +35,7 @@ class SoundCloudService extends ServiceBase {
 
 			var results = {};
 			this.getSoundCloudData(query, results).then(function (data) {
-
 				resolve(results);
-
 			});
 
 		});
@@ -54,10 +52,7 @@ class SoundCloudService extends ServiceBase {
 	getSoundCloudData (query, results) {
 
 		return Promise.all([
-
-			this.searchTracks(query, results),
-			this.searchUsers(query, results)
-
+			this.searchTracks(query, results)
 		]);
 		
 	}
@@ -118,15 +113,29 @@ class SoundCloudService extends ServiceBase {
 					client_id : settings.client_id
 				}
 			}).on('success', data => {
-				var trackResults = data;
 				var tracks = [];
-				for (let i in trackResults) {
-					tracks.push({
-						id : trackResults[i].id,
-						title : trackResults[i].title,
-						url : trackResults[i].uri,
-						duration : trackResults[i].duration
-					});
+				for (let trackResult of data) {
+					let track = {
+						id: trackResult.id,
+						name: trackResult.title,
+						url: trackResult.uri,
+						duration: trackResult.duration,
+						image: trackResult.artwork_url,
+						description: trackResult.description,
+						link: trackResult.permalink_url,
+						waveform_url: trackResult.waveform_url,
+						favorites: trackResult.favoritings_count,
+						likes: trackResult.likes_count,
+						plays: trackResult.playback_count,
+						genre: trackResult.genre,
+						created: trackResult.created_at,
+					};
+
+					if (trackResult.user !== null) {
+						track.user = trackResult.user;
+					}
+
+					tracks.push(track);
 				}
 				results.track = tracks;
 				resolve(true);
