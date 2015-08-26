@@ -87,6 +87,10 @@ class Search {
 		return new Promise((resolve, reject) => {
 			this.es.search({
 				body: {
+					/* limits the size of "hits" to 0, 
+					 since the data is not accessed directly, 
+					 but rather via aggregations */
+					size: 0,
 					query: {
 						match: {
 							'_all': searchTerm
