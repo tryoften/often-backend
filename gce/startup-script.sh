@@ -56,6 +56,9 @@ curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 # Install dependencies from apt
 apt-get install -y git nodejs build-essential supervisor
 
+# Remove the remote
+rm -rf /opt/app
+
 # Get the source code
 git config --global credential.helper gcloud.sh
 git clone https://source.developers.google.com/p/$PROJECTID /opt/app
