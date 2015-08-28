@@ -1,6 +1,6 @@
 var express = require('express');
 var Firebase = require('firebase');
-var ref = new Firebase('https://asterix.firebaseio.com');
+var ref = new Firebase('https://jakub-test.firebaseio.com/queue/tasks');
 var app = express();
 
 app.get('/', function(req, res){
@@ -10,7 +10,8 @@ app.get('/', function(req, res){
 });
 
 function sendQuery(queryText) {
-	var pushRef = ref.child('requests').push({
+	var pushRef = ref.push({
+		id : queryText+':'+Date.now(),
 		query : queryText,
 		time_made : Date.now(),
 		user : '-JuXf23K7JyEzYBfXDSv'

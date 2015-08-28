@@ -68,12 +68,19 @@ module.exports = {
   },
 
   FirebaseConfig: {
-	BaseURL: 'https://asterix.firebaseio.com'
+	  BaseURL: 'https://asterix.firebaseio.com'
   },
 
   ElasticSearchConfig: {
-	BaseURL: 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+	  BaseURL: 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+  },clear
+
+  FireQueueConfig: {
+    numWorkers: 2,
+    sanitize: false,
+    suppressStack: true
   }
+
 };
 
 

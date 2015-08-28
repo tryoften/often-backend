@@ -1,4 +1,3 @@
-import Requests from '../Collections/Requests';
 import Responses from '../Collections/Responses';
 import Search from '../Search/Search';
 import SpotifyService from './Spotify/SpotifyService';
@@ -21,7 +20,6 @@ class ClientRequestDispatcher {
 	 */
 	constructor (models, opts) {
 
-		this.requests = new Requests();
 		this.responses = new Responses();
 		this.search = new Search();
 
@@ -36,38 +34,51 @@ class ClientRequestDispatcher {
 
 	/**
 	 * Determines which service provider the request should be executed with and executes it.
+	 * @param {object} incomingRequest - contains information about an incoming request.
 	 *
-	 * @return {void}
+	 * @return {Promise} -- Resolves to true when all service callbacks have completed
 	 */
-	process () {
+	process (incomingRequest) {
 
-			/* Set up an event listener for new requests */
-			this.requests.on('add', (incomingRequest) => {		
-				console.log('adding new');
-				/* For every user provider that the user is subscribed to */
-				var providers = Object.keys(this.serviceProviders);
-				for (let i in providers){					
-					/* create a new response */
-					var resp = this.responses.create({ 
-						id : incomingRequest.id
-					});
+		return new Promise((resolve, reject) => {
 
-					var outgoingResponse = this.responses.get(resp.id);
-					this.serviceProviders[providers[i]].execute(incomingRequest, outgoingResponse);
-				}
-
-			});
-
+			/* store the total number of services left to process */
+			var servicesLeftToProcess = Object.keys(this.serviceProviders).length;
 			this.responses.on('change:time_modified', (updatedResponse) => {
 
 				/* query search */
-				var searchTerm = this.requests.get(updatedResponse.id).get('query');
+				//var searchTerm = this.requests.get(updatedResponse.id).get('query');
+				var searchTerm = incomingRequest.query;
 				this.search.query(searchTerm).then((data) => {
 					var results = this.serializeAndSortResults(data);
 					updatedResponse.set('results', results);
+
+					/* Decrement the count of services to process & resolve when all services have completed successfully */
+					servicesLeftToProcess--;
+					if(servicesLeftToProcess === 0) {
+						resolve(true);
+					}
+
 				});
+
 			});
 
+			/* create a new response */
+			var resp = this.responses.create({ 
+				id : incomingRequest.id
+			});
+
+			var outgoingResponse = this.responses.get(resp.id);
+			console.log('incoming id: ' + resp.id);
+
+			/* Execute the request every user provider that the user is subscribed */
+			var providers = Object.keys(this.serviceProviders);
+			for (let i in providers){					
+				this.serviceProviders[providers[i]].execute(incomingRequest, outgoingResponse);
+			}
+
+		});
+		
 	}
 
 	/**
@@ -91,7 +102,6 @@ class ClientRequestDispatcher {
 				var source = indResults[j]._source;
 				for (let k in source){
 					singleResult[k] = source[k];
-					/* set image content type */
 				}
 				results.push(singleResult);
 			}
