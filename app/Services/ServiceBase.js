@@ -1,4 +1,3 @@
-import CachedResponses from '../Collections/CachedResponses';
 import Search from '../Search/Search';
 
 /** 
@@ -31,7 +30,7 @@ class ServiceBase {
 	 */
 	execute (request, response) {
 
-		var query = request.get('query');
+		var query = request.query;
 		var requestId = request.id;
 
 		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */

@@ -1,5 +1,3 @@
-
-import ClientRequestDispatcher from './Services/ClientRequestDispatcher';
-var crd = new ClientRequestDispatcher();
-
-crd.process();
+import PriorityQueue from './PriorityQueues/PriorityQueue';
+var pq = new PriorityQueue();
+pq.process();

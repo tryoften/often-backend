@@ -20,8 +20,7 @@ class Search {
 	 */
 	constructor (models, opts) {
 		this.es = new Client({
-			host: ElasticSearchConfig.BaseURL,
-			log: 'trace'
+			host: ElasticSearchConfig.BaseURL
 		});
 	}
 
