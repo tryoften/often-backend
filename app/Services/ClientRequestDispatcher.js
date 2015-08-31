@@ -46,12 +46,18 @@ class ClientRequestDispatcher {
 			var servicesLeftToProcess = Object.keys(this.serviceProviders).length;
 			this.responses.on('change:time_modified', (updatedResponse) => {
 
+				if (incomingRequest.id != updatedResponse.id) {
+					return;
+				}
+
 				/* query search */
-				//var searchTerm = this.requests.get(updatedResponse.id).get('query');
 				var searchTerm = incomingRequest.query;
 				this.search.query(searchTerm).then((data) => {
 					var results = this.serializeAndSortResults(data);
-					updatedResponse.set('results', results);
+					updatedResponse.set({
+						'doneUpdating': false,
+						'results': results
+					});
 
 					/* Decrement the count of services to process & resolve when all services have completed successfully */
 					servicesLeftToProcess--;
@@ -66,7 +72,9 @@ class ClientRequestDispatcher {
 
 			/* create a new response */
 			var resp = this.responses.create({ 
-				id : incomingRequest.id
+				id: incomingRequest.id,
+				query: incomingRequest.query,
+				doneUpdating: false
 			});
 
 			var outgoingResponse = this.responses.get(resp.id);
