@@ -3,6 +3,8 @@ import Firebase from 'firebase';
 import ClientRequestDispatcher from '../Services/ClientRequestDispatcher';
 import { FirebaseConfig } from '../config';
 import { FireQueueConfig } from '../config';
+import _ from 'underscore';
+
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
  */
@@ -10,14 +12,19 @@ class PriorityQueue {
 
 	/**
 	 * Initializes the priority queue.
-	 * @param {object} models - supporting models
 	 * @param {object} opts - supporting options
 	 *
 	 * @return {void}
 	 */
-	constructor (models, opts) {
+	constructor (opts = {}) {
 
 		this.crd = new ClientRequestDispatcher();
+		this.options = _.defaults(opts, {
+			'numWorkers': FireQueueConfig.numWorkers,
+			'sanitize':  FireQueueConfig.sanitize,
+			'suppressStack':  FireQueueConfig.suppressStack,
+			'url': `${FirebaseConfig.BaseURL}/queue`
+		});
 
 	}
 
@@ -27,22 +34,16 @@ class PriorityQueue {
 	 * @return {void}
 	 */
 	process () {
-		var ref = new Firebase(`${FirebaseConfig.BaseURL}/queue`);
-		var options = {
-			'numWorkers': FireQueueConfig.numWorkers,
-			'sanitize':  FireQueueConfig.sanitize,
-			'suppressStack':  FireQueueConfig.suppressStack
-		};
-		var queue = new Queue(ref, options, (data, progress, resolve, reject) => {
+		this.ref = new Firebase(this.options.url);
+		this.queue = new Queue(this.ref, this.options, (data, progress, resolve, reject) => {
 			// Read and process task data
 			console.log('starting ' + data.id);
 
 			//returns a promise when all providers are resolved
-			this.crd.process(data).then((d)=>{
+			this.crd.process(data).then( (d) => {
 				console.log('finished' + data.id);
 				resolve();
 			});
-
 		});
 	}
 }

@@ -56,6 +56,7 @@ class ClientRequestDispatcher {
 					/* Decrement the count of services to process & resolve when all services have completed successfully */
 					servicesLeftToProcess--;
 					if(servicesLeftToProcess === 0) {
+						updatedResponse.set('doneUpdating', true);
 						resolve(true);
 					}
 

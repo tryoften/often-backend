@@ -40,7 +40,8 @@ class Responses extends Firebase.Collection {
 			meta : {
 				time_completed : Date.now(),
 			},
-			results : contents
+			results : contents,
+			doneUpdating: false
 		});
 
 	}
