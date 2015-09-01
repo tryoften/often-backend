@@ -93,12 +93,6 @@ class Search {
 						counter: 1
 					}
 				}
-			}, (error, response) => {
-				if (error) {
-					debugger;
-					// reject(error);
-				}
-				// resolve(response);
 			});
 
 			this.es.search({
