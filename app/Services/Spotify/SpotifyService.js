@@ -31,8 +31,10 @@ class SpotifyService extends ServiceBase {
 		return new Promise((resolve, reject) => {
 
 			var results = {};
-			this.getSpotifyData(query, results).then(function (data) {
+			this.getSpotifyData(query, results).then((data) => {
 				resolve(results);
+			}, (error) => {
+				reject(error);
 			});
 
 		});

@@ -7,7 +7,6 @@ import Search from '../Search/Search';
  */
 class ServiceBase {
 
-
 	/**
 	 * Initializes the service base.
 	 * @param {object} models - supporting models
@@ -21,7 +20,6 @@ class ServiceBase {
 		this.search = new Search();
 	}
 
-
 	/**
 	 * Method for executing a request with a service provider.
 	 * @param {object} request - request to be processed
@@ -33,6 +31,13 @@ class ServiceBase {
 		var query = request.query;
 		var requestId = request.id;
 
+		var onError = (error) => {
+			console.log("On Error: ", error);
+			response.set({
+				time_modified: Date.now()
+			}); 
+		};
+
 		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
 		this.fetchData(query).then((results) => {
 
@@ -43,9 +48,9 @@ class ServiceBase {
 				response.set({
 					time_modified: Date.now()
 				}); 
-			});
+			}, onError);
 
-		});
+		}, onError);
 
 	}
 }
