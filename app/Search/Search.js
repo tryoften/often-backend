@@ -58,23 +58,14 @@ class Search {
 			}
 
 			this.es.bulk({
-				body : formattedResults
+				body: formattedResults,
+				refresh: true
 			}, (err, resp) => {
-				if(err){
+				if (err) {
 					console.log('Failed to index: ' + err);
 					reject(err);
 				} else {
-					/* Refresh the index and give back the response */
-					this.es.indices.refresh({
-						index : index
-					}, (err, resp) => {
-						if(err){
-							reject(err);
-						} else {
-							resolve(resp);
-						}
-					});
-					
+					resolve(resp);					
 				}
 			});
 
@@ -84,6 +75,26 @@ class Search {
 	query (searchTerm) {
 
 		return new Promise((resolve, reject) => {
+
+			let searchId = new Buffer(searchTerm).toString('base64');
+
+			// index search term for autocompletion
+			this.es.update({
+				index: 'search-terms',
+				type: 'query',
+				id: searchId,
+				body: {
+					script: 'ctx._source.counter += 1',
+					upsert: {
+						text: searchTerm,
+						suggest: {
+							input: searchTerm
+						},
+						counter: 1
+					}
+				}
+			});
+
 			this.es.search({
 				body: {
 					/* limits the size of "hits" to 0, 
@@ -111,12 +122,34 @@ class Search {
 					}
 				}
 			}, (error, response) => {
-				if(error){
+				if (error) {
 					console.log('error' + error);
 					reject(error);
 				} else {
-					//console.log('resolving' + response);
 					resolve(response);
+				}
+			});
+		});
+	}
+
+	suggest (query) {
+
+		return new Promise((resolve, reject) => {
+			this.es.suggest({
+				index: 'search-terms',
+				body: {
+					'query-suggest': {
+						text: query,
+						completion: {
+							field: 'suggest'
+						}
+					}
+				}
+			}, (error, response) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve(response['query-suggest']);
 				}
 			});
 		});
