@@ -44,7 +44,7 @@ class ClientRequestDispatcher {
 		return new Promise((resolve, reject) => {
 
 			/* whether the query is for autocomplete suggestions */
-			var isAutocomplete = incomingRequest.query.autocomplete;
+			var isAutocomplete = !!incomingRequest.query.autocomplete;
 
 			/* store the total number of services left to process */
 			var servicesLeftToProcess = Object.keys(this.serviceProviders).length;
@@ -56,32 +56,25 @@ class ClientRequestDispatcher {
 
 				/* query search */
 				var searchTerm = incomingRequest.query.text;
+				var promise = (isAutocomplete) ? this.search.suggest(searchTerm) : this.search.query(searchTerm);
 
-				if (isAutocomplete) {
-					this.search.suggest(searchTerm).then((data) => {
-						updatedResponse.set({
-							doneUpdating: true,
-							results: data
-						});
-						resolve(true);
+				promise.then((data) => {
+					updatedResponse.set({
+						doneUpdating: false,
+						results: data
 					});
-				} else {
-					this.search.query(searchTerm).then((data) => {
-						var results = this.serializeAndSortResults(data);
-						updatedResponse.set({
-							doneUpdating: false,
-							results: results
-						});
 
+					if (!isAutocomplete) {
 						/* Decrement the count of services to process & resolve when all services have completed successfully */
 						servicesLeftToProcess--;
 						if (servicesLeftToProcess === 0) {
 							updatedResponse.set('doneUpdating', true);
 							resolve(true);
 						}
-
-					});
-				}
+					} else {
+						resolve(true);
+					}
+				});
 
 			});
 
@@ -112,36 +105,6 @@ class ClientRequestDispatcher {
 		});
 		
 	}
-
-	/**
-	 * Creates a formatted results array using data returned from search and sorts it using the score.
-	 * @param {object} data - object containing data from search
-	 *
-	 * @return {[object]} - array of objects
-	 */
-	serializeAndSortResults (data) {
-		var results = [];
-		let buckets = data.aggregations['top-providers'].buckets;
-		for (let i in buckets) {
-			var indResults = buckets[i]['top-provider-hits'].hits.hits;
-			for (let j in indResults) {
-				var singleResult = {
-					'_index' : indResults[j]._index,
-					'_type' : indResults[j]._type,
-					'_score' : indResults[j]._score,
-					'_id' : indResults[j]._id
-				};
-				var source = indResults[j]._source;
-				for (let k in source){
-					singleResult[k] = source[k];
-				}
-				results.push(singleResult);
-			}
-		}
-		//sort array by score
-		results.sort(function(a,b){return b._score - a._score;});
-		return results;
-	}	
 }
 
 export default ClientRequestDispatcher;

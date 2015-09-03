@@ -72,11 +72,22 @@ class Search {
 		});
 	}
 
-	query (searchTerm) {
+	/**
+	 * Queries the search database with the given query
+	 * @param {string} query - The search query
+	 *
+	 * @return {Promise} - a promise resolving in an array of search results
+	 */
+	query (query, autocomplete = false) {
+
+		var command;
+		if ( (command = this.processCommands(query)) ) {
+			return command;
+		}
 
 		return new Promise((resolve, reject) => {
 
-			let searchId = new Buffer(searchTerm).toString('base64');
+			let searchId = new Buffer(query).toString('base64');
 
 			// index search term for autocompletion
 			this.es.update({
@@ -86,9 +97,9 @@ class Search {
 				body: {
 					script: 'ctx._source.counter += 1',
 					upsert: {
-						text: searchTerm,
+						text: query,
 						suggest: {
-							input: searchTerm
+							input: query
 						},
 						counter: 1
 					}
@@ -103,14 +114,13 @@ class Search {
 					size: 0,
 					query: {
 						match: {
-							'_all': searchTerm
+							'_all': query
 						}
 					},
 					aggs: {
 						'top-providers': {
 							terms: {
-								field: '_index',
-								size: 10
+								field: '_index'
 							}, aggs: {
 								'top-provider-hits': {
 									'top_hits': {
@@ -126,13 +136,24 @@ class Search {
 					console.log('error' + error);
 					reject(error);
 				} else {
-					resolve(response);
+					resolve(this.serializeAndSortResults(response));
 				}
 			});
 		});
 	}
 
+	/**
+	 * returns a some search autocomplete suggestions for a given query
+	 * @param {string} query - The query to get results for
+	 *
+	 * @return {Promise} - a promise that resolves an array of the top results
+	 */
 	suggest (query) {
+
+		var command;
+		if ( (command = this.processCommands(query)) ) {
+			return command;
+		}
 
 		return new Promise((resolve, reject) => {
 			this.es.suggest({
@@ -154,6 +175,97 @@ class Search {
 			});
 		});
 	}
+
+	processCommands(query) {
+		if (query.substring(0, 13) === '#top-searches') {
+			return this.getTopSearches();
+		}
+		return false;
+	}
+
+	/**
+	 * returns the current top searches on the platform
+	 * @param {int} count - the number of results to return
+	 *
+	 * @return {Promise} - a promise that resolves an array of the top results
+	 */ 
+	getTopSearches (count = 10) {
+
+		let parseData = (data) => {
+			var results = [];
+
+			for (let item of data) {
+				results.push({
+					id: item._id,
+					text: item._source.text,
+					counter: item._source.counter,
+					type: item._type,
+					index: item._index
+				});
+			}
+
+			return [
+				{
+					text: `#top-searches:${count}`,
+					options: results
+				}
+			];
+		};
+
+		return new Promise((resolve, reject) => {
+			this.es.search({
+				body: {
+					sort: [{
+						counter: { order: "desc" }
+					}],
+					size: count
+				}
+			}, (error, response) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve( parseData(response.hits.hits) );
+				}
+			});
+		});
+	}
+
+	/**
+	 * Creates a formatted results array using data returned from search and sorts it using the score.
+	 * @param {object} data - object containing data from search
+	 *
+	 * @return {[object]} - array of objects
+	 */
+	serializeAndSortResults (data) {
+		var results = [];
+		let buckets = data.aggregations['top-providers'].buckets;
+
+		for (let i in buckets) {
+			var indResults = buckets[i]['top-provider-hits'].hits.hits;
+
+			for (let j in indResults) {
+				var singleResult = {
+					'_index' : indResults[j]._index,
+					'_type' : indResults[j]._type,
+					'_score' : indResults[j]._score,
+					'_id' : indResults[j]._id
+				};
+
+				var source = indResults[j]._source;
+				for (let k in source) {
+					singleResult[k] = source[k];
+				}
+				results.push(singleResult);
+			}
+		}
+
+		//sort array by score
+		results.sort( (a,b) => {
+			return b._score - a._score;
+		});
+
+		return results;
+	}	
 }
 
 export default Search;
