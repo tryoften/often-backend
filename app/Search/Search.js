@@ -89,23 +89,6 @@ class Search {
 
 			let searchId = new Buffer(query).toString('base64');
 
-			// index search term for autocompletion
-			this.es.update({
-				index: 'search-terms',
-				type: 'query',
-				id: searchId,
-				body: {
-					script: 'ctx._source.counter += 1',
-					upsert: {
-						text: query,
-						suggest: {
-							input: query
-						},
-						counter: 1
-					}
-				}
-			});
-
 			this.es.search({
 				body: {
 					/* limits the size of "hits" to 0, 
@@ -136,7 +119,37 @@ class Search {
 					console.log('error' + error);
 					reject(error);
 				} else {
-					resolve(this.serializeAndSortResults(response));
+					let results = this.serializeAndSortResults(response);
+					resolve(results);
+
+					// index search term for autocompletion
+					this.es.update({
+						index: 'search-terms',
+						type: 'query',
+						id: searchId,
+						body: {
+							script: `ctx._source.counter += 1; 
+								ctx._source.resultsCount = count;
+								ctx._source.suggest.payload = [:];
+								ctx._source.suggest.payload['resultsCount'] = count;`,
+
+							params: {
+								count: results.length
+							},
+
+							upsert: {
+								text: query,
+								suggest: {
+									input: query,
+									payload: {
+										resultsCount: results.length
+									}
+								},
+								counter: 1,
+								resultsCount: results.length
+							}
+						}
+					});
 				}
 			});
 		});
@@ -200,7 +213,8 @@ class Search {
 					text: item._source.text,
 					counter: item._source.counter,
 					type: item._type,
-					index: item._index
+					index: item._index,
+					payload: item._source.suggest.payload
 				});
 			}
 

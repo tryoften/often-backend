@@ -100,6 +100,11 @@ class ClientRequestDispatcher {
 				for (let i in providers) {					
 					this.serviceProviders[providers[i]].execute(incomingRequest, outgoingResponse);
 				}
+
+				// if nothing happens after 2 seconds: timeout
+				setTimeout(reject, 5000, 'timeout');
+			} else {
+				setTimeout(reject, 1000, 'timeout');
 			}
 
 		});
