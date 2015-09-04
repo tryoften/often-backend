@@ -40,10 +40,15 @@ class PriorityQueue {
 			console.log('starting ' + data.id);
 
 			//returns a promise when all providers are resolved
-			this.crd.process(data).then( (d) => {
-				console.log('finished' + data.id);
-				resolve();
-			});
+			return this.crd
+				.process(data)
+				.then( (d) => {
+					console.log('finished' + data.id);
+					resolve();
+				})
+				.catch( (err) => {
+					reject();
+				});
 		});
 	}
 }
