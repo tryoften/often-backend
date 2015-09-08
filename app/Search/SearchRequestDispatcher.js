@@ -1,16 +1,16 @@
 import Responses from '../Collections/Responses';
 import Search from '../Search/Search';
-import SpotifyService from './Spotify/SpotifyService';
-import GiphyService from './Giphy/GiphyService';
-import YouTubeService from './YouTube/YouTubeService';
-import SoundCloudService from './SoundCloud/SoundCloudService';
+import SpotifyService from '../Services/Spotify/SpotifyService';
+import GiphyService from '../Services/Giphy/GiphyService';
+import YouTubeService from '../Services/YouTube/YouTubeService';
+import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
 import _ from 'underscore';
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
  * This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
  */
-class ClientRequestDispatcher {
+class SearchRequestDispatcher {
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -112,4 +112,4 @@ class ClientRequestDispatcher {
 	}
 }
 
-export default ClientRequestDispatcher;
+export default SearchRequestDispatcher;

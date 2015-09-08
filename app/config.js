@@ -40,29 +40,33 @@ module.exports = {
     scopes: ['email', 'profile']
   },
 
-  mysql: {
-    user: 'your-mysql-user-here',
-    password: 'your-mysql-password-here',
-    host: 'your-mysql-host-here'
+  firebase: {
+	  BaseURL: 'https://asterix.firebaseio.com',
+    queues: {
+      default: {
+        url: 'https://asterix.firebaseio.com/queues/default',
+        numWorkers: 1,
+        sanitize: false,
+        suppressStack: true
+      },
+      feed: {
+        specId: 'feed_ingestion',
+        url: 'https://asterix.firebaseio.com/queues/feed',
+        numWorkers: 2,
+        sanitize: false
+      },
+      search: {
+        specId: 'search_query',
+        url: 'https://asterix.firebaseio.com/queues/search',
+        numWorkers: 2,
+        sanitize: false,
+        suppressStack: true
+      }
+    }
   },
 
-  mongodb: {
-    url: 'your-mongo-url-here',
-    collection: 'your-mongo-collection-here'
-  },
-
-  FirebaseConfig: {
-	  BaseURL: 'https://asterix.firebaseio.com'
-  },
-
-  ElasticSearchConfig: {
+  elasticsearch: {
 	  BaseURL: 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
-  },
-
-  FireQueueConfig: {
-    numWorkers: 2,
-    sanitize: false,
-    suppressStack: true
   }
 
 };

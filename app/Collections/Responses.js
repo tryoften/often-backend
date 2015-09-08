@@ -1,6 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { FirebaseConfig } from '../config';
+import { firebase as FirebaseConfig } from '../config';
 import Response from '../Models/Response';
 import fb from 'firebase';
 

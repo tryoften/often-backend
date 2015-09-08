@@ -1,10 +1,13 @@
 import elasticsearch from 'elasticsearch';
+import Queue from 'firebase-queue';
+import Firebase from 'firebase';
 import sources from './sources';
-import RSSFeed from '../../Models/RSSFeed';
-import { ElasticSearchConfig } from '../../config';
+import Feed from '../../Models/Feed';
+import { elasticsearch as ElasticSearchConfig } from '../../config';
 
 class FeedIngestor {
-	constructor () {
+
+	constructor (opts) {
 		this.feeds = [];
 		this.search = new elasticsearch.Client({
 		  host: ElasticSearchConfig.BaseURL,
@@ -12,7 +15,7 @@ class FeedIngestor {
 		});
 
 		for (let source of sources) {
-			let feed = new RSSFeed(source);
+			let feed = new Feed(source);
 			feed.ingestor = this;
 			this.feeds.push(feed);
 		}
@@ -25,7 +28,7 @@ class FeedIngestor {
 	}
 }
 
+export default FeedIngestor;
+
 var ingestor = new FeedIngestor();
 ingestor.ingest(true);
-
-export default FeedIngestor;

@@ -1,3 +1,4 @@
-import PriorityQueue from './PriorityQueues/PriorityQueue';
-var pq = new PriorityQueue();
-pq.process();
+import SearchWorker from './Workers/SearchWorker';
+
+var worker = new SearchWorker();
+worker.start();
