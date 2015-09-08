@@ -29,6 +29,3 @@ class FeedIngestor {
 }
 
 export default FeedIngestor;
-
-var ingestor = new FeedIngestor();
-ingestor.ingest(true);

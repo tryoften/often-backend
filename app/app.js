@@ -1,5 +1,5 @@
 import SearchWorker from './Workers/SearchWorker';
-import FeedIngestor from './Workers/FeedIngestorWorker';
+import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import minimist from 'minimist';
 import _ from 'underscore';
 

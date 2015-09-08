@@ -25,3 +25,5 @@ class FeedPageWorker extends Worker {
 			});
 	}
 }
+
+export default FeedPageWorker;
