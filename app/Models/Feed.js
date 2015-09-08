@@ -2,9 +2,11 @@ import Feedparser from 'feedparser';
 import request from 'request';
 import URL from 'url';
 import _ from 'underscore';
-import cheerio from 'cheerio';
 
-class RSSFeed {
+/**
+ * This class represents a atom/rss feed along with it's metadata and how to parse it 
+ */
+class Feed {
 	constructor (opts) {
 		this.id = opts.id;
 		this.name = opts.name;
@@ -96,60 +98,6 @@ class RSSFeed {
 		}
 	}
 
-	/**
-	 * Requests RSS feed data for provided url
-	 * @param {string} url - request url
-	 * @param {function} callback - callback invoked when request is completed
-	 *
-	 * @return {Request} - the request object
-	 */
-	request (url, callback) {
-		var req = request(url);
-		var feedparser = new Feedparser();
-		var items = [];
-		var meta;
-		var errorHandler = (error) => {
-			this.failedRequests++;
-			if (this.failedRequests >= this.failedRequestsThreshold) {
-				this.stopFetching = true;
-			}
-			callback(error, null);
-		};
-
-		req.on('error', errorHandler);
-		feedparser.on('error', errorHandler);
-
-
-		req.on('response', function (res) {
-			var stream = this;
-
-			if (res.statusCode != 200) {
-				return this.emit('error', new Error('Bad status code'));
-			}
-
-			stream.pipe(feedparser);
-		});
-
-		feedparser.on('readable', function () {
-		  // This is where the action is!
-		  let stream = this, item;
-		  meta = this.meta;
-
-		  while ((item = stream.read())) {
-		  	items.push(item);
-		  }
-		});
-
-		feedparser.on('end', (chunk) => {
-			callback(null, {
-				meta: meta,
-				items: items
-			});
-		});
-
-		return req;
-	}
-
 	processJob (job, err, data) {
 		job.done = true;
 		job.processing = false;
@@ -164,24 +112,6 @@ class RSSFeed {
 		}
 	}
 
-	ingestData(data) {
-		var items = [];
-		if (data.items.length) {
-			for (let item of data.items) {
-				items.push({
-					'index': {
-						'_index': this.id,
-						'_id': item.guid,
-						'_type': 'article'
-					}
-				});
-				items.push(this.processItem(item));
-			}
-		}
-		this.ingestor.search.bulk({
-			'body': items
-		});
-	}
 
 	/**
 		stores the rss feed item in elastic search and indexes it
@@ -195,51 +125,6 @@ class RSSFeed {
 		};
 	}
 
-	processItem (item) {
-		function getImage(o) {
-			if (o.image.url !== undefined) {
-				return o.image.url;
-			}
-
-			if (o.enclosures.length > 0 && o.enclosures[0].url !== undefined) {
-				return o.enclosures[0].url;
-			}
-
-			if (o["media:content"] !== undefined && 
-				o["media:content"]["@"] !== undefined && 
-				o["media:content"]["@"].url !== undefined && 
-				o["media:content"]["@"].medium === "image") {
-				return o["media:content"]["@"].url;
-			}
-			try {
-				let $description = cheerio.load(o.description);
-				let $image = $description('img');
-
-				if ($image.length) {
-					return $image.attr("src");
-				}
-			} catch (e) {}
-
-			return null;
-		}
-
-		return {
-			"title": item.title,
-			"author": item.author,
-			"date": item.date,
-			"description": item.description,
-			"guid": item.guid,
-			"link": item.link,
-			"summary": item.summary,
-			"categories": item.categories,
-			"image": getImage(item),
-			"source": {
-				"id": this.id,
-				"name": this.name
-			}
-		};
-	}
-
 }
 
-export default RSSFeed;
+export default Feed;

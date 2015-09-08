@@ -1,5 +1,5 @@
 import { Client } from 'elasticsearch';
-import { ElasticSearchConfig } from '../config';
+import { elasticsearch as ElasticSearchConfig } from '../config';
 
 /**
  * Class for interacting with ElasticSearch.
