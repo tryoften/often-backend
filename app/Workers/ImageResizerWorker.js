@@ -20,7 +20,7 @@ class ImageResizerWorker extends Worker {
 
 		super(options);
 
-				this.default_transformations = ['rectangle', 'original', 'square', 'medium'];
+		this.default_transformations = ['rectangle', 'original', 'square', 'medium'];
 		this.gcs = gcloud.storage({
 			projectId : GoogleStorageConfig.projectId,
 			key : GoogleStorageConfig.key
