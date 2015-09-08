@@ -1,4 +1,7 @@
 
 class IngestionScheduler {
 
+	constructor () {
+		
+	}
 }
