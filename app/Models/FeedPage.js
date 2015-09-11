@@ -1,39 +1,59 @@
-import request from 'request';
-import Feedparser from 'feedparser';
+import getFeedPage from '../Utilities/getFeedPage';
+import { firebase as FirebaseConfig } from '../config';
+import Firebase from 'firebase';
+import cheerio from 'cheerio';
 
 class FeedPage {
 
 	/**
 	 * @param {}
 	 * @param {Feed} opts.feed - The feed from where the page originates
-	 * @param {Search} opts.ingestor - 
+	 * @param {Search} opts.search - 
 	 */
 	constructor (opts) {
-		this.url = opts.url;
+		this.url = opts.pageURL;
 		this.feed = opts.feed;
-		this.ingestor = opts.ingestor;
+		this.search = opts.search;
+		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/feeds/${this.feed.id}`);
+		this.feedQueueRef = this.feedRef.child('queue/tasks');
 	}
 
-	process () {
+	process (data) {
 		this.request();
 	}
 
 	ingestData(data) {
-		var items = [];
-		if (data.items.length) {
-			for (let item of data.items) {
-				items.push({
-					'index': {
-						'_index': this.id,
-						'_id': item.guid,
-						'_type': 'article'
-					}
-				});
-				items.push(this.processItem(item));
+		let id = this.feed.id;
+		return new Promise((resolve, reject) => {
+			var items = [];
+			if (data.items.length) {
+				for (let item of data.items) {
+					items.push({
+						'index': {
+							'_index': id,
+							'_id': item.guid,
+							'_type': 'article'
+						}
+					});
+					items.push(this.processItem(item));
+				}
 			}
-		}
-		this.ingestor.search.bulk({
-			'body': items
+			this.search.bulk({
+				'body': items
+			}, (err, resp) => {
+				if (err) {
+					reject(err);
+				} else {
+					let date = (data.items[0] !== null) ? data.items[0].date.toISOString() : '';
+					let feedData = {
+						url: this.url,
+						date: date
+					};
+					this.feedQueueRef.push(feedData);
+					console.log(`FeedPage(${this.url}).ingestData(): done ingesting`);
+					resolve(feedData);
+				}
+			});
 		});
 	}
 
@@ -42,48 +62,29 @@ class FeedPage {
 	 *
 	 * @return {Promise} - the request object
 	 */
-	request () {
-		return new Promise((resolve, reject) => {
-			var req = request(this.url);
-			var feedparser = new Feedparser();
-			var items = [];
-			var meta;
-			var errorHandler = (error) => {
-				reject(error);
-			};
-
-			req.on('error', errorHandler);
-			feedparser.on('error', errorHandler);
-
-
-			req.on('response', function (res) {
-				var stream = this;
-
-				if (res.statusCode != 200) {
-					return this.emit('error', new Error('Bad status code'));
-				}
-
-				stream.pipe(feedparser);
-			});
-
-			feedparser.on('readable', function () {
-			  // This is where the action is!
-			  let stream = this, item;
-			  meta = this.meta;
-
-			  while ((item = stream.read())) {
-			  	items.push(item);
-			  }
-			});
-
-			feedparser.on('end', (chunk) => {
-				resolve({
-					meta: meta,
-					items: items
+	request (data) {
+		return new Promise((resolve, reject) => { 
+			getFeedPage(this.url)
+				.then(this.ingestData.bind(this))
+				.then(data => {
+					resolve(data);
+				})
+				.catch(err => {
+					reject(err);
 				});
-			});
-
 		});
+	}
+
+	/**
+		stores the rss feed item in elastic search and indexes it
+	*/
+	indexItemInSearchEngine(item) {
+		return {
+			'index': this.id,
+			'id': item.guid,
+			'type': 'feed',
+			'body': item
+		};
 	}
 
 	processItem (item) {

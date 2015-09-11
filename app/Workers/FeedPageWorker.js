@@ -1,26 +1,36 @@
 import Worker from './worker';
 import FeedPage from '../Models/FeedPage';
 import _ from 'underscore';
-import { FirebaseConfig } from '../config';
+import elasticsearch from 'elasticsearch';
+import { elasticsearch as ElasticSearchConfig } from '../config';
+import { firebase as FirebaseConfig } from '../config';
 
 class FeedPageWorker extends Worker {
 	
 	constructor (opts = {}) {
 		let options = _.defaults(opts, {
+			specId: 'feed_page_parsing',
 			numWorkers: 3,
-			url: FirebaseConfig.queues.feed
+			url: FirebaseConfig.queues.feed.url,
+			suppressStack: false
 		});
 
 		super(options);
+
+		this.search = new elasticsearch.Client({
+		  host: ElasticSearchConfig.BaseURL,
+		  log: 'trace'
+		});
 	}
 
 	process (data, progress, resolve, reject) {
+		data.search = this.search;
 		let page = new FeedPage(data);
 		page.request()
-			.then((data) => {
+			.then(data => {
 				resolve(data);
 			})
-			.fail((err) => {
+			.catch(err => {
 				reject(err);
 			});
 	}

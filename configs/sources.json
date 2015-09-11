@@ -1,4 +1,4 @@
-export var sources = {
+{
 	"complex-music": {
 		"id": "complex-music",
 		"name": "Complex Music",
@@ -40,6 +40,4 @@ export var sources = {
 		"category": "news",
 		"pagination": "paged"
 	}
-};
-
-export default sources;
+}
