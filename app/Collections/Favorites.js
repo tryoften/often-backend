@@ -31,17 +31,19 @@ class Favorites extends Firebase.Collection {
 	 					false if that item is already found in the favorites or an error upon rejection
 	 */
 	favorite (inputObj) {
-		return new Promise((resolve, reject) => {
-			this.once('sync', (syncedFavorites) => {
-				for (let favModel of syncedFavorites.models){
-					if (favModel.get('result')._id == inputObj.result._id) {
-						resolve(false);
-						return;
+		return new Promise( (resolve, reject) => {
+			this.once('sync', 
+				syncedFavorites => {		
+					for (let favModel of syncedFavorites.models){
+						if (favModel.get('result')._id == inputObj.result._id) {
+							resolve(false);
+							return;	
+						}
 					}
-				}
-				this.add(inputObj);
-				resolve(true);
-			}, (err) => { reject(err)});
+					this.add(inputObj);
+					resolve(true);
+				}, 
+				err => { reject(err) });
 		});
 	}
 
@@ -52,18 +54,20 @@ class Favorites extends Firebase.Collection {
 	 * @return {Promise} - Resolves to true when an item is removed from the favorites collection, 
 	 					false if that item is not found in the favorites or an error upon rejection
 	 */
-	unfavorite(inputObj){
-		return new Promise((resolve, reject) => {
-			this.once('sync', (syncedFavorites) => {
-				for (let favModel of syncedFavorites.models){
-					if (favModel.get('result')._id == inputObj.result._id) {
-						this.remove(favModel);
-						resolve(true);
-						return;
+	unfavorite (inputObj) {
+		return new Promise( (resolve, reject) => {
+			this.once('sync', 
+				syncedFavorites => {
+					for (let favModel of syncedFavorites.models){
+						if (favModel.get('result')._id == inputObj.result._id) {
+							this.remove(favModel);
+							resolve(true);
+							return;
+						}
 					}
-				}
-				resolve(false);
-			}, (err) => { reject(err)});
+					resolve(false);
+				}, 
+				err => { reject(err) });
 		});
 	}
 
@@ -72,11 +76,13 @@ class Favorites extends Firebase.Collection {
 	 *
 	 * @return {Promise} - Resolves to an array containing recentresults or an error.
 	 */
-	getFavorites(){
-		return new Promise((resolve, reject) => {
-			this.once('sync', (syncedFavorites) => {
-				resolve(syncedFavorites);
-			}, (err) => { reject(err)});
+	getFavorites () {
+		return new Promise( (resolve, reject) => {
+			this.once('sync', 
+				syncedFavorites => {
+					resolve(syncedFavorites);
+				}, 
+				err => { reject(err) });
 		});
 	
 	}

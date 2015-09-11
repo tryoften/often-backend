@@ -31,17 +31,19 @@ class Recents extends Firebase.Collection {
 	 					false if that item is already found in the recents or an error upon rejection
 	 */
 	addRecent (inputObj) {
-		return new Promise((resolve, reject) => {
-			this.once('sync', (syncedRecents) => {
-				for (let recModel of syncedRecents.models){
-					if (recModel.get('result')._id == inputObj.result._id) {
-						resolve(false);
-						return;
+		return new Promise( (resolve, reject) => {
+			this.once('sync', 
+				syncedRecents => {
+					for (let recModel of syncedRecents.models) {
+						if (recModel.get('result')._id == inputObj.result._id) {
+							resolve(false);
+							return;
+						}
 					}
-				}
-				this.add(inputObj);
-				resolve(true);
-			}, (err) => { reject(err)});
+					this.add(inputObj);
+					resolve(true);
+				}, 
+				err => { reject(err) });
 		});
 	}
 
@@ -53,18 +55,20 @@ class Recents extends Firebase.Collection {
 	 						or an error.
 	 */
 	getRecents (limit = this.last_recents) {
-		return new Promise((resolve, reject) => {
-			this.once('sync', (syncedRecents) => {
-				var sortedAndLimited = syncedRecents.sort( (a,b) => {
-					return a.time_accessed - b.time_accessed;
-				}).slice(0,limit);
-				var filtered = [];
-				for(let item of sortedAndLimited){
-					console.log(item.get('time_accessed'));
-					filtered.push(item.get('result'));
-				}
-				resolve(filtered);
-			}, (err) => { reject(err) });
+		return new Promise( (resolve, reject) => {
+			this.once('sync', 
+				syncedRecents => {
+					var sortedAndLimited = syncedRecents.sort( (a,b) => {
+						return a.time_accessed - b.time_accessed;
+					}).slice(0,limit);
+					var filtered = [];
+					for(let item of sortedAndLimited){
+						console.log(item.get('time_accessed'));
+						filtered.push(item.get('result'));
+					}
+					resolve(filtered);
+				}, 
+				err => { reject(err) });
 		});
 
 
