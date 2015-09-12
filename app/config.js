@@ -61,6 +61,13 @@ module.exports = {
         numWorkers: 2,
         sanitize: false,
         suppressStack: true
+      },
+      imageResizing: {
+        specId: 'image_resizing',
+        url: 'https://asterix.firebaseio.com/queues/feed',
+        numWorkers: 2,
+        sanitize: false,
+        suppressStack: true
       }
     }
   },
