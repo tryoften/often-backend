@@ -26,7 +26,9 @@ module.exports = {
     This is the id of your project in the Google Developers Console.
   */
   gcloud: {
-    projectId: 'acoustic-rider-104419'
+    projectId: 'acoustic-rider-104419',
+    bucket_name: 'resized_images',
+    key: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E'
   },
 
   /*

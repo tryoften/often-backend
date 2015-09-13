@@ -1,5 +1,6 @@
 import getFeedPage from '../Utilities/getFeedPage';
 import { firebase as FirebaseConfig } from '../config';
+import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
 
@@ -16,6 +17,7 @@ class FeedPage {
 		this.search = opts.search;
 		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/feeds/${this.feed.id}`);
 		this.feedQueueRef = this.feedRef.child('queue/tasks');
+		this.imageResizer = new ImageResizerWorker();
 	}
 
 	process (data) {
@@ -25,35 +27,47 @@ class FeedPage {
 	ingestData(data) {
 		let id = this.feed.id;
 		return new Promise((resolve, reject) => {
-			var items = [];
+			
 			if (data.items.length) {
+				let promises = [];
+				
 				for (let item of data.items) {
-					items.push({
-						'index': {
-							'_index': id,
-							'_id': item.guid,
-							'_type': 'article'
+					promises.push(this.processItem(item));
+				}
+
+				Promise.all(promises).then(processedItems => {
+					let items = [];
+
+					for (let item of processedItems) {
+						items.push({
+							'index': {
+								'_index': id,
+								'_id': item.guid,
+								'_type': 'article'
+							}
+						});
+						items.push(item);
+					}
+
+					this.search.bulk({body: items}, (err, resp) => {
+						if (err) {
+							reject(err);
+						} else {
+							let date = (data.items[0] !== null) ? data.items[0].date.toISOString() : '';
+							let feedData = {
+								url: this.url,
+								date: date
+							};
+							this.feedQueueRef.push(feedData);
+							console.log(`FeedPage(${this.url}).ingestData(): done ingesting`);
+							resolve(feedData);
 						}
 					});
-					items.push(this.processItem(item));
-				}
-			}
-			this.search.bulk({
-				'body': items
-			}, (err, resp) => {
-				if (err) {
+				}).catch(err => {
 					reject(err);
-				} else {
-					let date = (data.items[0] !== null) ? data.items[0].date.toISOString() : '';
-					let feedData = {
-						url: this.url,
-						date: date
-					};
-					this.feedQueueRef.push(feedData);
-					console.log(`FeedPage(${this.url}).ingestData(): done ingesting`);
-					resolve(feedData);
-				}
-			});
+				});
+			}
+
 		});
 	}
 
@@ -110,26 +124,43 @@ class FeedPage {
 				if ($image.length) {
 					return $image.attr("src");
 				}
+
 			} catch (e) {}
 
 			return null;
 		}
 
-		return {
-			"title": item.title,
-			"author": item.author,
-			"date": item.date,
-			"description": item.description,
-			"guid": item.guid,
-			"link": item.link,
-			"summary": item.summary,
-			"categories": item.categories,
-			"image": getImage(item),
-			"source": {
-				"id": this.id,
-				"name": this.name
-			}
-		};
+		return new Promise((resolve, reject) => {
+			let image = getImage(item);
+			let data = {
+				"title": item.title,
+				"author": item.author,
+				"date": item.date,
+				"description": item.description,
+				"guid": item.guid,
+				"link": item.link,
+				"summary": item.summary,
+				"categories": item.categories,
+				"image": image,
+				"source": {
+					"id": this.id,
+					"name": this.name
+				}
+			};
+
+			this.imageResizer
+				.ingest('rss', this.feed.id, item.guid, image)
+				.then(imageData => {
+					console.log(imageData);
+					data.images = imageData;
+					resolve(data);
+				})
+				.catch(err => {
+					resolve(data);
+				});
+
+		});
+
 	}
 }
 
