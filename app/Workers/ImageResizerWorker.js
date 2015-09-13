@@ -1,13 +1,13 @@
 import http from 'http';
-import stream from 'stream';
 import gcloud from 'gcloud';
 import Worker from './worker';
 import FeedPage from '../Models/FeedPage';
 import ImageResizer from '../Models/ImageResizer';
 import _ from 'underscore';
-import { FirebaseConfig } from '../config';
-import { GoogleStorageConfig } from '../config';
-var Stream = stream.Transform;
+import { Transform as Stream } from 'stream';
+import { firebase as FirebaseConfig } from '../config';
+import { gcloud as GoogleStorageConfig } from '../config';
+
 
 class ImageResizerWorker extends Worker {
 	
@@ -26,25 +26,21 @@ class ImageResizerWorker extends Worker {
 			key : GoogleStorageConfig.key
 		});
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.bucket_name);
+		this.bucket.getMetadata(data => {
+			console.log(data);
+		});
 	}
 
 	process (data, progress, resolve, reject) {
-		debugger;
 		console.log(data);
-		var originType = "";
-		var sourceId = "";
-		var resourceId = "";
-		var url = "";
 
-/*
-		ingest(originType, sourceId, resourceId, url)
-			.then((data) => {
+		ingest(data.originType, data.sourceId, data.resourceId, data.url)
+			.then(data => {
 				resolve(data);
 			})
-			.fail((err) => {
+			.catch(err => {
 				reject(err);
 			});
-*/
 	}
 
 	ingest (originType, sourceId, resourceId, url) {
@@ -68,16 +64,19 @@ class ImageResizerWorker extends Worker {
 		});
 	}
 
-	saveAndGenerateResponse(originType, sourceId, resourceId, dataArr){
+	saveAndGenerateResponse (originType, sourceId, resourceId, dataArr) {
 		var responseArray = [];
-		for(let dataObj of dataArr) {
+		for (let dataObj of dataArr) {
 			var path = this.generatePath(originType, sourceId, resourceId, dataObj.transformation, dataObj.meta.format);
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			dataObj.stream.pipe(remoteWriteStream);
+
+			let url = `https://www.googleapis.com/storage/v1/b/${GoogleStorageConfig.bucket_name}/o/${path})`;
 			
+			console.log('ImageResizerWorker(): Image URL: ', url);
 			responseArray.push({
 				transformation : dataObj.transformation,
-				url : 'https://console.developers.google.com/m/cloudstorage/b/' + GoogleStorageConfig.bucket_name + '/o/' + path,
+				url : url,
 				width : dataObj.meta.width,
 				height : dataObj.meta.height,
 				format : dataObj.meta.format
@@ -87,13 +86,13 @@ class ImageResizerWorker extends Worker {
 	}
 	
 	generatePath (originType, sourceId, resourceId, transformation, extension) {
-		return `${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`;
+		return encodeURIComponent(`${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`);
 	}
 
 	download (url) { 
 		return new Promise((resolve, reject) => {
 			/* download image */
-			http.get(url, (response) => {
+			http.get(url, response => {
 				var data = new Stream();
 
 				response.on('data', 
