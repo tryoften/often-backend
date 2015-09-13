@@ -2,6 +2,7 @@ import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';
 import minimist from 'minimist';
+import config from './config';
 import _ from 'underscore';
 
 var argv = minimist(process.argv.slice(2));
@@ -24,3 +25,6 @@ if (_.contains(argv._, 'feedpage-parser')) {
 	var worker = new FeedPageWorker();
 	worker.start();
 }
+
+console.log('firebase root URL: ', config.firebase.BaseURL);
+console.log('elasticsearch root URL: ', config.elasticsearch.BaseURL);

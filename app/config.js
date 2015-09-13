@@ -1,7 +1,7 @@
 var path = require('path');
+var args = require('minimist')(process.argv.slice(2));
 
-
-module.exports = {
+var config = {
   port: process.env.PORT || '8080',
 
   /* Secret is used by sessions to encrypt the cookie */
@@ -43,42 +43,44 @@ module.exports = {
   },
 
   firebase: {
-	  BaseURL: 'https://asterix.firebaseio.com',
-    queues: {
-      default: {
-        url: 'https://asterix.firebaseio.com/queues/default',
-        numWorkers: 1,
-        sanitize: false,
-        suppressStack: true
-      },
-      feed: {
-        specId: 'feed_ingestion',
-        url: 'https://asterix.firebaseio.com/queues/feed',
-        numWorkers: 2,
-        sanitize: false
-      },
-      search: {
-        specId: 'search_query',
-        url: 'https://asterix.firebaseio.com/queues/search',
-        numWorkers: 2,
-        sanitize: false,
-        suppressStack: true
-      },
-      imageResizing: {
-        specId: 'image_resizing',
-        url: 'https://asterix.firebaseio.com/queues/feed',
-        numWorkers: 2,
-        sanitize: false,
-        suppressStack: true
-      }
-    }
+	  BaseURL: args['firebase-root'] || 'https://asterix.firebaseio.com',
   },
 
   elasticsearch: {
-	  BaseURL: 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+	  BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
   }
 
 };
 
+config.firebase.queues = {
+  default: {
+    url: `${config.firebase.BaseURL}/queues/default`,
+    numWorkers: 1,
+    sanitize: false,
+    suppressStack: true
+  },
+  feed: {
+    specId: 'feed_ingestion',
+    url: `${config.firebase.BaseURL}/queues/feed`,
+    numWorkers: 2,
+    sanitize: false
+  },
+  search: {
+    specId: 'search_query',
+    url: `${config.firebase.BaseURL}/queues/search`,
+    numWorkers: 2,
+    sanitize: false,
+    suppressStack: true
+  },
+  imageResizing: {
+    specId: 'image_resizing',
+    url: `${config.firebase.BaseURL}/queues/feed`,
+    numWorkers: 2,
+    sanitize: false,
+    suppressStack: true
+  }
+};
+
+module.exports = config;
 
 
