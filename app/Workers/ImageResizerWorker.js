@@ -26,9 +26,7 @@ class ImageResizerWorker extends Worker {
 			key : GoogleStorageConfig.key
 		});
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.bucket_name);
-		this.bucket.getMetadata(data => {
-			console.log(data);
-		});
+
 	}
 
 	process (data, progress, resolve, reject) {
@@ -71,9 +69,9 @@ class ImageResizerWorker extends Worker {
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			dataObj.stream.pipe(remoteWriteStream);
 
-			let url = `https://www.googleapis.com/storage/v1/b/${GoogleStorageConfig.bucket_name}/o/${path})`;
-			
+			let url = `https://www.googleapis.com/download/storage/v1/b/${GoogleStorageConfig.bucket_name}/o/${encodeURIComponent(path)}?alt=media`;
 			console.log('ImageResizerWorker(): Image URL: ', url);
+
 			responseArray.push({
 				transformation : dataObj.transformation,
 				url : url,
@@ -86,7 +84,12 @@ class ImageResizerWorker extends Worker {
 	}
 	
 	generatePath (originType, sourceId, resourceId, transformation, extension) {
-		return encodeURIComponent(`${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`);
+		if (originType == 'rss') {
+			let pathComponents = resourceId.split('/');
+			resourceId = pathComponents[pathComponents.length - 1];
+		}
+
+		return `${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`;
 	}
 
 	download (url) { 
