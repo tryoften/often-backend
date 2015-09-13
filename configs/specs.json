@@ -1,0 +1,31 @@
+{
+	"search_query": {
+		"in_progress_state": "searching",
+		"finished_state": "query_answered",
+		"timeout": 10000,
+		"retries": 2
+	},
+	"feed_ingestion": {
+		"start_state": "start_feed_ingestion",
+		"in_progress_state": "processing",
+		"finished_state": "feed_ingested",
+		"retries": 2
+	},
+	"feed_page_parsing": {
+		"start_state": "start_feed_page_parsing",
+		"in_progress_state": "parsing_page",
+		"finished_state": "page_parsed",
+		"retries": 3
+	},
+	"image_resizing": {
+		"start_state": "page_parsed",
+		"in_progress_state": "rezising_image",
+		"finished_state": "image_resizing_done",
+		"retries": 3
+	},
+	"index_feed_items": {
+		"start_state": "image_resizing_done",
+		"in_progress_state": "indexing_feed_items",
+		"finished_state": "indexing_done"
+	}
+}

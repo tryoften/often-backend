@@ -65,25 +65,29 @@ class ImageResizer {
 	 */
 	resize (data, tran) {
 		return new Promise((resolve, reject) => {
-			sharp(data).metadata().then((metadata,err) => {
-				if(err){
-					reject(err);
-				}
-				this.transform(data, tran, { width : metadata.width, height : metadata.height })
-				.toBuffer((err, buff)=>{
-					var ref = sharp(buff);
-					ref.metadata().then((newMeta, err) => {
-						if(err){
-							reject(err);
-						}
-						resolve({ 
-							transformation : tran, 
-							meta : newMeta, 
-							stream : ref 
+			try {
+				sharp(data).metadata().then((metadata, err) => {
+					if (err) {
+						reject(err);
+					}
+					this.transform(data, tran, { width : metadata.width, height : metadata.height })
+					.toBuffer((err, buff) => {
+						var ref = sharp(buff);
+						ref.metadata().then((newMeta, err) => {
+							if(err){
+								reject(err);
+							}
+							resolve({ 
+								transformation : tran, 
+								meta : newMeta, 
+								stream : ref 
+							});
 						});
 					});
 				});
-			});
+			} catch (err) {
+				reject(err);
+			}
 		});
 		
 	}

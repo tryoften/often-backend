@@ -1,30 +1,20 @@
-import elasticsearch from 'elasticsearch';
-import Queue from 'firebase-queue';
-import Firebase from 'firebase';
-import sources from './sources';
-import Feed from '../../Models/Feed';
-import { elasticsearch as ElasticSearchConfig } from '../../config';
+import Feeds from '../../Collections/Feeds';
 
 class FeedIngestor {
 
-	constructor (opts) {
-		this.feeds = [];
-		this.search = new elasticsearch.Client({
-		  host: ElasticSearchConfig.BaseURL,
-		  log: 'trace'
-		});
-
-		for (let source of sources) {
-			let feed = new Feed(source);
-			feed.ingestor = this;
-			this.feeds.push(feed);
-		}
+	constructor (opts = {}) {
+		this.feeds = new Feeds();
 	}
 
-	ingest (backfill = false) {
-		for (let feed of this.feeds) {
-			feed.processPages(backfill);
-		}
+	ingest () {
+		return new Promise((resolve, reject) => {
+			this.feeds.once('sync', (data) => {
+				for (let feed of this.feeds.models) {
+					feed.processPages();
+				}
+			});
+			this.feeds.fetch();
+		});
 	}
 }
 
