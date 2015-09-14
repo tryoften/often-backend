@@ -1,6 +1,6 @@
 import http from 'http';
 import gcloud from 'gcloud';
-import Worker from './worker';
+import Worker from './Worker';
 import FeedPage from '../Models/FeedPage';
 import ImageResizer from '../Models/ImageResizer';
 import _ from 'underscore';
