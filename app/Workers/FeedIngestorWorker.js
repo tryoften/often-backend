@@ -12,9 +12,6 @@ class FeedIngestorWorker extends Worker {
 		this.ingestor = new FeedIngestor();
 
 		// ingest new data every 5 minutes
-		setInterval(function() {
-			this.ingestor.ingest();
-		}, 5000);
 	}
 
 	process (data, progress, resolve, reject) {
