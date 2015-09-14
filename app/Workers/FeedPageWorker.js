@@ -1,4 +1,4 @@
-import Worker from './worker';
+import Worker from './Worker';
 import FeedPage from '../Models/FeedPage';
 import _ from 'underscore';
 import elasticsearch from 'elasticsearch';
