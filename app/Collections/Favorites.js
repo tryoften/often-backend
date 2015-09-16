@@ -10,37 +10,55 @@ import fb from 'firebase';
 class Favorites extends Firebase.Collection {
 
 	/**
-	 * Initializes the favorites collection.
-	 * @param {object} models - supporting models
-	 * @param {object} opts - supporting options
+	 * Constructs the favorites collection.
 	 * @param {string} userId - user's id to load up favorites
 	 *
 	 * @return {void}
 	 */
+	 constructor (userId) {
+		if (typeof userId === 'undefined') {
+			throw new Error('userId needs to be set');
+		}
+
+		let opts = {
+			model: Favorite,
+			autoSync: true
+		};
+		super([], opts, userId);
+	}
+
+	/**
+	 * Initializes the favorites collection.
+	 * @param {string} models - optional models for backbone
+	 * @param {string} opts - optional options for backbone
+	 * @param {string} userId - user's id to load up favorties
+	 *
+	 * @return {void}
+	 */
 	initialize (models, opts, userId) {
-		this.model = Favorite;
+		this.idAttribute = 'id';
 		this.url = `${FirebaseConfig.BaseURL}/users/${userId}/favorites`;
-		this.autoSync = true;
 	}
 
 	/**
 	 * Adds an item to the favorites collection
-	 * @param {object} inputObj - object containing information about a record
+	 * @param {object} result - object containing information about a result
 	 *
 	 * @return {Promise} - Resolves to true when an item is added to the favorites collection, 
 	 					false if that item is already found in the favorites or an error upon rejection
 	 */
-	favorite (inputObj) {
+	favorite (result) {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFavorites => {		
-					for (let favModel of syncedFavorites.models){
-						if (favModel.get('result')._id == inputObj.result._id) {
+					for (let favModel of syncedFavorites.models) {						
+						if (favModel.get('_id') == result._id) {
 							resolve(false);
 							return;	
 						}
 					}
-					this.add(inputObj);
+					result.time_added = Date.now();
+					this.add(result);
 					resolve(true);
 				}, 
 				err => { reject(err) });
@@ -49,18 +67,18 @@ class Favorites extends Firebase.Collection {
 
 	/**
 	 * Removes an item to the favorites collection
-	 * @param {object} inputObj - object containing information about a record
+	 * @param {object} result - object containing information about a result
 	 *
 	 * @return {Promise} - Resolves to true when an item is removed from the favorites collection, 
 	 					false if that item is not found in the favorites or an error upon rejection
 	 */
-	unfavorite (inputObj) {
+	unfavorite (result) {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFavorites => {
-					for (let favModel of syncedFavorites.models){
-						if (favModel.get('result')._id == inputObj.result._id) {
-							this.remove(favModel);
+					for (let favModel of syncedFavorites.models) {
+						if (favModel.get('_id') == result._id) {
+							syncedFavorites.remove(favModel);
 							resolve(true);
 							return;
 						}
@@ -69,22 +87,6 @@ class Favorites extends Firebase.Collection {
 				}, 
 				err => { reject(err) });
 		});
-	}
-
-	/**
-	 * Gets favorites belonging to a user
-	 *
-	 * @return {Promise} - Resolves to an array containing recentresults or an error.
-	 */
-	getFavorites () {
-		return new Promise( (resolve, reject) => {
-			this.once('sync', 
-				syncedFavorites => {
-					resolve(syncedFavorites);
-				}, 
-				err => { reject(err) });
-		});
-	
 	}
 
 }
