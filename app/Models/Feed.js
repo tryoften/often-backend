@@ -19,8 +19,9 @@ class Feed extends Model {
 		};
 
 		this.set(_.defaults(attributes, defaults));
+		this.reingest = false;
 		
-		let url = `${FirebaseConfig.BaseURL}/feeds/${this.id}/queue`;
+		let url = `${this.url()}/queue`;
 		this.queue = new Queue(new Firebase(url), 
 			_.defaults({
 				suppressStack: false, 
@@ -34,15 +35,21 @@ class Feed extends Model {
 	}
 
 	/**
-	 *	This fetches the initial rss feed and queues requests to remaining pages
+	 * This fetches the initial rss feed and queues requests to remaining pages
+	 *
+	 * @param reingest {Bool} - whether we should reindex data has already been indexed
 	 */
-	processPages () {
-		getFeedPage(this.get('url')).then(data => {
+	processPages (reingest = false) {
+		this.reingest = reingest;
+
+		return getFeedPage(this.get('url')).then(data => {
 			this.updateMetadata(data);
 			this.queueJobs(data);
-		}).catch(err => {
-
 		});
+	}
+
+	url () {
+		return `${FirebaseConfig.BaseURL}/feeds/${this.id}`;
 	}
 
 	updateMetadata (data) {
@@ -72,39 +79,42 @@ class Feed extends Model {
 		});
 	}
 
+	/**
+	 * Queues subsequent jobs onto feed queue
+	 *
+	 */
 	queueJobs (data) {
-		let shouldIngest = false;
 		let firstItem = data.items[0];
+		let guid = new Buffer(firstItem.guid).toString('base64');
+		let url = `${this.url()}/items/${guid}`;
+		let itemRef = new Firebase(url);
+		console.log(`check if ${itemRef.toString()} exists`);
 
-		// TODO: check the timestamp of the first article and compare it with the date of the most recent item
-		// that was last ingested
-		let mostRecentItemDate = new Date(this.get('mostRecentItemDate'));
-		let firstItemDate = new Date(firstItem.date);
+		itemRef.once('value', snapshot => {
+			let shouldIngest = false;
 
-		if (isNaN(mostRecentItemDate)) {
-			mostRecentItemDate = new Date(0);
-		}
+			if (!snapshot.exists()) {
+				shouldIngest = true;
+			}
 
-		if (mostRecentItemDate < firstItemDate) {
-			shouldIngest = true;
-		}
+			if (shouldIngest) {
+				console.log(`Feed(${this.id}): ingesting`);
 
-		if (shouldIngest) {
-			console.log(`Feed(${this.id}): ingesting`);
+				this.set('currentPage', 0);
+				let taskData = {
+					pageURL: this.get('baseURL') + this.get('currentPage'),
+					feed: this.toJSON(),
+					_state: 'start_page_parsing'
+				};
 
-			this.set('currentPage', 0);
-			let taskData = {
-				pageURL: this.get('baseURL') + this.get('currentPage'),
-				feed: this.toJSON(),
-				_state: 'start_page_parsing'
-			};
+				let newTaskRef = this.taskQueueRef.push(taskData);
+				console.log('new task URL: ', newTaskRef.toString());
 
-			let newTaskRef = this.taskQueueRef.push(taskData);
-			console.log('new task URL: ', newTaskRef.toString());
+			} else {
+				console.warn(`Feed(${this.id}): nothing to ingest`);
+			}
+		});
 
-		} else {
-			console.warn(`Feed(${this.id}): nothing to ingest`);
-		}
 	}
 
 	processJob (data, progress, resolve, reject) {
@@ -124,28 +134,35 @@ class Feed extends Model {
 			// check if the page fetching failed
 		}
 
-		let shouldIngest = false;
-		let mostRecentItemDate = new Date(this.get('mostRecentItemDate'));
-		let firstItemDate = new Date(data.date);
+		let itemsRef = new Firebase(`${FirebaseConfig.BaseURL}/feeds/${this.id}/items`);
 
-		if (isNaN(mostRecentItemDate)) {
-			mostRecentItemDate = new Date(0);
-		}
+		itemsRef.once('value', snapshot => {
+			let shouldIngest = false;
+			for (let processedItem of data.processedItems) {
+				let guid = new Buffer(processedItem.guid).toString('base64');
+				let child = snapshot.child(guid);
+				
+				console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
 
-		if (mostRecentItemDate < firstItemDate) {
-			shouldIngest = true;
-		}
+				if (child.exists() && !this.reingest) {
+					shouldIngest = false;
+					break;
+				} else {
+					shouldIngest = true;	
+				}
+			}
 
-		if (shouldIngest) {
-			let taskData = {
-				pageURL: this.getNextPageURL(),
-				feed: this.toJSON(),
-				_state: 'start_page_parsing'
-			};
-			console.log(`Feed.processJob(): Queuing next job URL (${taskData.pageURL})`);
-			this.taskQueueRef.push(taskData);
-		}
-		resolve();
+			if (shouldIngest) {
+				let taskData = {
+					pageURL: this.getNextPageURL(),
+					feed: this.toJSON(),
+					_state: 'start_page_parsing'
+				};
+				console.log(`Feed.processJob(): Queuing next job URL (${taskData.pageURL})`);
+				this.taskQueueRef.push(taskData);
+			}
+			resolve(data);
+		});
 	}
 
 	getNextPageURL () {
@@ -155,6 +172,12 @@ class Feed extends Model {
 		this.set('currentPage', currentPage);
 
 		return baseURL + currentPage;
+	}
+
+	toJSON () {
+		var obj = super.toJSON();
+		delete obj.items;
+		return obj;
 	}
 
 }

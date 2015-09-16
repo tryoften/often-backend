@@ -25,19 +25,25 @@ class ImageResizer {
 	 *
 	 * @return {stream} - returns a stream containing transformed image
 	 */
-	transform(data, transformation, attr){
-		switch (transformation) {
-			case 'rectangle': 
-				return (attr.height > attr.width) ? sharp(data).resize(this.small_pixels, null) : sharp(data).resize(null, this.small_pixels); 
+	transform(data, transformation, attr) {
+		try {
+			switch (transformation) {
+				case 'rectangle': 
+					return (attr.height > attr.width) ? sharp(data).resize(this.small_pixels, null) : sharp(data).resize(null, this.small_pixels); 
 
-			case 'original': 
-				return sharp(data);
-				
-			case 'square':
-				return sharp(data).resize(this.small_pixels, this.small_pixels);
-				
-			case 'medium':
-				return (attr.height > attr.width) ? sharp(data).resize(this.medium_pixels, null) : sharp(data).resize(null, this.medium_pixels); 
+				case 'original': 
+					return sharp(data);
+					
+				case 'square':
+					return sharp(data).resize(this.small_pixels, this.small_pixels);
+					
+				case 'medium':
+					return (attr.height > attr.width) ? sharp(data).resize(this.medium_pixels, null) : sharp(data).resize(null, this.medium_pixels); 
+			}
+		} catch (err) {
+			return new Promise((resolve, reject) => {
+				reject(err);
+			});
 		}
 	}
 
@@ -69,20 +75,27 @@ class ImageResizer {
 				sharp(data).metadata().then((metadata, err) => {
 					if (err) {
 						reject(err);
+						return;
 					}
+					
 					this.transform(data, tran, { width : metadata.width, height : metadata.height })
 					.toBuffer((err, buff) => {
-						var ref = sharp(buff);
-						ref.metadata().then((newMeta, err) => {
-							if(err){
-								reject(err);
-							}
-							resolve({ 
-								transformation : tran, 
-								meta : newMeta, 
-								stream : ref 
+						if (err) {
+							reject(err);
+						} else {
+							var ref = sharp(buff);
+							ref.metadata().then((newMeta, err) => {
+								if (err) {
+									reject(err);
+								} else {
+									resolve({ 
+										transformation : tran, 
+										meta : newMeta, 
+										stream : ref 
+									});
+								}
 							});
-						});
+						}
 					});
 				});
 			} catch (err) {

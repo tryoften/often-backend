@@ -56,7 +56,8 @@ class FeedPage {
 							let date = (data.items[0] !== null) ? data.items[0].date.toISOString() : '';
 							let feedData = {
 								url: this.url,
-								date: date
+								date: date,
+								processedItems: JSON.parse(JSON.stringify(processedItems))
 							};
 							this.feedQueueRef.push(feedData);
 							console.log(`FeedPage(${this.url}).ingestData(): done ingesting`);
@@ -153,9 +154,14 @@ class FeedPage {
 				.then(imageData => {
 					console.log(imageData);
 					data.images = imageData;
+
+					// store item in firebase under feed
+					let guid = new Buffer(item.guid).toString('base64');
+					this.feedRef.child(`items/${guid}`).set(JSON.parse(JSON.stringify(data)));
 					resolve(data);
 				})
 				.catch(err => {
+					console.error('FeedPage(): Image resizing failed ', err);
 					resolve(data);
 				});
 

@@ -15,7 +15,14 @@ class FeedIngestorWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		this.ingestor.ingest();
+		var reingest = false;
+
+		if (_.isBoolean(data.reingest)) {
+			reingest = data.reingest;
+			console.log('FeedIngestorWorker(): reingest true');
+		}
+
+		this.ingestor.ingest(reingest);
 	}
 }
 
