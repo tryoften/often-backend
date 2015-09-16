@@ -24,7 +24,9 @@ class FeedPageWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
+		console.info('FeedPageWorker(): owner-id: ', data._owner, ' pageURL: ', data.pageURL);
 		data.search = this.search;
+		
 		let page = new FeedPage(data);
 		page.request()
 			.then(data => {

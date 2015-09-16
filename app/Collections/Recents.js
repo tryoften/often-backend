@@ -43,7 +43,9 @@ class Recents extends Firebase.Collection {
 					this.add(inputObj);
 					resolve(true);
 				}, 
-				err => { reject(err) });
+				err => { 
+					reject(err);
+				});
 		});
 	}
 
@@ -68,7 +70,9 @@ class Recents extends Firebase.Collection {
 					}
 					resolve(filtered);
 				}, 
-				err => { reject(err) });
+				err => { 
+					reject(err);
+				});
 		});
 
 

@@ -43,7 +43,9 @@ class Favorites extends Firebase.Collection {
 					this.add(inputObj);
 					resolve(true);
 				}, 
-				err => { reject(err) });
+				err => {
+					reject(err);
+				});
 		});
 	}
 
@@ -58,7 +60,7 @@ class Favorites extends Firebase.Collection {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFavorites => {
-					for (let favModel of syncedFavorites.models){
+					for (let favModel of syncedFavorites.models) {
 						if (favModel.get('result')._id == inputObj.result._id) {
 							this.remove(favModel);
 							resolve(true);
@@ -67,7 +69,9 @@ class Favorites extends Firebase.Collection {
 					}
 					resolve(false);
 				}, 
-				err => { reject(err) });
+				err => {
+					reject(err);
+				});
 		});
 	}
 
@@ -82,7 +86,7 @@ class Favorites extends Firebase.Collection {
 				syncedFavorites => {
 					resolve(syncedFavorites);
 				}, 
-				err => { reject(err) });
+				err => { reject(err); });
 		});
 	
 	}

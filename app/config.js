@@ -82,5 +82,3 @@ config.firebase.queues = {
 };
 
 module.exports = config;
-
-

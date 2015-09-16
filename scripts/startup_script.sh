@@ -3,11 +3,9 @@
 # [START startup]
 # Talk to the metadata server to get the project id
 PROJECTID=$(curl -s "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
-SERVER_TYPE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attriubtes/server-type" -H "Metadata-Flavor: Google")
-FIREBASE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/firebase-root" -H "Metadata-Fl
-avor: Google")
-ELASTICSEARCH=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/elasticsearch-root" -H "Metadata-Fl
-avor: Google")
+SERVER_TYPE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/server-type" -H "Metadata-Flavor: Google")
+FIREBASE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/firebase-root" -H "Metadata-Flavor: Google")
+ELASTICSEARCH=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/elasticsearch-root" -H "Metadata-Flavor: Google")
 
 # Install logging monitor and configure it to pickup application logs
 # [START logging]
