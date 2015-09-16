@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "description": "Backend service for Often.",
   "author": {
-    "name": "Jakub",
-    "email": "jakub@drizzyapp.com"
+    "name": "Often",
+    "email": "support@tryoften.com"
   },
   "repository": "october-labs/october-backend",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "index.js"
   ],
   "keywords": [
-    "october-backend"
+    "often-backend"
   ],
   "dependencies": {
     "backbone": "^1.1.2",
