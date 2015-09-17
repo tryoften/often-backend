@@ -25,7 +25,7 @@ class ImageResizer {
 	 *
 	 * @return {stream} - returns a stream containing transformed image
 	 */
-	transform(data, transformation, attr){
+	transform(data, transformation, attr) {
 		switch (transformation) {
 			case 'rectangle': 
 				return (attr.height > attr.width) ? sharp(data).resize(this.small_pixels, null) : sharp(data).resize(null, this.small_pixels); 

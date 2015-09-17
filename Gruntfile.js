@@ -93,7 +93,8 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('default', ['watch:babel']);
+  grunt.registerTask('default', ['babel:dist']);
   grunt.registerTask('client', ['browserify', 'serve']);
+  grunt.registerTask('watch', ['watch:babel']);
 
 };
