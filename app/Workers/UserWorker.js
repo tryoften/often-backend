@@ -1,4 +1,4 @@
-import Worker from './worker';
+import Worker from './Worker';
 import Recents from '../Collections/Recents';
 import Favorites from '../Collections/Favorites';
 import { firebase as FirebaseConfig } from '../config';
@@ -38,7 +38,7 @@ class UserWorker extends Worker {
 		try {
 			if (data.task == 'addFavorite') {
 				//instantiate favorites collection for user
-				let favs = new Favorites( data.user);
+				let favs = new Favorites(data.user);
 				favs.favorite(data.result)
 				.then( (d) => {
 					resolve(d);

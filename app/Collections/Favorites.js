@@ -21,6 +21,7 @@ class Favorites extends Firebase.Collection {
 		}
 
 		let opts = {
+			idAttribute: 'id',
 			model: Favorite,
 			autoSync: true
 		};
@@ -36,29 +37,28 @@ class Favorites extends Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts, userId) {
-		this.idAttribute = 'id';
 		this.url = `${FirebaseConfig.BaseURL}/users/${userId}/favorites`;
 	}
 
 	/**
 	 * Adds an item to the favorites collection
-	 * @param {object} result - object containing information about a result
+	 * @param {object} item - object containing information about an item
 	 *
 	 * @return {Promise} - Resolves to true when an item is added to the favorites collection, 
 	 					false if that item is already found in the favorites or an error upon rejection
 	 */
-	favorite (result) {
+	favorite (item) {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFavorites => {		
 					for (let favModel of syncedFavorites.models) {						
-						if (favModel.get('_id') == result._id) {
+						if (favModel.get('_id') == item._id) {
 							resolve(false);
 							return;	
 						}
 					}
-					result.time_added = Date.now();
-					this.add(result);
+					item.time_added = Date.now();
+					this.add(item);
 					resolve(true);
 				}, 
 				err => {
@@ -69,17 +69,17 @@ class Favorites extends Firebase.Collection {
 
 	/**
 	 * Removes an item to the favorites collection
-	 * @param {object} result - object containing information about a result
+	 * @param {object} item - object containing information about an item
 	 *
 	 * @return {Promise} - Resolves to true when an item is removed from the favorites collection, 
 	 					false if that item is not found in the favorites or an error upon rejection
 	 */
-	unfavorite (result) {
+	unfavorite (item) {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFavorites => {
 					for (let favModel of syncedFavorites.models) {
-						if (favModel.get('_id') == result._id) {
+						if (favModel.get('_id') == item._id) {
 							syncedFavorites.remove(favModel);
 							resolve(true);
 							return;

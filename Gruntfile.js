@@ -88,12 +88,12 @@ module.exports = function (grunt) {
       },
       babel: {
         files: 'app/**/*.js',
-        tasks: ['jshint:js', 'babel:dist']
+        tasks: ['browserify:watch', 'babel:dist']
       }
     }
   });
 
-  grunt.registerTask('default', ['watch:babel']);
+  grunt.registerTask('default', ['babel']);
   grunt.registerTask('client', ['browserify', 'serve']);
 
 };

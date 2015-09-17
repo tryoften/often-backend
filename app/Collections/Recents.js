@@ -21,6 +21,7 @@ class Recents extends Firebase.Collection {
 		}
 
 		let opts = {
+			idAttribute: 'id',
 			model: Recent,
 			autoSync: true
 		};
@@ -36,28 +37,27 @@ class Recents extends Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts, userId) {
-		this.idAttribute = 'id';
 		this.url = `${FirebaseConfig.BaseURL}/users/${userId}/recents`;
 	}
 
 	/**
 	 * Adds an item to the recents collection
-	 * @param {object} result - object containing information about a result
+	 * @param {object} item - object containing information about an item
 	 *
 	 * @return {Promise} - Resolves to true when an item is added to the recents collection, 
 	 					false if that item is already found in the recents or an error upon rejection
 	 */
-	addRecent (result) {
+	addRecent (item) {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedRecents => {
-					let rec = syncedRecents.find((mod) => { return mod.get('_id') == result._id });
+					let rec = syncedRecents.find((mod) => { return mod.get('_id') == item._id });
 					if (rec) {
 						rec.set('time_added', Date.now());
 						resolve(false);
 					} else {
-						result.time_added = Date.now();
-						syncedRecents.create(result);
+						item.time_added = Date.now();
+						syncedRecents.create(item);
 						resolve(true);
 					}
 				}, 
