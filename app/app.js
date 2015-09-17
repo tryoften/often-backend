@@ -1,6 +1,7 @@
 import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';
+import UserWorker from './Workers/UserWorker';
 import minimist from 'minimist';
 import config from './config';
 import _ from 'underscore';
@@ -23,6 +24,12 @@ if (_.contains(argv._, 'feed-ingestor')) {
 if (_.contains(argv._, 'feedpage-parser')) {
 	console.log('starting feed page parser');
 	var worker = new FeedPageWorker();
+	worker.start();
+}
+
+if (_.contains(argv._, 'user-worker')) {
+	console.log('starting the user worker');
+	var worker = new UserWorker();
 	worker.start();
 }
 

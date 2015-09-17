@@ -78,6 +78,13 @@ config.firebase.queues = {
     numWorkers: 2,
     sanitize: false,
     suppressStack: true
+  },
+  user: {
+    specId: 'default',
+    url: `${config.firebase.BaseURL}/queues/user`,
+    numWorkers: 2,
+    sanitize: false,
+    suppressStack: true
   }
 };
 
