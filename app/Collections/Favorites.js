@@ -34,7 +34,7 @@ class Favorites extends Firebase.Collection {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFavorites => {		
-					for (let favModel of syncedFavorites.models){
+					for (let favModel of syncedFavorites.models) {
 						if (favModel.get('result')._id == inputObj.result._id) {
 							resolve(false);
 							return;	
