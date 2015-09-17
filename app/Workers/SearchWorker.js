@@ -1,4 +1,4 @@
-import Worker from './worker';
+import Worker from './Worker';
 import SearchRequestDispatcher from '../Search/SearchRequestDispatcher';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';

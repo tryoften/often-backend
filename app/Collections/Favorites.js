@@ -61,7 +61,9 @@ class Favorites extends Firebase.Collection {
 					this.add(result);
 					resolve(true);
 				}, 
-				err => { reject(err) });
+				err => {
+					reject(err);
+				});
 		});
 	}
 
@@ -85,7 +87,9 @@ class Favorites extends Firebase.Collection {
 					}
 					resolve(false);
 				}, 
-				err => { reject(err) });
+				err => {
+					reject(err);
+				});
 		});
 	}
 

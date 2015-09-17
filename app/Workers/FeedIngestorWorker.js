@@ -1,4 +1,4 @@
-import Worker from './worker';
+import Worker from './Worker';
 import FeedIngestor from '../Ingestors/Feed/FeedIngestor';
 import config from '../config';
 import _ from 'underscore';
@@ -10,10 +10,19 @@ class FeedIngestorWorker extends Worker {
 
 		super(options);
 		this.ingestor = new FeedIngestor();
+
+		// ingest new data every 5 minutes
 	}
 
 	process (data, progress, resolve, reject) {
-		this.ingestor.ingest();
+		var reingest = false;
+
+		if (_.isBoolean(data.reingest)) {
+			reingest = data.reingest;
+			console.log('FeedIngestorWorker(): reingest true');
+		}
+
+		this.ingestor.ingest(reingest);
 	}
 }
 

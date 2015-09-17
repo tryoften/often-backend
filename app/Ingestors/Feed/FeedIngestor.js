@@ -6,11 +6,18 @@ class FeedIngestor {
 		this.feeds = new Feeds();
 	}
 
-	ingest () {
+	/**
+	 * Ingests data into elasticsearch
+	 *
+	 * @param reingest {Bool} - whether we should ingest data that has already been ingested
+	 */
+	ingest (reingest = false) {
 		return new Promise((resolve, reject) => {
 			this.feeds.once('sync', (data) => {
+				this.feedCount = this.feeds.models.length;
+				
 				for (let feed of this.feeds.models) {
-					feed.processPages();
+					feed.processPages(reingest);
 				}
 			});
 			this.feeds.fetch();

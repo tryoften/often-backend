@@ -61,7 +61,9 @@ class Recents extends Firebase.Collection {
 						resolve(true);
 					}
 				}, 
-				err => { reject(err) });
+				err => { 
+					reject(err);
+				});
 		});
 	}
 
