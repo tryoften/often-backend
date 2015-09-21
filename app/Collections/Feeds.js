@@ -8,7 +8,7 @@ import { firebase as FirebaseConfig } from '../config';
 class Feeds extends Backbone.Firebase.Collection {
 
 	/**
-	 * Initializes the requests collection.
+	 * Initializes the feeds collection.
 	 * @param {object} models - supporting models
 	 * @param {object} opts - supporting options
 	 *
@@ -26,7 +26,7 @@ class Feeds extends Backbone.Firebase.Collection {
 	 * @return {Promise} - Returns a promise that resolves to an array of strings containing feed names,
 	 					or an error when rejected 
 	 */
-	getFeedNames(){
+	getFeedNames () {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedFeeds => {

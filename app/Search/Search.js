@@ -163,14 +163,15 @@ class Search {
 
 	/**
 	 * returns a some search autocomplete suggestions for a given query
+	 * @param {string} filter - filter containing process commands
 	 * @param {string} query - The query to get results for
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
-	suggest (query) {
+	suggest (filter, query) {
 
 		var command;
-		if ( (command = this.processCommands(query)) ) {
+		if ( (command = this.processCommands(filter)) ) {
 			return command;
 		}
 
@@ -195,8 +196,8 @@ class Search {
 		});
 	}
 
-	processCommands(query) {
-		if (query.substring(0, 13) === '#top-searches') {
+	processCommands (filter) {
+		if (filter === 'top-searches') {
 			return this.getTopSearches();
 		}
 		return false;
