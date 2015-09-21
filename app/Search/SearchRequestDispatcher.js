@@ -4,6 +4,7 @@ import SpotifyService from '../Services/Spotify/SpotifyService';
 import GiphyService from '../Services/Giphy/GiphyService';
 import YouTubeService from '../Services/YouTube/YouTubeService';
 import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
+import Feeds from '../Collections/Feeds';
 import _ from 'underscore';
 
 /**
@@ -30,7 +31,51 @@ class SearchRequestDispatcher {
 		this.serviceProviders.giphy = new GiphyService({responses : this.responses});
 		this.serviceProviders.youtube = new YouTubeService({responses : this.responses});
 		this.serviceProviders.soundcloud = new SoundCloudService({responses : this.responses});
+		
+		/* load feeds */
+		this.feeds = new Feeds();
+	}
 
+	/**
+	 * Filters out the sources that will be queried against ElasticSearch based on attached filters
+	 * @param {[string]} sources - string array containing sources supported by the search system
+	 * @param {[string]} filters - string array containing filters passed in from the client
+	 *
+	 * @return {[string]} - string array containing only sources that match passed-in filters
+	 */
+	filterSources (sources, filters) {
+
+		return _.filter(sources, (sourceElement) => { 
+			return _.contains(filters, sourceElement.split('-')[0]); 
+		});
+	}
+	
+	/**
+	 * Extracts the filter string delimited by '#' character and an empty space ' ' 
+	 * @param {string} query - raw query string (contains '#' in front)
+	 *
+	 * @return {string/null} - Returns the filter string (excluding '#' character) if a filter is present, otherwise null.
+	 */
+	extractFilter (query) {
+
+		if (query === 'undefined' || query.length == 0) return null;
+		var firstWord = query.trim().split(' ')[0];
+		if (firstWord[0] == '#') {
+			return firstWord.substring(1, firstWord.length);
+		}
+		return null;
+	}
+
+	/**
+	 * Extracts the actual query string (with filter removed)
+	 * @param {string} query - raw query string (contains '#' in front)
+	 * @param {string} filter - filter (ex. "spotify", "vibe", etc.)
+	 *
+	 * @return {string} - Returns the actual query (filter removed)
+	 */
+	extractActualQuery (query, filter) {
+
+		return query.trim().substring(filter.length + 1, query.length);
 	}
 
 	/**
@@ -46,69 +91,90 @@ class SearchRequestDispatcher {
 			/* whether the query is for autocomplete suggestions */
 			var isAutocomplete = !!incomingRequest.query.autocomplete;
 
-			/* store the total number of services left to process */
-			var servicesLeftToProcess = Object.keys(this.serviceProviders).length;
-			this.responses.on('change:time_modified', (updatedResponse) => {
+			/* check which service providers apply */
+			this.feeds.getFeedNames().then( (feeds) => {
 
-				if (incomingRequest.id != updatedResponse.id) {
-					return;
+				/* check for filter tag */
+				var filter = this.extractFilter(incomingRequest.query.text);
+				var filteredFeeds, filteredProviders, searchTerm;
+
+				if (filter && !isAutocomplete) {
+
+					filteredFeeds = this.filterSources(feeds, [ filter ]);		
+					filteredProviders = this.filterSources(Object.keys(this.serviceProviders), [ filter ]);
+					searchTerm = this.extractActualQuery(incomingRequest.query.text, filter);				
+				} else {
+
+					/* no specific filters attached */
+					filteredFeeds = feeds;
+					filteredProviders = Object.keys(this.serviceProviders);
+					searchTerm = incomingRequest.query.text;
 				}
 
-				/* query search */
-				var searchTerm = incomingRequest.query.text;
-				var promise = (isAutocomplete) ? this.search.suggest(searchTerm) : this.search.query(searchTerm);
+				/* store the total number of services left to process */
+				var servicesLeftToProcess = filteredProviders.length;
+				this.responses.on('change:time_modified', (updatedResponse) => {
 
-				promise.then((data) => {
-					updatedResponse.set({
-						doneUpdating: false,
-						results: data
-					});
+					if (incomingRequest.id != updatedResponse.id) {
+						return;
+					}
 
-					if (!isAutocomplete) {
-						/* Decrement the count of services to process & resolve when all services have completed successfully */
-						servicesLeftToProcess--;
-						if (servicesLeftToProcess === 0) {
-							updatedResponse.set('doneUpdating', true);
+					/* query search */
+					var searchIndices = filteredFeeds.concat(filteredProviders);
+					var promise = (isAutocomplete) ? this.search.suggest(searchTerm) : this.search.query(searchTerm, searchIndices);
+
+					promise.then((data) => {
+						updatedResponse.set({
+							doneUpdating: false,
+							results: data
+						});
+
+						if (!isAutocomplete) {
+
+							/* Decrement the count of services to process & resolve when all services have completed successfully */
+							servicesLeftToProcess--;
+							if (servicesLeftToProcess === 0) {
+								updatedResponse.set('doneUpdating', true);
+								resolve(true);
+							}
+						} else {
 							resolve(true);
 						}
-					} else {
-						resolve(true);
-					}
+					});
+
 				});
 
-			});
+				/* create a new response */
+				var resp = this.responses.create({ 
+					id: incomingRequest.id,
+					query: incomingRequest.query.text,
+					doneUpdating: false,
+					autocomplete: isAutocomplete
+				});
 
-			/* create a new response */
-			var resp = this.responses.create({ 
-				id: incomingRequest.id,
-				query: incomingRequest.query.text,
-				doneUpdating: false,
-				autocomplete: isAutocomplete
-			});
+				var outgoingResponse = this.responses.get(resp.id);
+				console.log('incoming id: ' + resp.id);
 
-			var outgoingResponse = this.responses.get(resp.id);
-			console.log('incoming id: ' + resp.id);
+				/* triggers change:time_modified event */
+				outgoingResponse.set({
+					time_modified: Date.now()
+				});
 
-			/* triggers change:time_modified event */
-			outgoingResponse.set({
-				time_modified: Date.now()
-			});
+				if (!isAutocomplete) {
+					/* Execute the request every user provider that the user is subscribed */
+					for (let providerName of filteredProviders) {
 
-			if (!isAutocomplete) {
-				/* Execute the request every user provider that the user is subscribed */
-				var providers = Object.keys(this.serviceProviders);
-				for (let i in providers) {					
-					this.serviceProviders[providers[i]].execute(incomingRequest, outgoingResponse);
+						this.serviceProviders[providerName].execute(incomingRequest, outgoingResponse);
+					}
+
+					// if nothing happens after 2 seconds: timeout
+					setTimeout(reject, 5000, 'timeout');
+				} else {
+					setTimeout(reject, 1000, 'timeout');
 				}
 
-				// if nothing happens after 2 seconds: timeout
-				setTimeout(reject, 5000, 'timeout');
-			} else {
-				setTimeout(reject, 1000, 'timeout');
-			}
-
+			}).catch( err => reject(err) );
 		});
-		
 	}
 }
 

@@ -28,7 +28,7 @@ class ServiceBase {
 	 */
 	execute (request, response) {
 
-		var query = request.query;
+		var query = request.query.text;
 		var requestId = request.id;
 
 		var onError = (error) => {
