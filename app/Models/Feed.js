@@ -4,6 +4,7 @@ import Queue from 'firebase-queue';
 import config from '../config';
 import { Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
+import { generateURIfromGuid } from '../Utilities/generateURI';
 import getFeedPage from '../Utilities/getFeedPage';
 import URL from 'url';
 import _ from 'underscore';
@@ -90,15 +91,13 @@ class Feed extends Model {
 	 */
 	queueJobs (data) {
 		let firstItem = data.items[0];
-		let guid = firstItem.guid
-			.replace(new RegExp('^(http|https)://', 'i'), '')
-			.replace(/[.]/g, '')
-			.replace('www', '')
-			.replace('com', '');
-
+		let guid = generateURIfromGuid(firstItem.guid);
 		let url = `${this.url()}/items/${guid}`;
 		let itemRef = new Firebase(url);
 		console.log(`check if ${itemRef.toString()} exists`);
+
+		// TODO(luc): set timeout after 10 seconds
+		// if nothing comes back, assume feed is done ingesting
 
 		itemRef.once('value', snapshot => {
 			let shouldIngest = false;
@@ -110,11 +109,9 @@ class Feed extends Model {
 			if (shouldIngest) {
 				console.log(`Feed(${this.id}): ingesting`);
 
-				let url = this.get('baseURL') + this.get('currentPage');
-
-				if (this.get('pagination') == 'none') {
-					url = this.get('url');
-				}
+				let url = (this.get('pagination') == 'none') ? 
+					this.get('url') :
+					this.get('baseURL') + this.get('currentPage');
 
 				this.set('currentPage', 0);
 				let taskData = {
@@ -161,12 +158,7 @@ class Feed extends Model {
 			let shouldIngest = false;
 
 			for (let processedItem of data.processedItems) {
-				let guid = processedItem.guid
-					.replace(new RegExp('^(http|https)://', 'i'), '')
-					.replace(/[.]/g, '')
-					.replace('www', '')
-					.replace('com', '');
-
+				let guid = generateURIfromGuid(processedItem.guid);
 				let child = snapshot.child(guid);
 				console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
 

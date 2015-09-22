@@ -1,5 +1,6 @@
 import getFeedPage from '../Utilities/getFeedPage';
 import { firebase as FirebaseConfig } from '../config';
+import { generateURIfromGuid } from '../Utilities/generateURI';
 import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
@@ -41,22 +42,20 @@ class FeedPage {
 					let items = [];
 
 					for (let item of processedItems) {
-						let guid = item.guid
-							.replace(new RegExp('^(http|https)://', 'i'), '')
-							.replace('.com', '')
-							.replace('www.', '')
-							.replace(/[.]/g, '');
-
+						let guid = generateURIfromGuid(item.guid);
 						self.feedRef.child(`items/${guid}`).set(JSON.parse(JSON.stringify(item)));
 
 						items.push({
-							'index': {
+							'update': {
 								'_index': id,
 								'_id': item.guid,
 								'_type': 'article'
 							}
 						});
-						items.push(item);
+						items.push({
+							'doc_as_upsert': true,
+							'doc': item
+						});
 					}
 
 					this.search.bulk({body: items}, (err, resp) => {
