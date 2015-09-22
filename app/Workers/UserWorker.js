@@ -68,7 +68,7 @@ class UserWorker extends Worker {
 				
 			} else {
 				//no task found return an error
-				reject('Invalid user task detected')
+				reject('Invalid user task detected');
 			}
 		} catch(err) {
 			reject(err);
