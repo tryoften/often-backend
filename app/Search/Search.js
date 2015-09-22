@@ -75,21 +75,27 @@ class Search {
 	/**
 	 * Queries the search database with the given query
 	 * @param {string} query - The search query
+	 * @param {[string]} indices - Array of strings containing names of indices used for querying against Elasticsearch
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-	query (query, autocomplete = false) {
-
+	query (query, indices, autocomplete = false) {
 		var command;
 		if ( (command = this.processCommands(query)) ) {
 			return command;
 		}
-
+		/* if indices collection is undefined, then default to all */
+		
+		if (typeof indices === 'undefined') {
+			indices = '_all';
+		}
+		
 		return new Promise((resolve, reject) => {
 
 			let searchId = new Buffer(query).toString('base64');
 
 			this.es.search({
+				index: indices, 
 				body: {
 					/* limits the size of "hits" to 0, 
 					 since the data is not accessed directly, 
@@ -157,14 +163,15 @@ class Search {
 
 	/**
 	 * returns a some search autocomplete suggestions for a given query
+	 * @param {string} filter - filter containing process commands
 	 * @param {string} query - The query to get results for
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
-	suggest (query) {
+	suggest (filter, query) {
 
 		var command;
-		if ( (command = this.processCommands(query)) ) {
+		if ( (command = this.processCommands(filter)) ) {
 			return command;
 		}
 
@@ -189,8 +196,8 @@ class Search {
 		});
 	}
 
-	processCommands(query) {
-		if (query.substring(0, 13) === '#top-searches') {
+	processCommands (filter) {
+		if (filter === 'top-searches') {
 			return this.getTopSearches();
 		}
 		return false;
