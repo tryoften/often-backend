@@ -116,9 +116,9 @@ class SearchRequestDispatcher {
 				} else {
 					setTimeout(reject, 1000, 'timeout');
 				}
-			}).catch( err => reject(err));
+			}).catch( err => { reject(err); });
 
-		}).catch( err => reject(err) );
+		}).catch( err => { reject(err); });
 		
 	}
 }
