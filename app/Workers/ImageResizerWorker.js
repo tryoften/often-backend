@@ -67,7 +67,13 @@ class ImageResizerWorker extends Worker {
 		for (let dataObj of dataArr) {
 			var path = this.generatePath(originType, sourceId, resourceId, dataObj.transformation, dataObj.meta.format);
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
+			let onError = (err) => {
+				console.error(err);
+			};
+
 			dataObj.stream.pipe(remoteWriteStream);
+			dataObj.stream.on('error', onError);
+			remoteWriteStream.on('error', onError);
 
 			let url = `https://www.googleapis.com/download/storage/v1/b/${GoogleStorageConfig.bucket_name}/o/${encodeURIComponent(path)}?alt=media`;
 			console.log('ImageResizerWorker(): Image URL: ', url);
@@ -115,7 +121,11 @@ class ImageResizerWorker extends Worker {
 		        		reject(err);
 		        	}
 		        );
-			});
+			})
+			.on('error', function(e) {
+			  console.log("Got error: " + e.message);
+			  reject(e);
+			}); 
 		});
 	}
 	

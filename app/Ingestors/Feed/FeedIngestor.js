@@ -4,6 +4,10 @@ class FeedIngestor {
 
 	constructor (opts = {}) {
 		this.feeds = new Feeds();
+		
+		setInterval(() => {
+			this.ingest();
+		}, 5 * 60000);
 	}
 
 	/**

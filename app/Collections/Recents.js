@@ -51,7 +51,8 @@ class Recents extends Firebase.Collection {
 		return new Promise( (resolve, reject) => {
 			this.once('sync', 
 				syncedRecents => {
-					let rec = syncedRecents.find((mod) => { return mod.get('_id') == item._id });
+					let rec = syncedRecents.find(mod => mod.get('_id') == item._id);
+
 					if (rec) {
 						rec.set('time_added', Date.now());
 						resolve(false);

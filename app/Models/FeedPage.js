@@ -25,7 +25,9 @@ class FeedPage {
 	}
 
 	ingestData(data) {
+		let self = this;
 		let id = this.feed.id;
+
 		return new Promise((resolve, reject) => {
 			
 			if (data.items.length) {
@@ -39,6 +41,14 @@ class FeedPage {
 					let items = [];
 
 					for (let item of processedItems) {
+						let guid = item.guid
+							.replace(new RegExp('^(http|https)://', 'i'), '')
+							.replace('.com', '')
+							.replace('www.', '')
+							.replace(/[.]/g, '');
+
+						self.feedRef.child(`items/${guid}`).set(JSON.parse(JSON.stringify(item)));
+
 						items.push({
 							'index': {
 								'_index': id,
@@ -152,12 +162,9 @@ class FeedPage {
 			this.imageResizer
 				.ingest('rss', this.feed.id, item.guid, image)
 				.then(imageData => {
-					console.log(imageData);
 					data.images = imageData;
 
 					// store item in firebase under feed
-					let guid = new Buffer(item.guid).toString('base64');
-					this.feedRef.child(`items/${guid}`).set(JSON.parse(JSON.stringify(data)));
 					resolve(data);
 				})
 				.catch(err => {

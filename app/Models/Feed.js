@@ -25,13 +25,13 @@ class Feed extends Model {
 		this.queue = new Queue(new Firebase(url), 
 			_.defaults({
 				suppressStack: false, 
-				retries: 3
+				retries: 3,
+				sanitize: false
 			}, FirebaseConfig.queues.default), 
 			this.processJob.bind(this));
 
 		// task queue ref to schedule page parsing jobs
 		this.taskQueueRef = new Firebase(`${FirebaseConfig.queues.feed.url}/tasks`);
-		console.log('Feed.initialize(): task queue URL: ', this.taskQueueRef.toString());
 	}
 
 	/**
@@ -43,6 +43,7 @@ class Feed extends Model {
 		this.reingest = reingest;
 
 		return getFeedPage(this.get('url')).then(data => {
+			console.log('Feed.queueJobs(): First page URL: ', this.get('url'));
 			this.updateMetadata(data);
 			this.queueJobs(data);
 		});
@@ -69,6 +70,10 @@ class Feed extends Model {
 		else if (paginationType == 'paged') {
 			baseURL = `${this.get('url')}?paged=`;
 			pageCount = 10;
+		} 
+		else {
+			baseURL = this.get('url');
+			pageCount = 10;
 		}
 
 		console.log('Total Pages: ' + pageCount);
@@ -85,7 +90,12 @@ class Feed extends Model {
 	 */
 	queueJobs (data) {
 		let firstItem = data.items[0];
-		let guid = new Buffer(firstItem.guid).toString('base64');
+		let guid = firstItem.guid
+			.replace(new RegExp('^(http|https)://', 'i'), '')
+			.replace(/[.]/g, '')
+			.replace('www', '')
+			.replace('com', '');
+
 		let url = `${this.url()}/items/${guid}`;
 		let itemRef = new Firebase(url);
 		console.log(`check if ${itemRef.toString()} exists`);
@@ -93,22 +103,28 @@ class Feed extends Model {
 		itemRef.once('value', snapshot => {
 			let shouldIngest = false;
 
-			if (!snapshot.exists()) {
+			if (!snapshot.exists() || this.reingest) {
 				shouldIngest = true;
 			}
 
 			if (shouldIngest) {
 				console.log(`Feed(${this.id}): ingesting`);
 
+				let url = this.get('baseURL') + this.get('currentPage');
+
+				if (this.get('pagination') == 'none') {
+					url = this.get('url');
+				}
+
 				this.set('currentPage', 0);
 				let taskData = {
-					pageURL: this.get('baseURL') + this.get('currentPage'),
+					pageURL: url,
 					feed: this.toJSON(),
 					_state: 'start_page_parsing'
 				};
 
 				let newTaskRef = this.taskQueueRef.push(taskData);
-				console.log('new task URL: ', newTaskRef.toString());
+				console.log('new task URL: ', url);
 
 			} else {
 				console.warn(`Feed(${this.id}): nothing to ingest`);
@@ -119,10 +135,15 @@ class Feed extends Model {
 
 	processJob (data, progress, resolve, reject) {
 		let currentPage = this.get('currentPage');
+		let pagination = this.get('pagination');
+
+		if (pagination == 'none') {
+			return;
+		}
 
 		// stop queueing jobs if at end of pages
 		if (currentPage >= this.get('pageCount')) {
-			let pagination = this.get('pagination');
+
 			if (pagination == 'link') {
 				return;
 			}
@@ -138,10 +159,15 @@ class Feed extends Model {
 
 		itemsRef.once('value', snapshot => {
 			let shouldIngest = false;
+
 			for (let processedItem of data.processedItems) {
-				let guid = new Buffer(processedItem.guid).toString('base64');
+				let guid = processedItem.guid
+					.replace(new RegExp('^(http|https)://', 'i'), '')
+					.replace(/[.]/g, '')
+					.replace('www', '')
+					.replace('com', '');
+
 				let child = snapshot.child(guid);
-				
 				console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
 
 				if (child.exists() && !this.reingest) {
@@ -170,6 +196,10 @@ class Feed extends Model {
 		let currentPage = this.get('currentPage') + 1;
 
 		this.set('currentPage', currentPage);
+
+		if (this.get('pagination') == 'none') {
+			return this.get('url');
+		}
 
 		return baseURL + currentPage;
 	}
