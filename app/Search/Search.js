@@ -86,7 +86,7 @@ class Search {
 		}
 		/* if indices collection is undefined, then default to all */
 		
-		if (indices === 'undefined') {
+		if (typeof indices === 'undefined') {
 			indices = '_all';
 		}
 		

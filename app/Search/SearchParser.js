@@ -32,6 +32,15 @@ class SearchParser {
 	}
 
 	/**
+	 * Loads feeds and service providers
+	 *
+	 * @return {Promise} - resolves to an array of values or an error when rejected
+	 */
+	loadSources () {
+		return Promise.all([this.feeds.getFeedNames(), this.serviceProviders.getServiceProviderNames()]);
+	}
+
+	/**
 	 * Parses a query string in order to obtain the filter, actual query, and feeds & service providers relevant to the query
 	 * @param {string} rawQuery - query string that hasn't been parsed yet
 	 *
@@ -42,40 +51,36 @@ class SearchParser {
 
 		return new Promise((resolve, reject) => {
 
-			/* load feeds */
-			this.feeds.getFeedNames().then( feeds => {
+			/* load sources */
+			this.loadSources().then( values => {
+				var feeds = values[0];
+				var serviceProviders = values[1];
+				var tokens = this.tokenize(rawQuery)
+				var filter = tokens.filter;
+				var actualQuery = tokens.actualQuery;
+				var filteredFeeds, filteredProviders;
 
-				/* load service provicers */
-				this.serviceProviders.getServiceProviderNames().then( serviceProviders => {
+				if (filter.length > 0 && !this.isControlFilter(filter)) {
+					filteredFeeds = this.filterSources(feeds, [ filter ]);		
+					filteredProviders = this.filterSources(serviceProviders, [ filter ]);
+								
+				} else {
+					/* no specific filters attached */
+					filteredFeeds = feeds;
+					filteredProviders = serviceProviders;
+					
+				}
 
-					var tokens = this.tokenize(rawQuery)
-					var filter = tokens.filter;
-					var actualQuery = tokens.actualQuery;
-					var filteredFeeds, filteredProviders;
+				var parsedContents = {
+					feeds : filteredFeeds,
+					serviceProviders : filteredProviders,
+					filter : filter,
+					actualQuery : actualQuery
+				}
 
-					if (filter.length > 0 && !this.isControlFilter(filter)) {
-						filteredFeeds = this.filterSources(feeds, [ filter ]);		
-						filteredProviders = this.filterSources(serviceProviders, [ filter ]);
-									
-					} else {
-						/* no specific filters attached */
-						filteredFeeds = feeds;
-						filteredProviders = serviceProviders;
-						
-					}
+				resolve(parsedContents);
 
-					var parsedContents = {
-						feeds : filteredFeeds,
-						serviceProviders : filteredProviders,
-						filter : filter,
-						actualQuery : actualQuery
-					}
-
-					resolve(parsedContents);
-
-				}).catch( err => reject(err));
-
-			}).catch( err => reject(err));
+			}).catch ( err => { reject(err); });
 
 		});
 
@@ -104,21 +109,21 @@ class SearchParser {
 	 */
 	tokenize (rawQuery) {
 
-		if(rawQuery === 'undefined' || rawQuery.length  == 0) throw new Error('Invalid query');
+		if (typeof rawQuery === 'undefined' || rawQuery.length  == 0) throw new Error('Invalid query');
 
 		var trimmedQuery = rawQuery.trim();
 		var tokens = {};
 		var filter, actualQuery;
 
 		if (trimmedQuery[0] == '#') {
-
 			var firstWord = trimmedQuery.split(' ')[0];
 			filter = firstWord.substring(1, firstWord.length);
 			actualQuery = trimmedQuery.substring(filter.length + 2, trimmedQuery.length);
-		} else {
 
+		} else {
 			filter = '';
 			actualQuery = trimmedQuery;
+
 		}
 
 		tokens.filter = filter;

@@ -33,7 +33,7 @@ class Feeds extends Backbone.Firebase.Collection {
 					var feedNames = syncedFeeds.models.map(( feedObj ) => { return feedObj.id; });
 					resolve(feedNames);
 				}, 
-				err => { reject(err) });
+				err => { reject(err); });
 		});
 	}
 }
