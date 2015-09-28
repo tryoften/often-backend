@@ -67,11 +67,11 @@ class Feed extends Model {
 			
 			baseURL = lastPageURL.substring(0, equalPosition);
 			pageCount = parseInt(lastPageURL.substring(equalPosition));
-		} 
+		}
 		else if (paginationType == 'paged') {
 			baseURL = `${this.get('url')}?paged=`;
 			pageCount = 10;
-		} 
+		}
 		else {
 			baseURL = this.get('url');
 			pageCount = 10;

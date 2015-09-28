@@ -134,7 +134,7 @@ class Search {
 								ctx._source.suggest.payload['resultsCount'] = count;`,
 
 							params: {
-								count: results.length
+								count: response.hits.total
 							},
 
 							upsert: {
