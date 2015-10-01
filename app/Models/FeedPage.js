@@ -43,7 +43,8 @@ class FeedPage {
 
 					for (let item of processedItems) {
 						let guid = generateURIfromGuid(item.guid);
-						self.feedRef.child(`items/${guid}`).set(JSON.parse(JSON.stringify(item)));
+						let data = JSON.parse(JSON.stringify(item));
+						self.feedRef.child(`items/${guid}`).set(data);
 
 						items.push({
 							'update': {
@@ -97,18 +98,6 @@ class FeedPage {
 					reject(err);
 				});
 		});
-	}
-
-	/**
-		stores the rss feed item in elastic search and indexes it
-	*/
-	indexItemInSearchEngine(item) {
-		return {
-			'index': this.id,
-			'id': item.guid,
-			'type': 'feed',
-			'body': item
-		};
 	}
 
 	processItem (item) {
