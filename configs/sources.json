@@ -10,7 +10,8 @@
 		"id": "vice",
 		"name": "Vice",
 		"url": "http://www.vice.com/rss",
-		"category": "news"
+		"category": "news",
+		"pagination": "none"
 	},
 	"vibe-music": {
 		"id": "vibe-music",
@@ -39,5 +40,87 @@
 		"url": "http://www.mtv.com/news/feed/",
 		"category": "news",
 		"pagination": "paged"
+	},
+	"fader": {
+		"id": "fader",
+		"name": "Fader",
+		"url": "http://feeds.feedburner.com/TheFaderMagazine",
+		"category": "news",
+		"pagination": "none"
+	},
+	"hypebeast": {
+		"id": "hypebeast",
+		"name": "Hypebeast",
+		"url": "http://feeds.feedburner.com/hypebeast/feed?format=xml",
+		"category": "news",
+		"pagination": "none"
+	},
+	"paper": {
+		"id": "paper",
+		"name": "Paper Mag",
+		"url": "http://www.papermag.com/rss.xml",
+		"category": "fashion",
+		"pagination": "none"
+	},
+	"factmag": {
+		"id": "factmag",
+		"name": "Fact Magazine",
+		"url": "http://feeds.feedburner.com/factmag",
+		"pagination": "none"
+	},
+	"elitedaily": {
+		"id": "elitedaily",
+		"name": "Elite Daily",
+		"url": "http://elitedaily.com/feed/",
+		"pagination": "paged",
+		"category": ["news"]
+	},
+	"highsnobiety": {
+		"id": "highsnobiety",
+		"name": "Highsnobiety",
+		"url": "http://feeds.feedburner.com/highsnobiety/rss?format=xml",
+		"pagination": "none",
+		"category": ["fashion"]
+	},
+	"xxlmag": {
+		"id": "xxlmag",
+		"name": "XXL Mag",
+		"url": "http://www.xxlmag.com/feed/",
+		"pagination": "paged",
+		"category": ["music", "fashion"]
+	},
+	"billboard": {
+		"id": "billboard",
+		"name": "Billboard",
+		"url": "http://www.billboard.com/articles/rss.xml",
+		"pagination": "none"
+	},
+	"pigeonsandplanes": {
+		"id": "pigeonsandplanes",
+		"name": "Pigeons and Planes",
+		"url": "http://pigeonsandplanes.com/feed/",
+		"pagination": "none",
+		"category": "news"
+	},
+	"fourpins": {
+		"id": "fourpins",
+		"name": "Four Pins",
+		"url": "http://fourpins.com/feed/",
+		"pagination": "none",
+		"category": "news"
+	},
+	"hnhh": {
+		"id": "hnhh",
+		"name": "Hot New HipHop",
+		"url": "http://feeds.feedburner.com/realhotnewhiphop?format=xml",
+		"pagination": "none",
+		"category": "news"
+	},
+	"tmz": {
+		"id": "tmz",
+		"name": "TMZ",
+		"url": "http://www.tmz.com/rss.xml",
+		"pagination": "none",
+		"category": "news"
 	}
 }

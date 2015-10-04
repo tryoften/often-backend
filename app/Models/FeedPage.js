@@ -1,5 +1,6 @@
 import getFeedPage from '../Utilities/getFeedPage';
 import { firebase as FirebaseConfig } from '../config';
+import { generateURIfromGuid } from '../Utilities/generateURI';
 import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
@@ -25,7 +26,9 @@ class FeedPage {
 	}
 
 	ingestData(data) {
+		let self = this;
 		let id = this.feed.id;
+
 		return new Promise((resolve, reject) => {
 			
 			if (data.items.length) {
@@ -39,14 +42,21 @@ class FeedPage {
 					let items = [];
 
 					for (let item of processedItems) {
+						let guid = generateURIfromGuid(item.guid);
+						let data = JSON.parse(JSON.stringify(item));
+						self.feedRef.child(`items/${guid}`).set(data);
+
 						items.push({
-							'index': {
+							'update': {
 								'_index': id,
 								'_id': item.guid,
 								'_type': 'article'
 							}
 						});
-						items.push(item);
+						items.push({
+							'doc_as_upsert': true,
+							'doc': item
+						});
 					}
 
 					this.search.bulk({body: items}, (err, resp) => {
@@ -88,18 +98,6 @@ class FeedPage {
 					reject(err);
 				});
 		});
-	}
-
-	/**
-		stores the rss feed item in elastic search and indexes it
-	*/
-	indexItemInSearchEngine(item) {
-		return {
-			'index': this.id,
-			'id': item.guid,
-			'type': 'feed',
-			'body': item
-		};
 	}
 
 	processItem (item) {
@@ -152,12 +150,9 @@ class FeedPage {
 			this.imageResizer
 				.ingest('rss', this.feed.id, item.guid, image)
 				.then(imageData => {
-					console.log(imageData);
 					data.images = imageData;
 
 					// store item in firebase under feed
-					let guid = new Buffer(item.guid).toString('base64');
-					this.feedRef.child(`items/${guid}`).set(JSON.parse(JSON.stringify(data)));
 					resolve(data);
 				})
 				.catch(err => {
