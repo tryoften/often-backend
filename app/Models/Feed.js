@@ -120,6 +120,10 @@ class Feed extends Model {
 					_state: 'start_page_parsing'
 				};
 
+				if (this.get('pagination') == 'none') {
+					taskData.pageURL = this.get('url');
+				}
+
 				let newTaskRef = this.taskQueueRef.push(taskData);
 				console.log('new task URL: ', url);
 			} else {
@@ -139,8 +143,9 @@ class Feed extends Model {
 
 		// stop queueing jobs if at end of pages
 		if (currentPage >= this.get('pageCount')) {
+			let pagination = this.get('pagination');
 
-			if (pagination == 'link') {
+			if (pagination == 'link' || pagination == 'none') {
 				return;
 			}
 

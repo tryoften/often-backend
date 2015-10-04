@@ -1,4 +1,4 @@
-import 'backbonefire'
+import 'backbonefire';
 import _ from 'underscore';
 import Backbone from 'backbone';
 import Firebase from 'firebase';
@@ -33,7 +33,7 @@ class ServiceProviders extends Backbone.Firebase.Collection {
 					var spNames = syncedSPs.models.map(( feedObj ) => { return feedObj.id; });
 					resolve(spNames);
 				}, 
-				err => { reject(err) });
+				err => { reject(err); });
 		});
 	}
 }
