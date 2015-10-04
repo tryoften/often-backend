@@ -122,7 +122,6 @@ class Feed extends Model {
 
 				let newTaskRef = this.taskQueueRef.push(taskData);
 				console.log('new task URL: ', url);
-
 			} else {
 				console.warn(`Feed(${this.id}): nothing to ingest`);
 			}
