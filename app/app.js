@@ -27,7 +27,7 @@ if (_.contains(argv._, 'feedpage-parser')) {
 	worker.start();
 }
 
-if (_.contains(argv._, 'user-worker')) {
+if (_.contains(argv._, 'user')) {
 	console.log('starting the user worker');
 	var worker = new UserWorker();
 	worker.start();

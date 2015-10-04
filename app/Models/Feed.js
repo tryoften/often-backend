@@ -67,11 +67,11 @@ class Feed extends Model {
 			
 			baseURL = lastPageURL.substring(0, equalPosition);
 			pageCount = parseInt(lastPageURL.substring(equalPosition));
-		} 
+		}
 		else if (paginationType == 'paged') {
 			baseURL = `${this.get('url')}?paged=`;
 			pageCount = 10;
-		} 
+		}
 		else {
 			baseURL = this.get('url');
 			pageCount = 10;
@@ -122,7 +122,6 @@ class Feed extends Model {
 
 				let newTaskRef = this.taskQueueRef.push(taskData);
 				console.log('new task URL: ', url);
-
 			} else {
 				console.warn(`Feed(${this.id}): nothing to ingest`);
 			}

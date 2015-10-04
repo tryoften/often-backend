@@ -1,8 +1,10 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
+import { generateURIfromGuid } from '../Utilities/generateURI';
 import Favorite from '../Models/Favorite';
 import fb from 'firebase';
+import _ from 'underscore';
 
 /**
  * This class is responsible for maintaining the favorite collection.
@@ -21,7 +23,6 @@ class Favorites extends Firebase.Collection {
 		}
 
 		let opts = {
-			idAttribute: 'id',
 			model: Favorite,
 			autoSync: true
 		};
@@ -52,11 +53,13 @@ class Favorites extends Firebase.Collection {
 			this.once('sync', 
 				syncedFavorites => {		
 					for (let favModel of syncedFavorites.models) {						
-						if (favModel.get('_id') == item._id) {
+						if (favModel.get('id') == item.id) {
 							resolve(false);
 							return;	
 						}
 					}
+
+					item.id = generateURIfromGuid(item.id);
 					item.time_added = Date.now();
 					this.add(item);
 					resolve(true);

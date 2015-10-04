@@ -43,17 +43,18 @@ class Search {
 
 					/* Put action in */
 					formattedResults.push({
-						index : {
-							_index : index,
-							_type : type,
-							_id : individualResults[item].id
+						'update': {
+							_index: index,
+							_type: type,
+							_id: individualResults[item].id
 						}
 					});
 					
 					/* Put data in */
-					formattedResults.push(
-						individualResults[item]
-					);
+					formattedResults.push({
+						'doc_as_upsert': true,
+						doc: individualResults[item]
+					});
 				}
 			}
 
@@ -140,7 +141,7 @@ class Search {
 								ctx._source.suggest.payload['resultsCount'] = count;`,
 
 							params: {
-								count: results.length
+								count: response.hits.total
 							},
 
 							upsert: {
