@@ -1,6 +1,6 @@
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
-
+import QueryMaker from '../Models/QueryMaker';
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -22,6 +22,7 @@ class Search {
 		this.es = new Client({
 			host: ElasticSearchConfig.BaseURL
 		});
+		this.queryMaker = new QueryMaker();
 	}
 
 	/**
@@ -79,85 +80,64 @@ class Search {
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-	query (query, indices, autocomplete = false) {
+	query (query, userFeedIndices, userServiceProviderIndices, autocomplete = false) {
+
 		var command;
 		if ( (command = this.processCommands(query)) ) {
 			return command;
 		}
-		/* if indices collection is undefined, then default to all */
-		
-		if (typeof indices === 'undefined') {
-			indices = '_all';
-		}
-		
+
 		return new Promise((resolve, reject) => {
 
 			let searchId = new Buffer(query).toString('base64');
 
-			this.es.search({
-				index: indices, 
-				body: {
-					/* limits the size of "hits" to 0, 
-					 since the data is not accessed directly, 
-					 but rather via aggregations */
-					size: 0,
-					query: {
-						match: {
-							'_all': query
-						}
-					},
-					aggs: {
-						'top-providers': {
-							terms: {
-								field: '_index'
-							}, aggs: {
-								'top-provider-hits': {
-									'top_hits': {
-										size : 2
-									}
-								}
-							}
-						}
-					}
-				}
-			}, (error, response) => {
-				if (error) {
-					console.log('error' + error);
-					reject(error);
-				} else {
-					let results = this.serializeAndSortResults(response);
-					resolve(results);
+			this.queryMaker.generateQuery(query, userFeedIndices, userServiceProviderIndices).then(
 
-					// index search term for autocompletion
-					this.es.update({
-						index: 'search-terms',
-						type: 'query',
-						id: searchId,
-						body: {
-							script: `ctx._source.counter += 1; 
-								ctx._source.resultsCount = count;
-								ctx._source.suggest.payload = [:];
-								ctx._source.suggest.payload['resultsCount'] = count;`,
+				(esQuery) => {
+					this.es.search({
+						body : esQuery
+					}, (error, response) => {
+						if (error) {
+							console.log('error' + error);
+							reject(error);
+						} else {
+							let results = this.serializeAndSortResults(response);
+							resolve(results);
 
-							params: {
-								count: results.length
-							},
+							// index search term for autocompletion
+							this.es.update({
+								index: 'search-terms',
+								type: 'query',
+								id: searchId,
+								body: {
+									script: `ctx._source.counter += 1; 
+										ctx._source.resultsCount = count;
+										ctx._source.suggest.payload = [:];
+										ctx._source.suggest.payload['resultsCount'] = count;`,
 
-							upsert: {
-								text: query,
-								suggest: {
-									input: query,
-									payload: {
+									params: {
+										count: results.length
+									},
+
+									upsert: {
+										text: query,
+										suggest: {
+											input: query,
+											payload: {
+												resultsCount: results.length
+											}
+										},
+										counter: 1,
 										resultsCount: results.length
 									}
-								},
-								counter: 1,
-								resultsCount: results.length
-							}
+								}
+							});
 						}
 					});
-				}
-			});
+				})
+				.catch( (err) => { reject(err); });
+
+			
 		});
 	}
 
@@ -257,7 +237,35 @@ class Search {
 	 *
 	 * @return {[object]} - array of objects
 	 */
-	serializeAndSortResults (data) {
+	 serializeAndSortResults (data) {
+		var results = [];
+		let hits = data.hits.hits;
+
+		for (let hit of hits) {
+			var singleResult = {
+				'_index' : hit._index,
+				'_type' : hit._type,
+				'_score' : hit._score,
+				'_id' : hit._id
+			};
+
+			var source = hit._source;
+			for (let k in source) {
+				singleResult[k] = source[k];
+			}
+			results.push(singleResult);
+
+		}
+		return results;
+	}
+	
+	/**
+	 * Creates a formatted results array using data returned from search and sorts it using the score and bucket grouping.
+	 * @param {object} data - object containing data from search
+	 *
+	 * @return {[object]} - array of objects
+	 */ 
+	serializeAndSortResultsWithBuckets (data) {
 		var results = [];
 		let buckets = data.aggregations['top-providers'].buckets;
 
@@ -286,7 +294,8 @@ class Search {
 		});
 
 		return results;
-	}	
+	}
+		
 }
 
 export default Search;

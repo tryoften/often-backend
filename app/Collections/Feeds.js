@@ -1,4 +1,4 @@
-import 'backbonefire'
+import 'backbonefire';
 import _ from 'underscore';
 import Backbone from 'backbone';
 import Firebase from 'firebase';
