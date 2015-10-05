@@ -123,7 +123,7 @@ class QueryMaker {
 
 		var query;
 		if (filteredSPIndices.length === 0 && filteredFeedIndices.length === 0) {
-			return undefined;
+			return null;
 
 		} else if (filteredSPIndices.length > 0 && filteredFeedIndices.length === 0) {
 			query = this.prepareQueryObject(filteredSPIndices, spFinalObject, "none");
@@ -175,8 +175,7 @@ class QueryMaker {
 				/* force initialize the feeds and serviceProviders settings data if it hasn't been initalized yet by the real-time model */
 				this.initQuerySettings().then( () => {
 					query = this.formQuery(queryText, userFeedIndices, userServiceProviderIndices);
-					console.log(JSON.stringify(query));
-					if (_.isUndefined(query)) {
+					if (_.isNull(query)) {
 						reject(query);
 
 					} else {
