@@ -11,13 +11,23 @@ class Feeds extends Backbone.Firebase.Collection {
 	 * Initializes the feeds collection.
 	 * @param {object} models - supporting models
 	 * @param {object} opts - supporting options
+	 * @param {Boolean} opts.queueEnabled - whether to enable the feed page parsing queue
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
+	initialize (models, opts = {}) {
 		this.model = Feed;
+		this.queueEnabled = opts.queueEnabled || false;
 		this.url = new Firebase(`${FirebaseConfig.BaseURL}/feeds`);
 		this.autoSync = true;
+	}
+
+	/**
+	 * passes options to the Feed models in the collection
+	 */
+	model (attrs, opts = {}) {
+		opts.queueEnabled = opts.queueEnabled || this.queueEnabled;
+		return Feed(attrs, opts);
 	}
 	
 	/**

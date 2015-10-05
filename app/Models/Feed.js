@@ -21,18 +21,21 @@ class Feed extends Model {
 
 		this.set(_.defaults(attributes, defaults));
 		this.reingest = false;
+		this.queueEnabled = opts.queueEnabled || false;
 		
-		let url = `${this.url()}/queue`;
-		this.queue = new Queue(new Firebase(url), 
-			_.defaults({
-				suppressStack: false, 
-				retries: 3,
-				sanitize: false
-			}, FirebaseConfig.queues.default), 
-			this.processJob.bind(this));
+		if (this.queueEnabled) {
+			let url = `${this.url()}/queue`;
+			this.queue = new Queue(new Firebase(url), 
+				_.defaults({
+					suppressStack: false, 
+					retries: 3,
+					sanitize: false
+				}, FirebaseConfig.queues.default), 
+				this.processJob.bind(this));
 
-		// task queue ref to schedule page parsing jobs
-		this.taskQueueRef = new Firebase(`${FirebaseConfig.queues.feed.url}/tasks`);
+			// task queue ref to schedule page parsing jobs
+			this.taskQueueRef = new Firebase(`${FirebaseConfig.queues.feed.url}/tasks`);
+		}
 	}
 
 	/**
@@ -113,24 +116,33 @@ class Feed extends Model {
 					this.get('url') :
 					this.get('baseURL') + this.get('currentPage');
 
+				this.queueJob(url);
 				this.set('currentPage', 0);
-				let taskData = {
-					pageURL: url,
-					feed: this.toJSON(),
-					_state: 'start_page_parsing'
-				};
-
-				if (this.get('pagination') == 'none') {
-					taskData.pageURL = this.get('url');
-				}
-
-				let newTaskRef = this.taskQueueRef.push(taskData);
 				console.log('new task URL: ', url);
+
 			} else {
 				console.warn(`Feed(${this.id}): nothing to ingest`);
 			}
 		});
 
+	}
+
+	queueJob (url) {
+		let taskData = {
+			pageURL: url,
+			feed: {
+				id: this.id
+			},
+			_state: 'start_page_parsing'
+		};
+
+		if (this.get('pagination') == 'none') {
+			taskData.pageURL = this.get('url');
+		}
+
+		let newTaskRef = this.taskQueueRef.push(taskData);
+
+		return taskData;
 	}
 
 	processJob (data, progress, resolve, reject) {
@@ -174,14 +186,9 @@ class Feed extends Model {
 				}
 			}
 
-			if (shouldIngest) {
-				let taskData = {
-					pageURL: this.getNextPageURL(),
-					feed: this.toJSON(),
-					_state: 'start_page_parsing'
-				};
+			if (shouldIngest) {		
+				let taskData = this.queueJob(this.getNextPageURL());
 				console.log(`Feed.processJob(): Queuing next job URL (${taskData.pageURL})`);
-				this.taskQueueRef.push(taskData);
 			}
 			resolve(data);
 		});

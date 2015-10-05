@@ -16,7 +16,7 @@ class FeedPage {
 		this.url = opts.pageURL;
 		this.feed = opts.feed;
 		this.search = opts.search;
-		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/feeds/${this.feed.id}`);
+		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
 		this.feedQueueRef = this.feedRef.child('queue/tasks');
 		this.imageResizer = new ImageResizerWorker();
 	}
