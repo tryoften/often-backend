@@ -3,21 +3,11 @@
 > Backend service for October.
 
 
-## Install
+## Setup
+Tested on node v0.12.7. Steps:
 
-```sh
-$ npm install --save october-backend
-```
-
-
-## Usage
-
-```js
-var octoberBackend = require('october-backend');
-
-octoberBackend('Rainbow');
-```
-
+1. Install libvips: [General Instructions](https://github.com/jcupitt/libvips), [Mac OS X Instructions](http://www.vips.ecs.soton.ac.uk/index.php?title=Build\_on\_OS\_X)
+2. `npm install`
 
 ## License
 
