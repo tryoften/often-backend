@@ -1,7 +1,13 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+# Often Backend
 
-> Backend service for October.
+Backend service for Often. A backend service written in Node.js that does handles ingesting RSS feeds and pushing new content to Firebase / ElasticSearch.
 
+## Endpoints
+All endpoints are in Firebase and are queues. The workers implemented in this service are in charge of taking tasks off the queues and processing them.
+
+* /queues/search
+* /queues/user
+* /queues/feeds
 
 ## Setup
 Tested on node v0.12.7. Steps:
@@ -11,12 +17,4 @@ Tested on node v0.12.7. Steps:
 
 ## License
 
-MIT © [Jakub](archipelacode.com)
-
-
-[npm-image]: https://badge.fury.io/js/october-backend.svg
-[npm-url]: https://npmjs.org/package/october-backend
-[travis-image]: https://travis-ci.org/october-labs/october-backend.svg?branch=master
-[travis-url]: https://travis-ci.org/october-labs/october-backend
-[daviddm-image]: https://david-dm.org/october-labs/october-backend.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/october-labs/october-backend
+Copyright &copy; 2015 - &infin;, Project Surf, Inc. All rights reserved.
