@@ -119,7 +119,7 @@ class QueryMaker {
 			feedMatchObject : this.attachFunctionsToQuery(feedMatchObject, this.feeds.function_score);
 
 		var spFinalObject = _.isUndefined(this.serviceProviders.function_score) ? 
-			spMatchObject : this.attachFunctionsToQuery(feedMatchObject, this.serviceProviders.function_score);
+			spMatchObject : this.attachFunctionsToQuery(spMatchObject, this.serviceProviders.function_score);
 
 		var query;
 		if (filteredSPIndices.length === 0 && filteredFeedIndices.length === 0) {
