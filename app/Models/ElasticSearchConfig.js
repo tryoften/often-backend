@@ -6,7 +6,7 @@ import _ from 'underscore';
 /**
  * This class is responsible for parsing out search filters / parameters
  */
-class ElastSearchConfig extends Firebase.Model {
+class ElasticSearchConfig extends Firebase.Model {
 
 	/**
 	 * Initializes the elastic search config model.
@@ -37,4 +37,4 @@ class ElastSearchConfig extends Firebase.Model {
 	
 }
 
-export default ElastSearchConfig;
+export default ElasticSearchConfig;

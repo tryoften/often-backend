@@ -2,6 +2,7 @@ import 'backbonefire';
 import _ from 'underscore';
 import ElasticSearchConfig from '../Models/ElasticSearchConfig';
 
+
 /**
  * This class is responsible for creating a query string based on the Elasticsearch config
  */
@@ -47,7 +48,6 @@ class QueryMaker {
 	 * @return {object} -- returns prepared query object
 	 */
 	prepareQueryObject (searchIndices, match, noMatch ) {
-
 		return {
 			size : this.resultSize,
 			query : {
@@ -57,8 +57,7 @@ class QueryMaker {
 					no_match_query : noMatch
 				}
 			}
-		}
-
+		};
 	}
 
 	/**
@@ -76,7 +75,7 @@ class QueryMaker {
 				type : type,
 				fields : fields
 			}
-		}
+		};
 
 	}
 
@@ -90,9 +89,10 @@ class QueryMaker {
 	attachFunctionsToQuery (query, functionScore) {
 		var fsObj = {};
 		fsObj.function_score = {};
-		fsObj.function_score.functions = functionScore.functions;
 		fsObj.function_score.query = query;
-		fsObj.function_score.score_mode = functionScore.score_mode;
+		for (let key in functionScore) {
+			fsObj.function_score[key] = functionScore[key];
+		}
 		return fsObj;
 
 	}
@@ -115,26 +115,28 @@ class QueryMaker {
 		var feedMatchObject = this.prepareMatchObject(queryText, "most_fields", serializedFeedFields);
 		var spMatchObject = this.prepareMatchObject(queryText, "cross_fields", serializedSPFields);
 
-		var feedFinalObject = (typeof this.feeds.function_score === "undefined" ) ? 
+		var feedFinalObject = _.isUndefined(this.feeds.function_score) ? 
 			feedMatchObject : this.attachFunctionsToQuery(feedMatchObject, this.feeds.function_score);
 
-		var spFinalObject = (typeof this.serviceProviders.function_score === "undefined" ) ? 
+		var spFinalObject = _.isUndefined(this.serviceProviders.function_score) ? 
 			spMatchObject : this.attachFunctionsToQuery(feedMatchObject, this.serviceProviders.function_score);
 
 		var query;
-		if (filteredSPIndices.length == 0 && filteredFeedIndices.length == 0) {
+		if (filteredSPIndices.length === 0 && filteredFeedIndices.length === 0) {
 			return undefined;
 
-		} else if (filteredSPIndices.length > 0 && filteredFeedIndices.length == 0) {
+		} else if (filteredSPIndices.length > 0 && filteredFeedIndices.length === 0) {
 			query = this.prepareQueryObject(filteredSPIndices, spFinalObject, "none");
 
-		} else if (filteredSPIndices.length == 0 && filteredFeedIndices.length > 0) {
+		} else if (filteredSPIndices.length === 0 && filteredFeedIndices.length > 0) {
 			query = this.prepareQueryObject(filteredFeedIndices, feedFinalObject, "none");
 
 		} else {
 			query = this.prepareQueryObject(filteredSPIndices, spFinalObject, feedFinalObject);
 
 		}
+
+
 		return query;
 
 	}
@@ -146,7 +148,7 @@ class QueryMaker {
 	 * @return {object} -- returns a properly formatted fields object
 	 */
 	serializeFields (fields) {
-		var serializedFields = []
+		var serializedFields = [];
 		for (let f in Object.keys(fields)) {
 			let type = fields[f].type;
 			let attr = fields[f].attr;
@@ -173,7 +175,14 @@ class QueryMaker {
 				/* force initialize the feeds and serviceProviders settings data if it hasn't been initalized yet by the real-time model */
 				this.initQuerySettings().then( () => {
 					query = this.formQuery(queryText, userFeedIndices, userServiceProviderIndices);
-					(typeof query === "undefined") ? reject(query) : resolve(query);
+					console.log(JSON.stringify(query));
+					if (_.isUndefined(query)) {
+						reject(query);
+
+					} else {
+						resolve(query);
+
+					}
 					
 				}).catch( err => {
 					reject(err);
@@ -215,7 +224,7 @@ class QueryMaker {
 	parseSettings (querySettings) {
 		this.resultSize = querySettings.size;
 		this.extractSetting(querySettings['service-providers'], this.serviceProviders);
-		this.extractSetting(querySettings['feeds'], this.feeds);
+		this.extractSetting(querySettings.feeds, this.feeds);
 	}
 
 	/**
@@ -228,7 +237,7 @@ class QueryMaker {
 	extractSetting (setting, source) {
 		source.indices = setting.indices;
 		source.fields = this.parseFields(setting.fields);
-		source.function_score = (typeof setting.function_score === "undefined") ? undefined : this.parseFunctions(setting.function_score);
+		source.function_score = _.isUndefined(setting.function_score) ? undefined : this.parseFunctions(setting.function_score);
 	}
 
 	/**
@@ -240,21 +249,38 @@ class QueryMaker {
 	parseFunctions(functionSettings){
 		var functions = [];
 		var function_score = {};
-		function_score.score_mode = functionSettings.score_mode;
 
-		for (let funcContents of functionSettings.functions) {
-			var funcType = Object.keys(funcContents)[0];
-			var funcValues = funcContents[funcType];
-			var tempObj = {};
-			tempObj[funcType] = {};
-			tempObj[funcType][funcValues.type + "." + funcValues.field] = funcValues.parameters;
-			functions.push(tempObj);
+		for (let key of Object.keys(functionSettings)) {
+			
+			if (key === "functions") {
+
+				for (let funcObj of functionSettings[key]) {
+					
+					var funcType = Object.keys(funcObj)[0];
+					var funcValues = funcObj[funcType];
+					var tempObj = {};
+					tempObj[funcType] = {};
+					if(funcType === "gauss"){
+						tempObj[funcType][funcValues.type + "." + funcValues.field] = funcValues.parameters;
+
+					} else {	
+						tempObj[funcType] = funcValues;
+
+					}
+					functions.push(tempObj);
+					
+				}
+				function_score.functions = functions;
+
+			} else {
+				function_score[key] = functionSettings[key];
+			}
 
 		}
-		function_score.functions = functions;
+		console.log(JSON.stringify(function_score));
 		return function_score;
-
 	}
+
 	/**
 	 * Parses fields defined in setting
 	 * @param {object} fields - raw fields settings
