@@ -88,6 +88,9 @@ supervisorctl update
 echo "Installing grunt"
 npm install -g grunt-cli
 
+echo "Installing Forever"
+npm install -g forever
+
 echo "Launching grunt"
 grunt
 
@@ -95,6 +98,6 @@ echo "Node version: "
 node --version
 
 echo "Launching app"
-node build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
+forever start build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
 
 echo "Finished setup."

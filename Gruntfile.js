@@ -82,19 +82,14 @@ module.exports = function (grunt) {
         files: '<%= jshint.js.src %>',
         tasks: ['jshint:js', 'browserify:client']
       },
-      test: {
-        files: '<%= jshint.test.src %>',
-        tasks: ['jshint:test', 'mochacli']
-      },
       babel: {
         files: 'app/**/*.js',
-        tasks: ['browserify:watch', 'babel:dist']
+        tasks: ['jshint:js', 'babel:dist']
       }
     }
   });
 
   grunt.registerTask('default', ['babel:dist']);
   grunt.registerTask('client', ['browserify', 'serve']);
-  grunt.registerTask('watch', ['watch:babel']);
 
 };

@@ -32,28 +32,57 @@ class YouTubeService extends ServiceBase {
 
 		return new Promise((resolve, reject) => {
 
-			var results = {};
-			this.rest.get(settings.base_url, {
+			this.rest.get(`${settings.base_url}/search`, {
 				query: {
-					q : query,
+					q: query.text,
 					key: settings.api_key,
-					part : 'snippet',
-					type : 'video'
+					part: 'snippet',
+					type: 'video'
 				}
 			}).on('success', data => {
-				var videoResults = data.items;
-				var videos = [];
-				for (let i in videoResults) {
-					videos.push({
-						id : videoResults[i].id.videoId,
-						link : `youtu.be/${ videoResults[i].id.videoId }`,
-						title : videoResults[i].snippet.title,
-						channel_title : videoResults[i].snippet.channelTitle,
-						thumbnail : videoResults[i].snippet.thumbnails.default.url
-					});
+				var videoIds = [];
+				for (let item of data.items) {
+					videoIds.push(item.id.videoId);
 				}
-				results.video = videos;
-				resolve(results);
+
+				this.rest.get(`${settings.base_url}/videos`, {
+					query: {
+						id: videoIds.join(','),
+						key: settings.api_key,
+						part: 'snippet, statistics',
+						type: 'video'
+					}
+				}).on('success', videoData => {
+					var videos = [];
+					var results = {};
+
+					for (let item of videoData.items) {
+						videos.push({
+							id: item.id,
+							link: `youtu.be/${ item.id }`,
+							title: item.snippet.title,
+							description: item.snippet.description,
+							channel_title: item.snippet.channelTitle,
+							thumbnail: item.snippet.thumbnails.default.url,
+							published: item.snippet.publishedAt,
+							viewCount: item.statistics.viewCount,
+							likeCount: item.statistics.likeCount,
+							dislikeCount: item.statistics.dislikeCount,
+							favoriteCount: item.statistics.favoriteCount,
+							commentCount: item.statistics.commentCount
+						});
+					}
+
+					results.video = videos;
+					console.log('YouTubeService(): ', query, JSON.stringify(videos));
+
+					resolve(results);
+
+				}).on('error', err => {
+					console.log('err', err);
+					reject(err);
+				});
+
 			}).on('error', err => {
 				console.log('err' + err);
 				reject(err);

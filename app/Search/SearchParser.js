@@ -27,7 +27,10 @@ class SearchParser {
 	 * @return {bool} - Returns true if the filter is a control filter or false otherwise
 	 */
 	isControlFilter (filter) {
-		if(filter === 'undefined' || filter.length === 0) return false;
+
+		if (_.isUndefined(filter) || filter.length === 0) {
+			return false;
+		}
 		return _.contains(this.controlFilters, filter);
 	}
 
@@ -109,7 +112,9 @@ class SearchParser {
 	 */
 	tokenize (rawQuery) {
 
-		if (typeof rawQuery === 'undefined' || rawQuery.length  === 0) throw new Error('Invalid query');
+		if (_.isUndefined(rawQuery) || rawQuery.length === 0) {
+			throw new Error('Invalid query');
+		}
 
 		var trimmedQuery = rawQuery.trim();
 		var tokens = {};

@@ -4,6 +4,7 @@ import Queue from 'firebase-queue';
 import config from '../config';
 import { Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
+import { generateURIfromGuid } from '../Utilities/generateURI';
 import getFeedPage from '../Utilities/getFeedPage';
 import URL from 'url';
 import _ from 'underscore';
@@ -25,13 +26,13 @@ class Feed extends Model {
 		this.queue = new Queue(new Firebase(url), 
 			_.defaults({
 				suppressStack: false, 
-				retries: 3
+				retries: 3,
+				sanitize: false
 			}, FirebaseConfig.queues.default), 
 			this.processJob.bind(this));
 
 		// task queue ref to schedule page parsing jobs
 		this.taskQueueRef = new Firebase(`${FirebaseConfig.queues.feed.url}/tasks`);
-		console.log('Feed.initialize(): task queue URL: ', this.taskQueueRef.toString());
 	}
 
 	/**
@@ -43,6 +44,7 @@ class Feed extends Model {
 		this.reingest = reingest;
 
 		return getFeedPage(this.get('url')).then(data => {
+			console.log('Feed.queueJobs(): First page URL: ', this.get('url'));
 			this.updateMetadata(data);
 			this.queueJobs(data);
 		});
@@ -65,9 +67,13 @@ class Feed extends Model {
 			
 			baseURL = lastPageURL.substring(0, equalPosition);
 			pageCount = parseInt(lastPageURL.substring(equalPosition));
-		} 
+		}
 		else if (paginationType == 'paged') {
 			baseURL = `${this.get('url')}?paged=`;
+			pageCount = 10;
+		}
+		else {
+			baseURL = this.get('url');
 			pageCount = 10;
 		}
 
@@ -85,31 +91,41 @@ class Feed extends Model {
 	 */
 	queueJobs (data) {
 		let firstItem = data.items[0];
-		let guid = new Buffer(firstItem.guid).toString('base64');
+		let guid = generateURIfromGuid(firstItem.guid);
 		let url = `${this.url()}/items/${guid}`;
 		let itemRef = new Firebase(url);
 		console.log(`check if ${itemRef.toString()} exists`);
 
+		// TODO(luc): set timeout after 10 seconds
+		// if nothing comes back, assume feed is done ingesting
+
 		itemRef.once('value', snapshot => {
 			let shouldIngest = false;
 
-			if (!snapshot.exists()) {
+			if (!snapshot.exists() || this.reingest) {
 				shouldIngest = true;
 			}
 
 			if (shouldIngest) {
 				console.log(`Feed(${this.id}): ingesting`);
 
+				let url = (this.get('pagination') == 'none') ? 
+					this.get('url') :
+					this.get('baseURL') + this.get('currentPage');
+
 				this.set('currentPage', 0);
 				let taskData = {
-					pageURL: this.get('baseURL') + this.get('currentPage'),
+					pageURL: url,
 					feed: this.toJSON(),
 					_state: 'start_page_parsing'
 				};
 
-				let newTaskRef = this.taskQueueRef.push(taskData);
-				console.log('new task URL: ', newTaskRef.toString());
+				if (this.get('pagination') == 'none') {
+					taskData.pageURL = this.get('url');
+				}
 
+				let newTaskRef = this.taskQueueRef.push(taskData);
+				console.log('new task URL: ', url);
 			} else {
 				console.warn(`Feed(${this.id}): nothing to ingest`);
 			}
@@ -119,11 +135,17 @@ class Feed extends Model {
 
 	processJob (data, progress, resolve, reject) {
 		let currentPage = this.get('currentPage');
+		let pagination = this.get('pagination');
+
+		if (pagination == 'none') {
+			return;
+		}
 
 		// stop queueing jobs if at end of pages
 		if (currentPage >= this.get('pageCount')) {
 			let pagination = this.get('pagination');
-			if (pagination == 'link') {
+
+			if (pagination == 'link' || pagination == 'none') {
 				return;
 			}
 
@@ -138,10 +160,10 @@ class Feed extends Model {
 
 		itemsRef.once('value', snapshot => {
 			let shouldIngest = false;
+
 			for (let processedItem of data.processedItems) {
-				let guid = new Buffer(processedItem.guid).toString('base64');
+				let guid = generateURIfromGuid(processedItem.guid);
 				let child = snapshot.child(guid);
-				
 				console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
 
 				if (child.exists() && !this.reingest) {
@@ -170,6 +192,10 @@ class Feed extends Model {
 		let currentPage = this.get('currentPage') + 1;
 
 		this.set('currentPage', currentPage);
+
+		if (this.get('pagination') == 'none') {
+			return this.get('url');
+		}
 
 		return baseURL + currentPage;
 	}
