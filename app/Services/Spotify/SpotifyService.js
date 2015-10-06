@@ -204,7 +204,7 @@ class SpotifyService extends ServiceBase {
 						image_large : (artistData.images.length > 0) ? artistData.images[0].url : ""
 					});
 				}
-				console.log(artistData);
+				//console.log(artistData);
 				results.artist = artists;
 				resolve(true);
 

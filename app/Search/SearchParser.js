@@ -27,6 +27,7 @@ class SearchParser {
 	 * @return {bool} - Returns true if the filter is a control filter or false otherwise
 	 */
 	isControlFilter (filter) {
+
 		if (_.isUndefined(filter) || filter.length === 0) {
 			return false;
 		}

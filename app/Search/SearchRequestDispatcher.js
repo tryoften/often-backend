@@ -58,16 +58,16 @@ class SearchRequestDispatcher {
 				/* store the total number of services left to process */
 				var servicesLeftToProcess = filteredProviders.length;
 				this.responses.on('change:time_modified', (updatedResponse) => {
-
+			
 					if (incomingRequest.id != updatedResponse.id) {
 						return;
 					}
 
 					/* query search */
-					var searchIndices = filteredFeeds.concat(filteredProviders);
-					var promise = (isAutocomplete) ? this.search.suggest(filter, actualQuery) : this.search.query(actualQuery, searchIndices);
+					var promise = (isAutocomplete) ? this.search.suggest(filter, actualQuery) : this.search.query(actualQuery, filteredFeeds, filteredProviders);
 
 					promise.then((data) => {
+
 						updatedResponse.set({
 							doneUpdating: false,
 							results: data
@@ -97,7 +97,7 @@ class SearchRequestDispatcher {
 				});
 
 				var outgoingResponse = this.responses.get(resp.id);
-				console.log('incoming id: ' + resp.id);
+
 
 				/* triggers change:time_modified event */
 				outgoingResponse.set({
