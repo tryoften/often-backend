@@ -25,7 +25,7 @@ class Feeds extends Backbone.Firebase.Collection {
 	/**
 	 * passes options to the Feed models in the collection
 	 */
-	model (attrs, opts = {}) {
+	model (attrs, opts) {
 		opts.queueEnabled = opts.queueEnabled || this.queueEnabled;
 		return Feed(attrs, opts);
 	}

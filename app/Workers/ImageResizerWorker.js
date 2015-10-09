@@ -42,10 +42,9 @@ class ImageResizerWorker extends Worker {
 	}
 
 	ingest (originType, sourceId, resourceId, url) {
-
 		return new Promise((resolve, reject) => {
 			/* download the image */
-			this.download(url).then((data) => {
+			this.download(url).then(data => {
 
 				/* Process */
 				var img = new ImageResizer();
@@ -55,9 +54,8 @@ class ImageResizerWorker extends Worker {
 				}).catch((err) => {
 					reject(err);
 				});
-			}).catch(
-				(err) => {
-					reject(err);
+			}).catch(err => {
+				reject(err);
 			});
 		});
 	}
@@ -76,7 +74,6 @@ class ImageResizerWorker extends Worker {
 			remoteWriteStream.on('error', onError);
 
 			let url = `https://www.googleapis.com/download/storage/v1/b/${GoogleStorageConfig.bucket_name}/o/${encodeURIComponent(path)}?alt=media`;
-			console.log('ImageResizerWorker(): Image URL: ', url);
 
 			responseArray.push({
 				transformation : dataObj.transformation,

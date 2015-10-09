@@ -22,9 +22,13 @@ class Feed extends Model {
 		this.set(_.defaults(attributes, defaults));
 		this.reingest = false;
 		this.queueEnabled = opts.queueEnabled || false;
+
+		if (!_.isUndefined(opts.collection)) {
+			this.queueEnabled = opts.collection.queueEnabled;
+		}
 		
 		if (this.queueEnabled) {
-			let url = `${this.url()}/queue`;
+			let url = `${FirebaseConfig.BaseURL}/queues/feeds/${this.id}`;
 			this.queue = new Queue(new Firebase(url), 
 				_.defaults({
 					suppressStack: false, 
@@ -95,7 +99,7 @@ class Feed extends Model {
 	queueJobs (data) {
 		let firstItem = data.items[0];
 		let guid = generateURIfromGuid(firstItem.guid);
-		let url = `${this.url()}/items/${guid}`;
+		let url = `${FirebaseConfig.BaseURL}/articles/items/${guid}`;
 		let itemRef = new Firebase(url);
 		console.log(`check if ${itemRef.toString()} exists`);
 
@@ -173,17 +177,21 @@ class Feed extends Model {
 		itemsRef.once('value', snapshot => {
 			let shouldIngest = false;
 
-			for (let processedItem of data.processedItems) {
-				let guid = generateURIfromGuid(processedItem.guid);
-				let child = snapshot.child(guid);
-				console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
+			if (!_.isUndefined(data.processedItems)) {
+				for (let processedItem of data.processedItems) {
+					let guid = generateURIfromGuid(processedItem.guid);
+					let child = snapshot.child(guid);
+					console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
 
-				if (child.exists() && !this.reingest) {
-					shouldIngest = false;
-					break;
-				} else {
-					shouldIngest = true;	
+					if (child.exists() && !this.reingest) {
+						shouldIngest = false;
+						break;
+					} else {
+						shouldIngest = true;	
+					}
 				}
+			} else {
+				shouldIngest = true;
 			}
 
 			if (shouldIngest) {		
