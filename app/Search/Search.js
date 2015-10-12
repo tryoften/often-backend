@@ -1,6 +1,7 @@
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import QueryMaker from '../Models/QueryMaker';
+
 /**
  * Class for interacting with ElasticSearch.
  * Format:
