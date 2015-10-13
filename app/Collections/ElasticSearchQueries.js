@@ -7,42 +7,54 @@ import { firebase as FirebaseConfig } from '../config';
 class ElasticSearchQueries extends Backbone.Firebase.Collection {
 
 	/**
-	 * Initializes the elastic search queries.
-	 * @param {object} models - supporting models
-	 * @param {object} opts - supporting options
+	 * Constructs the ElasticSearchQueries collection.
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
-		this.model = ElasticSearchQuery;
+	 constructor () {
+		let opts = {
+			model: ElasticSearchQuery,
+			autoSync: true
+		};
+		super([], opts);
+	}
+
+	/**
+	 * Initializes the favorites collection.
+	 * @param {string} models - optional models for backbone
+	 * @param {string} opts - optional options for backbone
+	 * @param {string} userId - user's id to load up favorties
+	 *
+	 * @return {void}
+	 */
+	initialize (models, opts, userId) {
 		this.url = `${FirebaseConfig.BaseURL}/config/elastic-search/queries`;
-		this.autoSync = true;
 	}
 
 	/**
 	 * Prepares a query string with a query object that can be passed into ElasticSearch for querying
-	 * @param {string} queryText - textual query
+	 * @param {string} text - textual query
 	 * @param {string} index - optional parameter containing index information
-	 * @param {string} queryType - type of query as defined in the configuration
+	 * @param {string} type - type of query as defined in the configuration
 	 *
 	 * @return {Promise} - Promise that resolves to an array of header/body objects
 	 */
-	query (queryText, index = "", queryType = "") {
+	query (text, index = "", type = "") {
 		return new Promise( (resolve, reject) => {
 
 			this.once("sync", () => {
-				var queryRequests = [];
+				var requests = [];
 				if(this.models.length === 0) throw new Error("The query collection is empty!");
 				
-				if (index !== "" && queryType !== "") {
-					queryRequests = this.get(queryType).injectQuery(queryText, index);
+				if (index !== "" && type !== "") {
+					requests = this.get(type).injectQuery(text, index);
 				} else {
 					for (var model of this.models) {
-						queryRequests = queryRequests.concat(model.injectQuery(queryText));
+						requests = requests.concat(model.injectQuery(text));
 					}
 				}
 
-				resolve(queryRequests);
+				resolve(requests);
 
 			});
 
