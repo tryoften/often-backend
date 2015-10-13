@@ -44,6 +44,7 @@ class Feeds extends Backbone.Firebase.Collection {
 					resolve(feedNames);
 				}, 
 				err => { reject(err); });
+			this.fetch();
 		});
 	}
 }

@@ -35,6 +35,18 @@ class SearchRequestDispatcher {
 		this.searchParser = new SearchParser();
 	}
 
+	getRelevantProviders (filter) { 
+		if (filter === "") {
+			return Object.keys(this.serviceProviders);
+
+		} else if (!_.isUndefined(this.serviceProviders[filter])) {
+			return [filter];
+
+		} else {
+			return [];
+
+		}
+	}
 	/**
 	 * Determines which service provider the request should be executed with and executes it.
 	 * @param {object} incomingRequest - contains information about an incoming request.
@@ -45,79 +57,75 @@ class SearchRequestDispatcher {
 
 		return new Promise((resolve, reject) => {
 
-			this.searchParser.parse(incomingRequest.query.text).then( parsedContents => {
+			var parsedContents = this.searchParser.parse(incomingRequest.query.text);
 				
-				/* whether the query is for autocomplete suggestions */
-				var isAutocomplete = !!incomingRequest.query.autocomplete;
+			/* whether the query is for autocomplete suggestions */
+			var isAutocomplete = !!incomingRequest.query.autocomplete;
 
-				var filteredProviders = parsedContents.serviceProviders;
-				var filteredFeeds = parsedContents.feeds;
-				var filter = parsedContents.filter;
-				var actualQuery = parsedContents.actualQuery;
+			var filter = parsedContents.filter;
+			var actualQuery = parsedContents.actualQuery;
 
-				/* store the total number of services left to process */
-				var servicesLeftToProcess = filteredProviders.length;
-				this.responses.on('change:time_modified', (updatedResponse) => {
-			
-					if (incomingRequest.id != updatedResponse.id) {
-						return;
-					}
+			/* store the total number of services left to process */
+			var relevantProviders = this.getRelevantProviders(filter);
+			var servicesLeftToProcess = relevantProviders.length;
+			this.responses.on('change:time_modified', (updatedResponse) => {
+		
+				if (incomingRequest.id != updatedResponse.id) {
+					return;
+				}
 
-					/* query search */
-					var promise = (isAutocomplete) ? this.search.suggest(filter, actualQuery) : this.search.query(actualQuery, filteredFeeds, filteredProviders);
+				/* query search */
+				var promise = (isAutocomplete) ? this.search.suggest(filter, actualQuery) : this.search.query(actualQuery, filter);
 
-					promise.then((data) => {
+				promise.then((data) => {
 
-						updatedResponse.set({
-							doneUpdating: false,
-							results: data
-						});
-
-						if (!isAutocomplete) {
-
-							/* Decrement the count of services to process & resolve when all services have completed successfully */
-							servicesLeftToProcess--;
-							if (servicesLeftToProcess === 0) {
-								updatedResponse.set('doneUpdating', true);
-								resolve(true);
-							}
-						} else {
-							resolve(true);
-						}
+					updatedResponse.set({
+						doneUpdating: false,
+						results: data
 					});
 
-				});
+					if (!isAutocomplete) {
 
-				/* create a new response */
-				var resp = this.responses.create({ 
-					id: incomingRequest.id,
-					query: incomingRequest.query.text,
-					doneUpdating: false,
-					autocomplete: isAutocomplete
-				});
-
-				var outgoingResponse = this.responses.get(resp.id);
-
-
-				/* triggers change:time_modified event */
-				outgoingResponse.set({
-					time_modified: Date.now()
-				});
-
-				if (!isAutocomplete) {
-					/* Execute the request every user provider that the user is subscribed */
-					for (let providerName of filteredProviders) {
-
-						this.serviceProviders[providerName].execute(incomingRequest, outgoingResponse);
+						/* Decrement the count of services to process & resolve when all services have completed successfully */
+						servicesLeftToProcess--;
+						if (servicesLeftToProcess === 0) {
+							updatedResponse.set('doneUpdating', true);
+							resolve(true);
+						}
+					} else {
+						resolve(true);
 					}
+				});
 
-					// if nothing happens after 2 seconds: timeout
-					setTimeout(reject, 5000, 'timeout');
-				} else {
-					setTimeout(reject, 1000, 'timeout');
+			});
+
+			/* create a new response */
+			var resp = this.responses.create({ 
+				id: incomingRequest.id,
+				query: incomingRequest.query.text,
+				doneUpdating: false,
+				autocomplete: isAutocomplete
+			});
+
+			var outgoingResponse = this.responses.get(resp.id);
+
+
+			/* triggers change:time_modified event */
+			outgoingResponse.set({
+				time_modified: Date.now()
+			});
+
+			if (!isAutocomplete) {
+				/* Execute the request every user provider that the user is subscribed */
+				for (let providerName of relevantProviders) {
+					this.serviceProviders[providerName].execute(incomingRequest, outgoingResponse);
 				}
-			}).catch( err => { reject(err); });
 
+				// if nothing happens after 2 seconds: timeout
+				setTimeout(reject, 5000, 'timeout');
+			} else {
+				setTimeout(reject, 1000, 'timeout');
+			}
 		}).catch( err => { reject(err); });
 		
 	}

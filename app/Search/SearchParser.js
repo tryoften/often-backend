@@ -15,33 +15,9 @@ class SearchParser {
 	 * @return {void}
 	 */
 	constructor (models, opts) {
-		this.feeds = new Feeds();
-		this.serviceProviders = new ServiceProviders();
-		this.controlFilters = ['top-searches'];
+
 	}
 
-	/**
-	 * Checks whether the passed in filter is one of control filters
-	 * @param {string} filter
-	 *
-	 * @return {bool} - Returns true if the filter is a control filter or false otherwise
-	 */
-	isControlFilter (filter) {
-
-		if (_.isUndefined(filter) || filter.length === 0) {
-			return false;
-		}
-		return _.contains(this.controlFilters, filter);
-	}
-
-	/**
-	 * Loads feeds and service providers
-	 *
-	 * @return {Promise} - resolves to an array of values or an error when rejected
-	 */
-	loadSources () {
-		return Promise.all([this.feeds.getFeedNames(), this.serviceProviders.getServiceProviderNames()]);
-	}
 
 	/**
 	 * Parses a query string in order to obtain the filter, actual query, and feeds & service providers relevant to the query
@@ -51,58 +27,18 @@ class SearchParser {
 	 						or an error when rejected. 
 	 */
 	parse (rawQuery) {
-
-		return new Promise((resolve, reject) => {
-
-			/* load sources */
-			this.loadSources().then( values => {
-				var feeds = values[0];
-				var serviceProviders = values[1];
-				var tokens = this.tokenize(rawQuery);
-				var filter = tokens.filter;
-				var actualQuery = tokens.actualQuery;
-				var filteredFeeds, filteredProviders;
-
-				if (filter.length > 0 && !this.isControlFilter(filter)) {
-					filteredFeeds = this.filterSources(feeds, [ filter ]);		
-					filteredProviders = this.filterSources(serviceProviders, [ filter ]);
-								
-				} else {
-					/* no specific filters attached */
-					filteredFeeds = feeds;
-					filteredProviders = serviceProviders;
-					
-				}
-
-				var parsedContents = {
-					feeds : filteredFeeds,
-					serviceProviders : filteredProviders,
-					filter : filter,
-					actualQuery : actualQuery
-				};
-
-				resolve(parsedContents);
-
-			}).catch ( err => { reject(err); });
-
-		});
-
+		
+		var tokens = this.tokenize(rawQuery);
+		var filter = tokens.filter;
+		var actualQuery = tokens.actualQuery;
+		var parsedContents = {
+			filter : filter,
+			actualQuery : actualQuery
+		};
+		
+		return parsedContents;
 	}
 
-	/**
-	 * Filters out the sources that will be queried against ElasticSearch based on attached filters
-	 * @param {[string]} sources - string array containing sources supported by the search system
-	 * @param {[string]} filters - string array containing filters passed in from the client
-	 *
-	 * @return {[string]} - string array containing only sources that match passed-in filters
-	 */
-	filterSources (sources, filters) {
-
-		return _.filter(sources, (sourceElement) => { 
-			return _.contains(filters, sourceElement.split('-')[0]); 
-		});
-	}
-	
 	/**
 	 * Breaks the raw query into tokens
 	 * @param {string} rawQuery - query string that hasn't been parsed yet
