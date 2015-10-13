@@ -32,17 +32,23 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 		this.url = `${FirebaseConfig.BaseURL}/config/elastic-search/query-settings`;
 	}
 
-
+	/**
+	 * Returns the size of the response
+	 *
+	 * @return {int} - Size of the response
+	 */
 	getResponseSize () {
-		return new Promise( (resolve, reject) => {
-			this.once("sync", () => {
-				console.log(this.get("responseSize"));
-				resolve(this.get("responseSize"));
-			});
-			this.fetch();
-		});
+		return this.get("responseSize");
 	}
-	
+
+	/**
+	 * Returns the size of the response
+	 *
+	 * @return {int} - Size of the response
+	 */
+	getQueryType (index) {
+		return this.get("sourceToQueryMap")[index];
+	}
 
 	
 }

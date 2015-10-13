@@ -1,6 +1,8 @@
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import QueryMaker from '../Models/QueryMaker';
+import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
+import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -22,7 +24,8 @@ class Search {
 		this.es = new Client({
 			host: ElasticSearchConfig.BaseURL
 		});
-		this.queryMaker = new QueryMaker();
+		this.esQueries = new ElasticSearchQueries();
+		this.esQuerySettings = new ElasticSearchQuerySettings();
 	}
 
 	/**
@@ -81,65 +84,70 @@ class Search {
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-	query (query, userFeedIndices, userServiceProviderIndices, autocomplete = false) {
+	query (query, filteredIndex, autocomplete = false) {
 
 		var command;
-		if ( (command = this.processCommands(query)) ) {
+		if ( (command = this.processCommands(filteredIndex)) ) {
 			return command;
 		}
 
 		return new Promise((resolve, reject) => {
 
 			let searchId = new Buffer(query).toString('base64');
+			this.esQuerySettings.once("sync", () => {
+				var queryType = this.esQuerySettings.getQueryType(filteredIndex);
+				this.esQueries.query(query, filteredIndex || "", queryType || "").then(
+					(esq) => {
 
-			this.queryMaker.generateQuery(query, userFeedIndices, userServiceProviderIndices).then(
+						this.es.msearch({
+							body : esq
+						}, (error, response) => {
+							if (error) {
+								console.log('error' + error);
+								reject(error);
+							} else {
+									let results = this.serializeAndSortResults(response);
+									
+									resolve(results);
 
-				(esQuery) => {
-					this.es.search({
-						body : esQuery
-					}, (error, response) => {
-						if (error) {
-							console.log('error' + error);
-							reject(error);
-						} else {
-							let results = this.serializeAndSortResults(response);
-							resolve(results);
+									// index search term for autocompletion
+									
+									this.es.update({
+										index: 'search-terms',
+										type: 'query',
+										id: searchId,
+										body: {
+											script: `ctx._source.counter += 1; 
+												ctx._source.resultsCount = count;
+												ctx._source.suggest.payload = [:];
+												ctx._source.suggest.payload['resultsCount'] = count;`,
 
-							// index search term for autocompletion
-							this.es.update({
-								index: 'search-terms',
-								type: 'query',
-								id: searchId,
-								body: {
-									script: `ctx._source.counter += 1; 
-										ctx._source.resultsCount = count;
-										ctx._source.suggest.payload = [:];
-										ctx._source.suggest.payload['resultsCount'] = count;`,
+											params: {
+												count: results.length
+											},
 
-									params: {
-										count: results.length
-									},
-
-									upsert: {
-										text: query,
-										suggest: {
-											input: query,
-											payload: {
+											upsert: {
+												text: query,
+												suggest: {
+													input: query,
+													payload: {
+														resultsCount: results.length
+													}
+												},
+												counter: 1,
 												resultsCount: results.length
 											}
-										},
-										counter: 1,
-										resultsCount: results.length
-									}
-								}
-							});
-						}
-					});
-				})
-				.catch( (err) => { reject(err); });
-
-			
-		});
+										}
+									});
+								
+								this.esQuerySettings.fetch();
+							}
+						});
+					})
+					.catch( (err) => { reject(err); });
+				});
+				this.esQuerySettings.fetch();
+		}).catch( (err) => { reject(err); });
 	}
 
 	/**
@@ -236,28 +244,34 @@ class Search {
 	 * Creates a formatted results array using data returned from search and sorts it using the score.
 	 * @param {object} data - object containing data from search
 	 *
-	 * @return {[object]} - array of objects
+	 * @return {[object]} - array of size bounded by ES Settings
 	 */
 	 serializeAndSortResults (data) {
+
 		var results = [];
-		let hits = data.hits.hits;
+	 	for (let res of data.responses) {
+			results = results.concat(res.hits.hits);
+		}
+		/* Not the most optimal solution, but fast and concise enough */
+		results.sort( (a,b) => {
+			return b._score - a._score;
+		});
 
-		for (let hit of hits) {
+		var finalResults = [];
+		for (let res of results) {
 			var singleResult = {
-				'_index' : hit._index,
-				'_type' : hit._type,
-				'_score' : hit._score,
-				'_id' : hit._id
+				'_index' : res._index,
+				'_type' : res._type,
+				'_score' : res._score,
+				'_id' : res._id
 			};
-
-			var source = hit._source;
+			var source = res._source;
 			for (let k in source) {
 				singleResult[k] = source[k];
 			}
-			results.push(singleResult);
-
+			finalResults.push(singleResult);
 		}
-		return results;
+		return finalResults.slice(0, this.esQuerySettings.getResponseSize());
 	}
 	
 	/**

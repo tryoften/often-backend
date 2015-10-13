@@ -34,6 +34,7 @@ class ServiceProviders extends Backbone.Firebase.Collection {
 					resolve(spNames);
 				}, 
 				err => { reject(err); });
+			this.fetch();
 		});
 	}
 }
