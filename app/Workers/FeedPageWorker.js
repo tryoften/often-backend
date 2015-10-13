@@ -10,9 +10,10 @@ class FeedPageWorker extends Worker {
 	constructor (opts = {}) {
 		let options = _.defaults(opts, {
 			specId: 'feed_page_parsing',
-			numWorkers: 3,
+			numWorkers: 1,
 			url: FirebaseConfig.queues.feed.url,
-			suppressStack: false
+			suppressStack: true,
+			sanitize: false
 		});
 
 		super(options);
