@@ -3,6 +3,7 @@ import { elasticsearch as ElasticSearchConfig } from '../config';
 import QueryMaker from '../Models/QueryMaker';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
+
 /**
  * Class for interacting with ElasticSearch.
  * Format:

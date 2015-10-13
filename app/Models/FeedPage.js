@@ -16,8 +16,8 @@ class FeedPage {
 		this.url = opts.pageURL;
 		this.feed = opts.feed;
 		this.search = opts.search;
-		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/feeds/${this.feed.id}`);
-		this.feedQueueRef = this.feedRef.child('queue/tasks');
+		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
+		this.feedQueueRef = new Firebase(`${FirebaseConfig.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
 		this.imageResizer = new ImageResizerWorker();
 	}
 
@@ -44,7 +44,7 @@ class FeedPage {
 					for (let item of processedItems) {
 						let guid = generateURIfromGuid(item.guid);
 						let data = JSON.parse(JSON.stringify(item));
-						self.feedRef.child(`items/${guid}`).set(data);
+						self.feedRef.child('items').child(guid).set(data);
 
 						items.push({
 							'update': {
@@ -63,13 +63,12 @@ class FeedPage {
 						if (err) {
 							reject(err);
 						} else {
-							let date = (data.items[0] !== null) ? data.items[0].date.toISOString() : '';
 							let feedData = {
 								url: this.url,
-								date: date,
 								processedItems: JSON.parse(JSON.stringify(processedItems))
 							};
 							this.feedQueueRef.push(feedData);
+
 							console.log(`FeedPage(${this.url}).ingestData(): done ingesting`);
 							resolve(feedData);
 						}

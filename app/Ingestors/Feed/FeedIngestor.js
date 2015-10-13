@@ -3,7 +3,9 @@ import Feeds from '../../Collections/Feeds';
 class FeedIngestor {
 
 	constructor (opts = {}) {
-		this.feeds = new Feeds();
+		this.feeds = new Feeds([], {
+			queueEnabled: true
+		});
 		
 		setInterval(() => {
 			this.ingest();
