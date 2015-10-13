@@ -60,7 +60,20 @@ git clone https://source.developers.google.com/p/$PROJECTID /opt/app
 cd /opt/app
 npm install
 
+echo "Installing grunt"
+npm install -g grunt-cli
+
+echo "Installing Forever"
+npm install -g forever
+
 echo "NPM install finished"
+
+
+echo "Launching grunt"
+grunt
+
+echo "Node version: "
+node --version
 
 # Create a nodeapp user. The application will run as this user.
 useradd -m -d /home/nodeapp nodeapp
@@ -72,7 +85,7 @@ echo "Node app users owner changed"
 cat >/etc/supervisor/conf.d/node-app.conf << EOF
 [program:nodeapp]
 directory=/opt/app
-command=npm start
+command=node build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
 autostart=true
 autorestart=true
 user=nodeapp
@@ -84,20 +97,5 @@ supervisorctl update
 
 # Application should now be running under supervisor
 # [END startup]
-
-echo "Installing grunt"
-npm install -g grunt-cli
-
-echo "Installing Forever"
-npm install -g forever
-
-echo "Launching grunt"
-grunt
-
-echo "Node version: "
-node --version
-
-echo "Launching app"
-forever start build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
 
 echo "Finished setup."
