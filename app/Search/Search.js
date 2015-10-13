@@ -187,7 +187,7 @@ class Search {
 	}
 
 	processCommands (filter) {
-		if (filter === 'top-searches') {
+		if (filter.indexOf('top-searches') === 0) {
 			return this.getTopSearches();
 		}
 		return false;
