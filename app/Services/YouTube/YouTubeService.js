@@ -65,11 +65,11 @@ class YouTubeService extends ServiceBase {
 							channel_title: item.snippet.channelTitle,
 							thumbnail: item.snippet.thumbnails.default.url,
 							published: item.snippet.publishedAt,
-							viewCount: item.statistics.viewCount,
-							likeCount: item.statistics.likeCount,
-							dislikeCount: item.statistics.dislikeCount,
-							favoriteCount: item.statistics.favoriteCount,
-							commentCount: item.statistics.commentCount
+							viewCount: parseInt(item.statistics.viewCount),
+							likeCount: parseInt(item.statistics.likeCount),
+							dislikeCount: parseInt(item.statistics.dislikeCount),
+							favoriteCount: parseInt(item.statistics.favoriteCount),
+							commentCount: parseInt(item.statistics.commentCount)
 						});
 					}
 
