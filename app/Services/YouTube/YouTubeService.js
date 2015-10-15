@@ -31,10 +31,9 @@ class YouTubeService extends ServiceBase {
 	fetchData (query) {
 
 		return new Promise((resolve, reject) => {
-
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
-					q: query.text,
+					q: query,
 					key: settings.api_key,
 					part: 'snippet',
 					type: 'video'
