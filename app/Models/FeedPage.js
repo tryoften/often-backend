@@ -156,7 +156,7 @@ class FeedPage {
 				})
 				.catch(err => {
 					console.error('FeedPage(): Image resizing failed ', err);
-					resolve(data);
+					reject(data);
 				});
 
 		});
