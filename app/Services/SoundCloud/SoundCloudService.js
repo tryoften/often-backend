@@ -118,11 +118,11 @@ class SoundCloudService extends ServiceBase {
 					let track = {
 						id: trackResult.id,
 						name: trackResult.title,
-						url: trackResult.uri,
+						api_uri: trackResult.uri,
 						duration: trackResult.duration,
 						image: trackResult.artwork_url,
 						description: trackResult.description,
-						link: trackResult.permalink_url,
+						external_url: trackResult.permalink_url,
 						waveform_url: trackResult.waveform_url,
 						favorites: trackResult.favoritings_count,
 						likes: trackResult.likes_count,
