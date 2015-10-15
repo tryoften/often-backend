@@ -30,8 +30,7 @@ class ImageResizerWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		console.log(data);
-
+		console.log("URL: " + data.url);
 		ingest(data.originType, data.sourceId, data.resourceId, data.url)
 			.then(data => {
 				resolve(data);
@@ -43,13 +42,19 @@ class ImageResizerWorker extends Worker {
 
 	ingest (originType, sourceId, resourceId, url) {
 		return new Promise((resolve, reject) => {
+
+			if (_.isUndefined(url) || _.isNull(url)) {
+				reject("Bad Url: " + url);
+				return;
+			}
+
 			/* download the image */
 			this.download(url).then(data => {
-
 				/* Process */
 				var img = new ImageResizer();
 				img.bulkResize(data, this.default_transformations).then((dataArr) => {
 					var response = this.saveAndGenerateResponse(originType, sourceId, resourceId, dataArr);
+					console.log("resolving "+resourceId);
 					resolve(response);
 				}).catch((err) => {
 					reject(err);
