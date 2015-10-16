@@ -123,6 +123,7 @@ class SpotifyService extends ServiceBase {
 						image_large: trackData.album.images[0].url,
 						album_name: trackData.album.name,
 						artist_name: trackData.artists[0].name,
+						external_url : "https://play.spotify.com/track/"+trackData.id,
 						url: trackData.href,
 						uri: trackData.uri,
 						explicit: trackData.explicit
