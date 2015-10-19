@@ -1,5 +1,5 @@
 import Search from '../Search/Search';
-
+import UrlHelper from '../Models/UrlHelper';
 /** 
  *	This class is a base class for all service providers. 
  *	It has an instance of the results collection to which it adds a response after processing.
@@ -18,6 +18,7 @@ class ServiceBase {
 		this.provider_id = opts.provider_name;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
 		this.search = new Search();
+		this.urlHelper = new UrlHelper();
 	}
 
 	/**
@@ -53,6 +54,41 @@ class ServiceBase {
 		}, onError);
 
 	}
+
+	/**
+	 * Shortens the url (specified by prop) of each results object 
+	 * @param {[object]} results - array of results objects
+	 * @param {string} prop - property containing the link to be shortened (defaults to external_url)
+	 *
+	 * @return {promise} - Returns a promise that resolves to an array of results with shortened urls or an error
+	 */
+	shortenUrls (results, prop = 'external_url') {
+		var promises = [];
+		for (let res of results) {
+			promises.push(this.shortenUrl(res, prop));
+		}
+		return Promise.all(promises);
+
+	}
+
+	/**
+	 * Shortens and replaces the url denoted by prop of a result object with a shorter one
+	 * @param {object} result - result object
+	 * @param {string} prop - property containing the link to be shortened
+	 *
+	 * @return {promise} - Returns a promise that resolves to an object containing shortened_url or error, when rejected.
+	 */
+	shortenUrl (result, prop) {
+		return new Promise( (resolve, reject) => {
+			this.urlHelper.minifyUrl(result[prop]).then( (shortUrl) => {
+				result[prop] = shortUrl;
+				resolve(res);
+
+			}).catch( (err) => { reject(err); });
+		});
+
+	}
+
 }
 
 export default ServiceBase;

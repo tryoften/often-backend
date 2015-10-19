@@ -4,6 +4,7 @@ import { generateURIfromGuid } from '../Utilities/generateURI';
 import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
+import UrlHelper from '../Models/UrlHelper';
 
 class FeedPage {
 
@@ -19,6 +20,7 @@ class FeedPage {
 		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
 		this.feedQueueRef = new Firebase(`${FirebaseConfig.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
 		this.imageResizer = new ImageResizerWorker();
+		this.urlHelper = new UrlHelper();
 	}
 
 	process (data) {
@@ -129,6 +131,7 @@ class FeedPage {
 		}
 
 		return new Promise((resolve, reject) => {
+
 			let image = getImage(item);
 			let data = {
 				"title": item.title,
@@ -146,7 +149,9 @@ class FeedPage {
 				}
 			};
 
-			this.imageResizer
+			this.urlHelper.minifyUrl(data.link).then( (shortUrl) => {
+				data.link = shortUrl;
+				this.imageResizer
 				.ingest('rss', this.feed.id, item.guid, image)
 				.then(imageData => {
 					data.images = imageData;
@@ -158,6 +163,8 @@ class FeedPage {
 					console.error('FeedPage(): Image resizing failed ', err);
 					reject(data);
 				});
+			})
+			.catch( (err) => { reject(err); });
 
 		});
 
