@@ -30,7 +30,6 @@ class ImageResizerWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		console.log("URL: " + data.url);
 		ingest(data.originType, data.sourceId, data.resourceId, data.url)
 			.then(data => {
 				resolve(data);
@@ -47,14 +46,12 @@ class ImageResizerWorker extends Worker {
 				reject("Bad Url: " + url);
 				return;
 			}
-
 			/* download the image */
 			this.download(url).then(data => {
 				/* Process */
 				var img = new ImageResizer();
 				img.bulkResize(data, this.default_transformations).then((dataArr) => {
 					var response = this.saveAndGenerateResponse(originType, sourceId, resourceId, dataArr);
-					console.log("resolving "+resourceId);
 					resolve(response);
 				}).catch((err) => {
 					reject(err);
@@ -104,6 +101,10 @@ class ImageResizerWorker extends Worker {
 		return new Promise((resolve, reject) => {
 			/* download image */
 			http.get(url, response => {
+				if(response.statusCode !=  "200") {
+					reject("Http status not 200");
+					return;
+				}
 				var data = new Stream();
 
 				response.on('data', 
@@ -112,19 +113,22 @@ class ImageResizerWorker extends Worker {
 		        	}, 
 		        	(err) => {
 		        		reject(err);
+		        		return;
 		        	}
 		        );
 
 		        response.on('end', 
 		        	() => {
 		            	resolve(data.read());
+		            	return;
 		        	}, 
 		        	(err) => {
 		        		reject(err);
+		        		return;
 		        	}
 		        );
 			})
-			.on('error', function(e) {
+			.on('error', (e) => {
 			  console.log("Got error: " + e.message);
 			  reject(e);
 			}); 
