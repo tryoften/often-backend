@@ -1,5 +1,5 @@
 import Search from '../Search/Search';
-import UrlHelper from '../Models/UrlHelper';
+import URLHelper from '../Models/URLHelper';
 /** 
  *	This class is a base class for all service providers. 
  *	It has an instance of the results collection to which it adds a response after processing.
@@ -18,7 +18,7 @@ class ServiceBase {
 		this.provider_id = opts.provider_name;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
 		this.search = new Search();
-		this.urlHelper = new UrlHelper();
+		this.urlHelper = new URLHelper();
 	}
 
 	/**
