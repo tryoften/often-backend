@@ -56,7 +56,6 @@ class YouTubeService extends ServiceBase {
 					var results = {};
 
 					for (let item of videoData.items) {
-						debugger;
 						videos.push({
 							id: item.id,
 							external_url: `youtu.be/${ item.id }`,

@@ -3,6 +3,8 @@ import { elasticsearch as ElasticSearchConfig } from '../config';
 import QueryMaker from '../Models/QueryMaker';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
+import Filters from '../Collections/Filters';
+
 
 /**
  * Class for interacting with ElasticSearch.
@@ -27,6 +29,7 @@ class Search {
 		});
 		this.esQueries = new ElasticSearchQueries();
 		this.esQuerySettings = new ElasticSearchQuerySettings();
+		this.filters = new Filters();
 	}
 
 	/**
@@ -88,7 +91,7 @@ class Search {
 	query (query, filteredIndex, autocomplete = false) {
 
 		var command;
-		if ( (command = this.processCommands(filteredIndex)) ) {
+		if ( (command = this.processCommands(query)) ) {
 			return command;
 		}
 
@@ -187,6 +190,18 @@ class Search {
 	}
 
 	processCommands (filter) {
+		if (filter == 'filters-list') {
+			var self = this;
+			return new Promise( (resolve, reject) => {
+				resolve([
+					{
+						text: '#' + filter,
+						options: self.filters.toJSON()
+					}
+				]);
+			});
+		}
+
 		if (filter.indexOf('top-searches') === 0) {
 			return this.getTopSearches();
 		}
