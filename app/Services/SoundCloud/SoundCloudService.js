@@ -36,7 +36,7 @@ class SoundCloudService extends ServiceBase {
 			var results = {};
 			this.getSoundCloudData(query, results).then(function (data) {
 				resolve(results);
-			});
+			}).catch( (err) => { reject(err); });
 
 		});
 
@@ -62,7 +62,7 @@ class SoundCloudService extends ServiceBase {
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
-	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+	 * @return {promise} - Returns a promise that resolves to either true if resolved or error, when rejected.
 	 */
 	searchUsers (query, results) {
 
@@ -89,7 +89,7 @@ class SoundCloudService extends ServiceBase {
 				resolve(true);
 			}).on('error', err => {
 				console.log('err' + err);
-				reject(false);
+				reject(err);
 			});
 
 		});
@@ -101,7 +101,7 @@ class SoundCloudService extends ServiceBase {
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
-	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+	 * @return {promise} - Returns a promise that resolves to either true if resolved or error, when rejected.
 	 */
 	searchTracks (query, results) {
 
@@ -137,11 +137,16 @@ class SoundCloudService extends ServiceBase {
 
 					tracks.push(track);
 				}
-				results.track = tracks;
-				resolve(true);
+
+				this.shortenUrls(tracks).then( () => {
+					results.track = tracks;
+					resolve(true);
+				})
+				.catch( (err) => { reject(err); } );
+
 			}).on('error', err => {
 				console.log('err' + err);
-				reject(false);
+				reject(err);
 			});
 
 		});

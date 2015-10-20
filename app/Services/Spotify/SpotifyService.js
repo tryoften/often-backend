@@ -66,7 +66,7 @@ class SpotifyService extends ServiceBase {
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
-	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+	 * @return {promise} - Returns a promise that resolves to either true if resolved or error, when rejected.
 	 */
 	searchPlaylists (query, results) {
 
@@ -93,7 +93,7 @@ class SpotifyService extends ServiceBase {
 			}, function (error) {
 
 				console.log('Error detected ' + error);
-				reject(false);
+				reject(error);
 
 			});
 
@@ -106,12 +106,12 @@ class SpotifyService extends ServiceBase {
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
-	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+	 * @return {promise} - Returns a promise that resolves to either true if resolved or error, when rejected.
 	 */
 	searchTracks (query, results) {
-		return new Promise(function (resolve, reject){
+		return new Promise( (resolve, reject) => {
 
-			spotifyApi.searchTracks(query).then(function (data) {
+			spotifyApi.searchTracks(query).then( (data) => {
 
 				var trackItems = data.body.tracks.items;
 				var tracks = [];
@@ -129,14 +129,16 @@ class SpotifyService extends ServiceBase {
 						explicit: trackData.explicit
 					});
 				}
+				this.shortenUrls(tracks).then( () => {
+					results.track = tracks;
+					resolve(true);
+				})
+				.catch( (err) => { reject(err); } );
 
-				results.track = tracks;
-				resolve(true);
-
-			}, function (error) {
+			}, (error) => {
 
 				console.log('Error detected ' + error);
-				reject(false);
+				reject(error);
 
 			});
 
@@ -148,7 +150,7 @@ class SpotifyService extends ServiceBase {
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
-	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+	 * @return {promise} - Returns a promise that resolves to either true if resolved or error, when rejected.
 	 */
 	searchAlbums (query, results) {
 
@@ -173,7 +175,7 @@ class SpotifyService extends ServiceBase {
 			}, function (error) {
 
 				console.log('Error detected ' + error);
-				reject(false);
+				reject(error);
 
 			});
 
@@ -186,7 +188,7 @@ class SpotifyService extends ServiceBase {
 	 * @param {string} query - search term
 	 * @param {object} results - object for storing data from the service provider's
 	 *
-	 * @return {promise} - Returns a promise that resolves to either true if resolved or false, when rejected.
+	 * @return {promise} - Returns a promise that resolves to either true if resolved or error, when rejected.
 	 */
 	searchArtists (query, results) {
 
@@ -212,7 +214,7 @@ class SpotifyService extends ServiceBase {
 			}, function (error) {
 
 				console.log('Error detected ' + error);
-				reject(false);
+				reject(error);
 
 			});
 
