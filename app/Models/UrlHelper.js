@@ -1,10 +1,10 @@
-import { Model } from 'backbone';
 import BitlyAPI from 'node-bitlyapi';
+import { bitly as BitlyConfig } from '../config';
 
 /**
  * Helper class for Url related functionalities
  */
-class UrlHelper extends Model {
+class URLHelper {
 
 	/**
 	 * Constructs the url helper class.
@@ -12,12 +12,11 @@ class UrlHelper extends Model {
 	 * @return {Void}
 	 */
 	constructor () {
-		super();
 		this.bitly = new BitlyAPI({
-		    client_id: "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
-		    client_secret: "0c7321da3281625aa86d6245374ee206c1d6e331"  
+		    client_id: BitlyConfig.clientId,
+		    client_secret: BitlyConfig.clientSecret 
 		});
-		this.bitly.setAccessToken("caf39699a2f9df44a2c8acb4ab466385753dd228");
+		this.bitly.setAccessToken(BitlyConfig.accessToken);
 	}
 
 	/**
@@ -40,4 +39,4 @@ class UrlHelper extends Model {
 	}
 }
 
-export default UrlHelper;
+export default URLHelper;
