@@ -4,7 +4,7 @@ import { generateURIfromGuid } from '../Utilities/generateURI';
 import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
-import UrlHelper from '../Models/UrlHelper';
+import URLHelper from '../Models/URLHelper';
 
 class FeedPage {
 
@@ -20,7 +20,7 @@ class FeedPage {
 		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
 		this.feedQueueRef = new Firebase(`${FirebaseConfig.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
 		this.imageResizer = new ImageResizerWorker();
-		this.urlHelper = new UrlHelper();
+		this.urlHelper = new URLHelper();
 	}
 
 	process (data) {
