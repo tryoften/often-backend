@@ -9,7 +9,7 @@ class FeedIngestor {
 		
 		setInterval(() => {
 			this.ingest();
-		}, 5 * 60000);
+		}, 15 * 60000);
 	}
 
 	/**

@@ -58,7 +58,7 @@ class YouTubeService extends ServiceBase {
 					for (let item of videoData.items) {
 						videos.push({
 							id: item.id,
-							external_url: `youtu.be/${ item.id }`,
+							external_url: "https://www.youtube.com/watch?v=" + item.id ,
 							title: item.snippet.title,
 							description: item.snippet.description,
 							channel_title: item.snippet.channelTitle,
@@ -72,10 +72,13 @@ class YouTubeService extends ServiceBase {
 						});
 					}
 
-					results.video = videos;
-					console.log('YouTubeService(): ', query, JSON.stringify(videos));
+					this.shortenUrls(videos).then( () => {
 
-					resolve(results);
+						results.video = videos;
+						console.log('YouTubeService(): ', query, JSON.stringify(videos));
+						resolve(results);
+					})
+					.catch( (err) => { reject(err); } );
 
 				}).on('error', err => {
 					console.log('err', err);

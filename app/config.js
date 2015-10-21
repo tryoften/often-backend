@@ -48,6 +48,12 @@ var config = {
 
   elasticsearch: {
 	  BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+  },
+
+  bitly: {
+        clientId: "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
+        clientSecret: "0c7321da3281625aa86d6245374ee206c1d6e331",
+        accessToken: "caf39699a2f9df44a2c8acb4ab466385753dd228"
   }
 
 };
