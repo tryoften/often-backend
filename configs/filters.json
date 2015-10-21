@@ -1,0 +1,20 @@
+[
+	{
+		"id": "spotify",
+		"text": "#Spotify",
+		"type": "filter",
+		"image": "spotify-tag"
+	},
+	{
+		"id": "giphy",
+		"text": "#Giphy",
+		"type": "filter",
+		"image": "giphy-tag"
+	},
+	{
+		"id": "soundcloud",
+		"text": "#Soundcloud",
+		"type": "filter",
+		"image": "soundcloud-tag"
+	}
+]
