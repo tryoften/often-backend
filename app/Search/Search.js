@@ -4,7 +4,7 @@ import QueryMaker from '../Models/QueryMaker';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
-
+import _ from 'underscore';
 
 /**
  * Class for interacting with ElasticSearch.
@@ -183,6 +183,12 @@ class Search {
 				if (error) {
 					reject(error);
 				} else {
+					var result = response['query-suggest'][0];
+					result.options = _.each(result.options, (item) => {
+						item.type = "query";
+						item.id = new Buffer(item.text).toString('base64');
+						return item;
+					});
 					resolve(response['query-suggest']);
 				}
 			});
