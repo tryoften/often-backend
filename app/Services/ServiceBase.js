@@ -82,7 +82,7 @@ class ServiceBase {
 		return new Promise( (resolve, reject) => {
 			this.urlHelper.minifyUrl(result[prop]).then( (shortUrl) => {
 				result[prop] = shortUrl;
-				resolve(res);
+				resolve(result);
 
 			}).catch( (err) => { reject(err); });
 		});
