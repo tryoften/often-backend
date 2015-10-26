@@ -24,6 +24,7 @@
     "firebase": "^2.2.4",
     "firebase-queue": "^1.2.1",
     "gcloud": "^0.21.0",
+    "konfig": "^0.2.1",
     "minimist": "^1.2.0",
     "node-bitlyapi": "^0.4.0",
     "request": "^2.60.0",

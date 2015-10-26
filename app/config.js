@@ -1,5 +1,7 @@
 var path = require('path');
 var args = require('minimist')(process.argv.slice(2));
+var env_config = require('konfig')({path: './configs'}).app;
+console.log(env_config);
 
 var config = {
   port: process.env.PORT || '8080',
