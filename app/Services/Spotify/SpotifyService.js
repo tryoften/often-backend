@@ -51,12 +51,8 @@ class SpotifyService extends ServiceBase {
 	getSpotifyData (query, results) {
 
 		return Promise.all([
-
 			this.searchArtists(query, results),
-			this.searchAlbums(query, results),
-			this.searchTracks(query, results),
-			this.searchPlaylists(query, results)
-
+			this.searchTracks(query, results)
 		]);
 		
 	}

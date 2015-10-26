@@ -88,7 +88,7 @@ class Search {
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-	query (query, filteredIndex, autocomplete = false) {
+	query (query, filter, autocomplete = false) {
 
 		var command;
 		if ( (command = this.processCommands(query)) ) {
@@ -99,58 +99,54 @@ class Search {
 
 			let searchId = new Buffer(query).toString('base64');
 			this.esQuerySettings.once("sync", () => {
-				var queryType = this.esQuerySettings.getQueryType(filteredIndex);
-				this.esQueries.query(query, filteredIndex || "", queryType || "").then(
-					(esq) => {
+				var queryType = this.esQuerySettings.getQueryType(filter);
+				this.esQueries.query(query, filter || "", queryType || "").then(esq => {
+					this.es.msearch({
+						body: esq
+					}, (error, response) => {
+						if (error) {
+							console.log('error' + error);
+							reject(error);
+						} else {
+							let results = this.serializeAndSortResults(response);
+							resolve(results);
 
-						this.es.msearch({
-							body : esq
-						}, (error, response) => {
-							if (error) {
-								console.log('error' + error);
-								reject(error);
-							} else {
-									let results = this.serializeAndSortResults(response);
-									
-									resolve(results);
+							// index search term for autocompletion
+							this.es.update({
+								index: 'search-terms',
+								type: 'query',
+								id: searchId,
+								body: {
+									script: `ctx._source.counter += 1; 
+										ctx._source.resultsCount = count;
+										ctx._source.suggest.payload = [:];
+										ctx._source.suggest.payload['resultsCount'] = count;`,
 
-									// index search term for autocompletion
-									
-									this.es.update({
-										index: 'search-terms',
-										type: 'query',
-										id: searchId,
-										body: {
-											script: `ctx._source.counter += 1; 
-												ctx._source.resultsCount = count;
-												ctx._source.suggest.payload = [:];
-												ctx._source.suggest.payload['resultsCount'] = count;`,
+									params: {
+										count: results.length
+									},
 
-											params: {
-												count: results.length
-											},
-
-											upsert: {
-												text: query,
-												suggest: {
-													input: query,
-													payload: {
-														resultsCount: results.length
-													}
-												},
-												counter: 1,
+									upsert: {
+										text: query,
+										suggest: {
+											input: query,
+											payload: {
 												resultsCount: results.length
 											}
-										}
-									});
-								
-								this.esQuerySettings.fetch();
-							}
-						});
-					})
-					.catch( (err) => { reject(err); });
-				});
-				this.esQuerySettings.fetch();
+										},
+										counter: 1,
+										resultsCount: results.length
+									}
+								}
+							});
+							
+							this.esQuerySettings.fetch();
+						}
+					});
+				})
+				.catch( (err) => { reject(err); });
+			});
+			this.esQuerySettings.fetch();
 		}).catch( (err) => { reject(err); });
 	}
 
@@ -272,7 +268,9 @@ class Search {
 
 		var results = [];
 	 	for (let res of data.responses) {
-			results = results.concat(res.hits.hits);
+	 		if (!_.isUndefined(res.hits) && !_.isUndefined(res.hits.hits)) {
+				results = results.concat(res.hits.hits);
+			}
 		}
 		/* Not the most optimal solution, but fast and concise enough */
 		results.sort( (a,b) => {
