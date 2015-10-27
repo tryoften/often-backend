@@ -49,6 +49,7 @@ class Feed extends Model {
 	 */
 	processPages (reingest = false) {
 		this.reingest = reingest;
+		this.set('currentPage', 0);
 
 		return getFeedPage(this.get('url')).then(data => {
 			console.log('Feed.queueJobs(): First page URL: ', this.get('url'));
@@ -99,7 +100,7 @@ class Feed extends Model {
 	queueJobs (data) {
 		let firstItem = data.items[0];
 		let guid = generateURIfromGuid(firstItem.guid);
-		let url = `${FirebaseConfig.BaseURL}/articles/items/${guid}`;
+		let url = `${FirebaseConfig.BaseURL}/articles/${this.id}/items/${guid}`;
 		let itemRef = new Firebase(url);
 		console.log(`check if ${itemRef.toString()} exists`);
 
