@@ -173,7 +173,7 @@ class Feed extends Model {
 			// check if the page fetching failed
 		}
 
-		let itemsRef = new Firebase(`${FirebaseConfig.BaseURL}/feeds/${this.id}/items`);
+		let itemsRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.id}/items`);
 
 		itemsRef.once('value', snapshot => {
 			let shouldIngest = false;
