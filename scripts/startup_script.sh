@@ -95,7 +95,7 @@ stderr_logfile_maxbytes=50MB
 
 [program:nodeapp]
 directory=/opt/app
-command=node build/app.js --firebase-root=http://jakub-test.firebaseio.com --elasticsearch-root=http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200
+command=node build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
 autostart=true
 autorestart=true
 user=nodeapp
