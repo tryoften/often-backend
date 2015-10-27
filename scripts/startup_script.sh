@@ -84,6 +84,7 @@ echo "Node app users owner changed"
 # Configure supervisor to run the node app.
 cat >/etc/supervisor/conf.d/node-app.conf << EOF
 [eventlistener:event_parser]
+directory=/opt/app
 command=node scripts/event_parser.js
 events=PROCESS_LOG_STDERR
 buffer_size=1000
