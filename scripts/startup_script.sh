@@ -83,6 +83,17 @@ echo "Node app users owner changed"
 
 # Configure supervisor to run the node app.
 cat >/etc/supervisor/conf.d/node-app.conf << EOF
+[eventlistener:event_parser]
+directory=/opt/app
+command=node scripts/event_parser.js
+events=PROCESS_LOG_STDERR
+buffer_size=1000
+stdout_logfile=event_parser_stdout        
+stdout_logfile_maxbytes=50MB 
+stdout_logfile_backups=10  
+stderr_logfile=event_parser_stderr     
+stderr_logfile_maxbytes=50MB  
+
 [program:nodeapp]
 directory=/opt/app
 command=node build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
@@ -90,7 +101,15 @@ autostart=true
 autorestart=true
 user=nodeapp
 environment=HOME="/home/nodeapp",USER="nodeapp",NODE_ENV="production"
+stdout_logfile=nodeapp_stdout        
+stdout_logfile_maxbytes=50MB   
+stdout_logfile_backups=10     
+stderr_logfile=nodeapp_stderr 
+stderr_logfile_maxbytes=50MB 
+stderr_logfile_backups=10 
+stderr_events_enabled=true 
 EOF
+
 
 supervisorctl reread
 supervisorctl update
