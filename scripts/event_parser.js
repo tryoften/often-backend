@@ -10,7 +10,7 @@ process.stdin.setEncoding('utf8');
 
 function checkForError() {
 	for (var i = 0; i < error_handlers.length; i++) {
-		if (str.indexOf(error_handlers[i].message) != 1) {
+		if (str.indexOf(error_handlers[i].message) != -1) {
 			return error_handlers[i];
 		}
 	}
@@ -28,6 +28,9 @@ process.stdin.on('readable', function () {
 		  			parent_stderr.write("Failed to execute command.\n");
 		  			parent_stdout.write('RESULT 2\nFAIL');
 		  		} else {
+		  			parent_stderr.write("Str: " + str + "\n");
+		  			parent_stderr.write("Command: " + command + "\n");
+
 		  			str = "";
 		  			parent_stderr.write("Command successfully executed.\n");
 		  			parent_stdout.write('RESULT 2\nOK');
@@ -35,9 +38,12 @@ process.stdin.on('readable', function () {
 		  		parent_stdout.write('READY\n');
 	  		});
 		} else {
-			parent_stdout.write('RESULT 2\nFAIL');
+			parent_stdout.write('RESULT 2\nOK');
 			parent_stdout.write('READY\n');
 		}
+	} else {
+		parent_stdout.write('RESULT 2\nOK');
+		parent_stdout.write('READY\n');
 	}
 
 });
