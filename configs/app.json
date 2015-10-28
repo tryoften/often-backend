@@ -1,6 +1,7 @@
 {
   "default": {
     "port": "8080",
+    "secret": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E",
     "logPath": "./",
     "dataBackend": "datastore",
     "cloudStorageBucket": "acoustic-rider-104419",
@@ -9,8 +10,10 @@
       "bucket_name": "resized_images",
       "key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
     },
-    "firebase": "https://asterix.firebaseio.com",
     "oauth2": {
+      "clientId": "your-client-id-here",
+      "clientSecret": "your-client-secret-here",
+      "scopes": ["email", "profile"],
       "redirectUrl": "http://localhost:8080/oauth2callback"
     },
     "elasticsearch": {
@@ -61,11 +64,11 @@
   },
 
   "development": {
-    "secret": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E",
-    "oauth2": {
-      "clientId": "your-client-id-here",
-      "clientSecret": "your-client-secret-here",
-      "scopes": ["email", "profile"]
+  },
+
+  "frank": {
+    "firebase": {
+      "BaseURL": "https://often-late.firebaseio.com"
     }
   }
 }
