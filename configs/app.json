@@ -1,6 +1,6 @@
 {
   "default": {
-    "port": 8080,
+    "port": "8080",
     "logPath": "./",
     "dataBackend": "datastore",
     "cloudStorageBucket": "acoustic-rider-104419",
@@ -61,20 +61,11 @@
   },
 
   "development": {
-    "port": #{process.env.PORT},
     "secret": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E",
-    "logPath": #{process.env.LOG_PATH},
     "oauth2": {
       "clientId": "your-client-id-here",
       "clientSecret": "your-client-secret-here",
-      "redirectUrl": #{process.env.OAUTH2_CALLBACK},
       "scopes": ["email", "profile"]
-    },
-    "firebase": {
-      "BaseURL": #{process.env.firebase-root}
-    },
-    "elasticsearch": {
-      "BaseURL": #{process.env.elasticsearch-root}
     }
   }
 }

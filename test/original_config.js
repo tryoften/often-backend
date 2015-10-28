@@ -43,11 +43,11 @@ var config = {
   },
 
   firebase: {
-	  BaseURL: args['firebase-root'] || 'https://asterix.firebaseio.com',
+          BaseURL: args['firebase-root'] || 'https://asterix.firebaseio.com',
   },
 
   elasticsearch: {
-	  BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+          BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
   },
 
   bitly: {
