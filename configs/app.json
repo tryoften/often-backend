@@ -1,74 +1,74 @@
 {
-  "default": {
-    "port": "8080",
-    "secret": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E",
-    "logPath": "./",
-    "dataBackend": "datastore",
-    "cloudStorageBucket": "acoustic-rider-104419",
-    "gcloud": {
-      "projectId": "acoustic-rider-104419",
-      "bucket_name": "resized_images",
-      "key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
-    },
-    "oauth2": {
-      "clientId": "your-client-id-here",
-      "clientSecret": "your-client-secret-here",
-      "scopes": ["email", "profile"],
-      "redirectUrl": "http://localhost:8080/oauth2callback"
-    },
-    "elasticsearch": {
-      "BaseURL": "http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200"
-    },
-    "firebase": {
-      "BaseURL": "https://asterix.firebaseio.com",
-      "queues": {
-        "default": {
-          "path": "/queues/default",
-          "numWorkers": 1,
-          "sanitize": false,
-          "suppressStack": true
-        },
-        "feed": {
-          "specId": "feed_ingestion",
-          "path": "/queues/feed",
-          "numWorkers": 2,
-          "sanitize": false
-        },
-        "search": {
-          "specId": "search_query",
-          "path": "/queues/search",
-          "numWorkers": 2,
-          "sanitize": false,
-          "suppressStack": true
-        },
-        "imageResizing": {
-          "specId": "image_resizing",
-          "path": "/queues/feed",
-          "numWorkers": 2,
-          "sanitize": false,
-          "suppressStack": true
-        },
-        "user": {
-          "path": "/queues/user",
-          "numWorkers": 2,
-          "sanitize": false,
-          "suppressStack": true
-        }
-      }
-    },
-    "bitly": {
-      "clientId": "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
-      "clientSecret": "0c7321da3281625aa86d6245374ee206c1d6e331",
-      "accessToken": "caf39699a2f9df44a2c8acb4ab466385753dd228"
-    }
-  },
+	"default": {
+		"port": "8080",
+		"secret": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E",
+		"logPath": "./",
+		"dataBackend": "datastore",
+		"cloudStorageBucket": "acoustic-rider-104419",
+		"gcloud": {
+			"projectId": "acoustic-rider-104419",
+			"bucket_name": "resized_images",
+			"key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
+		},
+		"oauth2": {
+			"clientId": "your-client-id-here",
+			"clientSecret": "your-client-secret-here",
+			"scopes": ["email", "profile"],
+			"redirectUrl": "http://localhost:8080/oauth2callback"
+		},
+		"elasticsearch": {
+			"BaseURL": "http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200"
+		},
+		"firebase": {
+			"BaseURL": "https://asterix.firebaseio.com",
+			"queues": {
+				"default": {
+					"path": "/queues/default",
+					"numWorkers": 1,
+					"sanitize": false,
+					"suppressStack": true
+				},
+				"feed": {
+					"specId": "feed_ingestion",
+					"path": "/queues/feed",
+					"numWorkers": 2,
+					"sanitize": false
+				},
+				"search": {
+					"specId": "search_query",
+					"path": "/queues/search",
+					"numWorkers": 2,
+					"sanitize": false,
+					"suppressStack": true
+				},
+				"imageResizing": {
+					"specId": "image_resizing",
+					"path": "/queues/feed",
+					"numWorkers": 2,
+					"sanitize": false,
+					"suppressStack": true
+				},
+				"user": {
+					"path": "/queues/user",
+					"numWorkers": 2,
+					"sanitize": false,
+					"suppressStack": true
+				}
+			}
+		},
+		"bitly": {
+			"clientId": "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
+			"clientSecret": "0c7321da3281625aa86d6245374ee206c1d6e331",
+			"accessToken": "caf39699a2f9df44a2c8acb4ab466385753dd228"
+		}
+	},
 
-  "development": {
-  },
+	"development": {
+	},
 
-  "frank": {
-    "firebase": {
-      "BaseURL": "https://often-late.firebaseio.com"
-    }
-  }
+	"frank": {
+		"firebase": {
+			"BaseURL": "https://often-late.firebaseio.com"
+		}
+	}
 }
