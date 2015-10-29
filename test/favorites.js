@@ -8,9 +8,9 @@ var konfig = require('../app/config');
 import Favorites from '../app/Collections/Favorites';
 
 describe('app/Collections/Favorites', function() {
-  it('throws an error if not given a userID', function() {
-    (() => {
-      var collection = new Favorites();
-    }).should.throw();
-  });
+	it('throws an error if not given a userID', function() {
+		(() => {
+			var collection = new Favorites();
+		}).should.throw();
+	});
 });
