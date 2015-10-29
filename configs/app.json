@@ -70,5 +70,11 @@
     "firebase": {
       "BaseURL": "https://often-late.firebaseio.com"
     }
+  },
+
+  "testing": {
+    "firebase": {
+      "BaseURL": "https://test-often.firebaseio.com"
+    }
   }
 }
