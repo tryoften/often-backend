@@ -90,7 +90,6 @@ class UserWorker extends Worker {
 		} catch(err) {
 			reject(err);
 		}
-
 	}
 }
 
