@@ -35,7 +35,7 @@ class Trending extends Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts) {
-		this.url = `${FirebaseConfig.BaseURL}/trending`;
+		this.url = `${FirebaseConfig.BaseURL}/trending/all`;
 		this.idAttribute = 'id';
 	}
 
