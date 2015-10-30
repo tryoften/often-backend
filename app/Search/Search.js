@@ -6,7 +6,6 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import _ from 'underscore';
 
-
 /**
  * Class for interacting with ElasticSearch.
  * Format:

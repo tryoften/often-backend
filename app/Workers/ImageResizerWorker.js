@@ -1,4 +1,5 @@
 import http from 'http';
+import https from 'https';
 import gcloud from 'gcloud';
 import Worker from './Worker';
 import FeedPage from '../Models/FeedPage';
@@ -41,7 +42,6 @@ class ImageResizerWorker extends Worker {
 
 	ingest (originType, sourceId, resourceId, url) {
 		return new Promise((resolve, reject) => {
-
 			if (_.isUndefined(url) || _.isNull(url)) {
 				reject("Bad Url: " + url);
 				return;
@@ -100,9 +100,10 @@ class ImageResizerWorker extends Worker {
 	download (url) { 
 		return new Promise((resolve, reject) => {
 			/* download image */
-			http.get(url, response => {
+			var protocol = (url.indexOf('https') === 0) ? https : http;
+			protocol.get(url, response => {
 				if(response.statusCode !=  "200") {
-					reject("Http status not 200");
+					reject("Response code not 200");
 					return;
 				}
 				var data = new Stream();
@@ -129,7 +130,7 @@ class ImageResizerWorker extends Worker {
 		        );
 			})
 			.on('error', (e) => {
-			  console.log("Got error: " + e.message);
+			  console.log("Error found: " + e.message);
 			  reject(e);
 			}); 
 		});
