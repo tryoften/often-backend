@@ -15,6 +15,7 @@
     "often-backend"
   ],
   "dependencies": {
+    "airbrake": "^0.3.8",
     "backbone": "^1.1.2",
     "backbone-relational": "~0.9.0",
     "backbonefire": "git://github.com/october-labs/backbonefire",
