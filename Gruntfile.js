@@ -80,7 +80,7 @@ module.exports = function (grunt) {
       },
       js: {
         files: '<%= jshint.js.src %>',
-        tasks: ['jshint:js', 'browserify:client']
+        tasks: ['jshint:js']//, 'browserify:client']
       },
       babel: {
         files: 'app/**/*.js',
