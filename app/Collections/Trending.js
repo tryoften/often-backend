@@ -2,6 +2,7 @@ import 'backbonefire';
 import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
+import _ from 'underscore';
 
 // Note TrendingItem isn't used as the model for the collection, just used to
 // fetch individual items when needed
@@ -35,6 +36,7 @@ class Trending extends Firebase.Collection {
 	 */
 	initialize (models, opts) {
 		this.url = `${FirebaseConfig.BaseURL}/trending`;
+		this.idAttribute = 'id';
 	}
 
 	/**
@@ -45,22 +47,22 @@ class Trending extends Firebase.Collection {
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
 	increment (item) {
-		console.log(item);
+		// So that URI isn't generated twice by accident between Trending and Favorites
+		item = _.clone(item);
 
 		item.id = generateURIfromGuid(item.id);
 		let ti = new TrendingItem({id: item.id});
-		console.log(ti);
 		ti.set(item);
 
-		if (ti.favorited_count)
-			ti.favorited_count++;
+		if (ti.get('favorited_count'))
+			ti.set('favorited_count', ti.get('favorited_count') + 1);
 		else
-			ti.favorited_count = 1;
+			ti.set('favorited_count', 1);
 
 		let bindSyncHandler = function(resolve, reject) {
 			return (synced) => {
-				for (let new_favorite of synced.models)
-					console.log('New favorite');
+				for (let new_item of synced.models)
+					console.log('New item');
 
 				resolve();
 			};

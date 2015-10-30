@@ -57,8 +57,6 @@ class Favorites extends Firebase.Collection {
 							}
 						}
 
-						console.log('Generated Item ID before URI generation');
-						console.log(item.id);
 						item.id = generateURIfromGuid(item.id);
 						item.time_added = Date.now();
 						this.add(item);
