@@ -1,6 +1,7 @@
 import Worker from './Worker';
 import Recents from '../Collections/Recents';
 import Favorites from '../Collections/Favorites';
+import Trending from '../Collections/Trending';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 
@@ -34,47 +35,55 @@ class UserWorker extends Worker {
    *
    * @return {void}
    */
-  process (data, progress, resolve, reject) {
-    try {
-      if (data.task == 'addFavorite') {
-        //instantiate favorites collection for user
-        let favs = new Favorites(data.user);
-        favs.favorite(data.result)
-          .then( (d) => {
-            resolve(d);
-          }).catch( (err) => {
-            reject(err);
-          });
+	process (data, progress, resolve, reject) {
+		try {
+			if (data.task == 'addFavorite') {
+				// Instantiate favorites collection for user
+				let favs = new Favorites(data.user);
+				let favorites_promise = favs.favorite(data.result);
 
-      } else if (data.task == 'removeFavorite') {
-        //instantiate favorites collection for user
-        let favs = new Favorites(data.user);
-        favs.unfavorite(data.result)
-          .then( (d) => {
-            resolve(d);
-          }).catch( (err) => {
-            reject(err);
-          });
+				// Also increment counter in trending
+				let trending_collection = new Trending();
+				let trending_promise = trending_collection.increment(data.result);
 
-      } else if (data.task == 'addRecent') {
-        //instantiate recents collection for user
-        let recs = new Recents(data.user);
-        recs.addRecent(data.result)
-          .then( (d) => {
-            resolve(d);
-          }).catch( (err) => {
-            reject(err);
-          });
+				let promises = Promise.all([favorites_promise, trending_promise]);
 
-      } else {
-        //no task found return an error
-        reject('Invalid user task detected');
-      }
-    } catch(err) {
-      reject(err);
-    }
+				// Resolves if both promises resolve, otherwise rejects
+				promises.then( (values) => {
+					resolve(values[0]);
+				}).catch( (err) => {
+					reject(err);
+				});
 
-  }
+			} else if (data.task == 'removeFavorite') {
+				//instantiate favorites collection for user
+				let favs = new Favorites(data.user);
+				favs.unfavorite(data.result)
+					.then( (d) => {
+						resolve(d);
+					}).catch( (err) => {
+						reject(err);
+					});
+
+			} else if (data.task == 'addRecent') {
+				//instantiate recents collection for user
+				let recs = new Recents(data.user);
+				recs.addRecent(data.result)
+					.then( (d) => {
+						resolve(d);
+					}).catch( (err) => {
+						reject(err);
+					});
+
+			} else {
+				//no task found return an error
+				reject('Invalid user task detected');
+			}
+		} catch(err) {
+			reject(err);
+		}
+
+	}
 }
 
 export default UserWorker;
