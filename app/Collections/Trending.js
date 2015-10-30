@@ -45,27 +45,32 @@ class Trending extends Firebase.Collection {
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
 	increment (item) {
-		console.log('item.id');
-		console.log(item.id);
+		console.log(item);
 
+		item.id = generateURIfromGuid(item.id);
 		let ti = new TrendingItem({id: item.id});
+		console.log(ti);
+		ti.set(item);
 
-		console.log('URI');
-		console.log(generateURIfromGuid(item.id));
-		ti.id = generateURIfromGuid(item.id);
+		if (ti.favorited_count)
+			ti.favorited_count++;
+		else
+			ti.favorited_count = 1;
 
 		let bindSyncHandler = function(resolve, reject) {
 			return (synced) => {
 				for (let new_favorite of synced.models)
-					console.log(new_favorite);
+					console.log('New favorite');
 
 				resolve();
 			};
 		};
 
 		let promise = new Promise((resolve, reject) => {
-			this.once('sync', bindSyncHandler(resolve, reject), (error) => {
-				console.log(error);
+			this.once('sync', bindSyncHandler(resolve, reject), function(reject) {
+				return (error) => {
+					reject(error);
+				};
 			});
 		});
 
