@@ -50,6 +50,7 @@ class Trending extends Firebase.Collection {
 		// So that URI isn't generated twice by accident between Trending and Favorites
 		item = _.clone(item);
 
+		// Sync up with firebase and update counter
 		item.id = generateURIfromGuid(item.id);
 		let ti = new TrendingItem({id: item.id});
 		ti.set(item);
@@ -59,21 +60,13 @@ class Trending extends Firebase.Collection {
 		else
 			ti.set('favorited_count', 1);
 
-		let bindSyncHandler = function(resolve, reject) {
-			return (synced) => {
-				for (let new_item of synced.models)
-					console.log('New item');
+		// Just in case we want to do anything with the full collection
+		let success = (resolve, synced_data) => resolve(true);
 
-				resolve();
-			};
-		};
+		let errorHandler = (reject, error) => reject(error);
 
 		let promise = new Promise((resolve, reject) => {
-			this.once('sync', bindSyncHandler(resolve, reject), function(reject) {
-				return (error) => {
-					reject(error);
-				};
-			});
+			this.once('sync', _.partial(success, resolve), _.partial(errorHandler, reject));
 		});
 
 		return promise;
@@ -87,7 +80,30 @@ class Trending extends Firebase.Collection {
 	 *
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
-	decrement () {
+	decrement (item) {
+		// So that URI isn't generated twice by accident between Trending and Favorites
+		item = _.clone(item);
+
+		// Sync up with firebase and update counter
+		item.id = generateURIfromGuid(item.id);
+		let ti = new TrendingItem({id: item.id});
+		ti.set(item);
+
+		if (ti.get('favorited_count'))
+			ti.set('favorited_count', ti.get('favorited_count') - 1);
+		else
+			ti.set('favorited_count', 0);
+
+		// Just in case we want to do anything with the full collection
+		let success = (resolve, synced_data) => resolve(true);
+
+		let errorHandler = (reject, error) => reject(error);
+
+		let promise = new Promise((resolve, reject) => {
+			this.once('sync', _.partial(success, resolve), _.partial(errorHandler, reject));
+		});
+
+		return promise;
 	}
 }
 

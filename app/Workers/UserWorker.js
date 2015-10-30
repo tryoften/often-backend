@@ -58,12 +58,20 @@ class UserWorker extends Worker {
 			} else if (data.task == 'removeFavorite') {
 				//instantiate favorites collection for user
 				let favs = new Favorites(data.user);
-				favs.unfavorite(data.result)
-					.then( (d) => {
-						resolve(d);
-					}).catch( (err) => {
-						reject(err);
-					});
+				let favorites_promise = favs.unfavorite(data.result);
+
+				// Also increment counter in trending
+				let trending_collection = new Trending();
+				let trending_promise = trending_collection.decrement(data.result);
+
+				let promises = Promise.all([favorites_promise, trending_promise]);
+
+				// Resolves if both promises resolve, otherwise rejects
+				promises.then( (values) => {
+					resolve(values[0]);
+				}).catch( (err) => {
+					reject(err);
+				});
 
 			} else if (data.task == 'addRecent') {
 				//instantiate recents collection for user
