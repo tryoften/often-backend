@@ -8,7 +8,7 @@ import config from '../config';
 class TrendingItem extends Firebase.Model {
 
 	initialize () {
-		this.urlRoot = config.firebase.BaseURL + '/trending';
+		this.urlRoot = config.firebase.BaseURL + '/trending/all';
 		this.autoSync = true;
 		this.idAttribute = 'id';
 	}
