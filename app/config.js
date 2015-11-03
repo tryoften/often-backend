@@ -1,96 +1,38 @@
 var path = require('path');
 var args = require('minimist')(process.argv.slice(2));
+var env_config = require('konfig')({path: './configs'}).app;
 
-var config = {
-  port: process.env.PORT || '8080',
+// Have to figure out a way to do this in JSON file
+var config = env_config;
 
-  /* Secret is used by sessions to encrypt the cookie */
-  secret: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E',
+// When ENV vars are empty they overwrite defaults in JSON, put it here for now
+if (process.env.PORT) {
+	config.port = process.env.PORT;
+}
 
-  logPath: process.env.LOG_PATH || './',
+if (process.env.LOG_PATH) {
+	config.logPath = process.env.LOG_PATH;
+}
 
-  /*
-    dataBackend can be 'datastore', 'cloudsql', or 'mongodb'. Be sure to
-    configure the appropriate settings for each storage engine below.
-    Note that datastore requires no additional configuration.
-  */
-  dataBackend: 'datastore',
+if (process.env.OAUTH2_CALLBACK) {
+	config.oauth2.redirectUrl = process.env.OAUTH2_CALLBACK;
+}
 
-  /*
-    This can also be your project id as each project has a default
-    bucket with the same name as the project id.
-  */
-  cloudStorageBucket: 'acoustic-rider-104419',
+if (args['firebase-root']) {
+	config.firebase.BaseURL = args['firebase-root'];
+}
 
-  /*
-    This is the id of your project in the Google Developers Console.
-  */
-  gcloud: {
-    projectId: 'acoustic-rider-104419',
-    bucket_name: 'resized_images',
-    key: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E'
-  },
+if (args['elasticsearch-root']) {
+	config.elasticsearch.BaseURL = args['elasticsearch-root'];
+}
 
-  /*
-    The client ID and secret can be obtained by generating a new Client ID for
-    a web application on Google Developers Console.
-  */
-  oauth2: {
-    clientId: 'your-client-id-here',
-    clientSecret: 'your-client-secret-here',
-    redirectUrl: process.env.OAUTH2_CALLBACK || 'http://localhost:8080/oauth2callback',
-    scopes: ['email', 'profile']
-  },
-
-  firebase: {
-	  BaseURL: args['firebase-root'] || 'https://asterix.firebaseio.com',
-  },
-
-  elasticsearch: {
-	  BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
-  },
-
-  bitly: {
-        clientId: "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
-        clientSecret: "0c7321da3281625aa86d6245374ee206c1d6e331",
-        accessToken: "caf39699a2f9df44a2c8acb4ab466385753dd228"
-  }
-
-};
-
-config.firebase.queues = {
-  default: {
-    url: `${config.firebase.BaseURL}/queues/default`,
-    numWorkers: 1,
-    sanitize: false,
-    suppressStack: true
-  },
-  feed: {
-    specId: 'feed_ingestion',
-    url: `${config.firebase.BaseURL}/queues/feed`,
-    numWorkers: 2,
-    sanitize: false
-  },
-  search: {
-    specId: 'search_query',
-    url: `${config.firebase.BaseURL}/queues/search`,
-    numWorkers: 2,
-    sanitize: false,
-    suppressStack: true
-  },
-  imageResizing: {
-    specId: 'image_resizing',
-    url: `${config.firebase.BaseURL}/queues/feed`,
-    numWorkers: 2,
-    sanitize: false,
-    suppressStack: true
-  },
-  user: {
-    url: `${config.firebase.BaseURL}/queues/user`,
-    numWorkers: 2,
-    sanitize: false,
-    suppressStack: true
-  }
-};
+// No way to re-use host URL in JSON
+var queues = Object.keys(config.firebase.queues);
+queues.forEach(function(queue) {
+	if (config.firebase.queues[queue].path) {
+		config.firebase.queues[queue].url = config.firebase.BaseURL + config.firebase.queues[queue].path;
+		delete config.firebase.queues[queue].path;
+	}
+});
 
 module.exports = config;
