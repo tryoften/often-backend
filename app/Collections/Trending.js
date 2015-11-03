@@ -96,12 +96,11 @@ class Trending extends Firebase.Collection {
 		}
 
 		// Just in case we want to do anything with the full collection
-		let success = (resolve, synced_data) => resolve(true);
-
-		let errorHandler = (reject, error) => reject(error);
-
 		let promise = new Promise((resolve, reject) => {
-			this.once('sync', _.partial(success, resolve), _.partial(errorHandler, reject));
+			this.once('sync',
+				(synced_data) => resolve(true),
+				(error) => reject(error)
+			);
 		});
 
 		return promise;
