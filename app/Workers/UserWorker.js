@@ -1,11 +1,12 @@
 import Worker from './Worker';
 import Recents from '../Collections/Recents';
 import Favorites from '../Collections/Favorites';
+import Trending from '../Collections/Trending';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 
 class UserWorker extends Worker {
-	
+
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.user);
 		super(options);
@@ -14,13 +15,13 @@ class UserWorker extends Worker {
 	/**
 	 * Processes the user related tasks
 	 * @param {object} data - data object from the user queue
-	 *  Required attributes: 
+	 *  Required attributes:
 	 *	user - id of user on whose behalf a given task is to be processed
 	 *  task - specifies the operation to be performed. Currently supported tasks are: addFavorite, removeFavorite, addRecent
 	 *  result - contains a search result on which the task should be performed
 	 *  Example:
- 	 *	
- 	 *  data : {
+	 *
+	 *  data : {
 	 *		user : "myUser123",
 	 *		task : "addFavorites",
 	 *		result : {
@@ -37,11 +38,19 @@ class UserWorker extends Worker {
 	process (data, progress, resolve, reject) {
 		try {
 			if (data.task == 'addFavorite') {
-				//instantiate favorites collection for user
+				// Instantiate favorites collection for user
 				let favs = new Favorites(data.user);
-				favs.favorite(data.result)
-				.then( (d) => {
-					resolve(d);
+				let favorites_promise = favs.favorite(data.result);
+
+				// Also increment counter in trending
+				let trending_collection = new Trending();
+				let trending_promise = trending_collection.increment(data.result);
+
+				let promises = Promise.all([favorites_promise, trending_promise]);
+
+				// Resolves if both promises resolve, otherwise rejects
+				promises.then( (values) => {
+					resolve(values[0]);
 				}).catch( (err) => {
 					reject(err);
 				});
@@ -49,23 +58,31 @@ class UserWorker extends Worker {
 			} else if (data.task == 'removeFavorite') {
 				//instantiate favorites collection for user
 				let favs = new Favorites(data.user);
-				favs.unfavorite(data.result)
-				.then( (d) => {
-					resolve(d);
+				let favorites_promise = favs.unfavorite(data.result);
+
+				// Also increment counter in trending
+				let trending_collection = new Trending();
+				let trending_promise = trending_collection.decrement(data.result);
+
+				let promises = Promise.all([favorites_promise, trending_promise]);
+
+				// Resolves if both promises resolve, otherwise rejects
+				promises.then( (values) => {
+					resolve(values[0]);
 				}).catch( (err) => {
 					reject(err);
 				});
 
-			} else if (data.task == 'addRecent') {	
+			} else if (data.task == 'addRecent') {
 				//instantiate recents collection for user
 				let recs = new Recents(data.user);
 				recs.addRecent(data.result)
-				.then( (d) => {
-					resolve(d);
-				}).catch( (err) => {
-					reject(err);
-				});
-				
+					.then( (d) => {
+						resolve(d);
+					}).catch( (err) => {
+						reject(err);
+					});
+
 			} else {
 				//no task found return an error
 				reject('Invalid user task detected');
@@ -73,7 +90,6 @@ class UserWorker extends Worker {
 		} catch(err) {
 			reject(err);
 		}
-		
 	}
 }
 

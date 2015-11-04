@@ -1,6 +1,6 @@
 # Often Backend
 
-Backend service for Often. A backend service written in Node.js that does handles ingesting RSS feeds and pushing new content to Firebase / ElasticSearch.
+Backend service for Often. A backend service written in Node.js that handles ingesting RSS feeds and pushing new content to Firebase / ElasticSearch.
 
 ## Endpoints
 All endpoints are in Firebase and are queues. The workers implemented in this service are in charge of taking tasks off the queues and processing them.
