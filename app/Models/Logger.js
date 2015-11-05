@@ -28,7 +28,7 @@ logger.rewriters.push( (level, msg, meta) => {
 	newMeta.date = new Date();
 	newMeta.host = os.hostname();
 	newMeta.env = FirebaseConfig.BaseURL;
-	newMeta.worker = config.worker;
+	newMeta.workers = config.workers;
 	newMeta.data = meta;
 
 	return newMeta;
