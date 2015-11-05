@@ -3,7 +3,7 @@ import { GCL } from 'winston-gcl';
 import { Firebase } from 'winston-firebase';
 import config from '../config';
 import { firebase as FirebaseConfig } from '../config';
-import { winston as WinstonConfig } from '../config'
+import { winston as WinstonConfig } from '../config';
 import _ from 'underscore';
 import google from 'googleapis';
 import os from 'os';
@@ -24,14 +24,14 @@ for (var transport of WinstonConfig.transports) {
 }
 
 logger.rewriters.push( (level, msg, meta) => {
-	var newMeta = {};
-	newMeta.date = new Date();
-	newMeta.host = os.hostname();
-	newMeta.env = FirebaseConfig.BaseURL;
-	newMeta.workers = config.workers;
-	newMeta.data = meta;
+	return {
+		date: new Date(),
+		host: os.hostname(),
+		env: FirebaseConfig.BaseURL,
+		workers: config.workers,
+		data: meta
+	};
 
-	return newMeta;
 });
 
 export default logger;
