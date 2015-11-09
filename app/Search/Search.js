@@ -103,7 +103,7 @@ class Search {
 				this.esQueries.query(query, filteredIndex || "", queryType || "").then(
 
 					(esq) => {
-						
+
 						this.es.msearch({
 							body : esq
 						}, (error, response) => {
@@ -222,8 +222,8 @@ class Search {
 		if (filter.length > 0) {
 			var matchingFilters = [];
 			var hashedFilter = "#" + filter;
-			for( var actualFilter of this.filters.models) {
-				if( actualFilter.get("text").substring(0, hashedFilter.length) === hashedFilter) {
+			for ( var actualFilter of this.filters.models) {
+				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
 					matchingFilters.push(actualFilter.toJSON());
 				}
 			}

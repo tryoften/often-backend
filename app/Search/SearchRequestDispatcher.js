@@ -28,7 +28,6 @@ class SearchRequestDispatcher {
 		/* service provider name to service instances map */
 		this.serviceProviders = {};
 		this.serviceProviders.spotify = new SpotifyService({responses : this.responses});
-		this.serviceProviders.giphy = new GiphyService({responses : this.responses});
 		this.serviceProviders.youtube = new YouTubeService({responses : this.responses});
 		this.serviceProviders.soundcloud = new SoundCloudService({responses : this.responses});
 
@@ -56,7 +55,7 @@ class SearchRequestDispatcher {
 	process (incomingRequest) {
 
 		return new Promise((resolve, reject) => {
-			
+
 			var parsedContents = this.searchParser.parse(incomingRequest.query.text);
 				
 			/* whether the query is for autocomplete suggestions */
