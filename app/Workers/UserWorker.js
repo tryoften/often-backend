@@ -4,6 +4,7 @@ import Favorites from '../Collections/Favorites';
 import Trending from '../Collections/Trending';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 class UserWorker extends Worker {
 
@@ -82,6 +83,10 @@ class UserWorker extends Worker {
 					}).catch( (err) => {
 						reject(err);
 					});
+
+			} else if (data.task == 'createToken') {
+				var token = UserTokenGenerator.generateToken(data.user, data.data);
+				resolve(token);
 
 			} else {
 				//no task found return an error
