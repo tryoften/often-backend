@@ -56,7 +56,7 @@ class SearchRequestDispatcher {
 	process (incomingRequest) {
 
 		return new Promise((resolve, reject) => {
-
+			
 			var parsedContents = this.searchParser.parse(incomingRequest.query.text);
 				
 			/* whether the query is for autocomplete suggestions */

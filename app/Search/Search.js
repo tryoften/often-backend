@@ -5,7 +5,7 @@ import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import _ from 'underscore';
-
+import logger from '../Models/Logger';
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -101,8 +101,9 @@ class Search {
 			this.esQuerySettings.once("sync", () => {
 				var queryType = this.esQuerySettings.getQueryType(filteredIndex);
 				this.esQueries.query(query, filteredIndex || "", queryType || "").then(
-					(esq) => {
 
+					(esq) => {
+						
 						this.es.msearch({
 							body : esq
 						}, (error, response) => {
@@ -134,8 +135,10 @@ class Search {
 												text: query,
 												suggest: {
 													input: query,
+													output : query,
 													payload: {
-														resultsCount: results.length
+														resultsCount: results.length,
+														type: "query"
 													}
 												},
 												counter: 1,
@@ -185,7 +188,10 @@ class Search {
 				} else {
 					var result = response['query-suggest'][0];
 					result.options = _.each(result.options, (item) => {
-						item.type = "query";
+						item.type = item.payload.type;
+						if (item.type == "filter") {
+							item.image = item.text.substring(1, item.text.length) + "-tag";
+						}
 						item.id = new Buffer(item.text).toString('base64');
 						return item;
 					});
@@ -196,6 +202,7 @@ class Search {
 	}
 
 	processCommands (filter) {
+
 		if (filter == 'filters-list') {
 			var self = this;
 			return new Promise( (resolve, reject) => {
@@ -211,6 +218,27 @@ class Search {
 		if (filter.indexOf('top-searches') === 0) {
 			return this.getTopSearches();
 		}
+
+		if (filter.length > 0) {
+			var matchingFilters = [];
+			var hashedFilter = "#" + filter;
+			for( var actualFilter of this.filters.models) {
+				if( actualFilter.get("text").substring(0, hashedFilter.length) === hashedFilter) {
+					matchingFilters.push(actualFilter.toJSON());
+				}
+			}
+			if (matchingFilters.length === 0) return false;
+			return new Promise( (resolve, reject) => {
+				resolve([
+					{
+						text: hashedFilter,
+						options: matchingFilters
+					}
+				]);
+			});
+					
+		}
+
 		return false;
 	}
 
