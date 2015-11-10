@@ -1,6 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { FirebaseConfig } from '../config';
+import { firebase as FirebaseConfig } from '../config';
 import User from '../Models/User';
 
 /**
@@ -8,19 +8,24 @@ import User from '../Models/User';
  */
 class Users extends Firebase.Collection {
 
+	constructor () {
+		let opts = {
+			idAttribute: 'id',
+			model: User,
+			autoSync: true
+		};
+		super([], opts);
+	}
+
 	/**
 	 * Initializes the users collection.
-	 * @param {object} models - supporting models
-	 * @param {object} opts - supporting options
+	 * @param {string} models - optional models for backbone
+	 * @param {string} opts - optional options for backbone
 	 *
 	 * @return {void}
 	 */
 	initialize (models, opts) {
-
-		this.model = User;
 		this.url = `${FirebaseConfig.BaseURL}/users`;
-		this.autoSync = true;
-
 	}
 
 }
