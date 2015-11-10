@@ -5,6 +5,7 @@ import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
 import URLHelper from '../Models/URLHelper';
+import _ from 'underscore';
 
 class FeedPage {
 
@@ -117,6 +118,7 @@ class FeedPage {
 				o["media:content"]["@"].medium === "image") {
 				return o["media:content"]["@"].url;
 			}
+
 			try {
 				let $description = cheerio.load(o.description);
 				let $image = $description('img');
@@ -151,6 +153,10 @@ class FeedPage {
 
 			this.urlHelper.minifyUrl(data.link).then( (shortUrl) => {
 				data.link = shortUrl;
+				if (_.isUndefined(image) || _.isNull(image)) {
+					resolve(data);
+					return;
+				}
 				this.imageResizer
 				.ingest('rss', this.feed.id, item.guid, image)
 				.then(imageData => {
