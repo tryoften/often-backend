@@ -90,9 +90,13 @@ class UserWorker extends Worker {
 				var token = UserTokenGenerator.generateToken(data.user, data.data);
 				var user = this.users.get(data.user);
 				if (_.isUndefined(user)) {
-					user = this.users.create({ id : data.user });
+					this.users.create({ 
+						id : data.user,
+						auth_token : token 
+					});
+				} else {
+					user.setToken(token);
 				}
-				user.setToken(token);
 				resolve(token);
 				
 			} else {
