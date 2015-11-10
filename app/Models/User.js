@@ -5,6 +5,16 @@ import { Model } from 'backbone';
  */
 class User extends Model {
 
+	/**
+	 * Sets the authentication token on a user
+	 * @param {string} token - SHA256 encoded string
+	 *
+	 * @return {void}
+	 */
+	setToken (token) {
+		this.set("auth_token", token);
+	}
+
 }
 
 export default User;

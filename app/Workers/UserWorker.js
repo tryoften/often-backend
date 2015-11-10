@@ -5,12 +5,14 @@ import Trending from '../Collections/Trending';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import Users from '../Collections/Users';
 
 class UserWorker extends Worker {
 
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.user);
 		super(options);
+		this.users = new Users();
 	}
 
 	/**
@@ -86,8 +88,9 @@ class UserWorker extends Worker {
 
 			} else if (data.task == 'createToken') {
 				var token = UserTokenGenerator.generateToken(data.user, data.data);
+				this.users.get(data.user).setToken(token);
 				resolve(token);
-
+				
 			} else {
 				//no task found return an error
 				reject('Invalid user task detected');
