@@ -87,7 +87,6 @@ class UserWorker extends Worker {
 					});
 
 			} else if (data.task == 'createToken') {
-				console.log('here');
 				var token = UserTokenGenerator.generateToken(data.user, data.data);
 				var user = this.users.get(data.user);
 				if (_.isUndefined(user)) {
