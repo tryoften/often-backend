@@ -88,7 +88,11 @@ class UserWorker extends Worker {
 
 			} else if (data.task == 'createToken') {
 				var token = UserTokenGenerator.generateToken(data.user, data.data);
-				this.users.get(data.user).setToken(token);
+				var user = this.users.get(data.user);
+				if (_.isUndefined(user)) {
+					user = this.users.create({ id : data.user });
+				}
+				user.setToken(token);
 				resolve(token);
 				
 			} else {
