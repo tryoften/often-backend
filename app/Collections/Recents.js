@@ -3,6 +3,7 @@ import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import Recent from '../Models/Recent';
 import _ from 'underscore';
+import logger from '../Models/Logger';
 
 /**
  * This class is responsible for maintaining the recents collection.
@@ -61,6 +62,7 @@ class Recents extends Firebase.Collection {
 						syncedRecents.create(item);
 						resolve(true);
 					}
+					logger.info("Recents", "addRecent", "Added item", item);
 				}, 
 				err => { 
 					reject(err);

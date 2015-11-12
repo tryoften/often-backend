@@ -3,6 +3,7 @@ import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import Favorite from '../Models/Favorite';
+import logger from '../Models/Logger';
 
 /**
  * This class is responsible for maintaining the favorite collection.
@@ -61,6 +62,7 @@ class Favorites extends Firebase.Collection {
 						item.time_added = Date.now();
 						this.add(item);
 						resolve(true);
+						logger.info('Favorites', 'favorite', 'item added', item);
 					},
 					err => {
 						reject(err);
@@ -87,6 +89,7 @@ class Favorites extends Firebase.Collection {
 							}
 						}
 						resolve(false);
+						logger.info('Favorites', 'unfavorite', 'item removed', item);
 					},
 					err => {
 						reject(err);
