@@ -2,6 +2,7 @@ import 'backbonefire';
 import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import User from '../Models/User';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class is responsible for maintaining the users collection.
@@ -25,7 +26,7 @@ class Users extends Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts) {
-		this.url = `${FirebaseConfig.BaseURL}/users`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users`);
 	}
 
 }

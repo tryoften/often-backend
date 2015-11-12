@@ -2,6 +2,7 @@ import 'backbonefire';
 import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class is responsible for parsing out search filters / parameters
@@ -29,7 +30,7 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 	 * @return {void}
 	 */
 	initialize (models, opts) {
-		this.url = `${FirebaseConfig.BaseURL}/config/elastic-search/query-settings`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/config/elastic-search/query-settings`);
 	}
 
 	/**

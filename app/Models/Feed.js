@@ -8,6 +8,7 @@ import { generateURIfromGuid } from '../Utilities/generateURI';
 import getFeedPage from '../Utilities/getFeedPage';
 import URL from 'url';
 import _ from 'underscore';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class represents a atom/rss feed along with it's metadata and how to parse it 
@@ -28,8 +29,8 @@ class Feed extends Model {
 		}
 		
 		if (this.queueEnabled) {
-			let url = `${FirebaseConfig.BaseURL}/queues/feeds/${this.id}`;
-			this.queue = new Queue(new Firebase(url), 
+			var ref = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/queues/feeds/${this.id}`);
+			this.queue = new Queue(ref, 
 				_.defaults({
 					suppressStack: false, 
 					retries: 3,
@@ -38,7 +39,7 @@ class Feed extends Model {
 				this.processJob.bind(this));
 
 			// task queue ref to schedule page parsing jobs
-			this.taskQueueRef = new Firebase(`${FirebaseConfig.queues.feed.url}/tasks`);
+			this.taskQueueRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.queues.feed.url}/tasks`);
 		}
 	}
 
@@ -101,7 +102,7 @@ class Feed extends Model {
 		let firstItem = data.items[0];
 		let guid = generateURIfromGuid(firstItem.guid);
 		let url = `${FirebaseConfig.BaseURL}/articles/${this.id}/items/${guid}`;
-		let itemRef = new Firebase(url);
+		let itemRef = UserTokenGenerator.getAdminReference(url);
 		console.log(`check if ${itemRef.toString()} exists`);
 
 		// TODO(luc): set timeout after 10 seconds
@@ -173,7 +174,7 @@ class Feed extends Model {
 			// check if the page fetching failed
 		}
 
-		let itemsRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.id}/items`);
+		let itemsRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/articles/${this.id}/items`);
 
 		itemsRef.once('value', snapshot => {
 			let shouldIngest = false;

@@ -1,5 +1,5 @@
 import Queue from 'firebase-queue';
-import Firebase from 'firebase';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 
@@ -24,7 +24,7 @@ class Worker {
 	 * @return {void}
 	 */
 	start () {
-		this.ref = new Firebase(this.options.url);
+		this.ref = UserTokenGenerator.getAdminReference(this.options.url);
 		this.queue = new Queue(this.ref, this.options, this.process.bind(this));
 	}
 

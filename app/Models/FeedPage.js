@@ -6,6 +6,7 @@ import Firebase from 'firebase';
 import cheerio from 'cheerio';
 import URLHelper from '../Models/URLHelper';
 import _ from 'underscore';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 class FeedPage {
 
@@ -18,8 +19,8 @@ class FeedPage {
 		this.url = opts.pageURL;
 		this.feed = opts.feed;
 		this.search = opts.search;
-		this.feedRef = new Firebase(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
-		this.feedQueueRef = new Firebase(`${FirebaseConfig.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
+		this.feedRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
+		this.feedQueueRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
 		this.imageResizer = new ImageResizerWorker();
 		this.urlHelper = new URLHelper();
 	}

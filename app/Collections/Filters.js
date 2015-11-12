@@ -3,6 +3,7 @@ import _ from 'underscore';
 import { firebase as FirebaseConfig } from '../config';
 import { Firebase } from 'backbone';
 import Filter from '../Models/Filter';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 class Filters extends Firebase.Collection {
 
@@ -14,7 +15,7 @@ class Filters extends Firebase.Collection {
 	}
 
 	initialize (models, opts) {
-		this.url = `${FirebaseConfig.BaseURL}/filters`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/filters`);
 	}
 }
 

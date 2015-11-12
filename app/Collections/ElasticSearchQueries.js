@@ -3,6 +3,8 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import ElasticSearchQuery from '../Models/ElasticSearchQuery';
 import { firebase as FirebaseConfig } from '../config';
+import User from '../Models/User';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 class ElasticSearchQueries extends Backbone.Firebase.Collection {
 
@@ -28,7 +30,7 @@ class ElasticSearchQueries extends Backbone.Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts, userId) {
-		this.url = `${FirebaseConfig.BaseURL}/config/elastic-search/queries`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/config/elastic-search/queries`);
 	}
 
 	/**
