@@ -3,7 +3,7 @@ import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import _ from 'underscore';
-
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 // Note TrendingItem isn't used as the model for the collection, just used to
 // fetch individual items when needed
 import TrendingItem from '../Models/TrendingItem';
@@ -35,7 +35,7 @@ class Trending extends Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts) {
-		this.url = `${FirebaseConfig.BaseURL}/trending/all`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/trending/all`);
 		this.idAttribute = 'id';
 	}
 

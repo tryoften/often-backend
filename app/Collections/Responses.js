@@ -3,6 +3,7 @@ import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import Response from '../Models/Response';
 import fb from 'firebase';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class is responsible for maintaining the responses collection.
@@ -20,7 +21,7 @@ class Responses extends Firebase.Collection {
 	initialize (models, opts) {
 
 		this.model = Response;
-		this.url = `${FirebaseConfig.BaseURL}/responses`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/responses`);
 		this.autoSync = true;
 
 	}

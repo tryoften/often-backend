@@ -4,6 +4,7 @@ import Backbone from 'backbone';
 import Firebase from 'firebase';
 import Feed from '../Models/Feed';
 import { firebase as FirebaseConfig } from '../config';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 class Feeds extends Backbone.Firebase.Collection {
 
@@ -18,7 +19,7 @@ class Feeds extends Backbone.Firebase.Collection {
 	initialize (models, opts = {}) {
 		this.model = Feed;
 		this.queueEnabled = opts.queueEnabled || false;
-		this.url = new Firebase(`${FirebaseConfig.BaseURL}/feeds`);
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/feeds`);
 		this.autoSync = true;
 	}
 

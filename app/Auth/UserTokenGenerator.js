@@ -1,5 +1,7 @@
 import FirebaseTokenGenerator from 'firebase-token-generator';
 import { firebase as FirebaseConfig } from '../config';
+import Firebase from 'firebase';
+import logger from '../Models/Logger';
 
 /**
  * This singleton class is responsible for generating authentication tokens for user accounts
@@ -25,6 +27,24 @@ class UserTokenGenerator {
 			uid: uid, 
 			data: data
 		});
+	}
+
+	/**
+	 * Authenticates and returns a firebase reference to a passed in endpoint with admin privileges
+	 * @param {string} url - Firebase url endpoint
+	 *
+	 * @return {object} - Return authenticated firebase reference
+	 */
+	getAdminReference (url) {
+		var ref = new Firebase(url);
+		ref.auth(FirebaseConfig.Secret, (error, result) => {
+			if (error) {
+				logger.error("Authentication failed for: " + url);
+			} else {
+				logger.info("Authentication succesful for: " + url);
+			}
+		});
+		return ref;
 	}
 
 }

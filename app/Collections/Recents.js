@@ -3,6 +3,7 @@ import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import Recent from '../Models/Recent';
 import _ from 'underscore';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class is responsible for maintaining the recents collection.
@@ -37,7 +38,7 @@ class Recents extends Firebase.Collection {
 	 * @return {void}
 	 */
 	initialize (models, opts, userId) {
-		this.url = `${FirebaseConfig.BaseURL}/users/${userId}/recents`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users/${userId}/recents`);
 	}
 
 	/**
