@@ -1,7 +1,6 @@
 import Worker from './Worker';
 import Recents from '../Collections/Recents';
 import Favorites from '../Collections/Favorites';
-import Trending from '../Collections/Trending';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
@@ -43,16 +42,9 @@ class UserWorker extends Worker {
 			if (data.task == 'addFavorite') {
 				// Instantiate favorites collection for user
 				let favs = new Favorites(data.user);
-				let favorites_promise = favs.favorite(data.result);
-
-				// Also increment counter in trending
-				let trending_collection = new Trending();
-				let trending_promise = trending_collection.increment(data.result);
-
-				let promises = Promise.all([favorites_promise, trending_promise]);
 
 				// Resolves if both promises resolve, otherwise rejects
-				promises.then( (values) => {
+				favs.favorite(data.result).then( (values) => {
 					resolve(values[0]);
 				}).catch( (err) => {
 					reject(err);
@@ -61,16 +53,9 @@ class UserWorker extends Worker {
 			} else if (data.task == 'removeFavorite') {
 				//instantiate favorites collection for user
 				let favs = new Favorites(data.user);
-				let favorites_promise = favs.unfavorite(data.result);
-
-				// Also increment counter in trending
-				let trending_collection = new Trending();
-				let trending_promise = trending_collection.decrement(data.result);
-
-				let promises = Promise.all([favorites_promise, trending_promise]);
 
 				// Resolves if both promises resolve, otherwise rejects
-				promises.then( (values) => {
+				favs.unfavorite(data.result).then( (values) => {
 					resolve(values[0]);
 				}).catch( (err) => {
 					reject(err);
