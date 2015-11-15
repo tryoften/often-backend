@@ -13,7 +13,7 @@ class Users extends Firebase.Collection {
 		let opts = {
 			idAttribute: 'id',
 			model: User,
-			autoSync: true
+			autoSync: false
 		};
 		super([], opts);
 	}
