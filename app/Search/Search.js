@@ -111,49 +111,47 @@ class Search {
 								console.log('error' + error);
 								reject(error);
 							} else {
-									let results = this.serializeAndSortResults(response);
-									
-									resolve(results);
-
-									// index search term for autocompletion
-									
-									this.es.update({
-										index: 'search-terms',
-										type: 'query',
-										id: searchId,
-										body: {
-											script: `ctx._source.counter += 1; 
-												ctx._source.resultsCount = count;
-												ctx._source.suggest.payload = [:];
-												ctx._source.suggest.payload['resultsCount'] = count;`,
-
-											params: {
-												count: results.length
-											},
-
-											upsert: {
-												text: query,
-												suggest: {
-													input: query,
-													output : query,
-													payload: {
-														resultsCount: results.length,
-														type: "query"
-													}
-												},
-												counter: 1,
-												resultsCount: results.length
-											}
-										}
-									});
+								let results = this.serializeAndSortResults(response);
 								
-								this.esQuerySettings.fetch();
+								resolve(results);
+
+								// index search term for autocompletion
+								
+								this.es.update({
+									index: 'search-terms',
+									type: 'query',
+									id: searchId,
+									body: {
+										script: `ctx._source.counter += 1; 
+											ctx._source.resultsCount = count;
+											ctx._source.suggest.payload = [:];
+											ctx._source.suggest.payload['resultsCount'] = count;`,
+
+										params: {
+											count: results.length
+										},
+
+										upsert: {
+											text: query,
+											suggest: {
+												input: query,
+												output : query,
+												payload: {
+													resultsCount: results.length,
+													type: "query"
+												}
+											},
+											counter: 1,
+											resultsCount: results.length
+										}
+									}
+								});
 							}
 						});
 					})
 					.catch( (err) => { reject(err); });
 				});
-				this.esQuerySettings.fetch();
+			this.esQuerySettings.fetch();
 		}).catch( (err) => { reject(err); });
 	}
 
@@ -297,7 +295,7 @@ class Search {
 	 * @return {[object]} - array of size bounded by ES Settings
 	 */
 	 serializeAndSortResults (data) {
-
+	 	console.log("Data responses: " + data.responses.length);
 		var results = [];
 	 	for (let res of data.responses) {
 			results = results.concat(res.hits.hits);
@@ -321,7 +319,9 @@ class Search {
 			}
 			finalResults.push(singleResult);
 		}
+		console.log("Result size: " + finalResults.length);
 		return finalResults.slice(0, this.esQuerySettings.getResponseSize());
+		//return finalResults.slice(0, this.esQuerySettings.getResponseSize());
 	}
 	
 	/**

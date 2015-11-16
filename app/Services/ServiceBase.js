@@ -27,31 +27,28 @@ class ServiceBase {
 	 *
 	 * @return {Void}
 	 */
-	execute (request, response) {
+	execute (request) {
 
-		var query = request.query.text;
-		var requestId = request.id;
+		return new Promise( (resolve, reject) => {
+			var query = request.query.text;
+			var requestId = request.id;
 
-		var onError = (error) => {
-			console.log("On Error: ", error);
-			response.set({
-				time_modified: Date.now()
-			}); 
-		};
+			var onError = (error) => {
+				reject(JSON.stringify(error)); 
+			};
 
-		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
-		this.fetchData(query).then((results) => {
+			/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
+			this.fetchData(query).then((results) => {
 
-			/* Create a response based off of returned results and update the cache */
-			this.search.index(this.provider_id, results).then((f) => {
+				/* Create a response based off of returned results and update the cache */
+				this.search.index(this.provider_id, results).then((f) => {
 
-				/* Finished indexing */
-				response.set({
-					time_modified: Date.now()
-				}); 
+					/* Finished indexing */
+					resolve(true);
+				}, onError);
+
 			}, onError);
-
-		}, onError);
+		});
 
 	}
 
