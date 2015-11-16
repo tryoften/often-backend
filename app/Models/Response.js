@@ -21,7 +21,8 @@ class Response extends Firebase.Model {
 	
 
 	setInitialValues (initData) {
-		this.changedAttributes.add(this.id);
+		//this.changedAttributes.add(this.id);
+		this.set('id', 'id');
 		this.set(initData);
 	}
 
@@ -35,7 +36,7 @@ class Response extends Firebase.Model {
 
 	complete () {
 		this.set({
-			doneUpdating: true
+			doneUpdating: false
 		});
 	}
 	

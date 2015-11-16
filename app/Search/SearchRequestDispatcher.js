@@ -88,7 +88,7 @@ class SearchRequestDispatcher extends Backbone.Model {
 						response = null;
 						resolve(true);
 					}
-				}).catch( err => { reject(err); });
+				});
 			});
 
 			/* Emit query event once */
@@ -108,11 +108,11 @@ class SearchRequestDispatcher extends Backbone.Model {
 				}
 
 				// if nothing happens after 2 seconds: timeout
-				//setTimeout(reject, 5000, 'timeout');
+				setTimeout(reject, 5000, 'timeout');
 			} else {
-				//setTimeout(reject, 1000, 'timeout');
+				setTimeout(reject, 1000, 'timeout');
 			}
-		}).catch( err => { reject(err); });
+		}).catch( err => { console.log('in srd'); reject(err); });
 		
 	}
 }
