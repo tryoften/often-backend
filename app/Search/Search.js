@@ -320,7 +320,7 @@ class Search {
 			finalResults.push(singleResult);
 		}
 		console.log("Result size: " + finalResults.length);
-		return finalResults.slice(0, 20);
+		return finalResults.slice(0, this.esQuerySettings.getResponseSize());
 		//return finalResults.slice(0, this.esQuerySettings.getResponseSize());
 	}
 	
