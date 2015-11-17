@@ -1,17 +1,17 @@
 //import Responses from '../Collections/Responses';
-import Search from '../Search/Search';
 import SearchParser from '../Search/SearchParser';
 import _ from 'underscore';
-import { Events } from 'backbone';
+import { Model } from 'backbone';
 import Response from '../Models/Response';
 import URLHelper from '../Models/URLHelper';
 // import logger from '../Models/Logger';
+var logger = console;
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
  * This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
  */
-class SearchRequestDispatcher extends Events {
+class SearchRequestDispatcher extends Model {
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -22,8 +22,9 @@ class SearchRequestDispatcher extends Events {
 	 */
 	constructor (opts = {}) {
 		super();
-		this.search = new Search();
+		this.search = opts.search;
 		this.urlHelper = new URLHelper();
+		this.searchParser = new SearchParser();
 
 		if (_.isUndefined(opts.services) || _.isNull(opts.services)) {
 			throw "Services required to instantiate SearchRequestDispatcher";
@@ -39,8 +40,6 @@ class SearchRequestDispatcher extends Events {
 			});
 		}
 
-		this.searchParser = new SearchParser();
-		this.on('query', this.processQueryChanges);
 	}
 
 	getRelevantProviders (filter) { 
@@ -54,10 +53,6 @@ class SearchRequestDispatcher extends Events {
 			return [];
 
 		}
-	}
-
-	processQueryChanges () {
-
 	}
 
 	/**
