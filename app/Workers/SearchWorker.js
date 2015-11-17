@@ -11,7 +11,6 @@ class SearchWorker extends Worker {
 	
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.search);
-
 		super(options);
 		
 		this.dispatcher = new SearchRequestDispatcher({

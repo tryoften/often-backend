@@ -1,17 +1,14 @@
-//import Responses from '../Collections/Responses';
 import SearchParser from '../Search/SearchParser';
-import _ from 'underscore';
-import { Model } from 'backbone';
 import Response from '../Models/Response';
 import URLHelper from '../Models/URLHelper';
-// import logger from '../Models/Logger';
-var logger = console;
+import _ from 'underscore';
+import logger from '../Models/Logger';
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
  * This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
  */
-class SearchRequestDispatcher extends Model {
+class SearchRequestDispatcher {
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -21,7 +18,6 @@ class SearchRequestDispatcher extends Model {
 	 * @return {void}
 	 */
 	constructor (opts = {}) {
-		super();
 		this.search = opts.search;
 		this.urlHelper = new URLHelper();
 		this.searchParser = new SearchParser();
@@ -64,14 +60,29 @@ class SearchRequestDispatcher extends Model {
 	 */
 	process (request) {
 		return new Promise((resolve, reject) => {
-			logger.info('SearchRequestDispatcher', 'process', 'request started processing', request);
+			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 			var { filter, actualQuery } = this.searchParser.parse(request.query.text);
 
-			var done = function() {
-				logger.info('SearchRequestDispatcher', 'process', 'request completed');
+			var done = () => {
+				logger.info('SearchRequestDispatcher:process()', 'request completed');
+				this.stopListening();
 				response.complete();
 				request = null;
 				response = null;
+			};
+
+			var processQueryUpdate = () => {
+				var promise = (isAutocomplete) ? 
+					this.search.suggest(filter, actualQuery) :
+					this.search.query(actualQuery, filter);
+
+				promise.then( (data) => { 
+					response.updateResults(data);
+					if(servicesLeftToProcess === 0 || isAutocomplete) {
+						done();
+					}
+					resolve(true);
+				});
 			};
 
 			/* whether the query is for autocomplete suggestions */
@@ -84,37 +95,21 @@ class SearchRequestDispatcher extends Model {
 			var response = new Response({
 				id: request.id
 			});
-			
+
+			response.set('id', 'id');
 			response.set({
-				id: request.id,
 				query: request.query.text,
 				doneUpdating: false,
 				autocomplete: isAutocomplete
 			});
-
-			this.on('query', () => {
-				var promise = (isAutocomplete) ? 
-					this.search.suggest(filter, actualQuery) :
-					this.search.query(actualQuery, filter);
-
-				promise.then( (data) => { 
-					response.updateResults(data);
-					if(servicesLeftToProcess === 0 || isAutocomplete) {
-						done();
-						resolve(true);
-					}
-				});
-			});
-
-			/* Emit query event once */
-			this.trigger('query');
+			processQueryUpdate();
 
 			if (!isAutocomplete) {
 				/* Execute the request every user provider that the user is subscribed */
 				for (let providerName of relevantProviders) {
 					this.serviceProviders[providerName].execute(request).then( (fulfilled) => {
 						servicesLeftToProcess--;
-						this.trigger('query');
+						processQueryUpdate();
 
 					}).catch( (rejected) => {
 						servicesLeftToProcess--;
@@ -122,20 +117,18 @@ class SearchRequestDispatcher extends Model {
 					
 				}
 
-				// if nothing happens after 2 seconds: timeout
-				setTimeout(() => {
-					reject(false);
-					done();
-				}, 5000, 'timeout');
-			} else {
-				setTimeout(() => {
-					reject(false);
-					done();
-				}, 1000, 'timeout');
+
 			}
+
+			// if nothing happens after 2 seconds: timeout
+			setTimeout(() => {
+				if (!response.get('doneUpdating')) {
+					reject(false);
+				}
+				done();
+			}, 8000, 'timeout');
 		}).catch( err => { 
-			logger.info('SearchRequestDispatcher', 'process', 'request failed', request);
-			reject(err); 
+			logger.info('SearchRequestDispatcher:process()', 'request failed', request);
 		});
 		
 	}

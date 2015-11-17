@@ -1,6 +1,5 @@
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
-import QueryMaker from '../Models/QueryMaker';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
@@ -313,7 +312,6 @@ class Search {
 		}
 		console.log("Result size: " + finalResults.length);
 		return finalResults.slice(0, this.esQuerySettings.getResponseSize());
-		//return finalResults.slice(0, this.esQuerySettings.getResponseSize());
 	}
 	
 	/**

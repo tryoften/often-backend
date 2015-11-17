@@ -1,4 +1,3 @@
-//import heapdump from 'heapdump';
 import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';
