@@ -38,15 +38,7 @@ class Feeds extends Backbone.Firebase.Collection {
 	 					or an error when rejected 
 	 */
 	getFeedNames () {
-		return new Promise( (resolve, reject) => {
-			this.once('sync', 
-				syncedFeeds => {
-					var feedNames = syncedFeeds.models.map(( feedObj ) => { return feedObj.id; });
-					resolve(feedNames);
-				}, 
-				err => { reject(err); });
-			this.fetch();
-		});
+		return this.models.map(feedObj => { return feedObj.id; });
 	}
 }
 

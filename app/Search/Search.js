@@ -5,6 +5,7 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import _ from 'underscore';
 import logger from '../Models/Logger';
+
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -109,41 +110,50 @@ class Search {
 					let results = this.serializeAndSortResults(response);
 					resolve(results);
 
-					// index search term for autocompletion
-					this.es.update({
-						index: 'search-terms',
-						type: 'query',
-						id: searchId,
-						body: {
-							script: `ctx._source.counter += 1; 
-								ctx._source.resultsCount = count;
-								ctx._source.suggest.payload = [:];
-								ctx._source.suggest.payload['resultsCount'] = count;`,
-
-							params: {
-								count: results.length
-							},
-
-							upsert: {
-								text: query,
-								suggest: {
-									input: query,
-									output : query,
-									payload: {
-										resultsCount: results.length,
-										type: "query"
-									}
-								},
-								counter: 1,
-								resultsCount: results.length
-							}
-						}
+					this.updateSearchTerms({
+						searchId,
+						query,
+						count: results.length
 					});
 				}
 			});
 
 		});
+	}
 
+	updateSearchTerms({searchId, query, count} = {}) {
+		// index search term for autocompletion
+		this.es.update({
+			index: 'search-terms',
+			type: 'query',
+			id: searchId,
+			body: {
+				script: `ctx._source.counter += 1; 
+					ctx._source.resultsCount = count;
+					ctx._source.suggest.payload = [:];
+					ctx._source.suggest.payload['resultsCount'] = count;`,
+
+				params: {
+					count: results.length
+				},
+
+				upsert: {
+					text: query,
+					suggest: {
+						input: query,
+						output : query,
+						payload: {
+							resultsCount: results.length,
+							type: "query"
+						}
+					},
+					counter: 1,
+					resultsCount: results.length
+				}
+			}
+		}, (error, response) => {
+			console.log(error, response);
+		});
 	}
 
 	/**
@@ -211,6 +221,7 @@ class Search {
 		if (filter.length > 0) {
 			var matchingFilters = [];
 			var hashedFilter = "#" + filter;
+
 			for ( var actualFilter of this.filters.models) {
 				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
 					matchingFilters.push(actualFilter.toJSON());

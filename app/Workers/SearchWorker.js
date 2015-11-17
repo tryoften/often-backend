@@ -24,14 +24,11 @@ class SearchWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		// Read and process task data
-		console.log('starting ' + data.id);
 
 		//returns a promise when all providers are resolved
 		return this.dispatcher
 			.process(data)
 			.then(d => {
-				console.log('finished' + data.id);
 				resolve(d);
 			})
 			.catch(err => {

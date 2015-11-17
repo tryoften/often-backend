@@ -60,6 +60,7 @@ class SearchRequestDispatcher {
 	 */
 	process (request) {
 		return new Promise((resolve, reject) => {
+			logger.profile(request);
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 			var { filter, actualQuery } = this.searchParser.parse(request.query.text);
 
@@ -81,6 +82,7 @@ class SearchRequestDispatcher {
 					if(servicesLeftToProcess === 0 || isAutocomplete) {
 						done();
 					}
+					logger.profile(request);
 					resolve(true);
 				});
 			};
@@ -127,8 +129,6 @@ class SearchRequestDispatcher {
 				}
 				done();
 			}, 8000, 'timeout');
-		}).catch( err => { 
-			logger.info('SearchRequestDispatcher:process()', 'request failed', request);
 		});
 		
 	}
