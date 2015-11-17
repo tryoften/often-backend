@@ -18,7 +18,7 @@ class SearchWorker extends Worker {
 			search: new Search(),
 			services: {
 				spotify: SpotifyService,
-				youtube: YoutTubeService,
+				youtube: YouTubeService,
 				soundcloud: SoundCloudService
 			}
 		});

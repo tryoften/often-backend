@@ -34,7 +34,8 @@ class SearchRequestDispatcher extends Model {
 		this.serviceProviders = {};
 
 		for (var serviceId in opts.services) {
-			this.serviceProviders[serviceId] = opts.services[serviceId]({
+			let ServiceClass = opts.services[serviceId];
+			this.serviceProviders[serviceId] = new ServiceClass({
 				search: this.search,
 				urlHelper: this.urlHelper
 			});
