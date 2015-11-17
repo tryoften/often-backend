@@ -24,12 +24,14 @@ class SearchRequestDispatcher extends Backbone.Model {
 	constructor () {
 		super();
 		this.search = new Search();
+		this.services = [];
 
 		/* service provider name to service instances map */
-		this.serviceProviders = {};
-		this.serviceProviders.spotify = new SpotifyService({responses : this.responses});
-		this.serviceProviders.youtube = new YouTubeService({responses : this.responses});
-		this.serviceProviders.soundcloud = new SoundCloudService({responses : this.responses});
+		this.serviceProviders = {
+			spotify: new SpotifyService({responses : this.responses}),
+			youtube: new YouTubeService({responses : this.responses}),
+			soundcloud: new SoundCloudService({responses : this.responses})
+		};
 
 		this.searchParser = new SearchParser();
 	}

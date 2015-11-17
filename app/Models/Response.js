@@ -18,10 +18,8 @@ class Response extends Firebase.Model {
 		this.autoSync = true;
 		this.idAttribute = 'id';
 	}
-	
 
 	setInitialValues (initData) {
-		//this.changedAttributes.add(this.id);
 		this.set('id', 'id');
 		this.set(initData);
 	}
@@ -39,9 +37,6 @@ class Response extends Firebase.Model {
 			doneUpdating: false
 		});
 	}
-	
-	
-
 }
 
 export default Response;

@@ -1,9 +1,16 @@
-import { Model } from 'backbone';
+import { Firebase, Model } from 'backbone';
+import { firebase as FirebaseConfig } from '../config';
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
  */
-class User extends Model {
+class User extends Firebase.Model {
+
+	initialize (data, options) {
+		this.url = `${FirebaseConfig.BaseURL}/users/${data.user}`;
+		this.autoSync = true;
+		this.idAttribute = 'id';
+	}
 
 	/**
 	 * Sets the authentication token on a user
@@ -12,7 +19,7 @@ class User extends Model {
 	 * @return {void}
 	 */
 	setToken (token) {
-		this.set("auth_token", token);
+		this.set('auth_token', token);
 	}
 
 }
