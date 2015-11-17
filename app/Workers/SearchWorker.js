@@ -2,6 +2,10 @@ import Worker from './Worker';
 import SearchRequestDispatcher from '../Search/SearchRequestDispatcher';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
+import Search from '../Search/Search';
+import SpotifyService from '../Services/Spotify/SpotifyService';
+import YouTubeService from '../Services/YouTube/YouTubeService';
+import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
 
 class SearchWorker extends Worker {
 	
@@ -9,7 +13,15 @@ class SearchWorker extends Worker {
 		let options = _.defaults(opts, FirebaseConfig.queues.search);
 
 		super(options);
-		this.dispatcher = new SearchRequestDispatcher();
+		
+		this.dispatcher = new SearchRequestDispatcher({
+			search: new Search(),
+			services: {
+				spotify: SpotifyService,
+				youtube: YoutTubeService,
+				soundcloud: SoundCloudService
+			}
+		});
 	}
 
 	process (data, progress, resolve, reject) {
@@ -19,11 +31,11 @@ class SearchWorker extends Worker {
 		//returns a promise when all providers are resolved
 		return this.dispatcher
 			.process(data)
-			.then( (d) => {
+			.then(d => {
 				console.log('finished' + data.id);
 				resolve(d);
 			})
-			.catch( (err) => {
+			.catch(err => {
 				reject(err);
 			});
 	}

@@ -23,7 +23,7 @@ class Search {
 	 *
 	 * @return {void}
 	 */
-	constructor (models, opts) {
+	constructor (opts) {
 		this.es = new Client({
 			host: ElasticSearchConfig.BaseURL
 		});
@@ -98,61 +98,53 @@ class Search {
 		return new Promise((resolve, reject) => {
 
 			let searchId = new Buffer(query).toString('base64');
-			this.esQuerySettings.once("sync", () => {
-				var queryType = this.esQuerySettings.getQueryType(filteredIndex);
-				this.esQueries.query(query, filteredIndex || "", queryType || "").then(
+			let queryType = this.esQuerySettings.getQueryType(filteredIndex);
 
-					(esq) => {
+			this.es.msearch({
+				body : this.esQueries.generateQueries(query, filteredIndex, queryType)
+			}, (error, response) => {
+				if (error) {
+					console.log('error' + error);
+					reject(error);
+				} else {
+					let results = this.serializeAndSortResults(response);
+					resolve(results);
 
-						this.es.msearch({
-							body : esq
-						}, (error, response) => {
-							if (error) {
-								console.log('error' + error);
-								reject(error);
-							} else {
-								let results = this.serializeAndSortResults(response);
-								
-								resolve(results);
+					// index search term for autocompletion
+					this.es.update({
+						index: 'search-terms',
+						type: 'query',
+						id: searchId,
+						body: {
+							script: `ctx._source.counter += 1; 
+								ctx._source.resultsCount = count;
+								ctx._source.suggest.payload = [:];
+								ctx._source.suggest.payload['resultsCount'] = count;`,
 
-								// index search term for autocompletion
-								
-								this.es.update({
-									index: 'search-terms',
-									type: 'query',
-									id: searchId,
-									body: {
-										script: `ctx._source.counter += 1; 
-											ctx._source.resultsCount = count;
-											ctx._source.suggest.payload = [:];
-											ctx._source.suggest.payload['resultsCount'] = count;`,
+							params: {
+								count: results.length
+							},
 
-										params: {
-											count: results.length
-										},
-
-										upsert: {
-											text: query,
-											suggest: {
-												input: query,
-												output : query,
-												payload: {
-													resultsCount: results.length,
-													type: "query"
-												}
-											},
-											counter: 1,
-											resultsCount: results.length
-										}
+							upsert: {
+								text: query,
+								suggest: {
+									input: query,
+									output : query,
+									payload: {
+										resultsCount: results.length,
+										type: "query"
 									}
-								});
+								},
+								counter: 1,
+								resultsCount: results.length
 							}
-						});
-					})
-					.catch( (err) => { reject(err); });
-				});
-			this.esQuerySettings.fetch();
-		}).catch( (err) => { reject(err); });
+						}
+					});
+				}
+			});
+
+		});
+
 	}
 
 	/**
