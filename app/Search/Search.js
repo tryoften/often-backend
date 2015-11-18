@@ -134,7 +134,7 @@ class Search {
 					ctx._source.suggest.payload['resultsCount'] = count;`,
 
 				params: {
-					count: results.length
+					count: count
 				},
 
 				upsert: {
@@ -143,12 +143,12 @@ class Search {
 						input: query,
 						output : query,
 						payload: {
-							resultsCount: results.length,
+							resultsCount: count,
 							type: "query"
 						}
 					},
 					counter: 1,
-					resultsCount: results.length
+					resultsCount: count
 				}
 			}
 		}, (error, response) => {
@@ -220,26 +220,26 @@ class Search {
 			return this.getTopSearches();
 		}
 
-		// if (filter.length > 0) {
-		// 	var matchingFilters = [];
-		// 	var hashedFilter = "#" + filter;
+		if (filter.length > 0) {
+			var matchingFilters = [];
+			var hashedFilter = "#" + filter;
 
-		// 	for ( var actualFilter of this.filters.models) {
-		// 		if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
-		// 			matchingFilters.push(actualFilter.toJSON());
-		// 		}
-		// 	}
-		// 	if (matchingFilters.length === 0) return false;
-		// 	return new Promise( (resolve, reject) => {
-		// 		resolve([
-		// 			{
-		// 				text: hashedFilter,
-		// 				options: matchingFilters
-		// 			}
-		// 		]);
-		// 	});
+			for ( var actualFilter of this.filters.models) {
+				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
+					matchingFilters.push(actualFilter.toJSON());
+				}
+			}
+			if (matchingFilters.length === 0) return false;
+			return new Promise( (resolve, reject) => {
+				resolve([
+					{
+						text: hashedFilter,
+						options: matchingFilters
+					}
+				]);
+			});
 					
-		// }
+		}
 
 		return false;
 	}

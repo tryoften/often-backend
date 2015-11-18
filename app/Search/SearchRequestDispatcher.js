@@ -92,10 +92,6 @@ class SearchRequestDispatcher {
 				logger.info('SearchRequestDispatcher:process()', 'request completed');
 			};
 
-			var processQueryUpdate = () => {
-
-			};
-
 			/* whether the query is for autocomplete suggestions */
 			var isAutocomplete = !!request.query.autocomplete;
 
