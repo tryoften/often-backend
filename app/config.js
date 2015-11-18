@@ -79,7 +79,8 @@ config.firebase.queues = {
 		url: `${config.firebase.BaseURL}/queues/search`,
 		numWorkers: 2,
 		sanitize: false,
-		suppressStack: true
+		suppressStack: false,
+		retries: 0
 	},
 	imageResizing: {
 		specId: 'image_resizing',

@@ -14,10 +14,9 @@ class SearchParser {
 	 *
 	 * @return {void}
 	 */
-	constructor (models, opts) {
+	constructor (opts = {}) {
 
 	}
-
 
 	/**
 	 * Parses a query string in order to obtain the filter, actual query, and feeds & service providers relevant to the query

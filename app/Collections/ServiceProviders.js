@@ -28,13 +28,10 @@ class ServiceProviders extends Backbone.Firebase.Collection {
 	 */
 	getServiceProviderNames () {
 		return new Promise( (resolve, reject) => {
-			this.once('sync', 
-				syncedSPs => {
-					var spNames = syncedSPs.models.map(( feedObj ) => { return feedObj.id; });
-					resolve(spNames);
-				}, 
-				err => { reject(err); });
-			this.fetch();
+			var spNames = syncedSPs.models.map(feedObj => {
+				return feedObj.id; 
+			});
+			resolve(spNames);
 		});
 	}
 }

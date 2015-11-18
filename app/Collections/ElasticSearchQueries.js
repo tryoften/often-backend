@@ -41,29 +41,22 @@ class ElasticSearchQueries extends Backbone.Firebase.Collection {
 	 *
 	 * @return {Promise} - Promise that resolves to an array of header/body objects
 	 */
-	query (text, index = "", type = "") {
-		return new Promise( (resolve, reject) => {
+	generateQueries (text, index = "", type = "") {
 
-			this.once("sync", () => {
-				var requests = [];
-				if(this.models.length === 0) throw new Error("The query collection is empty!");
-				
-				if (index !== "" && type !== "") {
-					requests = this.get(type).injectQuery(text, index);
-				} else {
-					for (var model of this.models) {
-						requests = requests.concat(model.injectQuery(text));
-					}
-				}
-
-				resolve(requests);
-
-			});
-
-			this.fetch();
-
-		});
+		var requests = [];
+		if (this.models.length === 0) {
+			throw new Error("The query collection is empty!");
+		}
 		
+		if (index !== "" && type !== "") {
+			requests = this.get(type).injectQuery(text, index);
+		} else {
+			for (var model of this.models) {
+				requests = requests.concat(model.injectQuery(text));
+			}
+		}
+
+		return requests;
 	}
 
 }

@@ -1,5 +1,5 @@
 import Search from '../Search/Search';
-import URLHelper from '../Models/URLHelper';
+
 /** 
  *	This class is a base class for all service providers. 
  *	It has an instance of the results collection to which it adds a response after processing.
@@ -17,8 +17,8 @@ class ServiceBase {
 	constructor (models, opts) {
 		this.provider_id = opts.provider_name;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
-		this.search = new Search();
-		this.urlHelper = new URLHelper();
+		this.search = opts.search;
+		this.urlHelper = opts.urlHelper;
 	}
 
 	/**
@@ -29,27 +29,17 @@ class ServiceBase {
 	 */
 	execute (request) {
 
-		return new Promise( (resolve, reject) => {
-			var query = request.query.text;
-			var requestId = request.id;
-
-			var onError = (error) => {
-				reject(JSON.stringify(error)); 
-			};
-
-			/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
-			this.fetchData(query).then((results) => {
-
+		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
+		return this
+			.fetchData(request.query.text)
+			.then((results) => {
 				/* Create a response based off of returned results and update the cache */
-				this.search.index(this.provider_id, results).then((f) => {
+				return this.search.index(this.provider_id, results);
+			});
+	}
 
-					/* Finished indexing */
-					resolve(true);
-				}, onError);
-
-			}, onError);
-		});
-
+	fetchData (query) {
+		throw new Error("fetchData not implemented");
 	}
 
 	/**

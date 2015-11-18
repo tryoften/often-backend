@@ -18,16 +18,10 @@ class Response extends Firebase.Model {
 		this.autoSync = true;
 		this.idAttribute = 'id';
 	}
-	
-
-	setInitialValues (initData) {
-		//this.changedAttributes.add(this.id);
-		this.set('id', 'id');
-		this.set(initData);
-	}
 
 	updateResults (data) {
 		this.set({
+			id: 'id',
 			time_modified: Date.now(),
 			doneUpdating: false,
 			results: JSON.parse(JSON.stringify(data))
@@ -36,11 +30,10 @@ class Response extends Firebase.Model {
 
 	complete () {
 		this.set({
-			doneUpdating: false
+			id: 'id',
+			doneUpdating: true
 		});
-	}
-	
-	
+	}	
 
 }
 
