@@ -1,11 +1,11 @@
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
-import QueryMaker from '../Models/QueryMaker';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import _ from 'underscore';
 import logger from '../Models/Logger';
+
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -23,7 +23,7 @@ class Search {
 	 *
 	 * @return {void}
 	 */
-	constructor (models, opts) {
+	constructor (opts) {
 		this.es = new Client({
 			host: ElasticSearchConfig.BaseURL
 		});
@@ -98,61 +98,63 @@ class Search {
 		return new Promise((resolve, reject) => {
 
 			let searchId = new Buffer(query).toString('base64');
-			this.esQuerySettings.once("sync", () => {
-				var queryType = this.esQuerySettings.getQueryType(filteredIndex);
-				this.esQueries.query(query, filteredIndex || "", queryType || "").then(
+			let queryType = this.esQuerySettings.getQueryType(filteredIndex);
 
-					(esq) => {
+			this.es.msearch({
+				body : this.esQueries.generateQueries(query, filteredIndex, queryType)
+			}, (error, response) => {
+				if (error) {
+					console.log('error' + error);
+					reject(error);
+				} else {
+					let data = this.serializeAndSortResults(response);
+					let results = data.results;
+					resolve(results);
 
-						this.es.msearch({
-							body : esq
-						}, (error, response) => {
-							if (error) {
-								console.log('error' + error);
-								reject(error);
-							} else {
-								let results = this.serializeAndSortResults(response);
-								
-								resolve(results);
+					this.updateSearchTerms({
+						searchId,
+						query,
+						count: data.totalCount
+					});
+				}
+			});
 
-								// index search term for autocompletion
-								
-								this.es.update({
-									index: 'search-terms',
-									type: 'query',
-									id: searchId,
-									body: {
-										script: `ctx._source.counter += 1; 
-											ctx._source.resultsCount = count;
-											ctx._source.suggest.payload = [:];
-											ctx._source.suggest.payload['resultsCount'] = count;`,
+		});
+	}
 
-										params: {
-											count: results.length
-										},
+	updateSearchTerms({searchId, query, count} = {}) {
+		// index search term for autocompletion
+		this.es.update({
+			index: 'search-terms',
+			type: 'query',
+			id: searchId,
+			body: {
+				script: `ctx._source.counter += 1; 
+					ctx._source.resultsCount = count;
+					ctx._source.suggest.payload = [:];
+					ctx._source.suggest.payload['resultsCount'] = count;`,
 
-										upsert: {
-											text: query,
-											suggest: {
-												input: query,
-												output : query,
-												payload: {
-													resultsCount: results.length,
-													type: "query"
-												}
-											},
-											counter: 1,
-											resultsCount: results.length
-										}
-									}
-								});
-							}
-						});
-					})
-					.catch( (err) => { reject(err); });
-				});
-			this.esQuerySettings.fetch();
-		}).catch( (err) => { reject(err); });
+				params: {
+					count: count
+				},
+
+				upsert: {
+					text: query,
+					suggest: {
+						input: query,
+						output : query,
+						payload: {
+							resultsCount: count,
+							type: "query"
+						}
+					},
+					counter: 1,
+					resultsCount: count 
+				}
+			}
+		}, (error, response) => {
+			console.log(error, response);
+		});
 	}
 
 	/**
@@ -163,6 +165,7 @@ class Search {
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
 	suggest (filter, query) {
+		logger.profile('Suggest ' + query);
 
 		var command;
 		if ( (command = this.processCommands(filter)) ) {
@@ -187,12 +190,18 @@ class Search {
 					var result = response['query-suggest'][0];
 					result.options = _.each(result.options, (item) => {
 						item.type = item.payload.type;
+
+						if (_.isUndefined(item.type) || _.isNull(item.type)) {
+							item.type = "query";
+						}
+
 						if (item.type == "filter") {
 							item.image = item.text.substring(1, item.text.length) + "-tag";
 						}
 						item.id = new Buffer(item.text).toString('base64');
 						return item;
 					});
+					logger.profile('Suggest ' + query);
 					resolve(response['query-suggest']);
 				}
 			});
@@ -220,6 +229,7 @@ class Search {
 		if (filter.length > 0) {
 			var matchingFilters = [];
 			var hashedFilter = "#" + filter;
+
 			for ( var actualFilter of this.filters.models) {
 				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
 					matchingFilters.push(actualFilter.toJSON());
@@ -297,7 +307,10 @@ class Search {
 	 serializeAndSortResults (data) {
 	 	console.log("Data responses: " + data.responses.length);
 		var results = [];
+		var total = 0;
+
 	 	for (let res of data.responses) {
+	 		total += res.hits.total;
 			results = results.concat(res.hits.hits);
 		}
 		/* Not the most optimal solution, but fast and concise enough */
@@ -320,8 +333,10 @@ class Search {
 			finalResults.push(singleResult);
 		}
 		console.log("Result size: " + finalResults.length);
-		return finalResults.slice(0, this.esQuerySettings.getResponseSize());
-		//return finalResults.slice(0, this.esQuerySettings.getResponseSize());
+		return {
+			totalCount: total,
+			results: finalResults.slice(0, this.esQuerySettings.getResponseSize())
+		};
 	}
 	
 	/**
