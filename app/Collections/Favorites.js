@@ -51,22 +51,17 @@ class Favorites extends Firebase.Collection {
 	favorite (item) {
 		logger.info("Favorites:favorite()", "favorited item", item._id);
 		return new Promise( (resolve, reject) => {
-			this.once('sync', syncedFavorites => {
-				for (let favModel of syncedFavorites.models) {
-					if (favModel.get('id') == item.id) {
-						resolve(false);
-						return;
-					}
+			for (let model of this.models) {
+				if (model.get('id') == item.id) {
+					resolve(false);
+					return;
 				}
+			}
 
-				item.id = generateURIfromGuid(item.id);
-				item.time_added = Date.now();
-				this.add(item);
-				resolve(true);
-			},
-			err => {
-				reject(err);
-			});
+			item.id = generateURIfromGuid(item.id);
+			item.time_added = Date.now();
+			this.add(item);
+			resolve(true);
 		});
 	}
 
@@ -80,19 +75,14 @@ class Favorites extends Firebase.Collection {
 	unfavorite (item) {
 		logger.info("Favorites:unfavorite()", "unfavorited item", item._id);
 		return new Promise( (resolve, reject) => {
-			this.once('sync', syncedFavorites => {
-				for (let favModel of syncedFavorites.models) {
-					if (favModel.get('_id') == item._id) {
-						syncedFavorites.remove(favModel);
-						resolve(true);
-						return;
-					}
+			for (let model of this.models) {
+				if (model.get('_id') == item._id) {
+					syncedFavorites.remove(model);
+					resolve(true);
+					return;
 				}
-				resolve(false);
-			},
-			err => {
-				reject(err);
-			});
+			}
+			resolve(false);
 		});
 	}
 
