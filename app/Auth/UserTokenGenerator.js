@@ -37,7 +37,7 @@ class UserTokenGenerator {
 	 */
 	getAdminReference (url) {
 		var ref = new Firebase(url);
-		ref.auth(FirebaseConfig.Secret, (error, result) => {
+		ref.authWithCustomToken(FirebaseConfig.Secret, (error, result) => {
 			if (error) {
 				logger.error("Authentication failed for: " + url);
 			} else {

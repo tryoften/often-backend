@@ -5,13 +5,13 @@ import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import Users from '../Collections/Users';
+import User from '../Models/User';
 
 class UserWorker extends Worker {
 
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.user);
 		super(options);
-		this.users = new Users();
 	}
 
 	/**
@@ -72,17 +72,9 @@ class UserWorker extends Worker {
 					});
 
 			} else if (data.task == 'createToken') {
-				console.log("Processing");
 				var token = UserTokenGenerator.generateToken(data.user, data.data);
-				var user = this.users.get(data.user);
-				if (_.isUndefined(user)) {
-					this.users.create({ 
-						id : data.user,
-						auth_token : token 
-					});
-				} else {
-					user.setToken(token);
-				}
+				var user = new User(data);
+				user.setToken(token);
 				resolve(token);
 				
 			} else {

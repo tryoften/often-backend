@@ -33,8 +33,7 @@ class Response extends Firebase.Model {
 			id: 'id',
 			doneUpdating: true
 		});
-	}	
-
+	}
 }
 
 export default Response;
