@@ -4,6 +4,7 @@ import { firebase as FirebaseConfig } from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import Favorite from '../Models/Favorite';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import logger from '../Models/Logger';
 
 /**
  * This class is responsible for maintaining the favorite collection.
@@ -48,24 +49,24 @@ class Favorites extends Firebase.Collection {
 	 false if that item is already found in the favorites or an error upon rejection
 	 */
 	favorite (item) {
+		logger.info("Favorites:favorite()", "favorited item", item._id);
 		return new Promise( (resolve, reject) => {
-			this.once('sync',
-					syncedFavorites => {
-						for (let favModel of syncedFavorites.models) {
-							if (favModel.get('id') == item.id) {
-								resolve(false);
-								return;
-							}
-						}
+			this.once('sync', syncedFavorites => {
+				for (let favModel of syncedFavorites.models) {
+					if (favModel.get('id') == item.id) {
+						resolve(false);
+						return;
+					}
+				}
 
-						item.id = generateURIfromGuid(item.id);
-						item.time_added = Date.now();
-						this.add(item);
-						resolve(true);
-					},
-					err => {
-						reject(err);
-					});
+				item.id = generateURIfromGuid(item.id);
+				item.time_added = Date.now();
+				this.add(item);
+				resolve(true);
+			},
+			err => {
+				reject(err);
+			});
 		});
 	}
 
@@ -77,21 +78,21 @@ class Favorites extends Firebase.Collection {
 	 false if that item is not found in the favorites or an error upon rejection
 	 */
 	unfavorite (item) {
+		logger.info("Favorites:unfavorite()", "unfavorited item", item._id);
 		return new Promise( (resolve, reject) => {
-			this.once('sync',
-					syncedFavorites => {
-						for (let favModel of syncedFavorites.models) {
-							if (favModel.get('_id') == item._id) {
-								syncedFavorites.remove(favModel);
-								resolve(true);
-								return;
-							}
-						}
-						resolve(false);
-					},
-					err => {
-						reject(err);
-					});
+			this.once('sync', syncedFavorites => {
+				for (let favModel of syncedFavorites.models) {
+					if (favModel.get('_id') == item._id) {
+						syncedFavorites.remove(favModel);
+						resolve(true);
+						return;
+					}
+				}
+				resolve(false);
+			},
+			err => {
+				reject(err);
+			});
 		});
 	}
 

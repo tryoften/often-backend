@@ -4,6 +4,7 @@ import { firebase as FirebaseConfig } from '../config';
 import Recent from '../Models/Recent';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import logger from '../Models/Logger';
 
 /**
  * This class is responsible for maintaining the recents collection.
@@ -49,23 +50,23 @@ class Recents extends Firebase.Collection {
 	 					false if that item is already found in the recents or an error upon rejection
 	 */
 	addRecent (item) {
+		logger.info("Recents:addRecent()", "added recent", item._id);
 		return new Promise( (resolve, reject) => {
-			this.once('sync', 
-				syncedRecents => {
-					let rec = syncedRecents.find(mod => mod.get('_id') == item._id);
+			this.once('sync', syncedRecents => {
+				let rec = syncedRecents.find(mod => mod.get('_id') == item._id);
 
-					if (rec) {
-						rec.set('time_added', Date.now());
-						resolve(false);
-					} else {
-						item.time_added = Date.now();
-						syncedRecents.create(item);
-						resolve(true);
-					}
-				}, 
-				err => { 
-					reject(err);
-				});
+				if (rec) {
+					rec.set('time_added', Date.now());
+					resolve(false);
+				} else {
+					item.time_added = Date.now();
+					syncedRecents.create(item);
+					resolve(true);
+				}
+			}, 
+			err => { 
+				reject(err);
+			});
 		});
 	}
 
