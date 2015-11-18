@@ -36,7 +36,6 @@ class SearchRequestDispatcher {
 				urlHelper: this.urlHelper
 			});
 		}
-
 	}
 
 	getRelevantProviders (filter) { 
@@ -52,6 +51,28 @@ class SearchRequestDispatcher {
 		}
 	}
 
+	processQueryUpdate ({request, response, resolve, reject}) {
+		var { filter, actualQuery } = this.searchParser.parse(request.query.text);
+		
+		/* whether the query is for autocomplete suggestions */
+		var isAutocomplete = !!request.query.autocomplete;
+
+		var promise = (isAutocomplete) ? 
+			this.search.suggest(filter, actualQuery) :
+			this.search.query(actualQuery, filter);
+
+		promise.then( (data) => { 
+			response.updateResults(data);
+			logger.profile(request);
+
+			if(servicesLeftToProcess === 0 || isAutocomplete) {
+				done();
+			}
+
+			resolve(true);
+		});
+	}
+
 	/**
 	 * Determines which service provider the request should be executed with and executes it.
 	 * @param {object} incomingRequest - contains information about an incoming request.
@@ -65,26 +86,14 @@ class SearchRequestDispatcher {
 			var { filter, actualQuery } = this.searchParser.parse(request.query.text);
 
 			var done = () => {
-				logger.info('SearchRequestDispatcher:process()', 'request completed');
-				this.stopListening();
 				response.complete();
 				request = null;
 				response = null;
+				logger.info('SearchRequestDispatcher:process()', 'request completed');
 			};
 
 			var processQueryUpdate = () => {
-				var promise = (isAutocomplete) ? 
-					this.search.suggest(filter, actualQuery) :
-					this.search.query(actualQuery, filter);
 
-				promise.then( (data) => { 
-					response.updateResults(data);
-					if(servicesLeftToProcess === 0 || isAutocomplete) {
-						done();
-					}
-					logger.profile(request);
-					resolve(true);
-				});
 			};
 
 			/* whether the query is for autocomplete suggestions */
@@ -104,14 +113,14 @@ class SearchRequestDispatcher {
 				doneUpdating: false,
 				autocomplete: isAutocomplete
 			});
-			processQueryUpdate();
+			this.processQueryUpdate({request, response, resolve, reject});
 
 			if (!isAutocomplete) {
 				/* Execute the request every user provider that the user is subscribed */
 				for (let providerName of relevantProviders) {
 					this.serviceProviders[providerName].execute(request).then( (fulfilled) => {
 						servicesLeftToProcess--;
-						processQueryUpdate();
+						this.processQueryUpdate({request, response, resolve, reject});
 
 					}).catch( (rejected) => {
 						servicesLeftToProcess--;

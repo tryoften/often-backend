@@ -164,6 +164,7 @@ class Search {
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
 	suggest (filter, query) {
+		logger.profile('Suggest ' + query);
 
 		var command;
 		if ( (command = this.processCommands(filter)) ) {
@@ -194,6 +195,7 @@ class Search {
 						item.id = new Buffer(item.text).toString('base64');
 						return item;
 					});
+					logger.profile('Suggest ' + query);
 					resolve(response['query-suggest']);
 				}
 			});
@@ -218,26 +220,26 @@ class Search {
 			return this.getTopSearches();
 		}
 
-		if (filter.length > 0) {
-			var matchingFilters = [];
-			var hashedFilter = "#" + filter;
+		// if (filter.length > 0) {
+		// 	var matchingFilters = [];
+		// 	var hashedFilter = "#" + filter;
 
-			for ( var actualFilter of this.filters.models) {
-				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
-					matchingFilters.push(actualFilter.toJSON());
-				}
-			}
-			if (matchingFilters.length === 0) return false;
-			return new Promise( (resolve, reject) => {
-				resolve([
-					{
-						text: hashedFilter,
-						options: matchingFilters
-					}
-				]);
-			});
+		// 	for ( var actualFilter of this.filters.models) {
+		// 		if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
+		// 			matchingFilters.push(actualFilter.toJSON());
+		// 		}
+		// 	}
+		// 	if (matchingFilters.length === 0) return false;
+		// 	return new Promise( (resolve, reject) => {
+		// 		resolve([
+		// 			{
+		// 				text: hashedFilter,
+		// 				options: matchingFilters
+		// 			}
+		// 		]);
+		// 	});
 					
-		}
+		// }
 
 		return false;
 	}

@@ -27,6 +27,7 @@ class Response extends Firebase.Model {
 
 	updateResults (data) {
 		this.set({
+			id: 'id',
 			time_modified: Date.now(),
 			doneUpdating: false,
 			results: JSON.parse(JSON.stringify(data))
@@ -35,6 +36,7 @@ class Response extends Firebase.Model {
 
 	complete () {
 		this.set({
+			id: 'id',
 			doneUpdating: true
 		});
 	}	
