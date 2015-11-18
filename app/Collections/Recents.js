@@ -52,21 +52,16 @@ class Recents extends Firebase.Collection {
 	addRecent (item) {
 		logger.info("Recents:addRecent()", "added recent", item._id);
 		return new Promise( (resolve, reject) => {
-			this.once('sync', syncedRecents => {
-				let rec = syncedRecents.find(mod => mod.get('_id') == item._id);
+			let rec = this.find(mod => mod.get('_id') == item._id);
 
-				if (rec) {
-					rec.set('time_added', Date.now());
-					resolve(false);
-				} else {
-					item.time_added = Date.now();
-					syncedRecents.create(item);
-					resolve(true);
-				}
-			}, 
-			err => { 
-				reject(err);
-			});
+			if (rec) {
+				rec.set('time_added', Date.now());
+				resolve(false);
+			} else {
+				item.time_added = Date.now();
+				this.create(item);
+				resolve(true);
+			}
 		});
 	}
 
