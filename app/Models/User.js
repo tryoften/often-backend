@@ -1,5 +1,6 @@
 import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
+import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
@@ -7,7 +8,7 @@ import { firebase as FirebaseConfig } from '../config';
 class User extends Firebase.Model {
 
 	initialize (data, options) {
-		this.url = `${FirebaseConfig.BaseURL}/users/${data.user}`;
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users/${data.user}`);
 		this.autoSync = true;
 		this.idAttribute = 'id';
 	}
