@@ -25,7 +25,6 @@ function testRandomQueries() {
 
 		if (snap.exists()) {
 			responsesRef[snap.id] = snap.val();
-			console.log(responsesRef[snap.id]);
 			console.timeEnd("Query: " + query);
 		}
 
@@ -51,4 +50,6 @@ function testRandomQueries() {
 	}
 }
 
-testRandomQueries();
+for (var i = 0; i < 200; i++) {
+	testRandomQueries();
+}

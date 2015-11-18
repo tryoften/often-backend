@@ -107,13 +107,14 @@ class Search {
 					console.log('error' + error);
 					reject(error);
 				} else {
-					let results = this.serializeAndSortResults(response);
+					let data = this.serializeAndSortResults(response);
+					let results = data.results;
 					resolve(results);
 
 					this.updateSearchTerms({
 						searchId,
 						query,
-						count: results.length
+						count: data.totalCount
 					});
 				}
 			});
@@ -148,7 +149,7 @@ class Search {
 						}
 					},
 					counter: 1,
-					resultsCount: count
+					resultsCount: count 
 				}
 			}
 		}, (error, response) => {
@@ -189,6 +190,11 @@ class Search {
 					var result = response['query-suggest'][0];
 					result.options = _.each(result.options, (item) => {
 						item.type = item.payload.type;
+
+						if (_.isUndefined(item.type) || _.isNull(item.type)) {
+							item.type = "query";
+						}
+
 						if (item.type == "filter") {
 							item.image = item.text.substring(1, item.text.length) + "-tag";
 						}
@@ -301,7 +307,10 @@ class Search {
 	 serializeAndSortResults (data) {
 	 	console.log("Data responses: " + data.responses.length);
 		var results = [];
+		var total = 0;
+
 	 	for (let res of data.responses) {
+	 		total += res.hits.total;
 			results = results.concat(res.hits.hits);
 		}
 		/* Not the most optimal solution, but fast and concise enough */
@@ -324,7 +333,10 @@ class Search {
 			finalResults.push(singleResult);
 		}
 		console.log("Result size: " + finalResults.length);
-		return finalResults.slice(0, this.esQuerySettings.getResponseSize());
+		return {
+			totalCount: total,
+			results: finalResults.slice(0, this.esQuerySettings.getResponseSize())
+		};
 	}
 	
 	/**

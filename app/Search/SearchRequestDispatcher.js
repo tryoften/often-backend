@@ -65,12 +65,17 @@ class SearchRequestDispatcher {
 			response.updateResults(data);
 			logger.profile(request);
 
-			if(servicesLeftToProcess === 0 || isAutocomplete) {
-				done();
+			if(request.servicesLeftToProcess === 0 || !!request.query.autocomplete) {
+				this.doneProcessingRequest({request, response});
 			}
 
 			resolve(true);
 		});
+	}
+
+	doneProcessingRequest({request, response}) {
+		response.complete();
+		logger.info('SearchRequestDispatcher:proces()', 'request completed');
 	}
 
 	/**
@@ -85,19 +90,13 @@ class SearchRequestDispatcher {
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 			var { filter, actualQuery } = this.searchParser.parse(request.query.text);
 
-			var done = () => {
-				response.complete();
-				request = null;
-				response = null;
-				logger.info('SearchRequestDispatcher:process()', 'request completed');
-			};
 
 			/* whether the query is for autocomplete suggestions */
 			var isAutocomplete = !!request.query.autocomplete;
 
 			/* store the total number of services left to process */
-			var relevantProviders = this.getRelevantProviders(filter);
-			var servicesLeftToProcess = relevantProviders.length;
+			request.relevantProviders = this.getRelevantProviders(filter);
+			request.servicesLeftToProcess = request.relevantProviders.length;
 			
 			var response = new Response({
 				id: request.id
@@ -113,13 +112,13 @@ class SearchRequestDispatcher {
 
 			if (!isAutocomplete) {
 				/* Execute the request every user provider that the user is subscribed */
-				for (let providerName of relevantProviders) {
+				for (let providerName of request.relevantProviders) {
 					this.serviceProviders[providerName].execute(request).then( (fulfilled) => {
-						servicesLeftToProcess--;
+						request.servicesLeftToProcess--;
 						this.processQueryUpdate({request, response, resolve, reject});
 
 					}).catch( (rejected) => {
-						servicesLeftToProcess--;
+						request.servicesLeftToProcess--;
 					});
 					
 				}
@@ -132,7 +131,7 @@ class SearchRequestDispatcher {
 				if (!response.get('doneUpdating')) {
 					reject(false);
 				}
-				done();
+				this.doneProcessingRequest({request, response});
 			}, 8000, 'timeout');
 		});
 		
