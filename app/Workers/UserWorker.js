@@ -4,7 +4,6 @@ import Favorites from '../Collections/Favorites';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import Users from '../Collections/Users';
 import User from '../Models/User';
 
 class UserWorker extends Worker {
