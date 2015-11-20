@@ -14,9 +14,9 @@ class SoundCloudService extends ServiceBase {
 	 *
 	 * @return {void}
 	 */
-	constructor (models) {
+	constructor (opts) {
 
-		super(models, settings);
+		super(opts);
 		this.rest = new RestService({
 			baseURL : settings.base_url
 		});
@@ -137,12 +137,10 @@ class SoundCloudService extends ServiceBase {
 
 					tracks.push(track);
 				}
-
-				this.shortenUrls(tracks).then( () => {
-					results.track = tracks;
-					resolve(true);
-				})
-				.catch( (err) => { reject(err); } );
+				this.shortenUrls(tracks);
+				results.track = tracks;
+				console.log('SoundCloudService(): ', query, JSON.stringify(tracks));
+				resolve(true);
 
 			}).on('error', err => {
 				console.log('err' + err);

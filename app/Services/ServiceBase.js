@@ -14,7 +14,7 @@ class ServiceBase {
 	 *
 	 * @return {Void}
 	 */
-	constructor (models, opts) {
+	constructor (opts) {
 		this.provider_id = opts.provider_name;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
 		this.search = opts.search;
@@ -44,36 +44,23 @@ class ServiceBase {
 
 	/**
 	 * Shortens the url (specified by prop) of each results object 
-	 * @param {[object]} results - array of results objects
-	 * @param {string} prop - property containing the link to be shortened (defaults to external_url)
 	 *
-	 * @return {promise} - Returns a promise that resolves to an array of results with shortened urls or an error
+	 * @return {Void}
 	 */
 	shortenUrls (results, prop = 'external_url') {
-		var promises = [];
-		for (let res of results) {
-			promises.push(this.shortenUrl(res, prop));
+		for (var res of results) {
+			res[prop] = this.shortenUrl(res[prop]);
 		}
-		return Promise.all(promises);
-
 	}
 
 	/**
 	 * Shortens and replaces the url denoted by prop of a result object with a shorter one
-	 * @param {object} result - result object
-	 * @param {string} prop - property containing the link to be shortened
+	 * @param {string} link - long url
 	 *
 	 * @return {promise} - Returns a promise that resolves to an object containing shortened_url or error, when rejected.
 	 */
-	shortenUrl (result, prop) {
-		return new Promise( (resolve, reject) => {
-			this.urlHelper.minifyUrl(result[prop]).then( (shortUrl) => {
-				result[prop] = shortUrl;
-				resolve(result);
-
-			}).catch( (err) => { reject(err); });
-		});
-
+	shortenUrl (link) {
+		return this.urlHelper.shortenUrl(link);
 	}
 
 }

@@ -1,6 +1,6 @@
 import SearchParser from '../Search/SearchParser';
 import Response from '../Models/Response';
-import URLHelper from '../Models/URLHelper';
+import URLHelper from '../Utilities/URLHelper';
 import _ from 'underscore';
 import logger from '../Models/Logger';
 

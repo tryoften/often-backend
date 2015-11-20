@@ -2,7 +2,6 @@ import 'backbonefire';
 import ServiceBase from '../ServiceBase';
 import { Settings as settings } from './config';
 import { Service as RestService, parsers } from 'restler';
-
 /** 
  * This class is responsible for fetching data from the Giphy API
  */
@@ -14,9 +13,9 @@ class YouTubeService extends ServiceBase {
 	 *
 	 * @return {void}
 	 */
-	constructor (models) {
+	constructor (opts) {
 
-		super(models, settings);
+		super(opts);
 		this.rest = new RestService({
 			baseURL : settings.base_url
 		});
@@ -71,14 +70,10 @@ class YouTubeService extends ServiceBase {
 							commentCount: parseInt(item.statistics.commentCount)
 						});
 					}
-
-					this.shortenUrls(videos).then( () => {
-
-						results.video = videos;
-						console.log('YouTubeService(): ', query, JSON.stringify(videos));
-						resolve(results);
-					})
-					.catch( (err) => { reject(err); } );
+					this.shortenUrls(videos);
+					results.video = videos;
+					console.log('YouTubeService(): ', query, JSON.stringify(videos));
+					resolve(results);
 
 				}).on('error', err => {
 					console.log('err', err);
