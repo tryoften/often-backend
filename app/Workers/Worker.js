@@ -41,7 +41,7 @@ class Worker {
 	setupHealthCheckServer () {
 		createServer((req, res) => {
 			res.writeHead(200, {"Content-Type": "text/plain"});
-			res.end("Hello World\n");
+			res.end("Health checker\n");
 		}).listen(config.port);
 
 		console.log(`Health check server running at at http://127.0.0.1:${config.port}/`);
