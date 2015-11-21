@@ -10,56 +10,63 @@ var config = {
 	secret: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E',
 
 	logPath: process.env.LOG_PATH || './',
+/*
+	dataBackend can be 'datastore', 'cloudsql', or 'mongodb'. Be sure to
+	configure the appropriate settings for each storage engine below.
+	Note that datastore requires no additional configuration.
+	*/
+	dataBackend: 'datastore',
 
-	/*
-		dataBackend can be 'datastore', 'cloudsql', or 'mongodb'. Be sure to
-		configure the appropriate settings for each storage engine below.
-		Note that datastore requires no additional configuration.
-		*/
-		dataBackend: 'datastore',
+/*
+	This can also be your project id as each project has a default
+	bucket with the same name as the project id.
+	*/
+	cloudStorageBucket: 'acoustic-rider-104419',
 
-	/*
-		This can also be your project id as each project has a default
-		bucket with the same name as the project id.
-		*/
-		cloudStorageBucket: 'acoustic-rider-104419',
+/*
+	This is the id of your project in the Google Developers Console.
+	*/
+	gcloud: {
+		projectId: 'acoustic-rider-104419',
+		bucket_name: 'resized_images',
+		key: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E'
+	},
 
-	/*
-		This is the id of your project in the Google Developers Console.
-		*/
-		gcloud: {
-			projectId: 'acoustic-rider-104419',
-			bucket_name: 'resized_images',
-			key: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E'
-		},
+/*
+	The client ID and secret can be obtained by generating a new Client ID for
+	a web application on Google Developers Console.
+	*/
+	oauth2: {
+		clientId: 'your-client-id-here',
+		clientSecret: 'your-client-secret-here',
+		redirectUrl: process.env.OAUTH2_CALLBACK || 'http://localhost:8080/oauth2callback',
+		scopes: ['email', 'profile']
+	},
 
-	/*
-		The client ID and secret can be obtained by generating a new Client ID for
-		a web application on Google Developers Console.
-		*/
-		oauth2: {
-			clientId: 'your-client-id-here',
-			clientSecret: 'your-client-secret-here',
-			redirectUrl: process.env.OAUTH2_CALLBACK || 'http://localhost:8080/oauth2callback',
-			scopes: ['email', 'profile']
-		},
+	firebase: {
+	 BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com',
+	 Secret: args['firebase-secret'] || 'kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2'
+	},
 
-		firebase: {
-			BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com',
-			Secret: args['firebase-secret'] || 'kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2'
-		},
+	elasticsearch: {
+		 BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+	},
 
-		elasticsearch: {
-			BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
-		},
+	bitly: {
+		clientId: "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
+		clientSecret: "0c7321da3281625aa86d6245374ee206c1d6e331",
+		accessToken: "caf39699a2f9df44a2c8acb4ab466385753dd228"
+	},
 
-		bitly: {
-			clientId: "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
-			clientSecret: "0c7321da3281625aa86d6245374ee206c1d6e331",
-			accessToken: "caf39699a2f9df44a2c8acb4ab466385753dd228"
-		}
+	url_shortener: {
+		host: args['shortener-host'] || 'oftn.me'
+	},
 
-	};
+	url_redirector: {
+		port: args['redirect-port'] || 9999
+	}
+
+};
 
 config.firebase.queues = {
 	default: {

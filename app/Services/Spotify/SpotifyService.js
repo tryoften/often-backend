@@ -1,7 +1,6 @@
 import 'backbonefire';
 import ServiceBase from '../ServiceBase';
 import { Settings as settings } from './config';
-
 var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
 
@@ -16,8 +15,8 @@ class SpotifyService extends ServiceBase {
 	 *
 	 * @return {void}
 	 */
-	constructor (models) {
-		super(models, settings);
+	constructor (opts) {
+		super(opts);
 	}
 	
 	/**
@@ -129,11 +128,10 @@ class SpotifyService extends ServiceBase {
 						explicit: trackData.explicit
 					});
 				}
-				this.shortenUrls(tracks).then( () => {
-					results.track = tracks;
-					resolve(true);
-				})
-				.catch( (err) => { reject(err); } );
+				this.shortenUrls(tracks);
+				results.track = tracks;
+				logger.info('SpotifyService.searchTracks(): query: %s, tracks: %s', query, JSON.stringify(tracks));
+				resolve(true);
 
 			}, (error) => {
 
@@ -207,7 +205,6 @@ class SpotifyService extends ServiceBase {
 						image_large : (artistData.images.length > 0) ? artistData.images[0].url : ""
 					});
 				}
-				//console.log(artistData);
 				results.artist = artists;
 				resolve(true);
 
