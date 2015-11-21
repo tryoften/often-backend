@@ -130,7 +130,7 @@ class SpotifyService extends ServiceBase {
 				}
 				this.shortenUrls(tracks);
 				results.track = tracks;
-				console.log('SpotifyService(): ', query, JSON.stringify(tracks));
+				logger.info('SpotifyService.searchTracks(): query: %s, tracks: %s', query, JSON.stringify(tracks));
 				resolve(true);
 
 			}, (error) => {
@@ -205,7 +205,6 @@ class SpotifyService extends ServiceBase {
 						image_large : (artistData.images.length > 0) ? artistData.images[0].url : ""
 					});
 				}
-				//console.log(artistData);
 				results.artist = artists;
 				resolve(true);
 

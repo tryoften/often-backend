@@ -72,7 +72,7 @@ class YouTubeService extends ServiceBase {
 					}
 					this.shortenUrls(videos);
 					results.video = videos;
-					console.log('YouTubeService(): ', query, JSON.stringify(videos));
+					logger.info('YouTubeService.fetchData(): query: %s, tracks: %s', query, JSON.stringify(videos));
 					resolve(results);
 
 				}).on('error', err => {

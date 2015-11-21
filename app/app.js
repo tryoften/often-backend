@@ -2,6 +2,7 @@ import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';
 import UserWorker from './Workers/UserWorker';
+import URIConverterService from './Utilities/URIConverterService';
 import minimist from 'minimist';
 import config from './config';
 import _ from 'underscore';
@@ -33,6 +34,13 @@ if (_.contains(argv._, 'user')) {
 	var worker = new UserWorker();
 	worker.start();
 }
+
+if (_.contains(argv._, 'link-redirector')) {
+	console.log('starting the link-redirector');
+	var redirector = new URIConverterService();
+	redirector.start();
+}
+
 
 console.log('firebase root URL: ', config.firebase.BaseURL);
 console.log('elasticsearch root URL: ', config.elasticsearch.BaseURL);

@@ -1,5 +1,4 @@
-import Search from '../Search/Search';
-
+import logger from '../Models/Logger';
 /** 
  *	This class is a base class for all service providers. 
  *	It has an instance of the results collection to which it adds a response after processing.

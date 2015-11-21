@@ -139,7 +139,7 @@ class SoundCloudService extends ServiceBase {
 				}
 				this.shortenUrls(tracks);
 				results.track = tracks;
-				console.log('SoundCloudService(): ', query, JSON.stringify(tracks));
+				logger.info('Soundcloud.searchTracks(): query: %s, tracks: %s', query, JSON.stringify(tracks));
 				resolve(true);
 
 			}).on('error', err => {

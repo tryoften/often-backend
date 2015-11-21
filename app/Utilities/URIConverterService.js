@@ -1,4 +1,3 @@
-
 import ShortenedURL from '../Models/ShortenedURL';
 import url_redirector from '../config';
 import express from 'express';
@@ -40,8 +39,11 @@ class URIConverterService {
 	 */
 	run () {
 		this.app.get('/:hash', (req, res) => {
-
 			var hash = req.params.hash;
+			if (hash === "favicon.ico") {
+				res.status(200).end();
+				return;
+			}
 			var urlObject = new ShortenedURL(hash);
 			var long_url = urlObject.get('long_url');
 
