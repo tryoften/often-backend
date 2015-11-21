@@ -2,6 +2,8 @@ import Queue from 'firebase-queue';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import { firebase as FirebaseConfig } from '../config';
 import _ from 'underscore';
+import { createServer } from 'http';
+import config from '../config';
 
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
@@ -26,6 +28,7 @@ class Worker {
 	start () {
 		this.ref = UserTokenGenerator.getAdminReference(this.options.url);
 		this.queue = new Queue(this.ref, this.options, this.process.bind(this));
+		this.setupHealthCheckServer();
 	}
 
 	/**
@@ -33,6 +36,15 @@ class Worker {
 	 */
 	process(data, progress, resolve, reject) {
 		throw new Error('Worker(): worker.process must be implemented by a child class');
+	}
+
+	setupHealthCheckServer () {
+		createServer((req, res) => {
+			res.writeHead(200, {"Content-Type": "text/plain"});
+			res.end("Health checker\n");
+		}).listen(config.port);
+
+		console.log(`Health check server running at at http://127.0.0.1:${config.port}/`);
 	}
 }
 
