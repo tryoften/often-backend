@@ -305,7 +305,6 @@ class Search {
 	 * @return {[object]} - array of size bounded by ES Settings
 	 */
 	 serializeAndSortResults (data) {
-	 	console.log("Data responses: " + data.responses.length);
 		var results = [];
 		var total = 0;
 
@@ -332,7 +331,6 @@ class Search {
 			}
 			finalResults.push(singleResult);
 		}
-		console.log("Result size: " + finalResults.length);
 		return {
 			totalCount: total,
 			results: finalResults.slice(0, this.esQuerySettings.getResponseSize())

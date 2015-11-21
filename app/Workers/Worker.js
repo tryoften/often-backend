@@ -1,9 +1,8 @@
 import Queue from 'firebase-queue';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import { firebase as FirebaseConfig } from '../config';
+import { firebase as FirebaseConfig, port } from '../config';
 import _ from 'underscore';
 import { createServer } from 'http';
-import config from '../config';
 
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
@@ -42,9 +41,9 @@ class Worker {
 		createServer((req, res) => {
 			res.writeHead(200, {"Content-Type": "text/plain"});
 			res.end("Health checker\n");
-		}).listen(config.port);
+		}).listen(port);
 
-		console.log(`Health check server running at at http://127.0.0.1:${config.port}/`);
+		console.log(`Health check server running at http://127.0.0.1:${port}/`);
 	}
 }
 

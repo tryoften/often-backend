@@ -1,5 +1,5 @@
 import 'backbonefire';
-import { Firebase} from 'backbone';
+import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 
 /**
@@ -16,8 +16,6 @@ class ShortenedURL extends Firebase.Model {
 		this.url = `${FirebaseConfig.BaseURL}/urls/${hash}`;
 		this.autoSync = true;
 	}
-
-
 
 }
 
