@@ -38,12 +38,14 @@ class URIConverterService {
 	 */
 	handleURL (req, res, model) {
 		var long_url = model.get('long_url');
-		logger.info('URIConverterService.handleURL(): ', 'converting URL', req.originalUrl, long_url);
+
 
 		if (!_.isUndefined(long_url) && !_.isNull(long_url)) {
+			logger.info('URIConverterService.handleURL(): ', 'success redirect URL', req.originalUrl, long_url);
 			model.set('time_accessed', Date.now());
 			res.redirect(long_url);
 		} else {
+			logger.error('URIConverterService.handleURL(): ', 'failed redirect URL', req.originalUrl);
 			res.status(404).end();
 		}
 		model.off();
