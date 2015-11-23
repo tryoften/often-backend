@@ -33,6 +33,25 @@ class URIConverterService {
 	}
 
 	/**
+	 * Handles fetching data from firebase and red
+	 *
+	 */
+	handleURL (req, res, model) {
+		var long_url = model.get('long_url');
+
+
+		if (!_.isUndefined(long_url) && !_.isNull(long_url)) {
+			logger.info('URIConverterService.handleURL(): ', 'success redirect URL', req.originalUrl, long_url);
+			model.set('time_accessed', Date.now());
+			res.redirect(long_url);
+		} else {
+			logger.error('URIConverterService.handleURL(): ', 'failed redirect URL', req.originalUrl);
+			res.status(404).end();
+		}
+		model.off();
+	}
+
+	/**
 	 * Sets up the route redirection
 	 *
 	 * @return {Void}
@@ -40,19 +59,15 @@ class URIConverterService {
 	run () {
 		this.app.get('/:hash', (req, res) => {
 			var hash = req.params.hash;
-			if (hash === "favicon.ico") {
+
+			if (hash === "favicon.ico" || hash === "health-check") {
 				res.status(200).end();
 				return;
 			}
-			var urlObject = new ShortenedURL(hash);
-			var long_url = urlObject.get('long_url');
 
-			if (!_.isUndefined(long_url) && !_.isNull(long_url)) {
-				urlObject.set('time_accessed', Date.now());
-				res.redirect(long_url);
-			} else {
-				res.status(404).end();
-			}
+			var urlObject = new ShortenedURL(hash);
+			urlObject.on('sync', this.handleURL.bind(this, req, res, urlObject));
+			urlObject.fetch();
 		});
 	}
 
