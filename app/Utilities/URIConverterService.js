@@ -1,5 +1,5 @@
 import ShortenedURL from '../Models/ShortenedURL';
-import url_redirector from '../config';
+import { url_redirector } from '../config';
 import express from 'express';
 import _ from 'underscore';
 import logger from '../Models/Logger';

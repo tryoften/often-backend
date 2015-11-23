@@ -4,7 +4,7 @@ import { generateURIfromGuid } from '../Utilities/generateURI';
 import ImageResizerWorker from '../Workers/ImageResizerWorker';
 import Firebase from 'firebase';
 import cheerio from 'cheerio';
-import URLHelper from '../Models/URLHelper';
+import URLHelper from '../Utilities/URLHelper';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
