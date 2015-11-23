@@ -14,7 +14,7 @@ class ServiceBase {
 	 * @return {Void}
 	 */
 	constructor (opts) {
-		this.provider_id = opts.provider_name;
+		this.provider_id = opts.provider_id;
 		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
 		this.search = opts.search;
 		this.urlHelper = opts.urlHelper;
