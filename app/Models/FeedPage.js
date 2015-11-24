@@ -143,6 +143,7 @@ class FeedPage {
 				"description": item.description,
 				"guid": item.guid,
 				"link": item.link,
+				"original_url": item.link,
 				"summary": item.summary,
 				"categories": item.categories,
 				"image": image,
@@ -151,27 +152,24 @@ class FeedPage {
 					"name": this.name
 				}
 			};
+			data.link = this.urlHelper.shortenUrl(data.link);
+			if (_.isUndefined(image) || _.isNull(image)) {
+				resolve(data);
+				return;
+			}
+			
+			this.imageResizer
+			.ingest('rss', this.feed.id, item.guid, image)
+			.then(imageData => {
+				data.images = imageData;
 
-			this.urlHelper.minifyUrl(data.link).then( (shortUrl) => {
-				data.link = shortUrl;
-				if (_.isUndefined(image) || _.isNull(image)) {
-					resolve(data);
-					return;
-				}
-				this.imageResizer
-				.ingest('rss', this.feed.id, item.guid, image)
-				.then(imageData => {
-					data.images = imageData;
-
-					// store item in firebase under feed
-					resolve(data);
-				})
-				.catch(err => {
-					console.error('FeedPage(): Image resizing failed ', err);
-					reject(data);
-				});
+				// store item in firebase under feed
+				resolve(data);
 			})
-			.catch( (err) => { reject(err); });
+			.catch(err => {
+				console.error('FeedPage(): Image resizing failed ', err);
+				reject(data);
+			});
 
 		});
 
