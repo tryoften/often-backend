@@ -4,7 +4,7 @@ import _ from 'underscore';
  * This class is responsible for providing granular functionalities (mostly accessors) for ElasticSearchQueries.
  */ 
 class ElasticSearchQuery extends Model {
-	
+
 	/**
 	 * Prepares query arguments by injecting text onto the query template and optionally overwrites the index
 	 * @param {string} text - textual query
@@ -28,6 +28,8 @@ class ElasticSearchQuery extends Model {
 		if (index !== "") {
 			/* if an index is defined, then header's index needs to be set */
 			header.index = index;
+			delete body.size;
+			delete body.from;
 		}
 		return [header, body];
 	}
