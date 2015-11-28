@@ -32,28 +32,28 @@ client.search({
 
 	var documents = response.hits.hits;
 	var bulkBody = [];
-  	for (var doc of documents) {
-  		bulkBody.push({
-  			update: {
-  				_index: doc._index, 
-  				_type: doc._type, 
-  				_id: doc._id 
-  			} 
-  		});
+	for (var doc of documents) {
+		bulkBody.push({
+			update: {
+				_index: doc._index, 
+				_type: doc._type, 
+				_id: doc._id 
+			} 
+		});
 
-  		var updObj = {
-  			original_url: doc._id,
-  			link: urlHelper.shortenUrl(doc._id)
-  		}
+		var updObj = {
+			original_url: doc._id,
+			link: urlHelper.shortenUrl(doc._id)
+		}
 
-  		bulkBody.push({
-  			doc : updObj
-  		});
-  	}
-  	
-  	/* Bulk update all documents */
-  	client.bulk({
-  		body : bulkBody
-  	});
+		bulkBody.push({
+			doc : updObj
+		});
+	}
+	
+	/* Bulk update all documents */
+	client.bulk({
+		body : bulkBody
+	});
   	
 });
