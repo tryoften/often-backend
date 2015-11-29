@@ -7,6 +7,7 @@ import cheerio from 'cheerio';
 import URLHelper from '../Utilities/URLHelper';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import logger from './Logger';
 
 class FeedPage {
 
@@ -73,7 +74,7 @@ class FeedPage {
 							};
 							this.feedQueueRef.push(feedData);
 
-							console.log(`FeedPage(${this.url}).ingestData(): done ingesting`);
+							logger.info(`FeedPage(${this.url}).ingestData(): done ingesting`);
 							resolve(feedData);
 						}
 					});
@@ -167,7 +168,7 @@ class FeedPage {
 				resolve(data);
 			})
 			.catch(err => {
-				console.error('FeedPage(): Image resizing failed ', err);
+				logger.error('FeedPage(): Image resizing failed ', err);
 				reject(data);
 			});
 

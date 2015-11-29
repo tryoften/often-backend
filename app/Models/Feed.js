@@ -9,6 +9,7 @@ import getFeedPage from '../Utilities/getFeedPage';
 import URL from 'url';
 import _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import logger from './Logger';
 
 /**
  * This class represents a atom/rss feed along with it's metadata and how to parse it 
@@ -53,7 +54,7 @@ class Feed extends Model {
 		this.set('currentPage', 0);
 
 		return getFeedPage(this.get('url')).then(data => {
-			console.log('Feed.queueJobs(): First page URL: ', this.get('url'));
+			logger.info('Feed.queueJobs(): First page URL: ', this.get('url'));
 			this.updateMetadata(data);
 			this.queueJobs(data);
 		});
@@ -86,7 +87,7 @@ class Feed extends Model {
 			pageCount = 10;
 		}
 
-		console.log('Total Pages: ' + pageCount);
+		logger.info('Total Pages: ' + pageCount);
 
 		this.set({
 			baseURL: baseURL,
@@ -103,7 +104,7 @@ class Feed extends Model {
 		let guid = generateURIfromGuid(firstItem.guid);
 		let url = `${FirebaseConfig.BaseURL}/articles/${this.id}/items/${guid}`;
 		let itemRef = UserTokenGenerator.getAdminReference(url);
-		console.log(`check if ${itemRef.toString()} exists`);
+		logger.info(`check if ${itemRef.toString()} exists`);
 
 		// TODO(luc): set timeout after 10 seconds
 		// if nothing comes back, assume feed is done ingesting
@@ -116,7 +117,7 @@ class Feed extends Model {
 			}
 
 			if (shouldIngest) {
-				console.log(`Feed(${this.id}): ingesting`);
+				logger.info(`Feed(${this.id}): ingesting`);
 
 				let url = (this.get('pagination') == 'none') ? 
 					this.get('url') :
@@ -124,10 +125,10 @@ class Feed extends Model {
 
 				this.queueJob(url);
 				this.set('currentPage', 0);
-				console.log('new task URL: ', url);
+				logger.info('new task URL: ', url);
 
 			} else {
-				console.warn(`Feed(${this.id}): nothing to ingest`);
+				logger.warn(`Feed(${this.id}): nothing to ingest`);
 			}
 		});
 
@@ -183,7 +184,7 @@ class Feed extends Model {
 				for (let processedItem of data.processedItems) {
 					let guid = generateURIfromGuid(processedItem.guid);
 					let child = snapshot.child(guid);
-					console.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
+					logger.info(`Feed(): itemRef: ${itemsRef.toString()}/${guid}`);
 
 					if (child.exists() && !this.reingest) {
 						shouldIngest = false;
@@ -198,7 +199,7 @@ class Feed extends Model {
 
 			if (shouldIngest) {		
 				let taskData = this.queueJob(this.getNextPageURL());
-				console.log(`Feed.processJob(): Queuing next job URL (${taskData.pageURL})`);
+				logger.info(`Feed.processJob(): Queuing next job URL (${taskData.pageURL})`);
 			}
 			resolve(data);
 		});

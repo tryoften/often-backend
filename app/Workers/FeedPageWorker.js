@@ -4,6 +4,7 @@ import _ from 'underscore';
 import elasticsearch from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import { firebase as FirebaseConfig } from '../config';
+import logger from '../Models/Logger';
 
 class FeedPageWorker extends Worker {
 	
@@ -25,7 +26,7 @@ class FeedPageWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		console.info('FeedPageWorker(): owner-id: ', data._owner, ' pageURL: ', data.pageURL);
+		logger.info('FeedPageWorker(): owner-id: ', data._owner, ' pageURL: ', data.pageURL);
 		data.search = this.search;
 		
 		let page = new FeedPage(data);
