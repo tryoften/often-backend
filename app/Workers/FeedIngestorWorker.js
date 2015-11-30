@@ -2,6 +2,7 @@ import Worker from './Worker';
 import FeedIngestor from '../Ingestors/Feed/FeedIngestor';
 import config from '../config';
 import _ from 'underscore';
+import logger from '../Models/Logger';
 
 class FeedIngestorWorker extends Worker {
 
@@ -19,7 +20,7 @@ class FeedIngestorWorker extends Worker {
 
 		if (_.isBoolean(data.reingest)) {
 			reingest = data.reingest;
-			console.log('FeedIngestorWorker(): reingest true');
+			logger.info('FeedIngestorWorker(): reingest true');
 		}
 
 		this.ingestor.ingest(reingest);
