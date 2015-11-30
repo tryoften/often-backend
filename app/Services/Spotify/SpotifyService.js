@@ -126,7 +126,8 @@ class SpotifyService extends ServiceBase {
 						external_url : "https://play.spotify.com/track/"+trackData.id,
 						url: trackData.href,
 						uri: trackData.uri,
-						explicit: trackData.explicit
+						explicit: trackData.explicit,
+						popularity: trackData.popularity
 					});
 				}
 				this.shortenUrls(tracks);
