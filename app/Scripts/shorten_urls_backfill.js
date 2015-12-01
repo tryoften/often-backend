@@ -61,8 +61,6 @@ client.search({
 			link: urlHelper.shortenUrl(doc._id)
 		};
 
-		// console.log("shortened url: ", updObj.link);
-
 		bulkBody.push({
 			doc : updObj
 		});
