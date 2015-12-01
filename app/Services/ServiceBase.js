@@ -26,11 +26,11 @@ class ServiceBase {
 	 *
 	 * @return {Void}
 	 */
-	execute (request) {
+	execute ({actualQuery}) {
 
 		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
 		return this
-			.fetchData(request.query.text)
+			.fetchData(actualQuery)
 			.then((results) => {
 				/* Create a response based off of returned results and update the cache */
 				return this.search.index(this.provider_id, results);

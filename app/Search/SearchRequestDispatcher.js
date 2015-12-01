@@ -114,7 +114,7 @@ class SearchRequestDispatcher {
 			if (!isAutocomplete) {
 				/* Execute the request every user provider that the user is subscribed */
 				for (let providerName of request.relevantProviders) {
-					this.serviceProviders[providerName].execute(request).then( (fulfilled) => {
+					this.serviceProviders[providerName].execute({actualQuery}).then( (fulfilled) => {
 						request.servicesLeftToProcess--;
 						this.processQueryUpdate({request, response, resolve, reject});
 
