@@ -169,7 +169,7 @@ class FeedPage {
 			})
 			.catch(err => {
 				logger.error('FeedPage(): Image resizing failed ', err);
-				reject(data);
+				resolve(data);
 			});
 
 		});

@@ -13,34 +13,28 @@ console.dir(argv);
 config.workers = argv._;
 if (_.contains(argv._, 'search')) {
 	console.log('starting search\n');
-	var worker = new SearchWorker();
-	worker.start();
+	new SearchWorker().start();
 }
 
 if (_.contains(argv._, 'feed-ingestor')) {
 	console.log('starting feed ingestor\n');
-	var worker = new FeedIngestorWorker();
-	worker.start();
+	new FeedIngestorWorker().start();
 }
 
 if (_.contains(argv._, 'feedpage-parser')) {
 	console.log('starting feed page parser');
-	var worker = new FeedPageWorker();
-	worker.start();
+	new FeedPageWorker().start();
 }
 
 if (_.contains(argv._, 'user')) {
 	console.log('starting the user worker');
-	var worker = new UserWorker();
-	worker.start();
+	new UserWorker().start();
 }
 
 if (_.contains(argv._, 'link-redirector')) {
 	console.log('starting the link-redirector');
-	var redirector = new URIConverterService();
-	redirector.start();
+	new URIConverterService().start();
 }
-
 
 console.log('firebase root URL: ', config.firebase.BaseURL);
 console.log('elasticsearch root URL: ', config.elasticsearch.BaseURL);

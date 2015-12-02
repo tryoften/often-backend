@@ -36,6 +36,7 @@
     "node-bitlyapi": "^0.4.0",
     "request": "^2.60.0",
     "restler": "^3.2.2",
+    "rsvp": "^3.1.0",
     "sha1": "^1.1.1",
     "sharp": "^0.11.3",
     "spotify-web-api-node": "^2.0.2",
