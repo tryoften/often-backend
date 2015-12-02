@@ -5,6 +5,7 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import _ from 'underscore';
 import logger from '../Models/Logger';
+import { Promise } from 'rsvp';
 
 /**
  * Class for interacting with ElasticSearch.
@@ -208,8 +209,15 @@ class Search {
 		});
 	}
 
+	/**
+	 * Processes commands parsed out of a search query and matches it against the appropriate handler.
+	 * The format for a command is `# + command_id`
+	 * e.g.: #top-searches:10
+	 *
+	 * @param filter the query string
+	 * @returns {Promise} - resolves with data for particular command
+     */
 	processCommands (filter) {
-
 		if (filter == 'filters-list') {
 			var self = this;
 			return new Promise( (resolve, reject) => {
