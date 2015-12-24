@@ -28,7 +28,7 @@ class Artist extends Firebase.Model {
 	}
 
 	update ({artist, track, lyrics}) {
-		console.log('updating artist');
+		
 		if (_.isUndefined(artist)) {
 			throw new Error("Artist information must be defined.");
 		}
@@ -47,23 +47,19 @@ class Artist extends Firebase.Model {
 		/* Update artist properties */
 		if (!this.trackExists(track.id)) {
 			/* if track doesn't exist then don't update counts */
-			
-			properties.tracks_count = (this.get('tracks_count') || 0) + 1
+			properties.tracks_count = (this.get('tracks_count') || 0) + 1;
 			
 			if (!_.isUndefined(lyrics)) {
 				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;
 			}
 			
-		} else {
-			properties.tracks_count = this.get('tracks_count');
-			properties.lyrics_count = this.get('lyrics_count');
-		}
+		} 
+
 		properties.tracks = this.get('tracks') || {};
 		properties.tracks[track.id] = track;
+		this.set('time_modified', Date.now());
 		this.set(properties);
-		this.set('tracks', properties.tracks);
-		this.set('id', 'id');
-
+		
 		return this.attributes;
 
 	}

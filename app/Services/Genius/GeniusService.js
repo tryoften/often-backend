@@ -6,6 +6,7 @@ import { Service as RestService } from 'restler';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
 import Lyric from '../../Models/Lyric';
+import _ from 'underscore';
 /** 
  * This class is responsible for fetching data from the Spotify API
  */
@@ -41,28 +42,32 @@ class GeniusService extends ServiceBase {
 					access_token: settings.access_token
 				}
 			}).on('success', data => {
+				
 				/* check response code */
 				if (data.meta.status != 200) {
 					reject("Invalid return status");
 				}
 
 				var promises = [];
+				
 				for (var result of data.response.hits) {
-					/* Add all songs to songs list */
+					//Add all songs to songs list 
 					promises.push(this.getData(result.result.id));
 				}
 
-				Promise.all(promises).then((data) => {
+				Promise.all(promises).then( (categorizedData) => {
 					results = {
 						artist: [],
 						track: [],
 						lyric: []
 					}
 
-					for (var res of data) {
+					for (var res of categorizedData) {
 						results.artist.push(res.artist);
 						results.track.push(res.track);
-						results.lyric.push(res.lyric);
+						if (!_.isUndefined(res.lyric)) {
+							results.lyric.push(res.lyric);
+						}
 					}
 
 					resolve(results);
@@ -77,49 +82,59 @@ class GeniusService extends ServiceBase {
 	}
 
 	getData (songId) {
+
 		return new Promise( (resolve, reject) => {
-			var result = {};
+			
 			this.getTrackMeta(songId).then( (meta) => {
-				console.log('Processing track metadata');
 				var artist = meta.artist;
 				var track = meta.track;
-				var lyrics = [];
-				console.log(artist.id);
 				var artistObj = new Artist({ id: artist.id });
-				artistObj.on('sync', (artistObj) => {
-					if (artistObj.trackExists(songId)) {
-						/* if the track does exist then we just need to update artist and track meta */
-						result = {
-							artist: artistObj.update({artist, track}),
-							track: new Track({ id: track.id }).update({artist, track, lyrics})
-						}
+				artistObj.once('sync', (syncedArtist) => {
+					var result = {};
+					var trackObj = new Track({ id: track.id });
+					trackObj.once('sync', (syncedTrack) => {
 						
-						resolve(result);
-
-
-					} else {
-						console.log('Fetching lyrics');
-						/* otherwise, lyrics data will need to be updated as well */
-						this.fetchLyrics(songId).then( (lyrics) => {
-
+						if (syncedArtist.trackExists(songId)) {
+							/* If track exists then just update meta */
 							result = {
-								artist: artistObj.update({artist, track, lyrics}),
-								track: new Track({ id: track.id }).update({artist, track, lyrics}),
-								lyrics: []
+								artist: syncedArtist.update({artist, track}),
+								track: syncedTrack.update({artist, track})
 							}
 
-							for (let i = 0; i < lyrics.length; i++) {
-								var lyric = lyrics[i];
-								result.lyrics.push(new Lyric({ id: `${track.id}_${i}` }).update({artist, track, lyric}));
-							}
-							
-							// update lyrics here
 							resolve(result);
-						});
-					}
+
+						} else {
+
+							/* Otherwise, update lyrics as well */
+							this.fetchLyrics(songId).then( (rawLyrics) => {
+
+								var lyrics = this.cleanUpLyrics(rawLyrics);
+
+								result = {
+									artist: syncedArtist.update({artist, track, lyrics}),
+									track: syncedTrack.update({artist, track, lyrics}),
+									lyric: []
+								}
+								for (let i = 0; i < lyrics.length; i++) {
+									var lyric = lyrics[i];
+									result.lyric.push(new Lyric({ id: `${track.id}_${i}` }).update({artist, track, lyric}));
+								}
+								
+								// update lyrics here
+								console.log('resolving ', songId);
+								resolve(result);
+							}).catch( (err) => {
+								console.log('rejecting ', songId);
+								reject(err);
+							});
+						}
+
+					});
+					trackObj.fetch();
 
 				});
 				artistObj.fetch();
+				
 			});
 		});
 	}
@@ -139,7 +154,9 @@ class GeniusService extends ServiceBase {
 					reject("Invalid return status");
 					return;
 				}
+
 				var result = data.response.song;
+				
 				var info = {
 					track: {
 						id: result.id,
@@ -147,14 +164,7 @@ class GeniusService extends ServiceBase {
 						url: result.url,
 						header_image_url: result.header_image_url,
 						song_art_image_url: result.song_art_image_url,
-						stats: {
-							hot: result.stats.hot,
-							pageviews: result.stats.pageviews
-						},
-						album_id: result.album.id,
-						album_name: result.album.name,
-						album_url: result.album.url,
-						album_cover_art_url: result.album.cover_art_url
+						hot: result.stats.hot
 
 					}, artist: {
 						id: result.primary_artist.id,
@@ -166,11 +176,26 @@ class GeniusService extends ServiceBase {
 					}
 				}
 
-				resolve(info);
+				if (result.album != null) {
+					info.track.album_id = result.album.id,
+					info.track.album_name = result.album.name,
+					info.track.album_url = result.album.url,
+					info.track.album_cover_art_url = result.album.cover_art_url
+				}
 
+				if (result.media != null) {
+					info.track.media = {};
+					for (var media of result.media) {
+						if (media.provider == "youtube") {
+							media.id = media.url.split("v=")[1];
+						}
+						info.track.media[media.provider] = media;
+					}
+				}
+
+				resolve(info);
 				
 			}).on('error', err => {
-				console.log('err' + err);
 				reject(err);
 			});
 
@@ -179,13 +204,13 @@ class GeniusService extends ServiceBase {
 
 
 	fetchLyrics (songId) {
-
 		return new Promise( (resolve, reject) => {
 
 			this.rest.get(`${settings.base_url}/referents`, {
 				query: {
 					song_id: songId,
-					access_token: settings.access_token
+					access_token: settings.access_token,
+					per_page: settings.per_page
 				}
 			}).on('success', data => {
 
@@ -193,10 +218,16 @@ class GeniusService extends ServiceBase {
 				/* check response code */
 				if (data.meta.status != 200) {
 					reject("Invalid return status");
+					return;
 				}
 
-				for (ref of data.response.referents) {
-					 lyrics.push(ref.fragment);
+				if (data.response.referents.length == 0) {
+					reject("There are no referent lyrics for this track.");
+					return;
+				}
+
+				for (let ref of data.response.referents) {
+					lyrics.push(ref.fragment);
 				}
 
 				resolve(lyrics);
@@ -210,13 +241,51 @@ class GeniusService extends ServiceBase {
 		});
 	}
 
+	cleanUpLyrics (lyrics) {
+		var filtered = [];
+		for (var lyr of lyrics) {
 
+			if (lyr.length == 0) {
+				continue;
+			}
 
+			if (lyr[0] == "[") {
+				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
+				continue;
+			}
 
+			if (lyr.indexOf(" ") == -1) {
+				/* If the lyric is composed of only one word then it's too short, don't ingest */
+				continue;
+			}
 
+			// if contains newline characters
+			if (lyr.indexOf('\n') != -1) {
+				var splitInterval = 2;
+				var currSplit = splitInterval;
+				var start = 0;
+				var end = 0;
+				for (var i = 0; i < lyr.length; i++) {
+					if (lyr[i] == '\n') {
+						currSplit--;
+						if (!currSplit) {
+							filtered.push(lyr.substring(start, end+1).trim());
+							start = end+1;
+							currSplit = splitInterval;
+						}
+					}
+					end++;
+				}
+				if (start != end) {
+					filtered.push(lyr.substring(start, end+1).trim());
+				}
+			} else {
+				filtered.push(lyr.trim());
+			}
 
-
-	
+		}
+		return filtered;
+	}
 
 }
 

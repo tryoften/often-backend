@@ -42,17 +42,20 @@ class Track extends Firebase.Model {
 		}
 
 		/* Update artist properties */
-		properties.lyrics = this.get('lyrics') || {};
-		if (properties.lyrics !== {}) {
-			// if lyrics arent set then set them and update count
+		if (!_.isUndefined(lyrics)) {
+			properties.lyrics = this.get('lyrics') || {};
+
 			for (var i = 0; i < lyrics.length; i++) {
 				properties.lyrics[`${track.id}_${i}`] = lyrics[i];
 			}
+
+			properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;
+			//this.set('lyrics', properties.lyrics);
 		}
-		this.set('lyrics', properties.lyrics);
+	
+		
 		this.set(properties);
-		this.set('id', 'id');
-		console.log(this.attributes);
+		this.set('time_modified', Date.now());
 		return this.attributes;
 
 	}

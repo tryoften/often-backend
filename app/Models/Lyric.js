@@ -20,13 +20,12 @@ class Lyric extends Firebase.Model {
 	}
 
 	update ({artist, track, lyric}) {
-
 		var properties = {};
 		
 		for (let prop in track) {
 			properties[`track_${prop}`] = track[prop];
 		}
-		console.log(properties);
+
 		for (let prop in artist) {
 			properties[`artist_${prop}`] = artist[prop];
 		}
