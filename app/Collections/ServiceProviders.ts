@@ -1,11 +1,11 @@
 import 'backbonefire';
-import _ from 'underscore';
-import Backbone from 'backbone';
-import Firebase from 'firebase';
+import * as _ from 'underscore';
+import * as Backbone from 'backbone';
+import * as Firebase from 'firebase';
 import ServiceProvider from '../Models/ServiceProvider';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 
-class ServiceProviders extends Backbone.Firebase.Collection {
+class ServiceProviders extends Backbone.Firebase.Collection<ServiceProvider> {
 
 	/**
 	 * Initializes the service providers.
@@ -14,9 +14,9 @@ class ServiceProviders extends Backbone.Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
+	initialize (models: ServiceProvider[], opts: any) {
 		this.model = ServiceProvider;
-		this.url = new Firebase(`${FirebaseConfig.BaseURL}/service-providers`);
+		this.url = new Firebase(`${config.firebase.BaseURL}/service-providers`);
 		this.autoSync = true;
 	}
 	
@@ -28,7 +28,7 @@ class ServiceProviders extends Backbone.Firebase.Collection {
 	 */
 	getServiceProviderNames () {
 		return new Promise( (resolve, reject) => {
-			var spNames = syncedSPs.models.map(feedObj => {
+			var spNames = this.models.map(feedObj => {
 				return feedObj.id; 
 			});
 			resolve(spNames);

@@ -1,5 +1,5 @@
 import { Model } from 'backbone';
-import _ from 'underscore';
+import * as _ from 'underscore';
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for ElasticSearchQueries.
  */ 
@@ -12,7 +12,7 @@ class ElasticSearchQuery extends Model {
 	 *
 	 * @return {Promise} - Promise that resolves to an array containing header and body objects
 	 */
-	injectQuery (text, index = "") {		
+	injectQuery (text: string, index: string = "") {
 
 		/* Perform a deep copy on an object */
 		var paths = this.get("queryPaths");
@@ -36,13 +36,13 @@ class ElasticSearchQuery extends Model {
 
 	/**
 	 * Inserts queryText into the template at the specified queryPath
-	 * @param {string} template - template of the query
+	 * @param {any} template - template of the query
 	 * @param {string} path - dot delimited path of where the query parameter is
 	 * @param {string} text - text of the query
 	 *
 	 * @return {void} 
 	 */
-	substituteQuery(template, path, text) {
+	substituteQuery(template: any, path: string, text: string) {
     	var arr = path.split(".");
     	/* iteratively pop elements in arr from left to right, and use them as indices into the body of the query, 
     	   until the very last "query" key is reached  */

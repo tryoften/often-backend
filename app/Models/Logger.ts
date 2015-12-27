@@ -1,4 +1,4 @@
-import winston from 'winston';
+import * as winston from 'winston';
 import { GCL } from 'winston-gcl';
 import { Firebase } from 'winston-firebase';
 import config from '../config';

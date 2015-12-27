@@ -1,15 +1,15 @@
-import 'backbonefire';
-import { Firebase } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import Firebase from 'backbonefire';
+import config from '../config';
 import Recent from '../Models/Recent';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from '../Models/Logger';
 
 /**
  * This class is responsible for maintaining the recents collection.
  */
-class Recents extends Firebase.Collection {
+class Recents extends Firebase.Collection<Recent> {
+	userId: string;
 
 	/**
 	 * Initializes the recents collection.
@@ -17,17 +17,18 @@ class Recents extends Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	constructor (userId) {
+	constructor (userId: string) {
 		if (typeof userId === 'undefined') {
 			throw new Error('userId needs to be set');
 		}
+		this.userId = userId;
 
 		let opts = {
 			idAttribute: 'id',
 			model: Recent,
 			autoSync: true
 		};
-		super([], opts, userId);
+		super([], opts);
 	}
 
 	/**
@@ -38,8 +39,8 @@ class Recents extends Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts, userId) {
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users/${userId}/recents`);
+	initialize (models: Recent[], opts: any) {
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/users/${this.userId}/recents`);
 	}
 
 	/**
@@ -49,7 +50,7 @@ class Recents extends Firebase.Collection {
 	 * @return {Promise} - Resolves to true when an item is added to the recents collection, 
 	 					false if that item is already found in the recents or an error upon rejection
 	 */
-	addRecent (item) {
+	addRecent (item: any) {
 		logger.info("Recents:addRecent()", "added recent", item._id);
 		return new Promise( (resolve, reject) => {
 			let rec = this.find(mod => mod.get('_id') == item._id);

@@ -1,6 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
@@ -12,8 +12,8 @@ class ShortenedURL extends Firebase.Model {
 	 *
 	 * @return {void}
 	 */
-	initialize (hash) {
-		this.url = `${FirebaseConfig.BaseURL}/urls/${hash}`;
+	initialize (hash: string) {
+		this.url = `${config.firebase.BaseURL}/urls/${hash}`;
 		this.autoSync = true;
 	}
 

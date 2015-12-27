@@ -1,50 +1,59 @@
 import getFeedPage from '../Utilities/getFeedPage';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import ImageResizerWorker from '../Workers/ImageResizerWorker';
-import Firebase from 'firebase';
-import cheerio from 'cheerio';
+import * as Firebase from 'firebase';
+import * as cheerio from 'cheerio';
 import URLHelper from '../Utilities/URLHelper';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from './Logger';
+import Search from "../Search/Search";
+import Feed from "./Feed";
 
 class FeedPage {
+	url: string;
+	feed: Feed;
+	search: any;
+	feedRef: Firebase;
+	feedQueueRef: Firebase;
+	imageResizer: ImageResizerWorker;
+	urlHelper: URLHelper;
 
 	/**
 	 * @param {}
 	 * @param {Feed} opts.feed - The feed from where the page originates
 	 * @param {Search} opts.search
 	 */
-	constructor (opts) {
+	constructor (opts: {pageURL: string, feed: Feed, search: Search}) {
 		this.url = opts.pageURL;
 		this.feed = opts.feed;
 		this.search = opts.search;
-		this.feedRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/articles/${this.feed.id}`);
-		this.feedQueueRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
+		this.feedRef = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/articles/${this.feed.id}`);
+		this.feedQueueRef = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/queues/feeds/${this.feed.id}/tasks`);
 		this.imageResizer = new ImageResizerWorker();
 		this.urlHelper = new URLHelper();
 	}
 
-	process (data) {
+	process (data: any) {
 		this.request();
 	}
 
-	ingestData(data) {
+	ingestData(data: any) {
 		let self = this;
 		let id = this.feed.id;
 
 		return new Promise((resolve, reject) => {
 			
 			if (data.items.length) {
-				let promises = [];
+				let promises: Promise<Object>[] = [];
 				
 				for (let item of data.items) {
 					promises.push(this.processItem(item));
 				}
 
-				Promise.all(promises).then(processedItems => {
-					let items = [];
+				Promise.all(promises).then((processedItems: any) => {
+					let items: Object[] = [];
 
 					for (let item of processedItems) {
 						let guid = generateURIfromGuid(item.guid);
@@ -64,7 +73,7 @@ class FeedPage {
 						});
 					}
 
-					this.search.bulk({body: items}, (err, resp) => {
+					this.search.bulk({body: items}, (err: Error, resp: any) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -91,7 +100,7 @@ class FeedPage {
 	 *
 	 * @return {Promise} - the request object
 	 */
-	request (data) {
+	request () {
 		return new Promise((resolve, reject) => { 
 			getFeedPage(this.url)
 				.then(this.ingestData.bind(this))
@@ -104,8 +113,8 @@ class FeedPage {
 		});
 	}
 
-	processItem (item) {
-		function getImage(o) {
+	processItem (item: any) {
+		function getImage(o: any) {
 			if (o.image.url !== undefined) {
 				return o.image.url;
 			}
@@ -137,7 +146,9 @@ class FeedPage {
 		return new Promise((resolve, reject) => {
 
 			let image = getImage(item);
-			let data = {
+
+			// TODO(luc): define interface from this object
+			let data: any = {
 				"title": item.title,
 				"author": item.author,
 				"date": item.date,
@@ -149,8 +160,7 @@ class FeedPage {
 				"categories": item.categories,
 				"image": image,
 				"source": {
-					"id": this.id,
-					"name": this.name
+					"id": this.feed.id
 				}
 			};
 			data.link = this.urlHelper.shortenUrl(data.link);

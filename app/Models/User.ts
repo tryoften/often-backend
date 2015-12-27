@@ -1,5 +1,5 @@
 import { Firebase, Model } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
@@ -7,8 +7,8 @@ import UserTokenGenerator from '../Auth/UserTokenGenerator';
  */
 class User extends Firebase.Model {
 
-	initialize (data, options) {
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users/${data.user}`);
+	initialize (data: any, options: any) {
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/users/${data.user}`);
 		this.autoSync = true;
 		this.idAttribute = 'id';
 	}
@@ -19,7 +19,7 @@ class User extends Firebase.Model {
 	 *
 	 * @return {void}
 	 */
-	setToken (token) {
+	setToken (token: string) {
 		this.set('auth_token', token);
 	}
 

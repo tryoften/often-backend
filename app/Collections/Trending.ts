@@ -1,8 +1,8 @@
 import 'backbonefire';
 import { Firebase, Model } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 // Note TrendingItem isn't used as the model for the collection, just used to
 // fetch individual items when needed
@@ -11,7 +11,7 @@ import TrendingItem from '../Models/TrendingItem';
 /**
  * This class is responsible for maintaining the favorite collection.
  */
-class Trending extends Firebase.Collection {
+class Trending extends Firebase.Collection<Model> {
 
 	/**
 	 * Sets model to use for this BackboneFire collection.
@@ -20,7 +20,7 @@ class Trending extends Firebase.Collection {
 	 */
 	constructor () {
 		let opts = {
-			model: Model.extend({}),
+			model: Model,
 			autoSync: true
 		};
 		super([], opts);
@@ -34,9 +34,8 @@ class Trending extends Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/trending/all`);
-		this.idAttribute = 'id';
+	initialize (models: Model[], opts: any) {
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/trending/all`);
 	}
 
 	/**
@@ -46,7 +45,7 @@ class Trending extends Firebase.Collection {
 	 *
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
-	increment (item) {
+	increment (item: any) {
 		// So that URI isn't generated twice by accident between Trending and Favorites
 		item = _.clone(item);
 
@@ -64,8 +63,8 @@ class Trending extends Firebase.Collection {
 		// Just in case we want to do anything with the full collection
 		let promise = new Promise((resolve, reject) => {
 			this.once('sync',
-				(synced_data) => resolve(true),
-				(error) => reject(error)
+				(synced_data: any) => resolve(true),
+				(error: Error) => reject(error)
 			);
 		});
 
@@ -80,7 +79,7 @@ class Trending extends Firebase.Collection {
 	 *
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
-	decrement (item) {
+	decrement (item: any) {
 		// So that URI isn't generated twice by accident between Trending and Favorites
 		item = _.clone(item);
 
@@ -98,8 +97,8 @@ class Trending extends Firebase.Collection {
 		// Just in case we want to do anything with the full collection
 		let promise = new Promise((resolve, reject) => {
 			this.once('sync',
-				(synced_data) => resolve(true),
-				(error) => reject(error)
+				(synced_data: any) => resolve(true),
+				(error: Error) => reject(error)
 			);
 		});
 

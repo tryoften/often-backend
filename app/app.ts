@@ -1,9 +1,11 @@
+/// <reference path="../typings/node/node.d.ts" />
+
 import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';
 import UserWorker from './Workers/UserWorker';
 import URIConverterService from './Utilities/URIConverterService';
-import minimist from 'minimist';
+import * as minimist from 'minimist';
 import config from './config';
 import _ from 'underscore';
 

@@ -1,6 +1,7 @@
-import 'backbonefire';
-import { Firebase } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+/// <reference path="../../typings/node/node.d.ts" />
+
+import Firebase from 'backbonefire';
+import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import Favorite from '../Models/Favorite';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
@@ -9,7 +10,8 @@ import logger from '../Models/Logger';
 /**
  * This class is responsible for maintaining the favorite collection.
  */
-class Favorites extends Firebase.Collection {
+class Favorites extends Firebase.Collection<Favorite> {
+	userId: string;
 
 	/**
 	 * Constructs the favorites collection.
@@ -17,28 +19,28 @@ class Favorites extends Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	constructor (userId) {
+	constructor (userId: string) {
 		if (typeof userId === 'undefined') {
 			throw new Error('userId needs to be set');
 		}
+		this.userId = userId;
 
 		let opts = {
 			model: Favorite,
 			autoSync: true
 		};
-		super([], opts, userId);
+		super([], opts);
 	}
 
 	/**
 	 * Initializes the favorites collection.
 	 * @param {string} models - optional models for backbone
 	 * @param {string} opts - optional options for backbone
-	 * @param {string} userId - user's id to load up favorties
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts, userId) {
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users/${userId}/favorites`);
+	initialize (models: Favorite[], opts: any) {
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/users/${this.userId}/favorites`);
 	}
 
 	/**
@@ -48,7 +50,7 @@ class Favorites extends Firebase.Collection {
 	 * @return {Promise} - Resolves to true when an item is added to the favorites collection,
 	 false if that item is already found in the favorites or an error upon rejection
 	 */
-	favorite (item) {
+	favorite (item: any) {
 		logger.info("Favorites:favorite()", "favorited item", item._id);
 		return new Promise( (resolve, reject) => {
 			for (let model of this.models) {
@@ -72,12 +74,12 @@ class Favorites extends Firebase.Collection {
 	 * @return {Promise} - Resolves to true when an item is removed from the favorites collection,
 	 false if that item is not found in the favorites or an error upon rejection
 	 */
-	unfavorite (item) {
+	unfavorite (item: any) {
 		logger.info("Favorites:unfavorite()", "unfavorited item", item._id);
 		return new Promise( (resolve, reject) => {
 			for (let model of this.models) {
 				if (model.get('_id') == item._id) {
-					syncedFavorites.remove(model);
+					this.remove(model);
 					resolve(true);
 					return;
 				}

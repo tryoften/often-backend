@@ -1,6 +1,8 @@
 import Feeds from '../../Collections/Feeds';
 
 class FeedIngestor {
+	feeds: Feeds;
+	feedCount: number;
 
 	constructor (opts = {}) {
 		this.feeds = new Feeds([], {
@@ -19,7 +21,7 @@ class FeedIngestor {
 	 */
 	ingest (reingest = false) {
 		return new Promise((resolve, reject) => {
-			this.feeds.once('sync', (data) => {
+			this.feeds.once('sync', (data: Feeds) => {
 				this.feedCount = this.feeds.models.length;
 				
 				for (let feed of this.feeds.models) {

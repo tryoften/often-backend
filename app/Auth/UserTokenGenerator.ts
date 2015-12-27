@@ -1,18 +1,21 @@
+///<reference path="../../typings/firebase/firebase.d.ts" />
+
 import FirebaseTokenGenerator from 'firebase-token-generator';
-import { firebase as FirebaseConfig } from '../config';
-import Firebase from 'firebase';
+import config from '../config';
+import * as Firebase from 'firebase';
 import logger from '../Models/Logger';
 
 /**
  * This singleton class is responsible for generating authentication tokens for user accounts
  */
 class UserTokenGenerator {
+	tokenGenerator: FirebaseTokenGenerator;
 
 	/**
 	 * Initializes the user token generator class
 	 */
 	constructor () {
-		this.tokenGenerator = new FirebaseTokenGenerator(FirebaseConfig.Secret);
+		this.tokenGenerator = new FirebaseTokenGenerator(config.firebase.Secret);
 	}
 	
 	/**
@@ -22,7 +25,7 @@ class UserTokenGenerator {
 	 *
 	 * @return {object} - authentication token
 	 */
-	generateToken (uid, data) {
+	generateToken (uid: string, data: any) {
 		return this.tokenGenerator.createToken({ 
 			uid: uid, 
 			data: data
@@ -35,9 +38,9 @@ class UserTokenGenerator {
 	 *
 	 * @return {object} - Return authenticated firebase reference
 	 */
-	getAdminReference (url) {
+	getAdminReference (url: string) {
 		var ref = new Firebase(url);
-		ref.authWithCustomToken(FirebaseConfig.Secret, (error, result) => {
+		ref.authWithCustomToken(config.firebase.Secret, (error, result) => {
 			if (error) {
 				logger.error("Authentication failed for: " + url);
 			} else {

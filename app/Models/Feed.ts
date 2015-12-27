@@ -1,13 +1,10 @@
-import Feedparser from 'feedparser';
-import Firebase from 'firebase';
 import Queue from 'firebase-queue';
-import config from '../config';
 import { Model } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import getFeedPage from '../Utilities/getFeedPage';
-import URL from 'url';
-import _ from 'underscore';
+import * as URL from 'url';
+import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from './Logger';
 
@@ -15,9 +12,13 @@ import logger from './Logger';
  * This class represents a atom/rss feed along with it's metadata and how to parse it 
  */
 class Feed extends Model {
+	reingest: boolean;
+	queueEnabled: boolean;
+	queue: Queue;
+	taskQueueRef: Firebase;
 
-	initialize (attributes, opts) {
-		let defaults = {
+	initialize (attributes: any, opts: any) {
+		let defaults: any = {
 			items: []
 		};
 
@@ -30,17 +31,17 @@ class Feed extends Model {
 		}
 		
 		if (this.queueEnabled) {
-			var ref = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/queues/feeds/${this.id}`);
+			var ref = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/queues/feeds/${this.id}`);
 			this.queue = new Queue(ref, 
 				_.defaults({
 					suppressStack: false, 
 					retries: 3,
 					sanitize: false
-				}, FirebaseConfig.queues.default), 
+				}, config.firebase.queues.default),
 				this.processJob.bind(this));
 
 			// task queue ref to schedule page parsing jobs
-			this.taskQueueRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.queues.feed.url}/tasks`);
+			this.taskQueueRef = UserTokenGenerator.getAdminReference(`${config.firebase.queues.feed.url}/tasks`);
 		}
 	}
 
@@ -60,18 +61,18 @@ class Feed extends Model {
 		});
 	}
 
-	url () {
-		return `${FirebaseConfig.BaseURL}/feeds/${this.id}`;
+	url (): string {
+		return `${config.firebase.BaseURL}/feeds/${this.id}`;
 	}
 
-	updateMetadata (data) {
+	updateMetadata (data: any) {
 		let pageCount = 0;
 		let baseURL = "";
 		let paginationType = this.get('pagination');
 
 		if (paginationType == 'link') {
 			let meta = data.meta;
-			let lastPage = _.find(meta['atom:link'], s => s['@'].rel == 'last');
+			let lastPage = _.find(meta['atom:link'], (s: any) => s['@'].rel == 'last');
 			let lastPageURL = lastPage !== null ? lastPage['@'].href : '';
 			let equalPosition = lastPageURL.indexOf('=') + 1;
 			
@@ -99,10 +100,10 @@ class Feed extends Model {
 	 * Queues subsequent jobs onto feed queue
 	 *
 	 */
-	queueJobs (data) {
+	queueJobs (data: any) {
 		let firstItem = data.items[0];
 		let guid = generateURIfromGuid(firstItem.guid);
-		let url = `${FirebaseConfig.BaseURL}/articles/${this.id}/items/${guid}`;
+		let url = `${config.firebase.BaseURL}/articles/${this.id}/items/${guid}`;
 		let itemRef = UserTokenGenerator.getAdminReference(url);
 		logger.info(`check if ${itemRef.toString()} exists`);
 
@@ -134,7 +135,7 @@ class Feed extends Model {
 
 	}
 
-	queueJob (url) {
+	queueJob (url: string) {
 		let taskData = {
 			pageURL: url,
 			feed: {
@@ -152,7 +153,7 @@ class Feed extends Model {
 		return taskData;
 	}
 
-	processJob (data, progress, resolve, reject) {
+	processJob (data: any, progress: any, resolve: any, reject: any) {
 		let currentPage = this.get('currentPage');
 		let pagination = this.get('pagination');
 
@@ -175,7 +176,7 @@ class Feed extends Model {
 			// check if the page fetching failed
 		}
 
-		let itemsRef = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/articles/${this.id}/items`);
+		let itemsRef = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/articles/${this.id}/items`);
 
 		itemsRef.once('value', snapshot => {
 			let shouldIngest = false;

@@ -1,21 +1,21 @@
 import 'backbonefire';
-import _ from 'underscore';
-import { firebase as FirebaseConfig } from '../config';
-import { Firebase } from 'backbone';
+import * as _ from 'underscore';
+import config from '../config';
+import Firebase from 'backbonefire';
 import Filter from '../Models/Filter';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
-class Filters extends Firebase.Collection {
+class Filters extends Firebase.Collection<Filter> {
 
-	constructor (models = [], options = {}) {
+	constructor (models: Filter[] = [], options: any = {}) {
 		let opts = _.defaults(options, {
 			model: Filter
 		});
 		super(models, opts);
 	}
 
-	initialize (models, opts) {
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/filters`);
+	initialize (models: Filter[], opts: any) {
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/filters`);
 	}
 }
 

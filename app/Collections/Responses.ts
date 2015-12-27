@@ -1,15 +1,14 @@
-import 'backbonefire';
-import { Firebase } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import Firebase from 'backbonefire';
+import config from '../config';
 import Response from '../Models/Response';
-import fb from 'firebase';
+import * as fb from 'firebase';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
  * This class is responsible for maintaining the responses collection.
  */
 
-class Responses extends Firebase.Collection {
+class Responses extends Firebase.Collection<Response> {
 
 	/**
 	 * Initializes the responses collection.
@@ -18,12 +17,10 @@ class Responses extends Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
-
+	initialize (models: Response[], opts: any) {
 		this.model = Response;
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/responses`);
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/responses`);
 		this.autoSync = true;
-
 	}
 
 	/**
@@ -32,9 +29,9 @@ class Responses extends Firebase.Collection {
 	 * @param {string} provider - used in conjuction with reqId to generate an id of new model
 	 * @param {object} contents - object containing results to be added to the response 
 	 *
-	 * @return {object} - returns a Response object
+	 * @return {Response} - returns a Response object
 	 */
-	createResponse (reqId, provider, contents) {
+	createResponse (reqId: string, provider: string, contents: any): Response {
 
 		return this.create({
 			id : `${reqId}/${provider}`,

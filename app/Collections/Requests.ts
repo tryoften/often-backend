@@ -1,14 +1,14 @@
 import 'backbonefire';
-import Firebase from 'firebase';
-import Backbone from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
+import * as Firebase from 'firebase';
+import * as Backbone from 'backbone';
+import config from '../config';
 import Request from '../Models/Request';
 
 /**
  * This class is responsible for maintaining and syncing Request collection.
  */
 
-class Requests extends Backbone.Firebase.Collection {
+class Requests extends Backbone.Firebase.Collection<Request> {
 
 	/**
 	 * Initializes the requests collection.
@@ -17,9 +17,9 @@ class Requests extends Backbone.Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
+	initialize (models: Request[], opts: any) {
 		this.model = Request;
-		this.url = new Firebase(`${FirebaseConfig.BaseURL}/requests`)
+		this.url = new Firebase(`${config.firebase.BaseURL}/requests`)
 			.orderByChild('time_made')
 			.startAt(Date.now());
 		this.autoSync = true;

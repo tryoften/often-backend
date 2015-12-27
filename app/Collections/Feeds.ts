@@ -1,12 +1,12 @@
 import 'backbonefire';
-import _ from 'underscore';
-import Backbone from 'backbone';
-import Firebase from 'firebase';
+import * as _ from 'underscore';
+import Firebase from 'backbonefire';
 import Feed from '../Models/Feed';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
-class Feeds extends Backbone.Firebase.Collection {
+class Feeds extends Firebase.Collection<Feed> {
+	queueEnabled: Boolean;
 
 	/**
 	 * Initializes the feeds collection.
@@ -16,20 +16,20 @@ class Feeds extends Backbone.Firebase.Collection {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts = {}) {
+	initialize (models: Feed[], opts: any = {}) {
 		this.model = Feed;
 		this.queueEnabled = opts.queueEnabled || false;
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/feeds`);
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/feeds`);
 		this.autoSync = true;
 	}
 
 	/**
 	 * passes options to the Feed models in the collection
 	 */
-	model (attrs, opts) {
-		opts.queueEnabled = opts.queueEnabled || this.queueEnabled;
-		return Feed(attrs, opts);
-	}
+	//model (attrs: any, opts: any) {
+	//	opts.queueEnabled = opts.queueEnabled || this.queueEnabled;
+	//	return new Feed(attrs, opts);
+	//}
 	
 	/**
 	 * Returns name of all feeds

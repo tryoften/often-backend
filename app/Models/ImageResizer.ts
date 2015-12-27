@@ -1,18 +1,19 @@
-import sharp from 'sharp';
+import * as sharp from 'sharp';
 
 /**
  * This class is responsible for resizing images.
  */
 class ImageResizer {
+	small_pixels: number;
+	medium_pixels: number;
 
 	/**
 	 * Initializes the client request dispatcher.
-	 * @param {object} models - supporting models
 	 * @param {object} opts - supporting options
 	 *
 	 * @return {void}
 	 */
-	constructor (models, opts) {
+	constructor (opts: any) {
 		this.small_pixels = 200;
 		this.medium_pixels = 400;
 	}
@@ -25,7 +26,7 @@ class ImageResizer {
 	 *
 	 * @return {stream} - returns a stream containing transformed image
 	 */
-	transform(data, transformation, attr) {
+	transform(data: any, transformation: string, attr: any) {
 		try {
 			switch (transformation) {
 				case 'rectangle': 
@@ -54,8 +55,8 @@ class ImageResizer {
 	 *
 	 * @return {Promise} - Promise that when resolved returns a collection of objects containing information about transformation of an image
 	 */
-	bulkResize (data, transformations) {
-		var promises = [];
+	bulkResize (data: any, transformations: string[]) {
+		var promises: any = [];
 		transformations.forEach((tran) => {
 			promises.push(this.resize(data, tran));
 		});
@@ -69,42 +70,40 @@ class ImageResizer {
 	 *
 	 * @return {Promise} - Promise that when resolved returns an object containing information about transformed image
 	 */
-	resize (data, tran) {
+	resize (data: any, tran: any) {
 		return new Promise((resolve, reject) => {
 			try {
-				sharp(data).metadata().then((metadata, err) => {
+				sharp(data).metadata().then((metadata:any, err:Error) => {
 					if (err) {
 						reject(err);
 						return;
 					}
-					
-					this.transform(data, tran, { width : metadata.width, height : metadata.height })
-					.toBuffer((err, buff) => {
-						if (err) {
-							reject(err);
-						} else {
-							var ref = sharp(buff);
-							ref.metadata().then((newMeta, err) => {
-								if (err) {
-									reject(err);
-								} else {
-									resolve({ 
-										transformation : tran, 
-										meta : newMeta, 
-										stream : ref 
-									});
-								}
-							});
-						}
-					});
+
+					this.transform(data, tran, {width: metadata.width, height: metadata.height})
+						.toBuffer((err:Error, buff:Buffer) => {
+							if (err) {
+								reject(err);
+							} else {
+								var ref = sharp(buff);
+								ref.metadata().then((newMeta:any, err:Error) => {
+									if (err) {
+										reject(err);
+									} else {
+										resolve({
+											transformation: tran,
+											meta: newMeta,
+											stream: ref
+										});
+									}
+								});
+							}
+						});
 				});
 			} catch (err) {
 				reject(err);
 			}
 		});
-		
 	}
-	
 }
 
 export default ImageResizer;

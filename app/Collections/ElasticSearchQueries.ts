@@ -1,12 +1,14 @@
-import 'backbonefire';
-import _ from 'underscore';
-import Backbone from 'backbone';
+import Firebase from 'backbonefire';
+import * as _ from 'underscore';
+import * as Backbone from 'backbone';
 import ElasticSearchQuery from '../Models/ElasticSearchQuery';
-import { firebase as FirebaseConfig } from '../config';
+import config from '../config';
 import User from '../Models/User';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import Requests from "./Requests";
+var FirebaseConfig = config.firebase;
 
-class ElasticSearchQueries extends Backbone.Firebase.Collection {
+class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 
 	/**
 	 * Constructs the ElasticSearchQueries collection.
@@ -23,13 +25,13 @@ class ElasticSearchQueries extends Backbone.Firebase.Collection {
 
 	/**
 	 * Initializes the favorites collection.
-	 * @param {string} models - optional models for backbone
+	 * @param {ElasticSearchQuery[]} models - optional models for backbone
 	 * @param {string} opts - optional options for backbone
 	 * @param {string} userId - user's id to load up favorties
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts, userId) {
+	initialize (models: ElasticSearchQuery[], opts: any) {
 		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/config/elastic-search/queries`);
 	}
 
@@ -41,9 +43,9 @@ class ElasticSearchQueries extends Backbone.Firebase.Collection {
 	 *
 	 * @return {Promise} - Promise that resolves to an array of header/body objects
 	 */
-	generateQueries (text, index = "", type = "") {
+	generateQueries (text: string, index: string = "", type = "") {
 
-		var requests = [];
+		var requests: any[] = [];
 		if (this.models.length === 0) {
 			throw new Error("The query collection is empty!");
 		}

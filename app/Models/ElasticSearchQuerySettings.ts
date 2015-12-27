@@ -1,7 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
-import { firebase as FirebaseConfig } from '../config';
-import _ from 'underscore';
+import config from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 
 /**
@@ -15,7 +14,6 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 	 * @return {void}
 	 */
 	constructor () {
-
 		let opts = {
 			autoSync: true
 		};
@@ -29,8 +27,8 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 	 *
 	 * @return {void}
 	 */
-	initialize (models, opts) {
-		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/config/elastic-search/query-settings`);
+	initialize (attrs: any, opts: any) {
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/config/elastic-search/query-settings`);
 	}
 
 	/**
@@ -47,7 +45,7 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 	 *
 	 * @return {int} - Size of the response
 	 */
-	getQueryType (index) {
+	getQueryType (index: number) {
 		return this.get("sourceToQueryMap")[index];
 	}
 
