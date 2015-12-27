@@ -14,7 +14,7 @@ class FeedPage {
 	/**
 	 * @param {}
 	 * @param {Feed} opts.feed - The feed from where the page originates
-	 * @param {Search} opts.search - 
+	 * @param {Search} opts.search
 	 */
 	constructor (opts) {
 		this.url = opts.pageURL;

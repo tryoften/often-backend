@@ -19,7 +19,7 @@ class Response extends Firebase.Model {
 		this.idAttribute = 'id';
 	}
 
-	updateResults (data) {
+	updateResults (data: any) {
 		this.set({
 			id: 'id',
 			time_modified: Date.now(),
