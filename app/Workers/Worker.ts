@@ -1,4 +1,4 @@
-import Queue from 'firebase-queue';
+import Queue = require('firebase-queue');
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import { firebase as FirebaseConfig, port } from '../config';
 import * as _ from 'underscore';

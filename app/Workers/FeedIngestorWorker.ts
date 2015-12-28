@@ -4,6 +4,9 @@ import config from '../config';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
 
+/**
+ * This worker handles
+ */
 class FeedIngestorWorker extends Worker {
 	ingestor: FeedIngestor;
 

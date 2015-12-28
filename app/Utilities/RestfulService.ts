@@ -39,8 +39,6 @@ class RestfulService extends Service {
 		});
 
 	}
-
-
 }
 
 export default RestfulService;

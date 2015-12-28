@@ -46,7 +46,7 @@ var config: any = {
   firebase: {
    BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com',
    Secret: args['firebase-secret'] || 'kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2',
-    queues: {}
+		queues: {}
   },
 
   elasticsearch: {

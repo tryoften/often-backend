@@ -1,4 +1,3 @@
-import Queue from 'firebase-queue';
 import { Model } from 'backbone';
 import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
@@ -7,6 +6,7 @@ import * as URL from 'url';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from './Logger';
+import Queue = require('firebase-queue');
 
 /**
  * This class represents a atom/rss feed along with it's metadata and how to parse it 

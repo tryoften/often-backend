@@ -1,5 +1,3 @@
-/// <reference path="../typings/node/node.d.ts" />
-
 import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';

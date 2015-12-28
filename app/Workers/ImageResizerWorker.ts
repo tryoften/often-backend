@@ -9,7 +9,6 @@ import { Transform as Stream } from 'stream';
 import { firebase as FirebaseConfig } from '../config';
 import { gcloud as GoogleStorageConfig } from '../config';
 
-
 class ImageResizerWorker extends Worker {
 	default_transformations: string[];
 	gcs: any;

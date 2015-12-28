@@ -1,7 +1,6 @@
-/// <reference path="../../typings/node/node.d.ts" />
-
-import Firebase from 'backbonefire';
-import config from '../config';
+import 'backbonefire';
+import { Firebase } from 'backbone';
+import { firebase as FirebaseConfig } from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import Favorite from '../Models/Favorite';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
@@ -40,7 +39,7 @@ class Favorites extends Firebase.Collection<Favorite> {
 	 * @return {void}
 	 */
 	initialize (models: Favorite[], opts: any) {
-		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/users/${this.userId}/favorites`);
+		this.url = UserTokenGenerator.getAdminReference(`${FirebaseConfig.BaseURL}/users/${this.userId}/favorites`);
 	}
 
 	/**

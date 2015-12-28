@@ -19,7 +19,7 @@ class FeedIngestor {
 	 *
 	 * @param reingest {Bool} - whether we should ingest data that has already been ingested
 	 */
-	ingest (reingest = false) {
+	ingest (reingest: boolean = false) {
 		return new Promise((resolve, reject) => {
 			this.feeds.once('sync', (data: Feeds) => {
 				this.feedCount = this.feeds.models.length;

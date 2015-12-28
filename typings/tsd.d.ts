@@ -12,7 +12,7 @@
 /// <reference path="cheerio/cheerio.d.ts" />
 
 declare module "firebase-queue" {
-	export default class Queue {
+	export = class Queue {
 		constructor(ref: Firebase, options: any, process: () => void);
 	}
 }

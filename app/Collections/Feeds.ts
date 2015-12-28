@@ -1,6 +1,6 @@
 import 'backbonefire';
 import * as _ from 'underscore';
-import Firebase from 'backbonefire';
+import { Firebase } from 'backbone';
 import Feed from '../Models/Feed';
 import config from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';

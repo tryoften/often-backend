@@ -1,12 +1,8 @@
-import Firebase from 'backbonefire';
-import * as _ from 'underscore';
-import * as Backbone from 'backbone';
+import 'backbonefire';
+import { Firebase } from 'backbone';
 import ElasticSearchQuery from '../Models/ElasticSearchQuery';
-import config from '../config';
-import User from '../Models/User';
+import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import Requests from "./Requests";
-var FirebaseConfig = config.firebase;
 
 class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 
