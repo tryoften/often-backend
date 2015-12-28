@@ -159,3 +159,6 @@ config.winston = {
 };
 
 export default config;
+export var firebase = config.firebase;
+export var winston = config.winston;
+export var elasticsearch = config.elasticsearch;

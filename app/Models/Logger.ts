@@ -4,9 +4,9 @@ import { Firebase } from 'winston-firebase';
 import config from '../config';
 import { firebase as FirebaseConfig } from '../config';
 import { winston as WinstonConfig } from '../config';
-import _ from 'underscore';
-import google from 'googleapis';
-import os from 'os';
+import * as _ from 'underscore';
+import * as google from 'googleapis';
+import * as os from 'os';
 
 winston.transports.GCL = GCL;
 

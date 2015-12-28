@@ -16,6 +16,29 @@ declare module "feedparser" {
 }
 
 declare module "sharp" {
-	var sharp: any;
+	function sharp(data: any): any;
 	export default sharp;
+}
+
+declare module "elasticsearch" {
+	export class Client {
+		bulk(options: any, callback: (results: any, error: Error) => void): void;
+	}
+}
+
+declare module "winston" {
+	export var transports: any;
+	export class Logger {
+		constructor(opts: any);
+	}
+}
+declare module "winston-gcl" {
+	export var GCL: any;
+}
+declare module "winston-firebase" {
+	export var Firebase: any;
+}
+
+declare module "googleapis" {
+
 }

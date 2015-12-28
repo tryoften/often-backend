@@ -1,4 +1,4 @@
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 
 /**
  * This class is responsible for resizing images.

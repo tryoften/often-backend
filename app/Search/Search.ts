@@ -5,7 +5,7 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import _ from 'underscore';
 import logger from '../Models/Logger';
-import { Promise } from 'rsvp';
+//import rsvp = require('rsvp');
 
 /**
  * Class for interacting with ElasticSearch.
@@ -16,6 +16,10 @@ import { Promise } from 'rsvp';
  *  id:    uniquely identifies the document
  */
 class Search {
+	es: Client;
+	esQueries: ElasticSearchQueries;
+	esQuerySettings: ElasticSearchQuerySettings;
+	filters: Filters;
 
 	/**
 	 * Initializes the search instance.
@@ -24,7 +28,7 @@ class Search {
 	 *
 	 * @return {void}
 	 */
-	constructor (opts) {
+	constructor (opts: any) {
 		this.es = new Client({
 			host: ElasticSearchConfig.BaseURL
 		});
@@ -40,12 +44,12 @@ class Search {
 	 *
 	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
 	 */
-	index (index, results) {
+	index (index: string, results: any[]) {
 
 		return new Promise((resolve, reject) => {
 
 			/* Prepare the results to be indexed with ElasticSearch */
-			var formattedResults = [];
+			var formattedResults: any[] = [];
 			for (let type in results) {
 				let individualResults = results[type];
 				for (let item in individualResults) {

@@ -3,12 +3,17 @@ import Response from '../Models/Response';
 import URLHelper from '../Utilities/URLHelper';
 import _ from 'underscore';
 import logger from '../Models/Logger';
+import Search from "./Search";
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
  * This class calls the 'execute' method of an appropriate service provider (as per request) and keeps track of the response.
  */
 class SearchRequestDispatcher {
+	search: Search;
+	urlHelper: URLHelper;
+	searchParser: SearchParser;
+	serviceProviders: any;
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -17,7 +22,7 @@ class SearchRequestDispatcher {
 	 *
 	 * @return {void}
 	 */
-	constructor (opts = {}) {
+	constructor (opts: any = {}) {
 		this.search = opts.search;
 		this.urlHelper = new URLHelper();
 		this.searchParser = new SearchParser();
@@ -39,7 +44,7 @@ class SearchRequestDispatcher {
 		}
 	}
 
-	getRelevantProviders (filter) { 
+	getRelevantProviders (filter: string) {
 		if (filter === "") {
 			return Object.keys(this.serviceProviders);
 
@@ -85,7 +90,7 @@ class SearchRequestDispatcher {
 	 *
 	 * @return {Promise} -- Resolves to true when all service callbacks have completed
 	 */
-	process (request) {
+	process (request: any) {
 		return new Promise((resolve, reject) => {
 			logger.profile(request);
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
@@ -114,17 +119,14 @@ class SearchRequestDispatcher {
 			if (!isAutocomplete) {
 				/* Execute the request every user provider that the user is subscribed */
 				for (let providerName of request.relevantProviders) {
-					this.serviceProviders[providerName].execute({actualQuery}).then( (fulfilled) => {
+					this.serviceProviders[providerName].execute({actualQuery}).then((fulfilled:any) => {
 						request.servicesLeftToProcess--;
 						this.processQueryUpdate({request, response, resolve, reject});
 
-					}).catch( (rejected) => {
+					}).catch((rejected:any) => {
 						request.servicesLeftToProcess--;
 					});
-					
 				}
-
-
 			}
 
 			// if nothing happens after 2 seconds: timeout
