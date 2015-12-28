@@ -1,13 +1,14 @@
 import Worker from './Worker';
 import SearchRequestDispatcher from '../Search/SearchRequestDispatcher';
 import { firebase as FirebaseConfig } from '../config';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import Search from '../Search/Search';
 import SpotifyService from '../Services/Spotify/SpotifyService';
 import YouTubeService from '../Services/YouTube/YouTubeService';
 import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
 
 class SearchWorker extends Worker {
+	dispatcher: SearchRequestDispatcher;
 	
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.search);

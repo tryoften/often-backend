@@ -1,12 +1,14 @@
 import ShortenedURL from '../Models/ShortenedURL';
 import { url_redirector } from '../config';
-import express from 'express';
-import _ from 'underscore';
+import * as express from 'express';
+import * as _ from 'underscore';
 import logger from '../Models/Logger';
 /**
  * Helper class for Url related functionalities
  */
 class URIConverterService {
+	app: any;
+	port: number;
 
 	/**
 	 * Constructs the url helper class.
@@ -70,8 +72,6 @@ class URIConverterService {
 			urlObject.fetch();
 		});
 	}
-
-
 }
 
 export default URIConverterService;

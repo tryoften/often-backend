@@ -1,12 +1,14 @@
 import Worker from './Worker';
 import FeedPage from '../Models/FeedPage';
-import _ from 'underscore';
-import elasticsearch from 'elasticsearch';
+import * as _ from 'underscore';
+import * as elasticsearch from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import { firebase as FirebaseConfig } from '../config';
 import logger from '../Models/Logger';
+import { Client } from "elasticsearch";
 
 class FeedPageWorker extends Worker {
+	search: Client;
 	
 	constructor (opts = {}) {
 		let options = _.defaults(opts, {

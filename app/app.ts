@@ -7,7 +7,7 @@ import UserWorker from './Workers/UserWorker';
 import URIConverterService from './Utilities/URIConverterService';
 import * as minimist from 'minimist';
 import config from './config';
-import _ from 'underscore';
+import * as _ from 'underscore';
 
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);

@@ -1,16 +1,19 @@
-import http from 'http';
-import https from 'https';
-import gcloud from 'gcloud';
+import * as http from 'http';
+import * as https from 'https';
+import * as gcloud from 'gcloud';
 import Worker from './Worker';
 import FeedPage from '../Models/FeedPage';
 import ImageResizer from '../Models/ImageResizer';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import { Transform as Stream } from 'stream';
 import { firebase as FirebaseConfig } from '../config';
 import { gcloud as GoogleStorageConfig } from '../config';
 
 
 class ImageResizerWorker extends Worker {
+	default_transformations: string[];
+	gcs: any;
+	bucket: any;
 	
 	constructor (opts = {}) {
 
@@ -31,7 +34,7 @@ class ImageResizerWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		ingest(data.originType, data.sourceId, data.resourceId, data.url)
+		this.ingest(data.originType, data.sourceId, data.resourceId, data.url)
 			.then(data => {
 				resolve(data);
 			})
@@ -101,7 +104,7 @@ class ImageResizerWorker extends Worker {
 		return new Promise((resolve, reject) => {
 			/* download image */
 			var protocol = (url.indexOf('https') === 0) ? https : http;
-			protocol.get(url, response => {
+			protocol.get(url, (response: any) => {
 				if(response.statusCode !=  "200") {
 					reject("Response code not 200");
 					return;

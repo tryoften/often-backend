@@ -13,7 +13,7 @@ class ImageResizer {
 	 *
 	 * @return {void}
 	 */
-	constructor (opts: any) {
+	constructor (opts?: any) {
 		this.small_pixels = 200;
 		this.medium_pixels = 400;
 	}

@@ -1,10 +1,11 @@
 import Worker from './Worker';
 import FeedIngestor from '../Ingestors/Feed/FeedIngestor';
 import config from '../config';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import logger from '../Models/Logger';
 
 class FeedIngestorWorker extends Worker {
+	ingestor: FeedIngestor;
 
 	constructor (opts = {}) {
 		let options = _.defaults(opts, config.firebase.queues.feed);

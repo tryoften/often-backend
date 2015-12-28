@@ -3,9 +3,8 @@ import { elasticsearch as ElasticSearchConfig } from '../config';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import logger from '../Models/Logger';
-//import rsvp = require('rsvp');
 
 /**
  * Class for interacting with ElasticSearch.
@@ -28,7 +27,7 @@ class Search {
 	 *
 	 * @return {void}
 	 */
-	constructor (opts: any) {
+	constructor (opts?: any) {
 		this.es = new Client({
 			host: ElasticSearchConfig.BaseURL
 		});
@@ -127,7 +126,7 @@ class Search {
 		});
 	}
 
-	updateSearchTerms({searchId, query, count} = {}) {
+	updateSearchTerms({searchId, query, count}) {
 		// index search term for autocompletion
 		this.es.update({
 			index: 'search-terms',
@@ -193,7 +192,7 @@ class Search {
 					reject(error);
 				} else {
 					var result = response['query-suggest'][0];
-					result.options = _.each(result.options, (item) => {
+					result.options = _.each(result.options, (item: any) => {
 						item.type = item.payload.type;
 
 						if (_.isUndefined(item.type) || _.isNull(item.type)) {
@@ -221,7 +220,7 @@ class Search {
 	 * @param filter the query string
 	 * @returns {Promise} - resolves with data for particular command
      */
-	processCommands (filter) {
+	processCommands (filter): any {
 		if (filter == 'filters-list') {
 			var self = this;
 			return new Promise( (resolve, reject) => {
@@ -300,7 +299,7 @@ class Search {
 					}],
 					size: count
 				}
-			}, (error, response) => {
+			}, (error, response: any) => {
 				if (error) {
 					reject(error);
 				} else {

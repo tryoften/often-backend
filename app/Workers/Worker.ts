@@ -1,13 +1,16 @@
 import Queue from 'firebase-queue';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import { firebase as FirebaseConfig, port } from '../config';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import { createServer } from 'http';
 
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
  */
 class Worker {
+	options: any;
+	ref: Firebase;
+	queue: Queue;
 
 	/**
 	 * Initializes the priority queue.

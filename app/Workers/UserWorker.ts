@@ -2,7 +2,7 @@ import Worker from './Worker';
 import Recents from '../Collections/Recents';
 import Favorites from '../Collections/Favorites';
 import { firebase as FirebaseConfig } from '../config';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import User from '../Models/User';
 

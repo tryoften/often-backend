@@ -12,13 +12,11 @@ class RestfulService extends Service {
 		Signature: (Object) -> Void
 	*/
 
-	constructor (models, opts) {
-
+	constructor (opts) {
 		super({
-			baseURL: models.base_url,
-			parser: parsers.json,
-		}, opts);
-
+			baseURL: opts.base_url,
+			parser: parsers.json
+		});
 	}
 	
 	/* 

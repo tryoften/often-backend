@@ -53,7 +53,7 @@ class YouTubeService extends ServiceBase {
 					}
 				}).on('success', videoData => {
 					var videos = [];
-					var results = {};
+					var results: any = {};
 
 					for (let item of videoData.items) {
 						videos.push({

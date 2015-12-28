@@ -7,16 +7,15 @@ import { Service as RestService, parsers } from 'restler';
  * This class is responsible for fetching data from the Giphy API
  */
 class GiphyService extends ServiceBase {
-	
+	rest: any;
+
 	/**
 	 * Initializes the giphy service provider.
-	 * @param {object} models - supporting models
 	 *
 	 * @return {void}
 	 */
-	constructor (models) {
-
-		super(models, settings);
+	constructor (settings) {
+		super(settings);
 		this.rest = new RestService({
 			baseURL : settings.base_url
 		});
@@ -29,10 +28,8 @@ class GiphyService extends ServiceBase {
 	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
 	fetchData (query) {
-
 		return new Promise((resolve, reject) => {
-
-			var results = {};
+			var results: any = {};
 			this.rest.get(settings.base_url, {
 				query: {
 					q : query,
@@ -56,7 +53,6 @@ class GiphyService extends ServiceBase {
 		});
 
 	}
-
 }
 
 export default GiphyService;

@@ -1,6 +1,6 @@
 import ServiceProviders from '../Collections/ServiceProviders';
 import Feeds from '../Collections/Feeds';
-import _ from 'underscore';
+import * as _ from 'underscore';
 
 /**
  * This class is responsible for parsing out search filters / parameters
@@ -41,9 +41,6 @@ class SearchParser {
 	/**
 	 * Breaks the raw query into tokens
 	 * @param {string} rawQuery - query string that hasn't been parsed yet
-	 *
-	 * @return {Promise} - Returns a promise that when resolved contains the filter and actualQuery
-	 						or an error when rejected. 
 	 */
 	tokenize (rawQuery) {
 
@@ -52,7 +49,7 @@ class SearchParser {
 		}
 
 		var trimmedQuery = rawQuery.trim();
-		var tokens = {};
+		var tokens: any = {};
 		var filter, actualQuery;
 
 		if (trimmedQuery[0] == '#') {
@@ -70,7 +67,6 @@ class SearchParser {
 		tokens.actualQuery = actualQuery;
 		
 		return tokens;
-
 	}
 
 

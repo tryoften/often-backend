@@ -2,13 +2,16 @@ import { firebase as FirebaseConfig } from '../config';
 import { url_shortener } from '../config';
 import ShortenedURL from '../Models/ShortenedURL';
 import { generateURIfromGuid } from '../Utilities/generateURI';
-import _ from 'underscore';
+import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import sha1 from 'sha1';
 /**
  * Helper class for Url related functionalities
  */
 class URLHelper {
+	baseUrl: string;
+	host: string;
+
 	/**
 	 * Constructs the url helper class.
 	 *

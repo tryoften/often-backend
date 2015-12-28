@@ -1,10 +1,18 @@
 import logger from '../Models/Logger';
+import URLHelper from "../Utilities/URLHelper";
+import Search from '../Search/Search';
+
 /** 
  *	This class is a base class for all service providers. 
  *	It has an instance of the results collection to which it adds a response after processing.
  *	It also keeps tracks of a cache for the derived class's responses.
  */
 class ServiceBase {
+	provider_id: string;
+	fetch_interval: number;
+	search: Search;
+	urlHelper: URLHelper;
+	rest: any;
 
 	/**
 	 * Initializes the service base.
@@ -13,11 +21,11 @@ class ServiceBase {
 	 *
 	 * @return {Void}
 	 */
-	constructor (opts) {
-		this.provider_id = opts.provider_id;
-		this.fetch_interval = opts.fetch_interval || 30000; //30 second default
-		this.search = opts.search;
-		this.urlHelper = opts.urlHelper;
+	constructor ({provider_id, fetch_interval, search, urlHelper}) {
+		this.provider_id = provider_id;
+		this.fetch_interval = fetch_interval || 30000; //30 second default
+		this.search = search;
+		this.urlHelper = urlHelper;
 	}
 
 	/**
@@ -37,7 +45,7 @@ class ServiceBase {
 			});
 	}
 
-	fetchData (query) {
+	fetchData (query): Promise<any> {
 		throw new Error("fetchData not implemented");
 	}
 

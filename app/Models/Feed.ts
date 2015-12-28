@@ -17,6 +17,11 @@ class Feed extends Model {
 	queue: Queue;
 	taskQueueRef: Firebase;
 
+	constructor(attributes: any, options: any) {
+		super(attributes, options);
+		this.url = `${config.firebase.BaseURL}/feeds/${this.id}`;
+	}
+
 	initialize (attributes: any, opts: any) {
 		let defaults: any = {
 			items: []
@@ -59,10 +64,6 @@ class Feed extends Model {
 			this.updateMetadata(data);
 			this.queueJobs(data);
 		});
-	}
-
-	url (): string {
-		return `${config.firebase.BaseURL}/feeds/${this.id}`;
 	}
 
 	updateMetadata (data: any) {

@@ -22,14 +22,6 @@ class Feeds extends Firebase.Collection<Feed> {
 		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/feeds`);
 		this.autoSync = true;
 	}
-
-	/**
-	 * passes options to the Feed models in the collection
-	 */
-	//model (attrs: any, opts: any) {
-	//	opts.queueEnabled = opts.queueEnabled || this.queueEnabled;
-	//	return new Feed(attrs, opts);
-	//}
 	
 	/**
 	 * Returns name of all feeds

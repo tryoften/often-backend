@@ -8,6 +8,7 @@ import logger from '../../Models/Logger';
  * This class is responsible for fetching data from the Giphy API
  */
 class SoundCloudService extends ServiceBase {
+	rest: any;
 	
 	/**
 	 * Initializes the soundcloud service provider.
@@ -116,7 +117,7 @@ class SoundCloudService extends ServiceBase {
 			}).on('success', data => {
 				var tracks = [];
 				for (let trackResult of data) {
-					let track = {
+					let track: any = {
 						id: trackResult.id,
 						name: trackResult.title,
 						api_uri: trackResult.uri,
