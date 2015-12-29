@@ -42,7 +42,6 @@ class GeniusService extends ServiceBase {
 					access_token: settings.access_token
 				}
 			}).on('success', data => {
-				
 				/* check response code */
 				if (data.meta.status != 200) {
 					reject("Invalid return status");
@@ -56,6 +55,7 @@ class GeniusService extends ServiceBase {
 				}
 
 				Promise.all(promises).then( (categorizedData) => {
+					console.log('resolved all');
 					results = {
 						artist: [],
 						track: [],
@@ -66,9 +66,12 @@ class GeniusService extends ServiceBase {
 						results.artist.push(res.artist);
 						results.track.push(res.track);
 						if (!_.isUndefined(res.lyric)) {
-							results.lyric.push(res.lyric);
+							for (var lyr of res.lyric) {
+								results.lyric.push(lyr);
+							}
 						}
 					}
+					console.log("about to return");
 
 					resolve(results);
 				});
@@ -104,12 +107,10 @@ class GeniusService extends ServiceBase {
 							resolve(result);
 
 						} else {
-
 							/* Otherwise, update lyrics as well */
 							this.fetchLyrics(songId).then( (rawLyrics) => {
 
 								var lyrics = this.cleanUpLyrics(rawLyrics);
-
 								result = {
 									artist: syncedArtist.update({artist, track, lyrics}),
 									track: syncedTrack.update({artist, track, lyrics}),
@@ -117,7 +118,8 @@ class GeniusService extends ServiceBase {
 								}
 								for (let i = 0; i < lyrics.length; i++) {
 									var lyric = lyrics[i];
-									result.lyric.push(new Lyric({ id: `${track.id}_${i}` }).update({artist, track, lyric}));
+									var lyrObj = new Lyric({ id: `${track.id}_${i}` });
+									result.lyric.push(lyrObj.update({artist, track, lyric}));
 								}
 								
 								// update lyrics here
@@ -182,8 +184,10 @@ class GeniusService extends ServiceBase {
 					info.track.album_url = result.album.url,
 					info.track.album_cover_art_url = result.album.cover_art_url
 				}
-
+				//console.log(songId);
+				
 				if (result.media != null) {
+					console.log('checking media');
 					info.track.media = {};
 					for (var media of result.media) {
 						if (media.provider == "youtube") {
@@ -192,10 +196,13 @@ class GeniusService extends ServiceBase {
 						info.track.media[media.provider] = media;
 					}
 				}
+				
 
 				resolve(info);
+
 				
 			}).on('error', err => {
+				console.log('err' + err);
 				reject(err);
 			});
 

@@ -6,6 +6,7 @@ import Search from '../Search/Search';
 import SpotifyService from '../Services/Spotify/SpotifyService';
 import YouTubeService from '../Services/YouTube/YouTubeService';
 import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
+import GeniusService from '../Services/Genius/GeniusService';
 
 class SearchWorker extends Worker {
 	
@@ -16,9 +17,7 @@ class SearchWorker extends Worker {
 		this.dispatcher = new SearchRequestDispatcher({
 			search: new Search(),
 			services: {
-				spotify: SpotifyService,
-				youtube: YouTubeService,
-				soundcloud: SoundCloudService
+				genius: GeniusService
 			}
 		});
 	}
