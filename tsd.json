@@ -18,19 +18,19 @@
       "commit": "e5a27ea95e47b95333784f1f0d590127b4e39a89"
     },
     "es6-shim/es6-shim.d.ts": {
-      "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
+      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
     "express/express.d.ts": {
-      "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
+      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
     "serve-static/serve-static.d.ts": {
-      "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
+      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
     "node/node.d.ts": {
-      "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
+      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
     "mime/mime.d.ts": {
-      "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
+      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
     "minimist/minimist.d.ts": {
       "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
