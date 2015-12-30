@@ -6,15 +6,14 @@ import { Service as RestService } from 'restler';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
 import Lyric from '../../Models/Lyric';
-import _ from 'underscore';
+import * as _ from 'underscore';
+
 /** 
  * This class is responsible for fetching data from the Spotify API
  */
 class GeniusService extends ServiceBase {
-	
 	/**
-	 * Initializes the spotify service provider.
-	 * @param {object} models - supporting models
+	 * Initializes the genius service provider.
 	 *
 	 * @return {void}
 	 */
@@ -35,7 +34,7 @@ class GeniusService extends ServiceBase {
 
 		return new Promise((resolve, reject) => {
 
-			var results = {};
+			var results: any = {};
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
 					q: query,
@@ -81,11 +80,16 @@ class GeniusService extends ServiceBase {
 
 	}
 
-	getData (songId) {
+	/**
+	 *
+	 * @param songId
+	 * @returns {Promise<T>}
+     */
+	getData (songId: string): Promise<any> {
 
 		return new Promise( (resolve, reject) => {
 			
-			this.getTrackMeta(songId).then( (meta) => {
+			this.getTrackMetadata(songId).then( (meta: any) => {
 				var artist = meta.artist;
 				var track = meta.track;
 				var artistObj = new Artist({ id: artist.id });
@@ -99,7 +103,7 @@ class GeniusService extends ServiceBase {
 							result = {
 								artist: syncedArtist.update({artist, track}),
 								track: syncedTrack.update({artist, track})
-							}
+							};
 
 							resolve(result);
 
@@ -109,12 +113,12 @@ class GeniusService extends ServiceBase {
 							this.fetchLyrics(songId).then( (rawLyrics) => {
 
 								var lyrics = this.cleanUpLyrics(rawLyrics);
-
 								result = {
 									artist: syncedArtist.update({artist, track, lyrics}),
 									track: syncedTrack.update({artist, track, lyrics}),
 									lyric: []
-								}
+								};
+
 								for (let i = 0; i < lyrics.length; i++) {
 									var lyric = lyrics[i];
 									result.lyric.push(new Lyric({ id: `${track.id}_${i}` }).update({artist, track, lyric}));
@@ -139,7 +143,7 @@ class GeniusService extends ServiceBase {
 		});
 	}
 
-	getTrackMeta (songId) {
+	getTrackMetadata (songId: string) {
 
 		return new Promise( (resolve, reject) => {
 			console.log(`${settings.base_url}/songs/${songId}`);
@@ -155,9 +159,9 @@ class GeniusService extends ServiceBase {
 					return;
 				}
 
-				var result = data.response.song;
+				var result: any = data.response.song;
 				
-				var info = {
+				var info: any = {
 					track: {
 						id: result.id,
 						title: result.title,

@@ -1,6 +1,7 @@
 import logger from '../Models/Logger';
 import URLHelper from "../Utilities/URLHelper";
 import Search from '../Search/Search';
+import { Service as RestService } from 'restler';
 
 /** 
  *	This class is a base class for all service providers. 
@@ -12,7 +13,7 @@ class ServiceBase {
 	fetch_interval: number;
 	search: Search;
 	urlHelper: URLHelper;
-	rest: any;
+	rest: RestService;
 
 	/**
 	 * Initializes the service base.

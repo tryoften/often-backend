@@ -2,7 +2,7 @@ import 'backbonefire';
 import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import _ from 'underscore';
+import * as _ from 'underscore';
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
  */

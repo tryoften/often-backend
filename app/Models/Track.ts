@@ -2,7 +2,7 @@ import 'backbonefire';
 import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import _ from 'underscore';
+import * as _ from 'underscore';
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
  */
@@ -29,7 +29,7 @@ class Track extends Firebase.Model {
 			throw new Error("Track information must be defined.");
 		}
 
-		var properties = {};
+		var properties: any = {};
 
 		/* Set track properties */
 		for (let prop in track) {
@@ -50,9 +50,7 @@ class Track extends Firebase.Model {
 			}
 
 			properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;
-			//this.set('lyrics', properties.lyrics);
 		}
-	
 		
 		this.set(properties);
 		this.set('time_modified', Date.now());

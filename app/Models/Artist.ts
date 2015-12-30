@@ -2,7 +2,7 @@ import 'backbonefire';
 import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import _ from 'underscore';
+import * as _ from 'underscore';
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
  */
@@ -19,7 +19,7 @@ class Artist extends Firebase.Model {
 		this.idAttribute = 'id';
 	}
 
-	trackExists (songId) {
+	trackExists (songId: string) {
 		var tracksObj = this.get("tracks");
 		if (!_.isUndefined(tracksObj) && !_.isNull(tracksObj)) {
 			return !_.isUndefined(tracksObj[songId]) && !_.isNull(tracksObj[songId]);
@@ -37,7 +37,7 @@ class Artist extends Firebase.Model {
 			throw new Error("Track information must be defined.");
 		}
 
-		var properties = {};
+		var properties: any = {};
 
 		/* Set artist properties */
 		for (let prop in artist) {
@@ -52,7 +52,6 @@ class Artist extends Firebase.Model {
 			if (!_.isUndefined(lyrics)) {
 				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;
 			}
-			
 		} 
 
 		properties.tracks = this.get('tracks') || {};

@@ -70,25 +70,6 @@ declare module "gcloud" {
 	export var storage: any;
 }
 
-declare module "restler" {
-	import {EventEmitter} from "events";
-	export class Request extends EventEmitter {
-		url: string;
-		options: any;
-		headers: any;
-
-		constructor(uri: string, options: any);
-	}
-
-	export class Service {
-		constructor(options: any);
-		request(path: string, options: any): Request;
-		get(url: string, options: any): Request;
-	}
-
-	export var parsers: any;
-}
-
 declare module "sha1" {
 	export default function sha1(str: string): string;
 }
