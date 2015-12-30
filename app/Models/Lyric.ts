@@ -3,6 +3,7 @@ import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
  */
@@ -20,7 +21,7 @@ class Lyric extends Firebase.Model {
 	}
 
 	update ({artist, track, lyric}) {
-		var properties = {};
+		var properties: any = {};
 		
 		for (let prop in track) {
 			properties[`track_${prop}`] = track[prop];

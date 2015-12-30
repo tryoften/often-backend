@@ -109,6 +109,7 @@ declare module "restler" {
 
 	interface ServiceOptions {
 		baseURL: string;
+		parser?: any;
 	}
 
 	export class Service {
