@@ -10,6 +10,6 @@ insert_final_newline = true
 charset = utf-8
 
 # Indentation level is one tab that takes up two columns
-[*.{js,json}]
+[*.{js,json,ts}]
 indent_style = tab
-tab_width = 2
+tab_width = 4
