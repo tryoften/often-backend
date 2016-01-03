@@ -7,9 +7,10 @@ import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
 import Lyric from '../../Models/Lyric';
 import * as _ from 'underscore';
+import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData } from './GeniusDataTypes';
 
 /** 
- * This class is responsible for fetching data from the Spotify API
+ * This class is responsible for fetching data from the Genius API
  */
 class GeniusService extends ServiceBase {
 	/**
@@ -17,10 +18,10 @@ class GeniusService extends ServiceBase {
 	 *
 	 * @return {void}
 	 */
-	constructor (opts) {
+	constructor (opts: {provider_id: string}) {
 		super(opts);
 		this.rest = new RestService({
-			baseURL : settings.base_url
+			baseURL: settings.base_url
 		});
 	}
 	
@@ -30,8 +31,7 @@ class GeniusService extends ServiceBase {
 	 *
 	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
-	 fetchData (query) {
-
+	 fetchData (query: string) {
 		return new Promise((resolve, reject) => {
 
 			var results: any = {};
@@ -84,70 +84,78 @@ class GeniusService extends ServiceBase {
 	}
 
 	/**
+	 * Gets all metadata for given track ID including artist, album, and lyrics data
+	 *
+	 * @param songId the genius track ID
+	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
+     */
+	getData (songId: string): Promise<GeniusData> {
+		return new Promise( (resolve, reject) => {
+
+			let trackMetadataPromise = this.getTrackMetadata(songId)
+				.then( (meta: any) => {
+					return Promise.all([
+						trackMetadataPromise,
+						new Artist({ id: meta.artist.id }).syncData(),
+						new Track({ id: meta.track.id }).syncData()
+					]);
+				})
+				.then( promises => {
+					let data: GeniusData = promises[0];
+					let artist = <Artist> promises[1], track = <Track> promises[2];
+
+					// Update backend DB with latest genius data
+					artist.setGeniusData(data);
+					track.setGeniusData(data);
+
+					if (artist.trackExists(songId)) {
+						/* If track exists then just update meta */
+						return resolve(data);
+					}
+
+					/* Otherwise, fetch and update lyrics as well */
+					return this.fetchLyrics(songId).then( (rawLyrics) => {
+						rawLyrics = this.cleanUpLyrics(rawLyrics);
+						let lyrics: GeniusLyricData[];
+
+						for (let i = 0; i < rawLyrics.length; i++) {
+							let lyricData: GeniusLyricData = {
+								id: `${track.id}_${i}`,
+								text: rawLyrics[i]
+							};
+							lyrics.push(lyricData);
+
+							// Persist lyric data to backend
+							let lyric = new Lyric(lyricData);
+							lyric.setGeniusData({
+								artist: data.artist,
+								track: data.track,
+								lyric: lyricData
+							});
+						}
+
+						data.lyrics = lyrics;
+						data.lyricsCount = lyrics.length;
+
+						// update lyrics here
+						console.log('resolving ', songId);
+						resolve(data);
+					});
+				})
+				.catch( (err) => {
+					console.log('rejecting ', songId, err);
+					reject(err);
+				});
+		});
+	}
+
+	/**
+	 * Gets only track data for the given track ID
 	 *
 	 * @param songId
 	 * @returns {Promise<T>}
      */
-	getData (songId: string): Promise<any> {
-
-		return new Promise( (resolve, reject) => {
-			
-			this.getTrackMetadata(songId).then( (meta: any) => {
-				var artist = meta.artist;
-				var track = meta.track;
-				var artistObj = new Artist({ id: artist.id });
-				artistObj.once('sync', (syncedArtist) => {
-					var result = {};
-					var trackObj = new Track({ id: track.id });
-					trackObj.once('sync', (syncedTrack) => {
-						
-						if (syncedArtist.trackExists(songId)) {
-							/* If track exists then just update meta */
-							result = {
-								artist: syncedArtist.update({artist, track}),
-								track: syncedTrack.update({artist, track})
-							};
-
-							resolve(result);
-
-						} else {
-							/* Otherwise, update lyrics as well */
-							this.fetchLyrics(songId).then( (rawLyrics) => {
-
-								var lyrics = this.cleanUpLyrics(rawLyrics);
-								result = {
-									artist: syncedArtist.update({artist, track, lyrics}),
-									track: syncedTrack.update({artist, track, lyrics}),
-									lyric: []
-								};
-
-								for (let i = 0; i < lyrics.length; i++) {
-									var lyric = lyrics[i];
-									var lyrObj = new Lyric({ id: `${track.id}_${i}` });
-									result.lyric.push(lyrObj.update({artist, track, lyric}));
-								}
-								
-								// update lyrics here
-								console.log('resolving ', songId);
-								resolve(result);
-							}).catch( (err) => {
-								console.log('rejecting ', songId);
-								reject(err);
-							});
-						}
-
-					});
-					trackObj.fetch();
-
-				});
-				artistObj.fetch();
-				
-			});
-		});
-	}
-
-	getTrackMetadata (songId: string) {
-
+	getTrackMetadata (songId: string): Promise<{track: GeniusTrackData, artist: GeniusArtistData}> {
 		return new Promise( (resolve, reject) => {
 			console.log(`${settings.base_url}/songs/${songId}`);
 			this.rest.get(`${settings.base_url}/songs/${songId}`, {
@@ -164,7 +172,7 @@ class GeniusService extends ServiceBase {
 
 				var result: any = data.response.song;
 				
-				var info: any = {
+				var info: {track: GeniusTrackData, artist: GeniusArtistData} = {
 					track: {
 						id: result.id,
 						title: result.title,
@@ -172,24 +180,22 @@ class GeniusService extends ServiceBase {
 						header_image_url: result.header_image_url,
 						song_art_image_url: result.song_art_image_url,
 						hot: result.stats.hot
-
-					}, artist: {
+					},
+					artist: {
 						id: result.primary_artist.id,
 						name: result.primary_artist.name,
 						url: result.primary_artist.url,
 						image_url: result.primary_artist.image_url,
 						is_verified: result.primary_artist.is_verified
-
 					}
-				}
+				};
 
 				if (result.album != null) {
-					info.track.album_id = result.album.id,
-					info.track.album_name = result.album.name,
-					info.track.album_url = result.album.url,
-					info.track.album_cover_art_url = result.album.cover_art_url
+					info.track.album_id = result.album.id;
+					info.track.album_name = result.album.name;
+					info.track.album_url = result.album.url;
+					info.track.album_cover_art_url = result.album.cover_art_url;
 				}
-				//console.log(songId);
 				
 				if (result.media != null) {
 					console.log('checking media');
@@ -201,11 +207,7 @@ class GeniusService extends ServiceBase {
 						info.track.media[media.provider] = media;
 					}
 				}
-				
-
 				resolve(info);
-
-				
 			}).on('error', err => {
 				console.log('err' + err);
 				reject(err);
@@ -214,8 +216,13 @@ class GeniusService extends ServiceBase {
 		});
 	}
 
-
-	fetchLyrics (songId) {
+	/**
+	 * Retrieves lyrics for the given genius song ID
+	 *
+	 * @param {string} songId the genius song ID
+	 * @returns {Promise<string[]>}
+     */
+	fetchLyrics (songId: string): Promise<string[]> {
 		return new Promise( (resolve, reject) => {
 
 			this.rest.get(`${settings.base_url}/referents`, {
@@ -243,8 +250,6 @@ class GeniusService extends ServiceBase {
 				}
 
 				resolve(lyrics);
-
-				
 			}).on('error', err => {
 				console.log('err' + err);
 				reject(err);
@@ -253,7 +258,13 @@ class GeniusService extends ServiceBase {
 		});
 	}
 
-	cleanUpLyrics (lyrics) {
+	/**
+	 * Cleans up raw lyrics by removing lines that dont fit a set of defined criterias.
+	 *
+	 * @param lyrics
+	 * @returns {Array}
+     */
+	private cleanUpLyrics (lyrics: string[]): string[] {
 		var filtered = [];
 		for (var lyr of lyrics) {
 
