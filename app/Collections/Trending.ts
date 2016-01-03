@@ -4,8 +4,6 @@ import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-// Note TrendingItem isn't used as the model for the collection, just used to
-// fetch individual items when needed
 import TrendingItem from '../Models/TrendingItem';
 
 /**
@@ -21,7 +19,7 @@ class Trending extends Firebase.Collection<Model> {
 	constructor () {
 		let opts = {
 			model: Model,
-			autoSync: true
+			autoSync: false
 		};
 		super([], opts);
 	}
@@ -42,7 +40,6 @@ class Trending extends Firebase.Collection<Model> {
 	 * Increments counter that tracks how many times an item has been favorited
 	 *
 	 * @param {object} item - object containing information about an item
-	 *
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
 	increment (item: any) {
@@ -76,7 +73,6 @@ class Trending extends Firebase.Collection<Model> {
 	 * Decrements counter that tracks how many times an item has been favorited
 	 *
 	 * @param {object} item - object containing information about an item
-	 *
 	 * @return {Promise} - Resolves to true as long as operation was successful
 	 */
 	decrement (item: any) {

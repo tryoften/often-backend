@@ -1,12 +1,15 @@
-import 'backbonefire';
-import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
+import BaseModel from "./BaseModel";
+import Track from "./Track";
+import MediaItem from "./MediaItem";
+import { GeniusData, GeniusArtistData, GeniusTrackData } from "../Services/Genius/GeniusDataTypes";
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
  */
-class Artist extends Firebase.Model {
+class Artist extends MediaItem {
 
 	/**
 	 * Initializes the elastic search config model.
@@ -27,7 +30,14 @@ class Artist extends Firebase.Model {
 		return false;
 	}
 
-	update ({artist, track, lyrics}) {
+	/**
+	 * Updates current artist model with genius data
+	 * @param data
+	 * @param {Artist} data.artist an artist
+	 * @returns {any}
+     */
+	setGeniusData (data: GeniusData) {
+		var {artist, track, lyricsCount} = data;
 		
 		if (_.isUndefined(artist)) {
 			throw new Error("Artist information must be defined.");
@@ -49,8 +59,8 @@ class Artist extends Firebase.Model {
 			/* if track doesn't exist then don't update counts */
 			properties.tracks_count = (this.get('tracks_count') || 0) + 1;
 			
-			if (!_.isUndefined(lyrics)) {
-				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;
+			if (lyricsCount) {
+				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyricsCount;
 			}
 		} 
 
@@ -60,7 +70,6 @@ class Artist extends Firebase.Model {
 		this.set(properties);
 		
 		return this.attributes;
-
 	}
 }
 
