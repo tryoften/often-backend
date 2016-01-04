@@ -92,10 +92,11 @@ class GeniusService extends ServiceBase {
 	getData (songId: string): Promise<GeniusData> {
 		return new Promise( (resolve, reject) => {
 
-			let trackMetadataPromise = this.getTrackMetadata(songId)
+			let trackMetadataPromise = this.getTrackMetadata(songId);
+			trackMetadataPromise
 				.then( (meta: any) => {
 					return Promise.all([
-						trackMetadataPromise,
+						meta,
 						new Artist({ id: meta.artist.id }).syncData(),
 						new Track({ id: meta.track.id }).syncData()
 					]);
@@ -105,10 +106,10 @@ class GeniusService extends ServiceBase {
 					let artist = <Artist> promises[1], track = <Track> promises[2];
 
 					// Update backend DB with latest genius data
-					artist.setGeniusData(data);
-					track.setGeniusData(data);
 
 					if (artist.trackExists(songId)) {
+						artist.setGeniusData(data);
+						track.setGeniusData(data);
 						/* If track exists then just update meta */
 						return resolve(data);
 					}
@@ -136,7 +137,8 @@ class GeniusService extends ServiceBase {
 
 						data.lyrics = lyrics;
 						data.lyricsCount = lyrics.length;
-
+						artist.setGeniusData(data);
+						track.setGeniusData(data);
 						// update lyrics here
 						console.log('resolving ', songId);
 						resolve(data);
@@ -163,7 +165,6 @@ class GeniusService extends ServiceBase {
 					access_token: settings.access_token
 				}
 			}).on('success', data => {
-
 				/* check response code */
 				if (data.meta.status != 200) {
 					reject("Invalid return status");
@@ -198,7 +199,6 @@ class GeniusService extends ServiceBase {
 				}
 				
 				if (result.media != null) {
-					console.log('checking media');
 					info.track.media = {};
 					for (var media of result.media) {
 						if (media.provider == "youtube") {

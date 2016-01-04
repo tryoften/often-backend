@@ -51,7 +51,7 @@ class Track extends MediaItem {
 			properties.lyrics = this.get('lyrics') || {};
 
 			for (var i = 0; i < lyrics.length; i++) {
-				properties.lyrics[`${track.id}_${i}`] = lyrics[i].toJSON();
+				properties.lyrics[`${track.id}_${i}`] = lyrics[i];
 			}
 
 			properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;
