@@ -165,7 +165,6 @@ class GeniusService extends ServiceBase {
 					access_token: settings.access_token
 				}
 			}).on('success', data => {
-				console.log('start');
 				/* check response code */
 				if (data.meta.status != 200) {
 					reject("Invalid return status");
@@ -209,7 +208,6 @@ class GeniusService extends ServiceBase {
 					}
 				}
 				resolve(info);
-				console.log('end');
 			}).on('error', err => {
 				console.log('err' + err);
 				reject(err);
