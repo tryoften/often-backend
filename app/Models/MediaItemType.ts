@@ -1,8 +1,4 @@
-import Artist from "./Artist";
-import Lyric from "./Lyric";
-import Track from "./Track";
 import * as _ from 'underscore';
-import MediaItem from "./MediaItem";
 
 export default class MediaItemType extends String {
 	static artist: MediaItemType = "artist";
@@ -15,10 +11,16 @@ export default class MediaItemType extends String {
 		MediaItemType.lyric
 	];
 
-	static classMapping = {
-		artist: Artist,
-		track: Track,
-		lyric: Lyric
+	private static mapping: any;
+	static get classMapping(): any {
+		if (MediaItemType.mapping == null) {
+			MediaItemType.mapping = {
+				artist: require('./Artist'),
+				track: require('./Track'),
+				lyric: require('./Lyric')
+			};
+		}
+		return MediaItemType.mapping;
 	};
 
 	/**
@@ -34,7 +36,7 @@ export default class MediaItemType extends String {
 		return <MediaItemType>str;
 	}
 
-	static toClass(type: MediaItemType): typeof MediaItem {
+	static toClass(type: MediaItemType): any {
 		return MediaItemType.classMapping[type.toString()];
 	}
 };

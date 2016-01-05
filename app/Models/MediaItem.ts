@@ -1,5 +1,5 @@
-import BaseModel from "./BaseModel";
-import MediaItemType from "./MediaItemType";
+import BaseModel from './BaseModel';
+import MediaItemType from './MediaItemType';
 import MediaItemSource from './MediaItemSource';
 import { firebase as FirebaseConfig } from '../config';
 import { generate as generateId } from 'shortid';
