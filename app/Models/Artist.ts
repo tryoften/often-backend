@@ -5,6 +5,7 @@ import BaseModel from "./BaseModel";
 import Track from "./Track";
 import MediaItem from "./MediaItem";
 import { GeniusData, GeniusArtistData, GeniusTrackData } from "../Services/Genius/GeniusDataTypes";
+import ModelSetOptions = Backbone.ModelSetOptions;
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
@@ -23,34 +24,29 @@ class Artist extends MediaItem {
 	}
 
 	trackExists (songId: string) {
-		var tracksObj = this.get("tracks");
-		if (!_.isUndefined(tracksObj) && !_.isNull(tracksObj)) {
-			return !_.isUndefined(tracksObj[songId]) && !_.isNull(tracksObj[songId]);
-		}
-		return false;
+		return _.has(this.get("tracks"), songId);
 	}
 
 	/**
 	 * Updates current artist model with genius data
+	 *
 	 * @param data
 	 * @param {Artist} data.artist an artist
+	 * @param {Boolean} update whether to update the artist model or not
 	 * @returns {any}
      */
-	setGeniusData (data: GeniusData) {
+	setGeniusData (data: GeniusData, update: Boolean = false): Artist {
 		var {artist, track, lyricsCount} = data;
-		
-		if (_.isUndefined(artist)) {
-			throw new Error("Artist information must be defined.");
-		}
 
-		if (_.isUndefined(track)) {
-			throw new Error("Track information must be defined.");
-		}
+		this.registerToIdSpace(artist.id);
 
 		var properties: any = {};
 
 		/* Set artist properties */
 		for (let prop in artist) {
+			if (prop === "id") {
+				continue;
+			}
 			properties[prop] = artist[prop];
 		}
 
@@ -66,10 +62,12 @@ class Artist extends MediaItem {
 
 		properties.tracks = this.get('tracks') || {};
 		properties.tracks[track.id] = track;
+		//properties = JSON.parse(JSON.stringify(properties));
+		console.dir(properties);
 		this.set('time_modified', Date.now());
 		this.set(properties);
-		
-		return this.attributes;
+
+		return this;
 	}
 }
 

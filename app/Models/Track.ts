@@ -26,18 +26,15 @@ class Track extends MediaItem {
 	setGeniusData (data: GeniusData) {
 		var {artist, track, lyrics} = data;
 
-		if (_.isUndefined(artist)) {
-			throw new Error("Artist information must be defined.");
-		}
-
-		if (_.isUndefined(track)) {
-			throw new Error("Track information must be defined.");
-		}
+		this.registerToIdSpace(track.id);
 
 		var properties: any = {};
 
 		/* Set track properties */
 		for (let prop in track) {
+			if (prop === "id") {
+				continue;
+			}
 			properties[prop] = track[prop];
 		}
 
@@ -51,7 +48,7 @@ class Track extends MediaItem {
 			properties.lyrics = this.get('lyrics') || {};
 
 			for (var i = 0; i < lyrics.length; i++) {
-				properties.lyrics[`${track.id}_${i}`] = lyrics[i].toJSON();
+				properties.lyrics[`${track.id}_${i}`] = lyrics[i];
 			}
 
 			properties.lyrics_count = (this.get('lyrics_count') || 0) + lyrics.length;

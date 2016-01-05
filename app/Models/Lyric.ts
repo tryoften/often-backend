@@ -34,7 +34,7 @@ class Lyric extends MediaItem {
 		for (let prop in artist) {
 			properties[`artist_${prop}`] = artist[prop];
 		}
-		properties.text = lyric;
+		properties.text = lyric.text;
 
 		this.set(properties);
 
