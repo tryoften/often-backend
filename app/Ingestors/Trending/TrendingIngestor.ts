@@ -1,8 +1,10 @@
 import * as cheerio from 'cheerio';
 import GeniusService from "../../Services/Genius/GeniusService";
 import { get, RequestOptions } from 'restler';
-import Trending from "../../Collections/Trending";
+import Trending from "../../Models/Trending";
 import { GeniusData } from "../../Services/Genius/GeniusDataTypes";
+import Track from "../../Models/Track";
+import * as _ from 'underscore';
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
@@ -24,18 +26,28 @@ class TrendingIngestor {
 	 */
 	ingestData (): Promise<any> {
 		return this.getTrendingTracks().then(data => {
-			var promises: Promise<GeniusData>[] = [];
+			var promises: Promise<Track>[] = [];
 			for (var trackData of data) {
 				promises.push(this.genius.getData(trackData.id));
 			}
 
-			return Promise.all(promises).then( (data: GeniusData[]) => {
-				console.log(data);
+			return Promise.all(promises).then( (data: Track[]) => {
+
+				var artists = _.map(data, track => {
+					return track.toJSON();
+				});
+
+				var tracks = _.map(data, track => {
+					return track.toJSON();
+				});
 
 				// TODO(luc): put data in trending collection
-				this.trending.add({
-
+				this.trending.set({
+					artists,
+					tracks
 				});
+			}).catch((error) => {
+				console.log(error);
 			});
 		});
 	}

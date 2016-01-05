@@ -8,6 +8,9 @@ import Track from '../../Models/Track';
 import Lyric from '../../Models/Lyric';
 import * as _ from 'underscore';
 import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData } from './GeniusDataTypes';
+import MediaItemSource from "../../Models/MediaItemSource";
+import MediaItemType from "../../Models/MediaItemType";
+import MediaItemAttributes from "../../Models/MediaItem";
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -89,34 +92,34 @@ class GeniusService extends ServiceBase {
 	 * @param songId the genius track ID
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
-	getData (songId: string): Promise<GeniusData> {
+	getData (songId: string): Promise<Track> {
 		return new Promise( (resolve, reject) => {
 
-			let trackMetadataPromise = this.getTrackMetadata(songId)
+			this.getTrackMetadata(songId)
 				.then( (meta: any) => {
 					return Promise.all([
-						trackMetadataPromise,
-						new Artist({ id: meta.artist.id }).syncData(),
-						new Track({ id: meta.track.id }).syncData()
+						meta,
+						Artist.fromType(MediaItemSource.Genius, MediaItemType.artist, meta.artist.id),
+						Track.fromType(MediaItemSource.Genius, MediaItemType.track, meta.track.id)
 					]);
 				})
 				.then( promises => {
 					let data: GeniusData = promises[0];
 					let artist = <Artist> promises[1], track = <Track> promises[2];
 
-					// Update backend DB with latest genius data
-					artist.setGeniusData(data);
-					track.setGeniusData(data);
-
 					if (artist.trackExists(songId)) {
+						// Update backend DB with latest genius data
+						artist.setGeniusData(data);
+						track.setGeniusData(data);
+
 						/* If track exists then just update meta */
-						return resolve(data);
+						return resolve(track);
 					}
 
 					/* Otherwise, fetch and update lyrics as well */
 					return this.fetchLyrics(songId).then( (rawLyrics) => {
 						rawLyrics = this.cleanUpLyrics(rawLyrics);
-						let lyrics: GeniusLyricData[];
+						var lyrics: GeniusLyricData[] = [];
 
 						for (let i = 0; i < rawLyrics.length; i++) {
 							let lyricData: GeniusLyricData = {
@@ -126,7 +129,10 @@ class GeniusService extends ServiceBase {
 							lyrics.push(lyricData);
 
 							// Persist lyric data to backend
-							let lyric = new Lyric(lyricData);
+							let lyric = new Lyric({
+								source: MediaItemSource.Genius,
+								type: MediaItemType.lyric
+							});
 							lyric.setGeniusData({
 								artist: data.artist,
 								track: data.track,
@@ -137,9 +143,13 @@ class GeniusService extends ServiceBase {
 						data.lyrics = lyrics;
 						data.lyricsCount = lyrics.length;
 
+						// Update backend DB with latest genius data
+						artist.setGeniusData(data);
+						track.setGeniusData(data);
+
 						// update lyrics here
 						console.log('resolving ', songId);
-						resolve(data);
+						resolve(track);
 					});
 				})
 				.catch( (err) => {
@@ -278,7 +288,7 @@ class GeniusService extends ServiceBase {
 			}
 
 			if (lyr.indexOf(" ") == -1) {
-				/* If the lyric is composed of only one word then it's too short, don't ingest */
+				/* If lyric is composed of only one word then it's too short, don't ingest */
 				continue;
 			}
 
@@ -313,4 +323,3 @@ class GeniusService extends ServiceBase {
 }
 
 export default GeniusService;
-

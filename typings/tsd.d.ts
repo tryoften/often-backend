@@ -78,3 +78,7 @@ declare module "request" {
 	var request: any;
 	export default request;
 }
+
+declare module "shortid" {
+	export function generate(): string;
+}

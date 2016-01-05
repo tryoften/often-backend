@@ -4,25 +4,12 @@ import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import TrendingItem from '../Models/TrendingItem';
+import TrendingItem from './TrendingItem';
 
 /**
  * This class is responsible for maintaining the favorite collection.
  */
-class Trending extends Firebase.Collection<Model> {
-
-	/**
-	 * Sets model to use for this BackboneFire collection.
-	 *
-	 * @return {void}
-	 */
-	constructor () {
-		let opts = {
-			model: Model,
-			autoSync: false
-		};
-		super([], opts);
-	}
+class Trending extends Firebase.Model {
 
 	/**
 	 * Initializes the trending collection.
@@ -32,8 +19,9 @@ class Trending extends Firebase.Collection<Model> {
 	 *
 	 * @return {void}
 	 */
-	initialize (models: Model[], opts: any) {
-		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/trending/all`);
+	initialize (attributes: any, options?: any) {
+		super.initialize(attributes, options);
+		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/trending/`);
 	}
 
 	/**
