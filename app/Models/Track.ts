@@ -1,11 +1,8 @@
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
-import BaseModel from "./BaseModel";
-import Lyric from "./Lyric";
-import Artist from "./Artist";
 import MediaItem from "./MediaItem";
-import { GeniusData, GeniusArtistData, GeniusTrackData } from "../Services/Genius/GeniusDataTypes";
+import { GeniusData } from "../Services/Genius/GeniusDataTypes";
 
 /**
  * Track model throughout the platform
@@ -25,10 +22,9 @@ class Track extends MediaItem {
 
 	setGeniusData (data: GeniusData) {
 		var {artist, track, lyrics} = data;
+		var properties: any = {};
 
 		this.registerToIdSpace(track.id);
-
-		var properties: any = {};
 
 		/* Set track properties */
 		for (let prop in track) {

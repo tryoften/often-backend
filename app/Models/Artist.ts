@@ -35,10 +35,9 @@ class Artist extends MediaItem {
      */
 	setGeniusData (data: GeniusData): Artist {
 		var {artist, track, lyricsCount} = data;
+		var properties: any = {};
 
 		this.registerToIdSpace(artist.id);
-
-		var properties: any = {};
 
 		/* Set artist properties */
 		for (let prop in artist) {
