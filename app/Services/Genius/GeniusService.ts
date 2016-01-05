@@ -8,7 +8,9 @@ import Track from '../../Models/Track';
 import Lyric from '../../Models/Lyric';
 import * as _ from 'underscore';
 import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData } from './GeniusDataTypes';
-import { generate as generateId } from 'shortid';
+import MediaItemSource from "../../Models/MediaItemSource";
+import MediaItemType from "../../Models/MediaItemType";
+import MediaItemAttributes from "../../Models/MediaItem";
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -97,8 +99,8 @@ class GeniusService extends ServiceBase {
 				.then( (meta: any) => {
 					return Promise.all([
 						meta,
-						new Artist({ genius_id: meta.artist.id }).syncData(),
-						new Track({ genius_id: meta.track.id }).syncData()
+						Artist.fromType(MediaItemSource.Genius, MediaItemType.artist, meta.artist.id),
+						Track.fromType(MediaItemSource.Genius, MediaItemType.track, meta.track.id)
 					]);
 				})
 				.then( promises => {
@@ -107,7 +109,7 @@ class GeniusService extends ServiceBase {
 
 					if (artist.trackExists(songId)) {
 						// Update backend DB with latest genius data
-						artist.setGeniusData(data, true);
+						artist.setGeniusData(data);
 						track.setGeniusData(data);
 
 						/* If track exists then just update meta */
@@ -127,7 +129,10 @@ class GeniusService extends ServiceBase {
 							lyrics.push(lyricData);
 
 							// Persist lyric data to backend
-							let lyric = new Lyric(lyricData);
+							let lyric = new Lyric({
+								source: MediaItemSource.Genius,
+								type: MediaItemType.lyric
+							});
 							lyric.setGeniusData({
 								artist: data.artist,
 								track: data.track,
@@ -283,7 +288,7 @@ class GeniusService extends ServiceBase {
 			}
 
 			if (lyr.indexOf(" ") == -1) {
-				/* If the lyric is composed of only one word then it's too short, don't ingest */
+				/* If lyric is composed of only one word then it's too short, don't ingest */
 				continue;
 			}
 
@@ -318,4 +323,3 @@ class GeniusService extends ServiceBase {
 }
 
 export default GeniusService;
-

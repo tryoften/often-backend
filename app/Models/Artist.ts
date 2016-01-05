@@ -5,7 +5,6 @@ import BaseModel from "./BaseModel";
 import Track from "./Track";
 import MediaItem from "./MediaItem";
 import { GeniusData, GeniusArtistData, GeniusTrackData } from "../Services/Genius/GeniusDataTypes";
-import ModelSetOptions = Backbone.ModelSetOptions;
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses. 
@@ -32,10 +31,9 @@ class Artist extends MediaItem {
 	 *
 	 * @param data
 	 * @param {Artist} data.artist an artist
-	 * @param {Boolean} update whether to update the artist model or not
 	 * @returns {any}
      */
-	setGeniusData (data: GeniusData, update: Boolean = false): Artist {
+	setGeniusData (data: GeniusData): Artist {
 		var {artist, track, lyricsCount} = data;
 
 		this.registerToIdSpace(artist.id);
