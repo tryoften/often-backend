@@ -5,7 +5,11 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import Filters from '../Collections/Filters';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
-
+import { Indexable } from '../Interfaces/Indexable';
+import { Queryable } from "../Interfaces/Queryable";
+import Command from '../Models/Command';
+import { CommandData } from '../Interfaces/CommandData';
+import  CommandType  from '../Models/CommandType';
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -43,31 +47,14 @@ class Search {
 	 *
 	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
 	 */
-	index (index: string, results: any[]) {
+	index (indexables: Indexable[]) {
 
 		return new Promise((resolve, reject) => {
 
 			/* Prepare the results to be indexed with ElasticSearch */
-			var formattedResults: any[] = [];
-			for (let type in results) {
-				let individualResults = results[type];
-				for (let item in individualResults) {
-
-					/* Put action in */
-					formattedResults.push({
-						'update': {
-							_index: index,
-							_type: type,
-							_id: individualResults[item].id
-						}
-					});
-					
-					/* Put data in */
-					formattedResults.push({
-						'doc_as_upsert': true,
-						doc: individualResults[item]
-					});
-				}
+			var formattedResults: Object[] = [];
+			for (let entry of indexables) {
+				formattedResults.concat(entry.toIndexingFormat());
 			}
 
 			this.es.bulk({
@@ -92,7 +79,7 @@ class Search {
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-	query (query, filteredIndex, autocomplete = false) {
+	query (query: Queryable) {
 
 		var command;
 		if ( (command = this.processCommands(query)) ) {
@@ -101,11 +88,8 @@ class Search {
 
 		return new Promise((resolve, reject) => {
 
-			let searchId = new Buffer(query).toString('base64');
-			let queryType = this.esQuerySettings.getQueryType(filteredIndex);
-
-			this.es.msearch({
-				body : this.esQueries.generateQueries(query, filteredIndex, queryType)
+			this.es.search({
+				body : query.toQueryFormat()
 			}, (error, response) => {
 				if (error) {
 					console.log('error' + error);
@@ -220,43 +204,68 @@ class Search {
 	 * @param filter the query string
 	 * @returns {Promise} - resolves with data for particular command
      */
-	processCommands (filter): any {
-		if (filter == 'filters-list') {
-			var self = this;
-			return new Promise( (resolve, reject) => {
-				resolve([
-					{
-						text: '#' + filter,
-						options: self.filters.toJSON()
+	processCommands (command: Command): [CommandData] {
+
+		switch (command.type) {
+			case CommandType.topSearches:
+				// TODO(jakub): TS reimplementation for topSearches
+				/*
+				 * if (filter.indexOf('top-searches') === 0) {
+				 return this.getTopSearches();
+				 }
+				 */
+				var count = 10;
+				var options = {};
+				//command.count = 10;
+				//command.options =
+				//resolve(command.)
+				break;
+
+			case CommandType.listFilters:
+				// TODO(jakub): TS reimplementation for listing filters
+				/*
+				 var self = this;
+				 return new Promise( (resolve, reject) => {
+				 resolve([
+				 {
+				 text: '#' + filter,
+				 options: self.filters.toJSON()
+				 }
+				 ]);
+				 });
+				 */
+				break;
+
+			case CommandType.filteredSearch:
+				// TODO(jakub): TS reimplementation for filtered search
+				/*
+				if (filter.length > 0) {
+					var matchingFilters = [];
+					var hashedFilter = "#" + filter;
+
+					for ( var actualFilter of this.filters.models) {
+						if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
+							matchingFilters.push(actualFilter.toJSON());
+						}
 					}
-				]);
-			});
-		}
+					if (matchingFilters.length === 0) return false;
+					return new Promise( (resolve, reject) => {
+						resolve([
+							{
+								text: hashedFilter,
+								options: matchingFilters
+							}
+						]);
+					});
 
-		if (filter.indexOf('top-searches') === 0) {
-			return this.getTopSearches();
-		}
-
-		if (filter.length > 0) {
-			var matchingFilters = [];
-			var hashedFilter = "#" + filter;
-
-			for ( var actualFilter of this.filters.models) {
-				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
-					matchingFilters.push(actualFilter.toJSON());
 				}
-			}
-			if (matchingFilters.length === 0) return false;
-			return new Promise( (resolve, reject) => {
-				resolve([
-					{
-						text: hashedFilter,
-						options: matchingFilters
-					}
-				]);
-			});
-					
+				*/
+			default:
+				return false;
 		}
+
+
+
 
 		return false;
 	}
