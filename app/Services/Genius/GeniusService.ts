@@ -1,16 +1,16 @@
 import 'backbonefire';
 import ServiceBase from '../ServiceBase';
 import { Settings as settings } from './config';
-import logger from '../../Models/Logger';
 import { Service as RestService } from 'restler';
+import { generate as generateId } from 'shortid';
+import * as _ from 'underscore';
+import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusServiceResult } from './GeniusDataTypes';
+import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
-import Lyric from '../../Models/Lyric';
-import * as _ from 'underscore';
-import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData } from './GeniusDataTypes';
+import { Lyric, LyricAttributes } from '../../Models/Lyric';
 import MediaItemSource from "../../Models/MediaItemSource";
 import MediaItemType from "../../Models/MediaItemType";
-import MediaItemAttributes from "../../Models/MediaItem";
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -62,7 +62,7 @@ class GeniusService extends ServiceBase {
 						artist: [],
 						track: [],
 						lyric: []
-					}
+					};
 
 					for (var res of categorizedData) {
 						results.artist.push(res.artist);
@@ -73,8 +73,8 @@ class GeniusService extends ServiceBase {
 							}
 						}
 					}
-					console.log("about to return");
 
+					console.log("about to return");
 					resolve(results);
 				});
 				
@@ -89,13 +89,13 @@ class GeniusService extends ServiceBase {
 	/**
 	 * Gets all metadata for given track ID including artist, album, and lyrics data
 	 *
-	 * @param songId the genius track ID
+	 * @param trackId - genius track ID
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
-	getData (songId: string): Promise<Track> {
+	getData (trackId: string): Promise<GeniusServiceResult> {
 		return new Promise( (resolve, reject) => {
 
-			this.getTrackMetadata(songId)
+			this.getTrackMetadata(trackId)
 				.then( (meta: any) => {
 					return Promise.all([
 						meta,
@@ -104,59 +104,191 @@ class GeniusService extends ServiceBase {
 					]);
 				})
 				.then( promises => {
-					let data: GeniusData = promises[0];
-					let artist = <Artist> promises[1], track = <Track> promises[2];
+					var data: GeniusData = promises[0];
+					var artist = <Artist> promises[1], track = <Track> promises[2];
 
-					if (artist.trackExists(songId)) {
+					if (artist.trackExists(trackId)) {
 						// Update backend DB with latest genius data
 						artist.setGeniusData(data);
 						track.setGeniusData(data);
 
 						/* If track exists then just update meta */
-						return resolve(track);
+						return resolve({
+							artist,
+							track,
+							lyrics: this.createLyricModelsFromGeniusData(track.lyrics)
+						});
 					}
 
 					/* Otherwise, fetch and update lyrics as well */
-					return this.fetchLyrics(songId).then( (rawLyrics) => {
-						rawLyrics = this.cleanUpLyrics(rawLyrics);
-						var lyrics: GeniusLyricData[] = [];
-
-						for (let i = 0; i < rawLyrics.length; i++) {
-							let lyricData: GeniusLyricData = {
-								id: `${track.id}_${i}`,
-								text: rawLyrics[i]
-							};
-							lyrics.push(lyricData);
-
-							// Persist lyric data to backend
-							let lyric = new Lyric({
-								source: MediaItemSource.Genius,
-								type: MediaItemType.lyric
-							});
-							lyric.setGeniusData({
-								artist: data.artist,
-								track: data.track,
-								lyric: lyricData
-							});
-						}
-
-						data.lyrics = lyrics;
-						data.lyricsCount = lyrics.length;
+					return this.fetchLyrics(trackId).then( res => {
+						data.lyrics = res.data;
 
 						// Update backend DB with latest genius data
 						artist.setGeniusData(data);
 						track.setGeniusData(data);
 
+						for (let lyric of res.models) {
+							lyric.setGeniusData(data)
+						}
+
 						// update lyrics here
-						console.log('resolving ', songId);
-						resolve(track);
+						console.log('resolving ', trackId);
+						resolve({artist, track, lyrics: res.models});
 					});
 				})
-				.catch( (err) => {
-					console.log('rejecting ', songId, err);
+				.catch( err => {
+					console.log('rejecting ', trackId, err);
 					reject(err);
 				});
 		});
+	}
+
+	/**
+	 * Retrieves lyrics for the given genius song ID
+	 *
+	 * @param {string} trackId the genius song ID
+	 * @returns {Promise<string[]>}
+	 */
+	private fetchLyrics (trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
+		return new Promise<GeniusLyricData[]>( (resolve, reject) => {
+
+			this.rest.get(`${settings.base_url}/referents`, {
+				query: {
+					song_id: trackId,
+					access_token: settings.access_token,
+					per_page: settings.per_page
+				}
+			}).on('success', data => {
+				var lyrics = [];
+				/* check response code */
+				if (data.meta.status != 200) {
+					reject("Invalid return status");
+					return;
+				}
+
+				if (data.response.referents.length == 0) {
+					reject("There are no referent lyrics for this track.");
+					return;
+				}
+
+				for (let ref of data.response.referents) {
+					var lyric: GeniusLyricData = {
+						id: generateId(),
+						text: ref.fragment,
+						score: 0
+					};
+
+					if (ref.annotations.length > 0) {
+						var annotation = ref.annotations[0];
+						lyric.score = annotation.votes_total;
+
+						if (annotation.state == "accepted") {
+							lyric.score += 2;
+						}
+					}
+
+					lyrics.push(lyric);
+				}
+
+				resolve(lyrics);
+			}).on('error', err => {
+				console.log('err' + err);
+				reject(err);
+			});
+
+		}).then(this.processLyrics.bind(this));
+	}
+
+	private createLyricModelsFromGeniusData(lyricsData: GeniusLyricData[]): Lyric[] {
+		let models: Lyric[] = [];
+
+		for (let lyricData of lyricsData) {
+			// Persist lyric data to backend
+			let lyric = new Lyric({
+				id: lyricData.id,
+				text: lyricData.text,
+				score: lyricData.score,
+				source: MediaItemSource.Genius,
+				type: MediaItemType.lyric
+			});
+			models.push(lyric);
+		}
+		return models;
+	}
+
+	/**
+	 * Generates `Lyric` objects including IDs
+	 *
+	 * @param lyricsData
+	 * @returns {Promise<{ models: Lyric[], data: GeniusLyricData[] }>}
+     */
+	private processLyrics(lyricsData: GeniusLyricData[]): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
+		return new Promise<{ models: Lyric[], data: GeniusLyricData[] }>( (resolve, reject) => {
+			lyricsData = this.cleanUpLyrics(lyricsData);
+			resolve({ data: lyricsData, models: this.createLyricModelsFromGeniusData(lyricsData) });
+		});
+	}
+
+	/**
+	 * Cleans up raw lyrics by removing lines that don't fit a set of defined criteria.
+	 *
+	 * @param lyrics
+	 * @returns {Array}
+	 */
+	 cleanUpLyrics (lyrics: GeniusLyricData[]): GeniusLyricData[] {
+
+		function generateLyric(text: string, score: number = 0): GeniusLyricData {
+			return {
+				id: generateId(),
+				text: text,
+				score: score
+			};
+		}
+
+		var filtered: GeniusLyricData[] = [];
+		for (var lyric of lyrics) {
+
+			if (lyric.text.length == 0) {
+				continue;
+			}
+
+			if (lyric[0] == "[") {
+				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
+				continue;
+			}
+
+			if (lyric.text.indexOf(" ") == -1) {
+				/* If lyric is composed of only one word then it's too short, don't ingest */
+				continue;
+			}
+
+			// if contains newline characters
+			if (lyric.text.indexOf('\n') != -1) {
+				var splitInterval = 2;
+				var currSplit = splitInterval;
+				var start = 0;
+				var end = 0;
+				for (var i = 0; i < lyric.text.length; i++) {
+					if (lyric[i] == '\n') {
+						currSplit--;
+						if (!currSplit) {
+							filtered.push(generateLyric(lyric.text.substring(start, end+1).trim(), lyric.score));
+							start = end+1;
+							currSplit = splitInterval;
+						}
+					}
+					end++;
+				}
+				if (start != end) {
+					filtered.push(generateLyric(lyric.text.substring(start, end+1).trim(), lyric.score));
+				}
+			} else {
+				lyric.text.trim();
+				filtered.push(lyric);
+			}
+		}
+		return filtered;
 	}
 
 	/**
@@ -165,7 +297,7 @@ class GeniusService extends ServiceBase {
 	 * @param songId
 	 * @returns {Promise<T>}
      */
-	getTrackMetadata (songId: string): Promise<{track: GeniusTrackData, artist: GeniusArtistData}> {
+	private getTrackMetadata (songId: string): Promise<{track: GeniusTrackData, artist: GeniusArtistData}> {
 		return new Promise( (resolve, reject) => {
 			console.log(`${settings.base_url}/songs/${songId}`);
 			this.rest.get(`${settings.base_url}/songs/${songId}`, {
@@ -225,101 +357,6 @@ class GeniusService extends ServiceBase {
 
 		});
 	}
-
-	/**
-	 * Retrieves lyrics for the given genius song ID
-	 *
-	 * @param {string} songId the genius song ID
-	 * @returns {Promise<string[]>}
-     */
-	fetchLyrics (songId: string): Promise<string[]> {
-		return new Promise( (resolve, reject) => {
-
-			this.rest.get(`${settings.base_url}/referents`, {
-				query: {
-					song_id: songId,
-					access_token: settings.access_token,
-					per_page: settings.per_page
-				}
-			}).on('success', data => {
-
-				var lyrics = [];
-				/* check response code */
-				if (data.meta.status != 200) {
-					reject("Invalid return status");
-					return;
-				}
-
-				if (data.response.referents.length == 0) {
-					reject("There are no referent lyrics for this track.");
-					return;
-				}
-
-				for (let ref of data.response.referents) {
-					lyrics.push(ref.fragment);
-				}
-
-				resolve(lyrics);
-			}).on('error', err => {
-				console.log('err' + err);
-				reject(err);
-			});
-
-		});
-	}
-
-	/**
-	 * Cleans up raw lyrics by removing lines that dont fit a set of defined criterias.
-	 *
-	 * @param lyrics
-	 * @returns {Array}
-     */
-	private cleanUpLyrics (lyrics: string[]): string[] {
-		var filtered = [];
-		for (var lyr of lyrics) {
-
-			if (lyr.length == 0) {
-				continue;
-			}
-
-			if (lyr[0] == "[") {
-				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
-				continue;
-			}
-
-			if (lyr.indexOf(" ") == -1) {
-				/* If lyric is composed of only one word then it's too short, don't ingest */
-				continue;
-			}
-
-			// if contains newline characters
-			if (lyr.indexOf('\n') != -1) {
-				var splitInterval = 2;
-				var currSplit = splitInterval;
-				var start = 0;
-				var end = 0;
-				for (var i = 0; i < lyr.length; i++) {
-					if (lyr[i] == '\n') {
-						currSplit--;
-						if (!currSplit) {
-							filtered.push(lyr.substring(start, end+1).trim());
-							start = end+1;
-							currSplit = splitInterval;
-						}
-					}
-					end++;
-				}
-				if (start != end) {
-					filtered.push(lyr.substring(start, end+1).trim());
-				}
-			} else {
-				filtered.push(lyr.trim());
-			}
-
-		}
-		return filtered;
-	}
-
 }
 
 export default GeniusService;

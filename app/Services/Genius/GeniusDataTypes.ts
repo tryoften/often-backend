@@ -1,3 +1,7 @@
+import Lyric from "../../Models/Lyric";
+import Track from "../../Models/Track";
+import Artist from "../../Models/Artist";
+
 export interface GeniusTrackData {
 	id: string;
 	title: string;
@@ -21,8 +25,9 @@ export interface GeniusArtistData {
 }
 
 export interface GeniusLyricData {
-	id: string;
+	id?: string;
 	text: string;
+	score: number;
 }
 
 /**
@@ -32,5 +37,10 @@ export interface GeniusData {
 	track: GeniusTrackData;
 	artist: GeniusArtistData;
 	lyrics?: GeniusLyricData[];
-	lyricsCount?: number;
+}
+
+export interface GeniusServiceResult {
+	track: Track,
+	artist: Artist,
+	lyrics: Lyric[]
 }

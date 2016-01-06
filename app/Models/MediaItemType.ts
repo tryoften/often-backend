@@ -15,9 +15,9 @@ export default class MediaItemType extends String {
 	static get classMapping(): any {
 		if (MediaItemType.mapping == null) {
 			MediaItemType.mapping = {
-				artist: require('./Artist'),
-				track: require('./Track'),
-				lyric: require('./Lyric')
+				artist: require('./Artist').default,
+				track: require('./Track').default,
+				lyric: require('./Lyric').default
 			};
 		}
 		return MediaItemType.mapping;
