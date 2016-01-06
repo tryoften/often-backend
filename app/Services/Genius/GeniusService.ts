@@ -1,16 +1,16 @@
-import 'backbonefire';
-import ServiceBase from '../ServiceBase';
+import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusServiceResult } from './GeniusDataTypes';
+import { Lyric } from '../../Models/Lyric';
 import { Settings as settings } from './config';
 import { Service as RestService } from 'restler';
 import { generate as generateId } from 'shortid';
-import * as _ from 'underscore';
-import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusServiceResult } from './GeniusDataTypes';
+import ServiceBase from '../ServiceBase';
 import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
-import { Lyric, LyricAttributes } from '../../Models/Lyric';
-import MediaItemSource from "../../Models/MediaItemSource";
-import MediaItemType from "../../Models/MediaItemType";
+import MediaItemSource from '../../Models/MediaItemSource';
+import MediaItemType from '../../Models/MediaItemType';
+import * as _ from 'underscore';
+import 'backbonefire';
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -27,14 +27,14 @@ class GeniusService extends ServiceBase {
 			baseURL: settings.base_url
 		});
 	}
-	
+
 	/**
 	 * Main method for obtaining results from the service provider's API.
 	 * @param {object} query - search term
 	 *
 	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
-	 fetchData (query: string) {
+	public fetchData (query: string) {
 		return new Promise((resolve, reject) => {
 
 			var results: any = {};
@@ -45,14 +45,14 @@ class GeniusService extends ServiceBase {
 				}
 			}).on('success', data => {
 				/* check response code */
-				if (data.meta.status != 200) {
-					reject("Invalid return status");
+				if (data.meta.status !== 200) {
+					reject('Invalid return status');
 				}
 
 				var promises = [];
-				
+
 				for (var result of data.response.hits) {
-					//Add all songs to songs list 
+					// Add all songs to songs list
 					promises.push(this.getData(result.result.id));
 				}
 
@@ -74,10 +74,10 @@ class GeniusService extends ServiceBase {
 						}
 					}
 
-					console.log("about to return");
+					console.log('about to return');
 					resolve(results);
 				});
-				
+
 			}).on('error', err => {
 				console.log('err' + err);
 				reject(err);
@@ -92,7 +92,7 @@ class GeniusService extends ServiceBase {
 	 * @param trackId - genius track ID
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
-	getData (trackId: string): Promise<GeniusServiceResult> {
+	public getData (trackId: string): Promise<GeniusServiceResult> {
 		return new Promise( (resolve, reject) => {
 
 			this.getTrackMetadata(trackId)
@@ -162,13 +162,13 @@ class GeniusService extends ServiceBase {
 			}).on('success', data => {
 				var lyrics = [];
 				/* check response code */
-				if (data.meta.status != 200) {
-					reject("Invalid return status");
+				if (data.meta.status !== 200) {
+					reject(new Error('Invalid return status'));
 					return;
 				}
 
-				if (data.response.referents.length == 0) {
-					reject("There are no referent lyrics for this track.");
+				if (data.response.referents.length === 0) {
+					reject(new Error('There are no referent lyrics for this track.'));
 					return;
 				}
 
@@ -183,7 +183,7 @@ class GeniusService extends ServiceBase {
 						var annotation = ref.annotations[0];
 						lyric.score = annotation.votes_total;
 
-						if (annotation.state == "accepted") {
+						if (annotation.state === 'accepted') {
 							lyric.score += 2;
 						}
 					}
@@ -236,9 +236,9 @@ class GeniusService extends ServiceBase {
 	 * @param lyrics
 	 * @returns {Array}
 	 */
-	 cleanUpLyrics (lyrics: GeniusLyricData[]): GeniusLyricData[] {
+	private cleanUpLyrics (lyrics: GeniusLyricData[]): GeniusLyricData[] {
 
-		function generateLyric(text: string, score: number = 0): GeniusLyricData {
+		function generateLyric(text: string, score = 0): GeniusLyricData {
 			return {
 				id: generateId(),
 				text: text,
@@ -249,28 +249,28 @@ class GeniusService extends ServiceBase {
 		var filtered: GeniusLyricData[] = [];
 		for (var lyric of lyrics) {
 
-			if (lyric.text.length == 0) {
+			if (lyric.text.length === 0) {
 				continue;
 			}
 
-			if (lyric[0] == "[") {
+			if (lyric[0] === "[") {
 				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
 				continue;
 			}
 
-			if (lyric.text.indexOf(" ") == -1) {
+			if (lyric.text.indexOf(" ") === -1) {
 				/* If lyric is composed of only one word then it's too short, don't ingest */
 				continue;
 			}
 
 			// if contains newline characters
-			if (lyric.text.indexOf('\n') != -1) {
+			if (lyric.text.indexOf('\n') !== -1) {
 				var splitInterval = 2;
 				var currSplit = splitInterval;
 				var start = 0;
 				var end = 0;
 				for (var i = 0; i < lyric.text.length; i++) {
-					if (lyric[i] == '\n') {
+					if (lyric[i] === '\n') {
 						currSplit--;
 						if (!currSplit) {
 							filtered.push(generateLyric(lyric.text.substring(start, end+1).trim(), lyric.score));
@@ -307,13 +307,13 @@ class GeniusService extends ServiceBase {
 			}).on('success', data => {
 
 				/* check response code */
-				if (data.meta.status != 200) {
-					reject("Invalid return status");
+				if (data.meta.status !== 200) {
+					reject('Invalid return status');
 					return;
 				}
 
 				var result: any = data.response.song;
-				
+
 				var info: {track: GeniusTrackData, artist: GeniusArtistData} = {
 					track: {
 						id: result.id,
@@ -338,13 +338,13 @@ class GeniusService extends ServiceBase {
 					info.track.album_url = result.album.url;
 					info.track.album_cover_art_url = result.album.cover_art_url;
 				}
-				
+
 				if (result.media != null) {
 					console.log('checking media');
 					info.track.media = {};
 					for (var media of result.media) {
-						if (media.provider == "youtube") {
-							media.id = media.url.split("v=")[1];
+						if (media.provider === 'youtube') {
+							media.id = media.url.split('v=')[1];
 						}
 						info.track.media[media.provider] = media;
 					}

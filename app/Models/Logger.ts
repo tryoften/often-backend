@@ -14,7 +14,7 @@ var logger = new winston.Logger(WinstonConfig.global);
 
 for (var transport of WinstonConfig.transports) {
 	var transportDetails = transport.details;
-	if (transport.type == 'GCL') {
+	if (transport.type === 'GCL') {
 		var jwtClient = new google.auth.JWT(null, null, null, transport.gcloud_endpoint);
 		jwtClient.fromJSON(transport.credentials);
 		transportDetails.googleMetadata.id = os.hostname();
