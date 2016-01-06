@@ -3,12 +3,14 @@ import MediaItemType from './MediaItemType';
 import MediaItemSource from './MediaItemSource';
 import { firebase as FirebaseConfig } from '../config';
 import { generate as generateId } from 'shortid';
-import { Indexable } from "../Interfaces/Indexable";
+import { Indexable, IndexedObject } from '../Interfaces/Indexable';
+import Firebase = require('firebase');
 
 export interface MediaItemAttributes {
 	id?: string;
 	source: MediaItemSource;
 	type: MediaItemType;
+	score?: number;
 }
 
 /**
@@ -18,6 +20,10 @@ export class MediaItem extends BaseModel implements Indexable {
 	constructor(attributes: MediaItemAttributes, options?: any) {
 		if (attributes.id == null) {
 			attributes.id = generateId();
+		}
+
+		if (attributes.score == null) {
+			attributes.score = 0.0;
 		}
 
 		super(attributes, options);
@@ -31,7 +37,7 @@ export class MediaItem extends BaseModel implements Indexable {
 	 * @param id - service provider id (e.g. spotify:track:xxx)
 	 * @returns {Promise<MediaItem>} Resolves to a new or existing MediaItem model
      */
-	static fromType(source: MediaItemSource, type: MediaItemType, id: string): Promise<MediaItem> {
+	public static fromType(source: MediaItemSource, type: MediaItemType, id: string): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(type);
 
 		return new Promise<MediaItem>( (resolve, reject) => {
@@ -53,14 +59,14 @@ export class MediaItem extends BaseModel implements Indexable {
 	 * @param id - service provider id (e.g. spotify:track:xxx)
 	 * @returns {Promise<string>} resolves with often id or fails if id is not found
      */
-	static getOftenIdFrom(source: MediaItemSource, type: MediaItemType, id: string): Promise<string> {
+	public static getOftenIdFrom(source: MediaItemSource, type: MediaItemType, id: string): Promise<string> {
 		return new Promise<string> ( (resolve, reject) => {
 			var url = `${FirebaseConfig.BaseURL}/idspace/${source}/${type}/${id}`;
-			new Firebase(url).on("value", snap => {
+			new Firebase(url).on('value', snap => {
 				if (snap.exists()) {
 					resolve(snap.val());
 				} else {
-					reject(new Error("id not found"));
+					reject(new Error('id not found'));
 				}
 			});
 		});
@@ -72,9 +78,10 @@ export class MediaItem extends BaseModel implements Indexable {
 	 * @param providerId - given provider id
 	 * @returns {Promise<Boolean|Error>} Resolves to a boolean or error if call fails
      */
-	registerToIdSpace(providerId: string): Promise<Boolean|Error> {
+	public registerToIdSpace(providerId: string): Promise<Boolean|Error> {
+		var url = `${FirebaseConfig.BaseURL}/idspace/${this.source}/${this.type}/${providerId}`;
+		console.log('Registering url to idspace: ', url);
 		return new Promise<Boolean>((resolve, reject) => {
-			var url = `${FirebaseConfig.BaseURL}/idspace/${this.source}/${this.type}/${providerId}`;
 			new Firebase(url).set(this.id, error => {
 				if (error) {
 					reject(error);
@@ -127,8 +134,13 @@ export class MediaItem extends BaseModel implements Indexable {
 		this.set('source', value);
 	}
 
-	toIndexingFormat(): Object {
-		return this.toJSON();
+	public toIndexingFormat(): IndexedObject {
+		var data =  this.toJSON();
+		data._id = data.id;
+		data._index = data.source;
+		data._score = data.score;
+		data._type = data.type;
+		return data;
 	}
 }
 

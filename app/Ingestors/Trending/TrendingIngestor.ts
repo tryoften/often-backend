@@ -1,19 +1,17 @@
-import * as cheerio from 'cheerio';
-import GeniusService from "../../Services/Genius/GeniusService";
-import { get, RequestOptions } from 'restler';
+import * as cheerio from "cheerio";
+import * as _ from "underscore";
 import Trending from "../../Models/Trending";
-import { GeniusData, GeniusServiceResult } from "../../Services/Genius/GeniusDataTypes";
-import * as _ from 'underscore';
-import Track from "../../Models/Track";
-import Artist from "../../Models/Artist";
+import GeniusService from "../../Services/Genius/GeniusService";
 import Lyric from "../../Models/Lyric";
+import { get } from "restler";
+import { GeniusServiceResult } from "../../Services/Genius/GeniusDataTypes";
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
  */
 class TrendingIngestor {
-	genius: GeniusService;
-	trending: Trending;
+	private genius: GeniusService;
+	private trending: Trending;
 
 	constructor () {
 		this.genius = new GeniusService({
@@ -26,30 +24,30 @@ class TrendingIngestor {
 	 * Fetches trending songs, lyrics and artists data and
 	 * stores appropriate data stores.
 	 */
-	ingestData (): Promise<any> {
+	public ingestData (): Promise<any> {
 		return this.getTrendingTracks().then(data => {
-			var promises: Promise<GeniusServiceResult>[] = [];
-			for (var trackData of data) {
+			let promises: Promise<GeniusServiceResult>[] = [];
+			for (let trackData of data) {
 				promises.push(this.genius.getData(trackData.id));
 			}
 
-			return Promise.all(promises).then( (data: GeniusServiceResult[]) => {
+			return Promise.all(promises).then( (results: GeniusServiceResult[]) => {
 
-				var topArtists = _.map(data, result => {
-					return result.artist.toJSON();
+				let topArtists = _.map(results, result => {
+					return result.artist.toIndexingFormat();
 				});
 
-				var topTracks = _.map(data, result => {
-					return result.track.toJSON();
+				let topTracks = _.map(results, result => {
+					return result.track.toIndexingFormat();
 				});
 
-				var trendingLyrics = _.map(data, result => {
+				let trendingLyrics = _.map(results, result => {
 
-					var sortedLyrics = result.lyrics.sort((a, b) => {
-						return b.score - a.score
+					let sortedLyrics: Lyric[] = result.lyrics.sort((a, b) => {
+						return b.score - a.score;
 					});
 
-					return sortedLyrics[0].toJSON();
+					return sortedLyrics[0].toIndexingFormat();
 				});
 
 				// TODO(luc): put data in trending collection
@@ -68,19 +66,19 @@ class TrendingIngestor {
 	 * Fetches trending track ids
 	 * @return {Promise} - Promise that when resolved returns the results of the data fetch, or an error if failed
 	 * */
-	getTrendingTracks (): Promise<any> {
+	private getTrendingTracks (): Promise<any> {
 		return new Promise((resolve, reject) => {
-			var url = "http://genius.com/home/show_more_cards?page=1";
+			let url = "http://genius.com/home/show_more_cards?page=1";
 
 			get(url).on("complete", (result, response) => {
-				var $ = cheerio.load(result);
+				let $ = cheerio.load(result);
 
-				var className = ".song_card";
-				var songItems = $(className).map(function (i, el) {
-					var song = {
-						id: $(this).attr('data-id'),
-						title: $(className + '-title', this).text(),
-						artist: $(className + '-artist', this).text()
+				let className = ".song_card";
+				let songItems = $(className).map(function (i, el) {
+					let song = {
+						id: $(this).attr("data-id"),
+						artist: $(className + "-artist", this).text(),
+						title: $(className + "-title", this).text()
 					};
 					return song;
 				}).get();

@@ -27,7 +27,7 @@ export interface GeniusArtistData {
 export interface GeniusLyricData {
 	id?: string;
 	text: string;
-	score: number;
+	score?: number;
 }
 
 /**
@@ -40,7 +40,7 @@ export interface GeniusData {
 }
 
 export interface GeniusServiceResult {
-	track: Track,
-	artist: Artist,
-	lyrics: Lyric[]
+	track: Track;
+	artist: Artist;
+	lyrics: Lyric[];
 }
