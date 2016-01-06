@@ -6,15 +6,15 @@ import { generate as generateId } from 'shortid';
 import { Indexable } from "../Interfaces/Indexable";
 
 export interface MediaItemAttributes {
+	id?: string;
 	source: MediaItemSource;
 	type: MediaItemType;
-	id?: string;
 }
 
 /**
  * Base model for media items. Includes all the metadata to query object from backend database
  */
-class MediaItem extends BaseModel implements Indexable {
+export class MediaItem extends BaseModel implements Indexable {
 	constructor(attributes: MediaItemAttributes, options?: any) {
 		if (attributes.id == null) {
 			attributes.id = generateId();
@@ -55,10 +55,10 @@ class MediaItem extends BaseModel implements Indexable {
      */
 	static getOftenIdFrom(source: MediaItemSource, type: MediaItemType, id: string): Promise<string> {
 		return new Promise<string> ( (resolve, reject) => {
-			var ref = new Firebase(`${FirebaseConfig.BaseURL}/idspace/${source}/${type}/${id}`);
-			ref.on("value", ref => {
-				if (ref.exists()) {
-					resolve(ref.val());
+			var url = `${FirebaseConfig.BaseURL}/idspace/${source}/${type}/${id}`;
+			new Firebase(url).on("value", snap => {
+				if (snap.exists()) {
+					resolve(snap.val());
 				} else {
 					reject(new Error("id not found"));
 				}
@@ -74,8 +74,8 @@ class MediaItem extends BaseModel implements Indexable {
      */
 	registerToIdSpace(providerId: string): Promise<Boolean|Error> {
 		return new Promise<Boolean>((resolve, reject) => {
-			var ref = new Firebase(`${FirebaseConfig.BaseURL}/idspace/${this.source}/${this.type}/${providerId}`);
-			ref.set(this.id, error => {
+			var url = `${FirebaseConfig.BaseURL}/idspace/${this.source}/${this.type}/${providerId}`;
+			new Firebase(url).set(this.id, error => {
 				if (error) {
 					reject(error);
 				} else {

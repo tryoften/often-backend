@@ -1,6 +1,8 @@
 declare module "firebase-token-generator" {
-    export class FirebaseTokenGenerator {
+	class FirebaseTokenGenerator {
         constructor(secret: string);
         createToken(data: any): string;
     }
+
+	export = FirebaseTokenGenerator
 }

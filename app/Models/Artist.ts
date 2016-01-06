@@ -34,31 +34,34 @@ class Artist extends MediaItem {
 	 * @returns {any}
      */
 	setGeniusData (data: GeniusData): Artist {
-		var {artist, track, lyricsCount} = data;
+		var artistData = data.artist;
+		var trackData = data.track;
+		var lyricsData = data.lyrics;
+
 		var properties: any = {};
 
-		this.registerToIdSpace(artist.id);
+		this.registerToIdSpace(artistData.id);
 
 		/* Set artist properties */
-		for (let prop in artist) {
+		for (let prop in artistData) {
 			if (prop === "id") {
 				continue;
 			}
-			properties[prop] = artist[prop];
+			properties[prop] = artistData[prop];
 		}
 
 		/* Update artist properties */
-		if (!this.trackExists(track.id)) {
+		if (!this.trackExists(trackData.id)) {
 			/* if track doesn't exist then don't update counts */
 			properties.tracks_count = (this.get('tracks_count') || 0) + 1;
 			
-			if (lyricsCount) {
-				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyricsCount;
+			if (lyricsData) {
+				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyricsData.length;
 			}
 		} 
 
 		properties.tracks = this.get('tracks') || {};
-		properties.tracks[track.id] = track;
+		properties.tracks[trackData.id] = trackData;
 		//properties = JSON.parse(JSON.stringify(properties));
 		console.dir(properties);
 		this.set('time_modified', Date.now());
