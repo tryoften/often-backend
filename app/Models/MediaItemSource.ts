@@ -24,4 +24,3 @@ export default class MediaItemSource extends String {
 	static TMZ: MediaItemSource = "tmz";
 	static Unknown: MediaItemSource = "unknown";
 };
-

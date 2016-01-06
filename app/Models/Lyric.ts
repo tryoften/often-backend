@@ -30,7 +30,7 @@ export class Lyric extends MediaItem {
 		super(attributes, options);
 	}
 
-	setGeniusData (data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
+	public setGeniusData (data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
 		var {artist, track, lyric} = data;
 		var properties: any = {};
 
