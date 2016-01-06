@@ -7,7 +7,6 @@ class Query implements Queryable {
 	time_made: number;
 	id: string;
 	autocomplete: boolean;
-	text: string;
 	filter: Filter;
 	command: Command;
 

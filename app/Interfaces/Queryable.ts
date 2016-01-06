@@ -3,6 +3,5 @@ export interface Queryable {
 	user: string,
 	time_made: number,
 	autocomplete: boolean,
-	text: string,
 	toQueryFormat(): Object;
 }

@@ -9,8 +9,9 @@ import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
 import { Lyric, LyricAttributes } from '../../Models/Lyric';
-import MediaItemSource from "../../Models/MediaItemSource";
-import MediaItemType from "../../Models/MediaItemType";
+import MediaItemSource from '../../Models/MediaItemSource';
+import MediaItemType from '../../Models/MediaItemType';
+import { Indexable } from '../../Interfaces/Indexable';
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -34,7 +35,7 @@ class GeniusService extends ServiceBase {
 	 *
 	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
-	 fetchData (query: string) {
+	 fetchData (query: string) : [Indexable] {
 		return new Promise((resolve, reject) => {
 
 			var results: any = {};
@@ -57,6 +58,7 @@ class GeniusService extends ServiceBase {
 				}
 
 				Promise.all(promises).then( (categorizedData) => {
+					let geniusServiceResults =  <[GeniusServiceResult]>categorizedData;
 					console.log('resolved all');
 					results = {
 						artist: [],
