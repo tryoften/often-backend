@@ -5,33 +5,60 @@ import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
 import MediaItem from "./MediaItem";
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from "../Services/Genius/GeniusDataTypes";
+import MediaItemAttributes from "./MediaItem";
+
+export interface LyricAttributes extends MediaItemAttributes {
+	text: string;
+	score: number;
+}
 
 class Lyric extends MediaItem {
-
-	initialize () {
-		this.urlRoot = `${FirebaseConfig.BaseURL}/lyrics`;
-		this.autoSync = true;
-		this.idAttribute = 'id';
+	get text(): string {
+		return this.get('text');
 	}
 
-	setGeniusData (data: {artist: GeniusArtistData, track: GeniusTrackData, lyric: GeniusLyricData}) {
+	set text(value: string) {
+		this.set('text', value);
+	}
+
+	get score(): number {
+		return this.get("score");
+	}
+
+	set score(value: number) {
+		this.set("score", value);
+	}
+
+	constructor (attributes: LyricAttributes, options?: any) {
+		this.urlRoot = `${FirebaseConfig.BaseURL}/lyrics`;
+		super(attributes, options);
+	}
+
+	initialize (attributes: LyricAttributes, options?: any) {}
+
+	setGeniusData (data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
 		var {artist, track, lyric} = data;
 		var properties: any = {};
-		
-		for (let prop in track) {
-			properties[`track_${prop}`] = track[prop];
+
+		if (track) {
+			for (let prop in track) {
+				properties[`track_${prop}`] = track[prop];
+			}
 		}
 
-		for (let prop in artist) {
-			properties[`artist_${prop}`] = artist[prop];
+		if (artist) {
+			for (let prop in artist) {
+				properties[`artist_${prop}`] = artist[prop];
+			}
 		}
-		properties.text = lyric.text;
+
+		if (lyric) {
+			properties.text = lyric.text;
+		}
 
 		this.set(properties);
-
-		return this.attributes;
+		return this;
 	}
-
 }
 
 export default Lyric;

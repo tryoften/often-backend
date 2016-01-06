@@ -3,8 +3,11 @@ import GeniusService from "../../Services/Genius/GeniusService";
 import { get, RequestOptions } from 'restler';
 import Trending from "../../Models/Trending";
 import { GeniusData } from "../../Services/Genius/GeniusDataTypes";
-import Track from "../../Models/Track";
 import * as _ from 'underscore';
+import Track from "../../Models/Track";
+import Artist from "../../Models/Artist";
+import Lyric from "../../Models/Lyric";
+import {GeniusServiceResult} from "../../Services/Genius/GeniusDataTypes";
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
@@ -26,25 +29,35 @@ class TrendingIngestor {
 	 */
 	ingestData (): Promise<any> {
 		return this.getTrendingTracks().then(data => {
-			var promises: Promise<Track>[] = [];
+			var promises: Promise<GeniusServiceResult>[] = [];
 			for (var trackData of data) {
 				promises.push(this.genius.getData(trackData.id));
 			}
 
-			return Promise.all(promises).then( (data: Track[]) => {
+			return Promise.all(promises).then( (data: GeniusServiceResult[]) => {
 
-				var artists = _.map(data, track => {
-					return track.toJSON();
+				var topArtists = _.map(data, result => {
+					return result.artist.toJSON();
 				});
 
-				var tracks = _.map(data, track => {
-					return track.toJSON();
+				var topTracks = _.map(data, result => {
+					return result.track.toJSON();
+				});
+
+				var trendingLyrics = _.map(data, result => {
+
+					var sortedLyrics = result.lyrics.sort((a, b) => {
+						return b.score - a.score
+					});
+
+					return sortedLyrics[0].toJSON();
 				});
 
 				// TODO(luc): put data in trending collection
 				this.trending.set({
-					artists,
-					tracks
+					topArtists,
+					topTracks,
+					trendingLyrics
 				});
 			}).catch((error) => {
 				console.log(error);
