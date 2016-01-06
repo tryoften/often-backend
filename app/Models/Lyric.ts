@@ -3,16 +3,12 @@ import { Firebase, Model } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
-import MediaItem from "./MediaItem";
+import { MediaItem, MediaItemAttributes } from "./MediaItem";
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from "../Services/Genius/GeniusDataTypes";
-import MediaItemAttributes from "./MediaItem";
 
-export interface LyricAttributes extends MediaItemAttributes {
-	text: string;
-	score: number;
-}
+export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
-class Lyric extends MediaItem {
+export class Lyric extends MediaItem {
 	get text(): string {
 		return this.get('text');
 	}
@@ -33,8 +29,6 @@ class Lyric extends MediaItem {
 		this.urlRoot = `${FirebaseConfig.BaseURL}/lyrics`;
 		super(attributes, options);
 	}
-
-	initialize (attributes: LyricAttributes, options?: any) {}
 
 	setGeniusData (data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
 		var {artist, track, lyric} = data;

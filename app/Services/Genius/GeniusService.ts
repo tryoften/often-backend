@@ -8,11 +8,9 @@ import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusS
 import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
-import Lyric from '../../Models/Lyric';
+import { Lyric, LyricAttributes } from '../../Models/Lyric';
 import MediaItemSource from "../../Models/MediaItemSource";
 import MediaItemType from "../../Models/MediaItemType";
-import MediaItemAttributes from "../../Models/MediaItem";
-import LyricAttributes from "../../Models/Lyric";
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -203,17 +201,17 @@ class GeniusService extends ServiceBase {
 	}
 
 	private createLyricModelsFromGeniusData(lyricsData: GeniusLyricData[]): Lyric[] {
-		var models: Lyric[] = [];
+		let models: Lyric[] = [];
+
 		for (let lyricData of lyricsData) {
 			// Persist lyric data to backend
-			let attributes: LyricAttributes = {
+			let lyric = new Lyric({
 				id: lyricData.id,
 				text: lyricData.text,
 				score: lyricData.score,
 				source: MediaItemSource.Genius,
 				type: MediaItemType.lyric
-			};
-			let lyric = new Lyric(attributes);
+			});
 			models.push(lyric);
 		}
 		return models;

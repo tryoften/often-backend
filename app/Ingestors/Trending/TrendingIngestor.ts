@@ -2,12 +2,11 @@ import * as cheerio from 'cheerio';
 import GeniusService from "../../Services/Genius/GeniusService";
 import { get, RequestOptions } from 'restler';
 import Trending from "../../Models/Trending";
-import { GeniusData } from "../../Services/Genius/GeniusDataTypes";
+import { GeniusData, GeniusServiceResult } from "../../Services/Genius/GeniusDataTypes";
 import * as _ from 'underscore';
 import Track from "../../Models/Track";
 import Artist from "../../Models/Artist";
 import Lyric from "../../Models/Lyric";
-import {GeniusServiceResult} from "../../Services/Genius/GeniusDataTypes";
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage

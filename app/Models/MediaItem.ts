@@ -14,7 +14,7 @@ export interface MediaItemAttributes {
 /**
  * Base model for media items. Includes all the metadata to query object from backend database
  */
-class MediaItem extends BaseModel implements Indexable {
+export class MediaItem extends BaseModel implements Indexable {
 	constructor(attributes: MediaItemAttributes, options?: any) {
 		if (attributes.id == null) {
 			attributes.id = generateId();

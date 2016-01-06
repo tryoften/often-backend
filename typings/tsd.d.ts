@@ -12,9 +12,10 @@
 /// <reference path="cheerio/cheerio.d.ts" />
 
 declare module "firebase-queue" {
-	export = class Queue {
+	class Queue {
 		constructor(ref: Firebase, options: any, process: () => void);
 	}
+	export = Queue
 }
 
 declare module "feedparser" {
