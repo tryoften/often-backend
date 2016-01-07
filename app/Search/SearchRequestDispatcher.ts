@@ -59,7 +59,7 @@ class SearchRequestDispatcher {
 
 	processQueryUpdate ({request, response, resolve, reject}) {
 		var { filter, actualQuery } = this.searchParser.parse(request.query.text);
-		
+
 		/* whether the query is for autocomplete suggestions */
 		var isAutocomplete = !!request.query.autocomplete;
 

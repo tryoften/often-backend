@@ -1,10 +1,6 @@
-import 'backbonefire';
-import { Firebase, Model } from 'backbone';
+import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
+import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
-import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import * as _ from 'underscore';
-import { MediaItem, MediaItemAttributes } from "./MediaItem";
-import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from "../Services/Genius/GeniusDataTypes";
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
@@ -18,11 +14,11 @@ export class Lyric extends MediaItem {
 	}
 
 	get score(): number {
-		return this.get("score");
+		return this.get('score');
 	}
 
 	set score(value: number) {
-		this.set("score", value);
+		this.set('score', value);
 	}
 
 	constructor (attributes: LyricAttributes, options?: any) {
@@ -36,13 +32,17 @@ export class Lyric extends MediaItem {
 
 		if (track) {
 			for (let prop in track) {
-				properties[`track_${prop}`] = track[prop];
+				if (track.hasOwnProperty(prop)) {
+					properties[`track_${prop}`] = track[prop];
+				}
 			}
 		}
 
 		if (artist) {
 			for (let prop in artist) {
-				properties[`artist_${prop}`] = artist[prop];
+				if (artist.hasOwnProperty(prop)) {
+					properties[`artist_${prop}`] = artist[prop];
+				}
 			}
 		}
 
@@ -51,6 +51,7 @@ export class Lyric extends MediaItem {
 		}
 
 		this.set(properties);
+		this.save();
 		return this;
 	}
 }

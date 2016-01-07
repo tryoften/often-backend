@@ -1,10 +1,10 @@
-import * as cheerio from "cheerio";
-import * as _ from "underscore";
-import Trending from "../../Models/Trending";
-import GeniusService from "../../Services/Genius/GeniusService";
-import Lyric from "../../Models/Lyric";
-import { get } from "restler";
-import { GeniusServiceResult } from "../../Services/Genius/GeniusDataTypes";
+import * as cheerio from 'cheerio';
+import * as _ from 'underscore';
+import Trending from '../../Models/Trending';
+import GeniusService from '../../Services/Genius/GeniusService';
+import Lyric from '../../Models/Lyric';
+import { get } from 'restler';
+import { GeniusServiceResult } from '../../Services/Genius/GeniusDataTypes';
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
@@ -15,7 +15,7 @@ class TrendingIngestor {
 
 	constructor () {
 		this.genius = new GeniusService({
-			provider_id: "genius"
+			provider_id: 'genius'
 		});
 		this.trending = new Trending();
 	}
@@ -50,12 +50,30 @@ class TrendingIngestor {
 					return sortedLyrics[0].toIndexingFormat();
 				});
 
-				// TODO(luc): put data in trending collection
-				this.trending.set({
-					topArtists,
-					topTracks,
-					trendingLyrics
-				});
+				var response = [
+					{
+						id: 'trendingLyrics',
+						title: 'Trending Lyrics',
+						type: 'lyric',
+						results: trendingLyrics,
+						score: 5.0
+					},
+					{
+						id: 'topArtists',
+						title: 'Top Artists',
+						type: 'artist',
+						results: topArtists,
+						score: 3.0
+					},
+					{
+						id: 'topTracks',
+						title: 'Top Tracks',
+						type: 'track',
+						results: topTracks,
+						score: 1.0
+					}
+				];
+				this.trending.set(response);
 			}).catch((error) => {
 				console.log(error);
 			});
@@ -68,23 +86,23 @@ class TrendingIngestor {
 	 * */
 	private getTrendingTracks (): Promise<any> {
 		return new Promise((resolve, reject) => {
-			let url = "http://genius.com/home/show_more_cards?page=1";
+			let url = 'http://genius.com/home/show_more_cards?page=1';
 
-			get(url).on("complete", (result, response) => {
+			get(url).on('complete', (result, response) => {
 				let $ = cheerio.load(result);
 
-				let className = ".song_card";
+				let className = '.song_card';
 				let songItems = $(className).map(function (i, el) {
 					let song = {
-						id: $(this).attr("data-id"),
-						artist: $(className + "-artist", this).text(),
-						title: $(className + "-title", this).text()
+						id: $(this).attr('data-id'),
+						artist: $(className + '-artist', this).text(),
+						title: $(className + '-title', this).text()
 					};
 					return song;
 				}).get();
 
 				resolve(songItems);
-			}).on("error", (err, response) => {
+			}).on('error', (err, response) => {
 				reject(err);
 			});
 
