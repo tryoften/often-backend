@@ -1,11 +1,15 @@
-import Lyric from "../../Models/Lyric";
-import Track from "../../Models/Track";
-import Artist from "../../Models/Artist";
+import Lyric from '../../Models/Lyric';
+import Track from '../../Models/Track';
+import Artist from '../../Models/Artist';
 
-export interface GeniusTrackData {
-	id: string;
+interface GeniusObject {
+	id?: string;
+	genius_id: string;
+	external_url: string;
+}
+
+export interface GeniusTrackData extends GeniusObject {
 	title: string;
-	url: string;
 	header_image_url: string;
 	song_art_image_url: string;
 	hot: boolean;
@@ -16,16 +20,13 @@ export interface GeniusTrackData {
 	media?: any;
 }
 
-export interface GeniusArtistData {
-	id: string;
+export interface GeniusArtistData extends GeniusObject {
 	name: string;
-	url: string;
 	image_url: string;
 	is_verified: boolean;
 }
 
-export interface GeniusLyricData {
-	id?: string;
+export interface GeniusLyricData extends GeniusObject {
 	text: string;
 	score?: number;
 }

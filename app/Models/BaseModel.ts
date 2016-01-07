@@ -8,7 +8,7 @@ class BaseModel extends Firebase.Model {
 	 *
 	 * @returns {Promise<Firebase.Model>} a promise that resolved with the synced model
      */
-	syncData (): Promise<Firebase.Model> {
+	public syncData (): Promise<Firebase.Model> {
 		return new Promise<Firebase.Model>( (resolve, reject) => {
 			this.once('sync', model => {
 				resolve(model);

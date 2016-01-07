@@ -1,19 +1,17 @@
+import { GeniusData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { firebase as FirebaseConfig } from '../config';
-import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import * as _ from 'underscore';
-import MediaItem from "./MediaItem";
-import { GeniusData, GeniusLyricData } from "../Services/Genius/GeniusDataTypes";
+import MediaItem from './MediaItem';
 
 /**
  * Track model throughout the platform
  */
 class Track extends MediaItem {
 	get lyrics(): GeniusLyricData[] {
-		return this.get("lyrics") || [];
+		return this.get('lyrics') || [];
 	}
 
 	set lyrics(value: GeniusLyricData[]) {
-		this.set("lyrics", value);
+		this.set('lyrics', value);
 	}
 
 	/**
@@ -21,23 +19,24 @@ class Track extends MediaItem {
 	 *
 	 * @return {void}
 	 */
-	initialize () {
+	public initialize () {
 		this.urlRoot = `${FirebaseConfig.BaseURL}/tracks`;
 		this.autoSync = true;
 		this.idAttribute = 'id';
 	}
 
-	setGeniusData (data: GeniusData) {
+	public setGeniusData (data: GeniusData) {
+		// save any properties that have been set up until this point.
+		this.save();
+
 		var artistData = data.artist;
 		var trackData = data.track;
 		var lyricsData = data.lyrics;
 		var properties: any = {};
 
-		this.registerToIdSpace(trackData.id);
-
 		/* Set track properties */
 		for (let prop in trackData) {
-			if (prop === "id") {
+			if (prop === 'id') {
 				continue;
 			}
 			properties[prop] = trackData[prop];
@@ -45,7 +44,9 @@ class Track extends MediaItem {
 
 		/* Set artist properties */
 		for (let prop in artistData) {
-			properties[`artist_${prop}`] = artistData[prop];
+			if (artistData.hasOwnProperty(prop)) {
+				properties[`artist_${prop}`] = artistData[prop];
+			}
 		}
 
 		/* Update artist properties */
@@ -58,9 +59,12 @@ class Track extends MediaItem {
 
 			properties.lyrics_count = (this.get('lyrics_count') || 0) + lyricsData.length;
 		}
-		
+
 		this.set(properties);
 		this.set('time_modified', Date.now());
+		this.registerToIdSpace(trackData.id);
+		this.save();
+
 		return this;
 	}
 }

@@ -120,8 +120,7 @@ class GeniusService extends ServiceBase {
 						});
 					}
 
-					/* Otherwise, fetch and update lyrics as well */
-					return this.fetchLyrics(trackId).then( res => {
+					let callback = function(res) {
 						data.lyrics = res.data;
 
 						// Update backend DB with latest genius data
@@ -129,13 +128,16 @@ class GeniusService extends ServiceBase {
 						track.setGeniusData(data);
 
 						for (let lyric of res.models) {
-							lyric.setGeniusData(data)
+							lyric.setGeniusData(data);
 						}
 
 						// update lyrics here
 						console.log('resolving ', trackId);
 						resolve({artist, track, lyrics: res.models});
-					});
+					};
+
+					/* Otherwise, fetch and update lyrics as well */
+					return this.fetchLyrics(artist, track, trackId).then(callback);
 				})
 				.catch( err => {
 					console.log('rejecting ', trackId, err);
@@ -150,7 +152,7 @@ class GeniusService extends ServiceBase {
 	 * @param {string} trackId the genius song ID
 	 * @returns {Promise<string[]>}
 	 */
-	private fetchLyrics (trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
+	private fetchLyrics (artist: Artist, track: Track, trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
 		return new Promise<GeniusLyricData[]>( (resolve, reject) => {
 
 			this.rest.get(`${settings.base_url}/referents`, {
@@ -175,6 +177,8 @@ class GeniusService extends ServiceBase {
 				for (let ref of data.response.referents) {
 					var lyric: GeniusLyricData = {
 						id: generateId(),
+						genius_id: ref.id,
+						external_url: ref.url,
 						text: ref.fragment,
 						score: 0
 					};
@@ -205,13 +209,12 @@ class GeniusService extends ServiceBase {
 
 		for (let lyricData of lyricsData) {
 			// Persist lyric data to backend
-			let lyric = new Lyric({
-				id: lyricData.id,
-				text: lyricData.text,
-				score: lyricData.score,
+			let lyric = new Lyric(_.extend({
 				source: MediaItemSource.Genius,
 				type: MediaItemType.lyric
-			});
+			}, lyricData));
+			lyric.registerToIdSpace(lyricData.genius_id);
+			lyric.save();
 			models.push(lyric);
 		}
 		return models;
@@ -237,13 +240,10 @@ class GeniusService extends ServiceBase {
 	 * @returns {Array}
 	 */
 	private cleanUpLyrics (lyrics: GeniusLyricData[]): GeniusLyricData[] {
-
-		function generateLyric(text: string, score = 0): GeniusLyricData {
-			return {
-				id: generateId(),
-				text: text,
-				score: score
-			};
+		function generateLyric(text: string, originalLyric: GeniusLyricData): GeniusLyricData {
+			var newLyric = _.clone(originalLyric);
+			newLyric.text = text;
+			return newLyric;
 		}
 
 		var filtered: GeniusLyricData[] = [];
@@ -253,12 +253,12 @@ class GeniusService extends ServiceBase {
 				continue;
 			}
 
-			if (lyric[0] === "[") {
+			if (lyric[0] === '[') {
 				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
 				continue;
 			}
 
-			if (lyric.text.indexOf(" ") === -1) {
+			if (lyric.text.indexOf(' ') === -1) {
 				/* If lyric is composed of only one word then it's too short, don't ingest */
 				continue;
 			}
@@ -273,15 +273,15 @@ class GeniusService extends ServiceBase {
 					if (lyric[i] === '\n') {
 						currSplit--;
 						if (!currSplit) {
-							filtered.push(generateLyric(lyric.text.substring(start, end+1).trim(), lyric.score));
-							start = end+1;
+							filtered.push(generateLyric(lyric.text.substring(start, end + 1).trim(), lyric));
+							start = end + 1;
 							currSplit = splitInterval;
 						}
 					}
 					end++;
 				}
-				if (start != end) {
-					filtered.push(generateLyric(lyric.text.substring(start, end+1).trim(), lyric.score));
+				if (start !== end) {
+					filtered.push(generateLyric(lyric.text.substring(start, end + 1).trim(), lyric));
 				}
 			} else {
 				lyric.text.trim();
@@ -299,57 +299,62 @@ class GeniusService extends ServiceBase {
      */
 	private getTrackMetadata (songId: string): Promise<{track: GeniusTrackData, artist: GeniusArtistData}> {
 		return new Promise( (resolve, reject) => {
-			console.log(`${settings.base_url}/songs/${songId}`);
-			this.rest.get(`${settings.base_url}/songs/${songId}`, {
+			let url = `${settings.base_url}/songs/${songId}`;
+			console.log('Getting track metadata. url: ', url);
+
+			this.rest.get(url, {
 				query: {
 					access_token: settings.access_token
 				}
 			}).on('success', data => {
-
-				/* check response code */
 				if (data.meta.status !== 200) {
-					reject('Invalid return status');
+					reject(new Error('Invalid return status'));
 					return;
 				}
 
-				var result: any = data.response.song;
+				let result: any = data.response.song;
 
-				var info: {track: GeniusTrackData, artist: GeniusArtistData} = {
-					track: {
-						id: result.id,
-						title: result.title,
-						url: result.url,
-						header_image_url: result.header_image_url,
-						song_art_image_url: result.song_art_image_url,
-						hot: result.stats.hot
-					},
-					artist: {
-						id: result.primary_artist.id,
-						name: result.primary_artist.name,
-						url: result.primary_artist.url,
-						image_url: result.primary_artist.image_url,
-						is_verified: result.primary_artist.is_verified
-					}
+				let trackInfo: GeniusTrackData = {
+					id: generateId(),
+					genius_id: result.id,
+					title: result.title,
+					external_url: result.url,
+					header_image_url: result.header_image_url,
+					song_art_image_url: result.song_art_image_url,
+					hot: result.stats.hot
 				};
 
-				if (result.album != null) {
-					info.track.album_id = result.album.id;
-					info.track.album_name = result.album.name;
-					info.track.album_url = result.album.url;
-					info.track.album_cover_art_url = result.album.cover_art_url;
+				if (result.album) {
+					trackInfo.album_id = result.album.id;
+					trackInfo.album_name = result.album.name;
+					trackInfo.album_url = result.album.url;
+					trackInfo.album_cover_art_url = result.album.cover_art_url;
 				}
 
-				if (result.media != null) {
-					console.log('checking media');
-					info.track.media = {};
+				if (result.media) {
+					trackInfo.media = {};
 					for (var media of result.media) {
+						// TODO(luc): identify available service id and register in idspace collection
 						if (media.provider === 'youtube') {
 							media.id = media.url.split('v=')[1];
 						}
-						info.track.media[media.provider] = media;
+						trackInfo.media[media.provider] = media;
 					}
 				}
-				resolve(info);
+
+				let artistInfo: GeniusArtistData = {
+					id: generateId(),
+					genius_id: result.primary_artist.id,
+					name: result.primary_artist.name,
+					external_url: result.primary_artist.url,
+					image_url: result.primary_artist.image_url,
+					is_verified: result.primary_artist.is_verified
+				};
+
+				resolve({
+					track: trackInfo,
+					artist: artistInfo
+				});
 			}).on('error', err => {
 				console.log('err' + err);
 				reject(err);
