@@ -17,6 +17,7 @@ export interface MediaItemAttributes {
  * Base model for media items. Includes all the metadata to query object from backend database
  */
 export class MediaItem extends BaseModel implements Indexable {
+
 	constructor(attributes: MediaItemAttributes, options?: any) {
 		if (attributes.id == null) {
 			attributes.id = generateId();
@@ -25,6 +26,7 @@ export class MediaItem extends BaseModel implements Indexable {
 		if (attributes.score == null) {
 			attributes.score = 0.0;
 		}
+		this.autoSync = true;
 
 		super(attributes, options);
 	}
@@ -42,10 +44,13 @@ export class MediaItem extends BaseModel implements Indexable {
 
 		return new Promise<MediaItem>( (resolve, reject) => {
 			MediaItem.getOftenIdFrom(source, type, id).then(oftenId => {
+				console.log(`Found often id for ${source}:${type}:${id} = ${oftenId}`);
 				var model = new MediaItemClass({ source, type, id: oftenId });
 				resolve(model);
 			}).catch(err => {
+				console.log(`Often id not found for ${source}:${type}:${id}, creating new model`);
 				var model = new MediaItemClass({ source, type });
+				model.save();
 				resolve(model);
 			});
 		});
@@ -137,9 +142,9 @@ export class MediaItem extends BaseModel implements Indexable {
 	public toIndexingFormat(): IndexedObject {
 		var data =  this.toJSON();
 		data._id = data.id;
-		data._index = data.source;
+		data._index = this.source;
 		data._score = data.score;
-		data._type = data.type;
+		data._type = this.type;
 		return data;
 	}
 }
