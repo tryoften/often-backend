@@ -4,6 +4,8 @@ import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import Search from "./Search";
+import Request from "../Models/Request";
+import RequestType from "../Models/RequestType";
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
@@ -64,7 +66,7 @@ class SearchRequestDispatcher {
 		var isAutocomplete = !!request.query.autocomplete;
 
 		var promise = (isAutocomplete) ? 
-			this.search.suggest(filter, actualQuery) :
+			this.search.suggest(filter, actualQuery):
 			this.search.query(actualQuery, filter);
 
 		promise.then( (data) => { 
@@ -90,16 +92,15 @@ class SearchRequestDispatcher {
 	 *
 	 * @return {Promise} -- Resolves to true when all service callbacks have completed
 	 */
-	process (request: any) {
+	process (request: Request) {
 		return new Promise((resolve, reject) => {
 			logger.profile(request);
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
-			var { filter, actualQuery } = this.searchParser.parse(request.query.text);
-
 
 			/* whether the query is for autocomplete suggestions */
 			var isAutocomplete = !!request.query.autocomplete;
 
+			request.setProviders()
 			/* store the total number of services left to process */
 			request.relevantProviders = this.getRelevantProviders(filter);
 			request.servicesLeftToProcess = request.relevantProviders.length;
@@ -116,7 +117,7 @@ class SearchRequestDispatcher {
 			});
 			this.processQueryUpdate({request, response, resolve, reject});
 
-			if (!isAutocomplete) {
+			if (request.type == RequestType.autocomplete) {
 				/* Execute the request every user provider that the user is subscribed */
 				for (let providerName of request.relevantProviders) {
 					this.serviceProviders[providerName].execute({actualQuery}).then((fulfilled:any) => {

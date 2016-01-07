@@ -1,5 +1,4 @@
 import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusServiceResult } from './GeniusDataTypes';
-import { Lyric } from '../../Models/Lyric';
 import { Settings as settings } from './config';
 import { Service as RestService } from 'restler';
 import { generate as generateId } from 'shortid';
@@ -7,17 +6,12 @@ import ServiceBase from '../ServiceBase';
 import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
-<<<<<<< HEAD
 import { Lyric, LyricAttributes } from '../../Models/Lyric';
 import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
-import { Indexable } from '../../Interfaces/Indexable';
-=======
-import MediaItemSource from '../../Models/MediaItemSource';
-import MediaItemType from '../../Models/MediaItemType';
-import * as _ from 'underscore';
-import 'backbonefire';
->>>>>>> b78382e54fa7ef37a4e8567ee9dc82b3d6411d45
+import { Indexable, IndexedObject } from '../../Interfaces/Indexable';
+import Query from "../../Models/Query";
+
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -42,10 +36,10 @@ class GeniusService extends ServiceBase {
 	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
 
-	 fetchData (query: string) : [Indexable] {
+	 fetchData (query: Query) : Promise<IndexedObject[]> {
 		return new Promise((resolve, reject) => {
 
-			var results: any = {};
+			let results = [];
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
 					q: query,
@@ -66,24 +60,16 @@ class GeniusService extends ServiceBase {
 
 				Promise.all(promises).then( (categorizedData) => {
 					let geniusServiceResults =  <[GeniusServiceResult]>categorizedData;
-					console.log('resolved all');
-					results = {
-						artist: [],
-						track: [],
-						lyric: []
-					};
 
-					for (var res of categorizedData) {
-						results.artist.push(res.artist);
-						results.track.push(res.track);
-						if (!_.isUndefined(res.lyric)) {
-							for (var lyr of res.lyric) {
-								results.lyric.push(lyr);
-							}
+					for (let gsr of geniusServiceResults) {
+
+						results.push(gsr.artist.toIndexingFormat());
+						results.push(gsr.track.toIndexingFormat());
+						for (let lyric of gsr.lyrics) {
+							results.push(lyric.toIndexingFormat());
 						}
 					}
 
-					console.log('about to return');
 					resolve(results);
 				});
 

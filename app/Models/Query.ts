@@ -8,7 +8,6 @@ class Query implements Queryable {
 	id: string;
 	autocomplete: boolean;
 	filter: Filter;
-	command: Command;
 
 	constructor (inputObj){
 		this.id = new Buffer(inputObj.text).toString('base64');

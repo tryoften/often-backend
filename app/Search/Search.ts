@@ -10,6 +10,7 @@ import { Queryable } from "../Interfaces/Queryable";
 import Command from '../Models/Command';
 import { CommandData } from '../Interfaces/CommandData';
 import  CommandType  from '../Models/CommandType';
+import {IndexedObject} from "../Interfaces/Indexable";
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -47,14 +48,15 @@ class Search {
 	 *
 	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
 	 */
-	index (indexables: Indexable[]) {
+	index (indexables: IndexedObject[]) {
 
 		return new Promise((resolve, reject) => {
 
 			/* Prepare the results to be indexed with ElasticSearch */
 			var formattedResults: Object[] = [];
-			for (let entry of indexables) {
-				formattedResults.concat(entry.toIndexingFormat());
+			for (let indexedObject of indexables) {
+				formattedResults.push(this.getIndexHeader(indexedObject));
+				formattedResults.push(this.getIndexBody(indexedObject));
 			}
 
 			this.es.bulk({
@@ -70,6 +72,23 @@ class Search {
 			});
 
 		});
+	}
+
+	getIndexHeader (indexedObject: IndexedObject): Object {
+		return {
+			'update' : {
+				_index: indexedObject._index,
+				_type: indexedObject._type,
+				_id: indexedObject._id
+			}
+		};
+	}
+
+	getIndexBody (indexedObject: IndexedObject): Object {
+		return {
+			'doc_as_upsert': true,
+			doc: indexedObject
+		};
 	}
 
 	/**

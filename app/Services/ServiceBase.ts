@@ -2,6 +2,8 @@ import logger from '../Models/Logger';
 import URLHelper from "../Utilities/URLHelper";
 import Search from '../Search/Search';
 import { Service as RestService } from 'restler';
+import {IndexedObject} from "../Interfaces/Indexable";
+import Query from "../Models/Query";
 
 //export interface ServiceProviderOptions {
 //	provider_id: string;
@@ -42,18 +44,18 @@ class ServiceBase {
 	 *
 	 * @return {Void}
 	 */
-	execute (actualQuery: string) {
+	execute (query: Query) {
 
 		/* Otherwise refresh the cache by obtaining new data from derived class via fetchData method */
 		return this
-			.fetchData(actualQuery)
+			.fetchData(query)
 			.then((results) => {
 				/* Create a response based off of returned results and update the cache */
-				return this.search.index(this.provider_id, results);
+				return this.search.index(results);
 			});
 	}
 
-	fetchData (query: string): Promise<any> {
+	fetchData (query: Query) : Promise<IndexedObject[]>  {
 		throw new Error("fetchData not implemented");
 	}
 

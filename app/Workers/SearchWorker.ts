@@ -7,6 +7,7 @@ import SpotifyService from '../Services/Spotify/SpotifyService';
 import YouTubeService from '../Services/YouTube/YouTubeService';
 import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
 import GeniusService from '../Services/Genius/GeniusService';
+import Request from "../Models/Request";
 
 class SearchWorker extends Worker {
 	dispatcher: SearchRequestDispatcher;
@@ -27,7 +28,7 @@ class SearchWorker extends Worker {
 
 		//returns a promise when all providers are resolved
 		return this.dispatcher
-			.process(data)
+			.process(<Request>data)
 			.then(d => {
 				resolve(d);
 			})
