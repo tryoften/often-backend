@@ -1,3 +1,4 @@
+console.log('Search');
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
@@ -7,9 +8,9 @@ import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import { Indexable } from '../Interfaces/Indexable';
 import { Queryable } from "../Interfaces/Queryable";
-import Command from '../Models/Command';
+//import Command from '../Models/Command';
 import { CommandData } from '../Interfaces/CommandData';
-import  CommandType  from '../Models/CommandType';
+//import  { CommandType } from '../Models/CommandType';
 import {IndexedObject} from "../Interfaces/Indexable";
 /**
  * Class for interacting with ElasticSearch.
@@ -49,14 +50,13 @@ class Search {
 	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
 	 */
 	index (indexables: IndexedObject[]) {
-
+		console.log('indexing...');
 		return new Promise((resolve, reject) => {
 
 			/* Prepare the results to be indexed with ElasticSearch */
 			var formattedResults: Object[] = [];
 			for (let indexedObject of indexables) {
-				formattedResults.push(this.getIndexHeader(indexedObject));
-				formattedResults.push(this.getIndexBody(indexedObject));
+				formattedResults = formattedResults.concat(this.getIndexFormat(indexedObject));
 			}
 
 			this.es.bulk({
@@ -67,6 +67,7 @@ class Search {
 					console.log('Failed to index: ' + err);
 					reject(err);
 				} else {
+					console.log('response');
 					resolve(resp);					
 				}
 			});
@@ -74,21 +75,18 @@ class Search {
 		});
 	}
 
-	getIndexHeader (indexedObject: IndexedObject): Object {
-		return {
+	getIndexFormat (indexedObject: IndexedObject): Object {
+		return [{
 			'update' : {
 				_index: indexedObject._index,
 				_type: indexedObject._type,
 				_id: indexedObject._id
 			}
-		};
-	}
-
-	getIndexBody (indexedObject: IndexedObject): Object {
-		return {
+		},
+		{
 			'doc_as_upsert': true,
 			doc: indexedObject
-		};
+		}];
 	}
 
 	/**
@@ -99,31 +97,36 @@ class Search {
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
 	query (query: Queryable) {
-
+/*
 		var command;
 		if ( (command = this.processCommands(query)) ) {
 			return command;
 		}
+*/
+		var esQuery = this.esQueries.generateQuery(query);
 
 		return new Promise((resolve, reject) => {
 
-			this.es.search({
-				body : query.toQueryFormat()
-			}, (error, response) => {
+			this.es.search(esQuery,
+				(error, response) => {
 				if (error) {
 					console.log('error' + error);
 					reject(error);
 				} else {
-					let data = this.serializeAndSortResults(response);
-					let results = data.results;
-					resolve(results);
+					let data = response;
+					//let data = this.formatResults(response);
+					//let results = data.results;
+					//resolve(results);
 
+					/*
 					this.updateSearchTerms({
 						searchId,
 						query,
 						count: data.totalCount
 					});
+					*/
 				}
+
 			});
 
 		});
@@ -171,20 +174,21 @@ class Search {
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
-	suggest (filter, query) {
+	suggest (query: Queryable)  {
 		logger.profile('Suggest ' + query);
 
+		/*
 		var command;
 		if ( (command = this.processCommands(filter)) ) {
 			return command;
 		}
-
+		*/
 		return new Promise((resolve, reject) => {
 			this.es.suggest({
 				index: 'search-terms',
 				body: {
 					'query-suggest': {
-						text: query,
+						text: query.text,
 						completion: {
 							field: 'suggest'
 						}
@@ -223,16 +227,17 @@ class Search {
 	 * @param filter the query string
 	 * @returns {Promise} - resolves with data for particular command
      */
+/*
 	processCommands (command: Command): [CommandData] {
 
 		switch (command.type) {
 			case CommandType.topSearches:
 				// TODO(jakub): TS reimplementation for topSearches
-				/*
-				 * if (filter.indexOf('top-searches') === 0) {
+
+				 if (filter.indexOf('top-searches') === 0) {
 				 return this.getTopSearches();
 				 }
-				 */
+
 				var count = 10;
 				var options = {};
 				//command.count = 10;
@@ -242,7 +247,7 @@ class Search {
 
 			case CommandType.listFilters:
 				// TODO(jakub): TS reimplementation for listing filters
-				/*
+
 				 var self = this;
 				 return new Promise( (resolve, reject) => {
 				 resolve([
@@ -252,12 +257,12 @@ class Search {
 				 }
 				 ]);
 				 });
-				 */
+
 				break;
 
 			case CommandType.filteredSearch:
 				// TODO(jakub): TS reimplementation for filtered search
-				/*
+
 				if (filter.length > 0) {
 					var matchingFilters = [];
 					var hashedFilter = "#" + filter;
@@ -278,17 +283,17 @@ class Search {
 					});
 
 				}
-				*/
+
 			default:
-				return false;
+				return null;
 		}
 
 
 
 
-		return false;
-	}
 
+	}
+*/
 	/**
 	 * returns the current top searches on the platform
 	 * @param {int} count - the number of results to return
@@ -337,82 +342,9 @@ class Search {
 		});
 	}
 
-	/**
-	 * Creates a formatted results array using data returned from search and sorts it using the score.
-	 * @param {object} data - object containing data from search
-	 *
-	 * @return {[object]} - array of size bounded by ES Settings
-	 */
-	 serializeAndSortResults (data) {
-		var results = [];
-		var total = 0;
-
-	 	for (let res of data.responses) {
-	 		total += res.hits.total;
-			results = results.concat(res.hits.hits);
-		}
-		/* Not the most optimal solution, but fast and concise enough */
-		results.sort( (a,b) => {
-			return b._score - a._score;
-		});
-
-		var finalResults = [];
-		for (let res of results) {
-			var singleResult = {
-				'_index' : res._index,
-				'_type' : res._type,
-				'_score' : res._score,
-				'_id' : res._id
-			};
-			var source = res._source;
-			for (let k in source) {
-				singleResult[k] = source[k];
-			}
-			finalResults.push(singleResult);
-		}
-		return {
-			totalCount: total,
-			results: finalResults.slice(0, this.esQuerySettings.getResponseSize())
-		};
+	generateSearchId (str: string) {
+		return new Buffer(str).toString('base64');
 	}
-	
-	/**
-	 * Creates a formatted results array using data returned from search and sorts it using the score and bucket grouping.
-	 * @param {object} data - object containing data from search
-	 *
-	 * @return {[object]} - array of objects
-	 */ 
-	serializeAndSortResultsWithBuckets (data) {
-		var results = [];
-		let buckets = data.aggregations['top-providers'].buckets;
-
-		for (let i in buckets) {
-			var indResults = buckets[i]['top-provider-hits'].hits.hits;
-
-			for (let j in indResults) {
-				var singleResult = {
-					'_index' : indResults[j]._index,
-					'_type' : indResults[j]._type,
-					'_score' : indResults[j]._score,
-					'_id' : indResults[j]._id
-				};
-
-				var source = indResults[j]._source;
-				for (let k in source) {
-					singleResult[k] = source[k];
-				}
-				results.push(singleResult);
-			}
-		}
-
-		//sort array by score
-		results.sort( (a,b) => {
-			return b._score - a._score;
-		});
-
-		return results;
-	}
-		
 }
 
 export default Search;

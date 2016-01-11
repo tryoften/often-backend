@@ -1,11 +1,12 @@
 import SearchParser from '../Search/SearchParser';
-import Response from '../Models/Response';
+import { Response } from '../Models/Response';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import Search from "./Search";
 import Request from "../Models/Request";
 import RequestType from "../Models/RequestType";
+import MediaItemSource from "../Models/MediaItemSource";
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
@@ -46,44 +47,30 @@ class SearchRequestDispatcher {
 		}
 	}
 
-	getRelevantProviders (filter: string) {
-		if (filter === "") {
-			return Object.keys(this.serviceProviders);
-
-		} else if (!_.isUndefined(this.serviceProviders[filter])) {
-			return [filter];
-
-		} else {
-			return [];
-
-		}
+	getProviders () : MediaItemSource[] {
+		return <MediaItemSource[]> Object.keys(this.serviceProviders);
 	}
 
-	processQueryUpdate ({request, response, resolve, reject}) {
-		var { filter, actualQuery } = this.searchParser.parse(request.query.text);
+	processQueryUpdate (request: Request, response: Response, resolve: any , reject: any) {
 
-		/* whether the query is for autocomplete suggestions */
-		var isAutocomplete = !!request.query.autocomplete;
+		var promise = (request.type == RequestType.autocomplete) ?
+			this.search.suggest(request.query):
+			this.search.query(request.query);
 
-		var promise = (isAutocomplete) ? 
-			this.search.suggest(filter, actualQuery):
-			this.search.query(actualQuery, filter);
-
-		promise.then( (data) => { 
+		promise.then( (data: any) => {
 			response.updateResults(data);
-			logger.profile(request);
 
-			if(request.servicesLeftToProcess === 0 || !!request.query.autocomplete) {
-				this.doneProcessingRequest({request, response});
+			if(request.providersLeftToProcess === 0 || !!(request.type == RequestType.autocomplete)) {
+				this.completeResponse(response);
 			}
 
 			resolve(true);
 		});
 	}
 
-	doneProcessingRequest({request, response}) {
+	completeResponse(response: Response) {
 		response.complete();
-		logger.info('SearchRequestDispatcher:proces()', 'request completed');
+		logger.info('SearchRequestDispatcher:process()', 'response completed');
 	}
 
 	/**
@@ -93,52 +80,43 @@ class SearchRequestDispatcher {
 	 * @return {Promise} -- Resolves to true when all service callbacks have completed
 	 */
 	process (request: Request) {
+
 		return new Promise((resolve, reject) => {
-			logger.profile(request);
-			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 
-			/* whether the query is for autocomplete suggestions */
-			var isAutocomplete = !!request.query.autocomplete;
+			var response = Response.fromRequest(request);
+			response.syncData().then(() => {
+				logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
+				//TODO(jakub): Figure out why the save doesn't propagate to firebase right away.
+				request.initProviders(Object.keys(this.serviceProviders));
 
-			request.setProviders()
-			/* store the total number of services left to process */
-			request.relevantProviders = this.getRelevantProviders(filter);
-			request.servicesLeftToProcess = request.relevantProviders.length;
-			
-			var response = new Response({
-				id: request.id
+				this.processQueryUpdate(request, response, resolve, reject);
+				request.removeProvider("genius");
+/*
+				if (request.type != RequestType.autocomplete) {
+					//Execute the request every user provider that the user is subscribed
+					for (var providerName of request.providers) {
+						this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled:any) => {
+							request.removeProvider(providerName);
+							this.processQueryUpdate(request, response, resolve, reject);
+
+						}).catch((rejected:any) => {
+							request.removeProvider(providerName);
+						});
+					}
+				}
+
+				// if nothing happens after 2 seconds: timeout
+				setTimeout(() => {
+					if (!response.get('doneUpdating')) {
+						reject(false);
+					}
+					this.completeResponse(response);
+				}, 8000, 'timeout');
+*/
 			});
 
-			response.set('id', 'id');
-			response.set({
-				query: request.query.text,
-				doneUpdating: false,
-				autocomplete: isAutocomplete
-			});
-			this.processQueryUpdate({request, response, resolve, reject});
-
-			if (request.type == RequestType.autocomplete) {
-				/* Execute the request every user provider that the user is subscribed */
-				for (let providerName of request.relevantProviders) {
-					this.serviceProviders[providerName].execute({actualQuery}).then((fulfilled:any) => {
-						request.servicesLeftToProcess--;
-						this.processQueryUpdate({request, response, resolve, reject});
-
-					}).catch((rejected:any) => {
-						request.servicesLeftToProcess--;
-					});
-				}
-			}
-
-			// if nothing happens after 2 seconds: timeout
-			setTimeout(() => {
-				if (!response.get('doneUpdating')) {
-					reject(false);
-				}
-				this.doneProcessingRequest({request, response});
-			}, 8000, 'timeout');
 		});
-		
+
 	}
 }
 

@@ -50,6 +50,7 @@ class ServiceBase {
 		return this
 			.fetchData(query)
 			.then((results) => {
+				console.log('results after fetch are: ' + results);
 				/* Create a response based off of returned results and update the cache */
 				return this.search.index(results);
 			});

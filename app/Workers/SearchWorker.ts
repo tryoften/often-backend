@@ -8,6 +8,7 @@ import YouTubeService from '../Services/YouTube/YouTubeService';
 import SoundCloudService from '../Services/SoundCloud/SoundCloudService';
 import GeniusService from '../Services/Genius/GeniusService';
 import Request from "../Models/Request";
+import {Requestable} from "../Interfaces/Requestable";
 
 class SearchWorker extends Worker {
 	dispatcher: SearchRequestDispatcher;
@@ -25,10 +26,10 @@ class SearchWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-
+		var request = new Request(<Requestable>data)
 		//returns a promise when all providers are resolved
 		return this.dispatcher
-			.process(<Request>data)
+			.process(request)
 			.then(d => {
 				resolve(d);
 			})

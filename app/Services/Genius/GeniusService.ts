@@ -11,7 +11,7 @@ import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
 import { Indexable, IndexedObject } from '../../Interfaces/Indexable';
 import Query from "../../Models/Query";
-
+import * as _ from 'underscore';
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -30,16 +30,16 @@ class GeniusService extends ServiceBase {
 	}
 
 	/**
-	 * Main method for obtaining results from the service provider's API.
+	 * Main method for obtaroining results from the service provider's API.
 	 * @param {object} query - search term
 	 *
-	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
+	 * @return {promise} - Pmise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
 
-	 fetchData (query: Query) : Promise<IndexedObject[]> {
+	 public fetchData (query: Query) : Promise<IndexedObject[]> {
 		return new Promise((resolve, reject) => {
 
-			let results = [];
+			let results: IndexedObject[] = [];
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
 					q: query,
@@ -56,10 +56,11 @@ class GeniusService extends ServiceBase {
 				for (var result of data.response.hits) {
 					// Add all songs to songs list
 					promises.push(this.getData(result.result.id));
+					break;
 				}
 
 				Promise.all(promises).then( (categorizedData) => {
-					let geniusServiceResults =  <[GeniusServiceResult]>categorizedData;
+					let geniusServiceResults =  <GeniusServiceResult[]>categorizedData;
 
 					for (let gsr of geniusServiceResults) {
 

@@ -145,6 +145,7 @@ export class MediaItem extends BaseModel implements Indexable {
 		data._index = this.source;
 		data._score = data.score;
 		data._type = this.type;
+		delete data.id;
 		return data;
 	}
 }

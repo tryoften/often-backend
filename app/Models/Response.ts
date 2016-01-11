@@ -1,39 +1,72 @@
-import 'backbonefire';
-import { Firebase, Model } from 'backbone';
 import config from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
+import BaseModel from "./BaseModel";
+import {Requestable} from "../Interfaces/Requestable";
+import {Queryable} from "../Interfaces/Queryable";
+import RequestType from "../Models/RequestType";
+
+
+export interface ResponseAttributes extends Requestable {
+	id: string,
+	userId: string,
+	time_created: number,
+	time_modified: number,
+	time_completed?: number,
+	query: Queryable,
+	type: RequestType,
+	doneUpdating: boolean
+}
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses.
  */
-class Response extends Firebase.Model {
+export class Response extends BaseModel {
+
 
     /**
      * Initializes the elastic search config model.
      *
      * @return {void}
      */
-    initialize () {
-        this.urlRoot = `${config.firebase.BaseURL}/responses`;
-        this.autoSync = true;
-        this.idAttribute = 'id';
-    }
+	constructor (attributes: ResponseAttributes, options?: any) {
+
+		if (attributes.id == null) {
+			throw new Error('Id must be defined and supplied to the Response constructor.');
+		}
+
+		this.urlRoot = `${config.firebase.BaseURL}/responses`;
+		this.autoSync = true;
+
+
+		super(attributes, options);
+	}
+
+	public static fromRequest(request: Requestable): Response {
+		/* Filter out any attributes not defined in the interface to avoid unwanted properties being passed in (like methods) to the backbone model */
+		var attrs = _.pick(request, 'id', 'userId', 'creation_time', 'query', 'type');
+		attrs = <ResponseAttributes> _.extend(attrs, {
+			doneUpdating: false,
+			time_created: Date.now(),
+			time_modified: Date.now()
+		});
+		var response = new Response(attrs);
+		response.save();
+		return response;
+	}
 
     updateResults (data: any) {
         this.set({
-            id: 'id',
             time_modified: Date.now(),
-            doneUpdating: false,
-            results: JSON.parse(JSON.stringify(data))
+            results: data
         });
     }
 
-    complete () {
-        this.set({
-            id: 'id',
-            doneUpdating: true
-        });
-    }
+	complete () {
+		this.set({
+			time_completed: Date.now(),
+			doneUpdating: true
+		});
+	}
+
 }
-
-export default Response;

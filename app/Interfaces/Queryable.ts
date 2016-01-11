@@ -1,5 +1,8 @@
-export interface Queryable {
+export interface QueryData {
 	text: string;
-	filter?: string;
-	toQueryFormat(): Object;
+	type: string;
+}
+
+export interface Queryable extends QueryData {
+
 }
