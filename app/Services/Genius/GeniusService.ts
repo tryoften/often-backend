@@ -56,7 +56,6 @@ class GeniusService extends ServiceBase {
 				for (var result of data.response.hits) {
 					// Add all songs to songs list
 					promises.push(this.getData(result.result.id));
-					break;
 				}
 
 				Promise.all(promises).then( (categorizedData) => {
