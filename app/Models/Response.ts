@@ -45,6 +45,8 @@ export class Response extends BaseModel {
 	public static fromRequest(request: Requestable): Response {
 		/* Filter out any attributes not defined in the interface to avoid unwanted properties being passed in (like methods) to the backbone model */
 		var attrs = _.pick(request, 'id', 'userId', 'creation_time', 'query', 'type');
+		attrs['request_time'] = attrs['creation_time'];
+		delete attrs['creation_time'];
 		attrs = <ResponseAttributes> _.extend(attrs, {
 			doneUpdating: false,
 			time_created: Date.now(),
@@ -60,13 +62,16 @@ export class Response extends BaseModel {
             time_modified: Date.now(),
             results: data
         });
+		this.save();
     }
 
 	complete () {
 		this.set({
+			time_modified: Date.now(),
 			time_completed: Date.now(),
 			doneUpdating: true
 		});
+		this.save();
 	}
 
 }

@@ -59,17 +59,22 @@ class SearchRequestDispatcher {
 
 		var promise: Promise<any> = (() => {
 			switch (request.type) {
-
 				case RequestType.autocomplete:
-					switch (request.query.filter.type) {
-						case FilterType.searchTerms:
-							return this.search.getTopSearches(request.query.filter.value);
-							break;
 
-						case FilterType.general:
-							return new Promise((resolve, reject) => {
-								resolve(this.filters.suggestFilters(request.query.filter));
-							});
+					switch (!!request.query.filter) {
+						case true:
+
+							switch (request.query.filter.type) {
+								case FilterType.searchTerms:
+									return this.search.getTopSearches(request.query.filter.value);
+									break;
+
+								case FilterType.general:
+									return new Promise((resolve, reject) => {
+										resolve(this.filters.suggestFilters(request.query.filter));
+									});
+									break;
+							}
 							break;
 
 						default:
@@ -77,9 +82,11 @@ class SearchRequestDispatcher {
 							return this.search.suggest(request.query);
 
 					}
+					break;
 
 				case RequestType.search:
 					return this.search.query(request.query);
+					break;
 
 				default:
 					throw new Error("Invalid request type");
@@ -114,11 +121,11 @@ class SearchRequestDispatcher {
 		return new Promise((resolve, reject) => {
 
 			var response = Response.fromRequest(request);
+
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 			request.initProviders(Object.keys(this.serviceProviders));
 
-			this.processQueryUpdate(request, response, resolve, reject);
-			request.removeProvider("genius");
+			//this.processQueryUpdate(request, response, resolve, reject);
 
 			if (request.type == RequestType.search) {
 				//Execute the request every user provider that the user is subscribed

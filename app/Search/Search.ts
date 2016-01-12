@@ -180,7 +180,7 @@ class Search {
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
-	suggest (query: Queryable)  {
+	suggest (query: Queryable): Promise<any>  {
 		logger.profile('Suggest ' + query);
 
 		return new Promise((resolve, reject) => {
@@ -226,7 +226,9 @@ class Search {
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */ 
 	getTopSearches (count = 10) {
-
+		if(!_.isNumber(count)){
+			count = 10;
+		}
 		let parseData = (data) => {
 			var results = [];
 

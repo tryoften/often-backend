@@ -1,6 +1,7 @@
+import {FilterInfo} from "../Models/FilterInfo";
 export interface QueryData {
 	text: string;
-	type: string;
+	filter?: FilterInfo
 }
 
 export interface Queryable extends QueryData {

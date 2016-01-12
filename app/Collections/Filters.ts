@@ -30,7 +30,7 @@ class Filters extends Firebase.Collection<Filter> {
 		/* Otherwise return the ones that match the prefix of the passed in filter */
 		var suggestions: FilterSuggestion[] = [];
 		for (var filter of this.models) {
-			if (filter.get("text").indexOf(filterInfo.value) === 0) {
+			if (filter.get("text").indexOf(`#${filterInfo.value}`) === 0) {
 				suggestions.push(filter.toJSON());
 			}
 		}

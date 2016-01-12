@@ -28,7 +28,7 @@ class ElasticSearchQuery extends Model {
 		}
 
 		if (query.filter != null) {
-			header.index = query.filter;
+			header.index = query.filter.value;
 		}
 
 		return {
