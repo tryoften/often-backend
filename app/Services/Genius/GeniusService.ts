@@ -99,8 +99,8 @@ class GeniusService extends ServiceBase {
 				.then( (meta: any) => {
 					return Promise.all([
 						meta,
-						Artist.fromType(MediaItemSource.Genius, MediaItemType.artist, meta.artist.id),
-						Track.fromType(MediaItemSource.Genius, MediaItemType.track, meta.track.id)
+						Artist.fromType(MediaItemSource.Genius, MediaItemType.artist, meta.artist.genius_id),
+						Track.fromType(MediaItemSource.Genius, MediaItemType.track, meta.track.genius_id)
 					]);
 				})
 				.then( promises => {
@@ -137,7 +137,7 @@ class GeniusService extends ServiceBase {
 					};
 
 					/* Otherwise, fetch and update lyrics as well */
-					return this.fetchLyrics(artist, track, trackId).then(callback);
+					return this.fetchLyrics(trackId).then(callback);
 				})
 				.catch( err => {
 					console.log('rejecting ', trackId, err);
@@ -152,7 +152,7 @@ class GeniusService extends ServiceBase {
 	 * @param {string} trackId the genius song ID
 	 * @returns {Promise<string[]>}
 	 */
-	private fetchLyrics (artist: Artist, track: Track, trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
+	private fetchLyrics (trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
 		return new Promise<GeniusLyricData[]>( (resolve, reject) => {
 
 			this.rest.get(`${settings.base_url}/referents`, {
@@ -163,7 +163,6 @@ class GeniusService extends ServiceBase {
 				}
 			}).on('success', data => {
 				var lyrics = [];
-				/* check response code */
 				if (data.meta.status !== 200) {
 					reject(new Error('Invalid return status'));
 					return;
@@ -176,7 +175,6 @@ class GeniusService extends ServiceBase {
 
 				for (let ref of data.response.referents) {
 					var lyric: GeniusLyricData = {
-						id: generateId(),
 						genius_id: ref.id,
 						external_url: ref.url,
 						text: ref.fragment,
@@ -359,6 +357,12 @@ class GeniusService extends ServiceBase {
 				console.log('err' + err);
 				reject(err);
 			});
+
+		});
+	}
+
+	private parseLyricPage (url: string) {
+		this.rest.get(url).on('success', data => {
 
 		});
 	}

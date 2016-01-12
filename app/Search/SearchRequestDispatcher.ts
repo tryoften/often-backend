@@ -3,7 +3,7 @@ import Response from '../Models/Response';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
-import Search from "./Search";
+import Search from './Search';
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.

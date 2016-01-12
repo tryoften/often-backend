@@ -5,6 +5,7 @@ import { firebase as FirebaseConfig } from '../config';
 import { generate as generateId } from 'shortid';
 import { Indexable, IndexedObject } from '../Interfaces/Indexable';
 import Firebase = require('firebase');
+import IDSpace from './IDSpace';
 
 export interface MediaItemAttributes {
 	id?: string;
@@ -17,7 +18,12 @@ export interface MediaItemAttributes {
  * Base model for media items. Includes all the metadata to query object from backend database
  */
 export class MediaItem extends BaseModel implements Indexable {
-
+	/**
+	 * Designated constructor
+	 *
+	 * @param attributes
+	 * @param options
+     */
 	constructor(attributes: MediaItemAttributes, options?: any) {
 		if (attributes.id == null) {
 			attributes.id = generateId();
@@ -36,21 +42,27 @@ export class MediaItem extends BaseModel implements Indexable {
 	 *
 	 * @param source - source id (e.g. Spotify, Soundcloud, etc...)
 	 * @param type - type of the id (e.g. lyric, track, etc...)
-	 * @param id - service provider id (e.g. spotify:track:xxx)
+	 * @param providerId - service provider id (e.g. spotify:track:xxx)
 	 * @returns {Promise<MediaItem>} Resolves to a new or existing MediaItem model
      */
-	public static fromType(source: MediaItemSource, type: MediaItemType, id: string): Promise<MediaItem> {
+	public static fromType(source: MediaItemSource, type: MediaItemType, providerId: string): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(type);
 
 		return new Promise<MediaItem>( (resolve, reject) => {
-			MediaItem.getOftenIdFrom(source, type, id).then(oftenId => {
-				console.log(`Found often id for ${source}:${type}:${id} = ${oftenId}`);
-				var model = new MediaItemClass({ source, type, id: oftenId });
-				resolve(model);
-			}).catch(err => {
-				console.log(`Often id not found for ${source}:${type}:${id}, creating new model`);
-				var model = new MediaItemClass({ source, type });
-				model.save();
+			IDSpace.instance.syncData().then(() => {
+				let oftenId = IDSpace.instance.getOftenIdFrom(source, type, providerId);
+				var model: typeof MediaItemClass;
+
+				if (oftenId) {
+					console.log(`Found often id for ${source}:${type}:${providerId} = ${oftenId}`);
+					model = new MediaItemClass({source, type, id: oftenId});
+				} else {
+					console.log(`Often id not found for ${source}:${type}:${providerId}, creating new model`);
+					model = new MediaItemClass({ source, type });
+					IDSpace.instance.registerId(model, providerId);
+					model.save();
+				}
+
 				resolve(model);
 			});
 		});
@@ -83,18 +95,8 @@ export class MediaItem extends BaseModel implements Indexable {
 	 * @param providerId - given provider id
 	 * @returns {Promise<Boolean|Error>} Resolves to a boolean or error if call fails
      */
-	public registerToIdSpace(providerId: string): Promise<Boolean|Error> {
-		var url = `${FirebaseConfig.BaseURL}/idspace/${this.source}/${this.type}/${providerId}`;
-		console.log('Registering url to idspace: ', url);
-		return new Promise<Boolean>((resolve, reject) => {
-			new Firebase(url).set(this.id, error => {
-				if (error) {
-					reject(error);
-				} else {
-					resolve(true);
-				}
-			});
-		});
+	public registerToIdSpace(providerId: string) {
+		IDSpace.instance.registerId(this, providerId);
 	}
 
 	// Getters
