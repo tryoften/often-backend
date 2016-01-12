@@ -7,6 +7,8 @@ import Search from "./Search";
 import Request from "../Models/Request";
 import RequestType from "../Models/RequestType";
 import MediaItemSource from "../Models/MediaItemSource";
+import Filters from "../Collections/Filters";
+import FilterType from "../Models/FilterType";
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
@@ -17,6 +19,7 @@ class SearchRequestDispatcher {
 	urlHelper: URLHelper;
 	searchParser: SearchParser;
 	serviceProviders: any;
+	filters: Filters;
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -29,6 +32,7 @@ class SearchRequestDispatcher {
 		this.search = opts.search;
 		this.urlHelper = new URLHelper();
 		this.searchParser = new SearchParser();
+		this.filters = new Filters();
 
 		if (_.isUndefined(opts.services) || _.isNull(opts.services)) {
 			throw "Services required to instantiate SearchRequestDispatcher";
@@ -53,9 +57,35 @@ class SearchRequestDispatcher {
 
 	processQueryUpdate (request: Request, response: Response, resolve: any , reject: any) {
 
-		var promise = (request.type == RequestType.autocomplete) ?
-			this.search.suggest(request.query):
-			this.search.query(request.query);
+		var promise: Promise<any> = (() => {
+			switch (request.type) {
+
+				case RequestType.autocomplete:
+					switch (request.query.filter.type) {
+						case FilterType.searchTerms:
+							return this.search.getTopSearches(request.query.filter.value);
+							break;
+
+						case FilterType.general:
+							return new Promise((resolve, reject) => {
+								resolve(this.filters.suggestFilters(request.query.filter));
+							});
+							break;
+
+						default:
+							/* If no filter type specified, then execute autocomplete suggestions */
+							return this.search.suggest(request.query);
+
+					}
+
+				case RequestType.search:
+					return this.search.query(request.query);
+
+				default:
+					throw new Error("Invalid request type");
+
+			}
+		})();
 
 		promise.then( (data: any) => {
 			response.updateResults(data);
@@ -84,36 +114,32 @@ class SearchRequestDispatcher {
 		return new Promise((resolve, reject) => {
 
 			var response = Response.fromRequest(request);
-			response.syncData().then(() => {
-				logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
-				//TODO(jakub): Figure out why the save doesn't propagate to firebase right away.
-				request.initProviders(Object.keys(this.serviceProviders));
+			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
+			request.initProviders(Object.keys(this.serviceProviders));
 
-				this.processQueryUpdate(request, response, resolve, reject);
-				request.removeProvider("genius");
-/*
-				if (request.type != RequestType.autocomplete) {
-					//Execute the request every user provider that the user is subscribed
-					for (var providerName of request.providers) {
-						this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled:any) => {
-							request.removeProvider(providerName);
-							this.processQueryUpdate(request, response, resolve, reject);
+			this.processQueryUpdate(request, response, resolve, reject);
+			request.removeProvider("genius");
 
-						}).catch((rejected:any) => {
-							request.removeProvider(providerName);
-						});
-					}
+			if (request.type == RequestType.search) {
+				//Execute the request every user provider that the user is subscribed
+				for (var providerName of request.providers) {
+					this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled:any) => {
+						request.removeProvider(providerName);
+						this.processQueryUpdate(request, response, resolve, reject);
+
+					}).catch((rejected:any) => {
+						request.removeProvider(providerName);
+					});
 				}
+			}
 
-				// if nothing happens after 2 seconds: timeout
-				setTimeout(() => {
-					if (!response.get('doneUpdating')) {
-						reject(false);
-					}
-					this.completeResponse(response);
-				}, 8000, 'timeout');
-*/
-			});
+			// if nothing happens after 2 seconds: timeout
+			setTimeout(() => {
+				if (!response.get('doneUpdating')) {
+					reject(false);
+				}
+				this.completeResponse(response);
+			}, 8000, 'timeout');
 
 		});
 

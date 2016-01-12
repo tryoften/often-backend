@@ -1,6 +1,7 @@
 import { Model } from 'backbone';
 import * as _ from 'underscore';
 import Query from "./Query";
+import {Queryable} from "../Interfaces/Queryable";
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for ElasticSearchQueries.
  */ 
@@ -13,7 +14,7 @@ class ElasticSearchQuery extends Model {
 	 *
 	 * @return {Promise} - Promise that resolves to an array containing header and body objects
 	 */
-	injectQuery (query: Query): Object {
+	injectQuery (query: Queryable): Object {
 
 		/* Perform a deep copy on an object */
 		var paths = this.get("queryPaths");
@@ -24,6 +25,10 @@ class ElasticSearchQuery extends Model {
 
 		for (let path of paths) {
 			this.substituteQuery(body, path, query.text);
+		}
+
+		if (query.filter != null) {
+			header.index = query.filter;
 		}
 
 		return {
