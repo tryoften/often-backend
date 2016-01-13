@@ -1,9 +1,14 @@
 import SearchParser from '../Search/SearchParser';
-import Response from '../Models/Response';
+import { Response } from '../Models/Response';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import Search from "./Search";
+import Request from "../Models/Request";
+import RequestType from "../Models/RequestType";
+import MediaItemSource from "../Models/MediaItemSource";
+import Filters from "../Collections/Filters";
+import FilterType from "../Models/FilterType";
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
@@ -14,6 +19,7 @@ class SearchRequestDispatcher {
 	urlHelper: URLHelper;
 	searchParser: SearchParser;
 	serviceProviders: any;
+	filters: Filters;
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -26,6 +32,7 @@ class SearchRequestDispatcher {
 		this.search = opts.search;
 		this.urlHelper = new URLHelper();
 		this.searchParser = new SearchParser();
+		this.filters = new Filters();
 
 		if (_.isUndefined(opts.services) || _.isNull(opts.services)) {
 			throw "Services required to instantiate SearchRequestDispatcher";
@@ -44,44 +51,63 @@ class SearchRequestDispatcher {
 		}
 	}
 
-	getRelevantProviders (filter: string) {
-		if (filter === "") {
-			return Object.keys(this.serviceProviders);
-
-		} else if (!_.isUndefined(this.serviceProviders[filter])) {
-			return [filter];
-
-		} else {
-			return [];
-
-		}
+	getProviders () : MediaItemSource[] {
+		return <MediaItemSource[]> Object.keys(this.serviceProviders);
 	}
 
-	processQueryUpdate ({request, response, resolve, reject}) {
-		var { filter, actualQuery } = this.searchParser.parse(request.query.text);
+	processQueryUpdate (request: Request, response: Response, resolve: any , reject: any) {
 
-		/* whether the query is for autocomplete suggestions */
-		var isAutocomplete = !!request.query.autocomplete;
+		var promise: Promise<any> = (() => {
+			switch (request.type) {
+				case RequestType.autocomplete:
 
-		var promise = (isAutocomplete) ? 
-			this.search.suggest(filter, actualQuery) :
-			this.search.query(actualQuery, filter);
+					switch (!!request.query.filter) {
+						case true:
 
-		promise.then( (data) => { 
+							switch (request.query.filter.type) {
+								case FilterType.searchTerms:
+									return this.search.getTopSearches(request.query.filter.value);
+									break;
+
+								case FilterType.general:
+									return new Promise((resolve, reject) => {
+										resolve(this.filters.suggestFilters(request.query.filter));
+									});
+									break;
+							}
+							break;
+
+						default:
+							/* If no filter type specified, then execute autocomplete suggestions */
+							return this.search.suggest(request.query);
+
+					}
+					break;
+
+				case RequestType.search:
+					return this.search.query(request.query);
+					break;
+
+				default:
+					throw new Error("Invalid request type");
+
+			}
+		})();
+
+		promise.then( (data: any) => {
 			response.updateResults(data);
-			logger.profile(request);
 
-			if(request.servicesLeftToProcess === 0 || !!request.query.autocomplete) {
-				this.doneProcessingRequest({request, response});
+			if(request.providersLeftToProcess === 0 || !!(request.type == RequestType.autocomplete)) {
+				this.completeResponse(response);
 			}
 
 			resolve(true);
 		});
 	}
 
-	doneProcessingRequest({request, response}) {
+	completeResponse(response: Response) {
 		response.complete();
-		logger.info('SearchRequestDispatcher:proces()', 'request completed');
+		logger.info('SearchRequestDispatcher:process()', 'response completed');
 	}
 
 	/**
@@ -90,41 +116,26 @@ class SearchRequestDispatcher {
 	 *
 	 * @return {Promise} -- Resolves to true when all service callbacks have completed
 	 */
-	process (request: any) {
+	process (request: Request) {
+
 		return new Promise((resolve, reject) => {
-			logger.profile(request);
+
+			var response = Response.fromRequest(request);
+
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
-			var { filter, actualQuery } = this.searchParser.parse(request.query.text);
+			request.initProviders(Object.keys(this.serviceProviders));
 
+			//this.processQueryUpdate(request, response, resolve, reject);
 
-			/* whether the query is for autocomplete suggestions */
-			var isAutocomplete = !!request.query.autocomplete;
-
-			/* store the total number of services left to process */
-			request.relevantProviders = this.getRelevantProviders(filter);
-			request.servicesLeftToProcess = request.relevantProviders.length;
-			
-			var response = new Response({
-				id: request.id
-			});
-
-			response.set('id', 'id');
-			response.set({
-				query: request.query.text,
-				doneUpdating: false,
-				autocomplete: isAutocomplete
-			});
-			this.processQueryUpdate({request, response, resolve, reject});
-
-			if (!isAutocomplete) {
-				/* Execute the request every user provider that the user is subscribed */
-				for (let providerName of request.relevantProviders) {
-					this.serviceProviders[providerName].execute({actualQuery}).then((fulfilled:any) => {
-						request.servicesLeftToProcess--;
-						this.processQueryUpdate({request, response, resolve, reject});
+			if (request.type == RequestType.search) {
+				//Execute the request every user provider that the user is subscribed
+				for (var providerName of request.providers) {
+					this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled:any) => {
+						request.removeProvider(providerName);
+						this.processQueryUpdate(request, response, resolve, reject);
 
 					}).catch((rejected:any) => {
-						request.servicesLeftToProcess--;
+						request.removeProvider(providerName);
 					});
 				}
 			}
@@ -134,10 +145,11 @@ class SearchRequestDispatcher {
 				if (!response.get('doneUpdating')) {
 					reject(false);
 				}
-				this.doneProcessingRequest({request, response});
+				this.completeResponse(response);
 			}, 8000, 'timeout');
+
 		});
-		
+
 	}
 }
 

@@ -1,12 +1,23 @@
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
+import {IndexedObject} from "../Interfaces/Indexable";
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
 export class Lyric extends MediaItem {
+
+	//TODO(jakub): create an interface for lyric that guarantees "common" indexed fields
 	get text(): string {
 		return this.get('text');
+	}
+
+	get artist_name(): string {
+		return this.get('artist_name');
+	}
+
+	get track_name(): string {
+		return this.get('track_name');
 	}
 
 	set text(value: string) {
@@ -53,6 +64,15 @@ export class Lyric extends MediaItem {
 		this.set(properties);
 		this.save();
 		return this;
+	}
+
+	public toIndexingFormat(): IndexedObject {
+		let data = super.toIndexingFormat();
+		data.title = this.track_name;
+		data.author = this.artist_name;
+		data.description = this.text;
+
+		return data;
 	}
 }
 

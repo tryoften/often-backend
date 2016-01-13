@@ -2,11 +2,13 @@ import { GeniusData } from '../Services/Genius/GeniusDataTypes';
 import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 import MediaItem from './MediaItem';
+import {IndexedObject} from "../Interfaces/Indexable";
 
 /**
  * This class is responsible for providing granular functionality (mostly accessors) for cached responses.
  */
 class Artist extends MediaItem {
+	//TODO(jakub): create an interface for artist that guarantees "common" indexed fields
 	constructor(attributes?: any, options?: any) {
 		this.urlRoot = `${FirebaseConfig.BaseURL}/artists`;
 		this.autoSync = true;
@@ -16,6 +18,10 @@ class Artist extends MediaItem {
 
 	public trackExists (songId: string) {
 		return _.has(this.get('tracks'), songId);
+	}
+
+	get name(): string {
+		return this.get('name');
 	}
 
 	/**
@@ -59,6 +65,15 @@ class Artist extends MediaItem {
 		this.save();
 
 		return this;
+	}
+
+	public toIndexingFormat(): IndexedObject {
+		let data = super.toIndexingFormat();
+		data.title = "";
+		data.author = this.name;
+		data.description = "";
+
+		return data;
 	}
 }
 

@@ -9,7 +9,7 @@ import { createServer } from 'http';
  */
 class Worker {
 	options: any;
-	ref: Firebase;
+	ref: any;
 	queue: Queue;
 
 	/**
