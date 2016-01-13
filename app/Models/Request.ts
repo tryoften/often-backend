@@ -1,4 +1,4 @@
-import {Requestable} from "../Interfaces/Requestable";
+import { Requestable } from "../Interfaces/Requestable";
 import Query from "./Query";
 import RequestType from "./RequestType";
 import MediaItemSource from "./MediaItemSource";
@@ -35,7 +35,7 @@ class Request implements Requestable {
 		} else {
 			//TODO(jakub): Filter out the providers from filters to exclude feeds
 			/* copy all filter properties to service properties */
-			this._providers = _.extend(attributes.filters)
+			this._providers = _.extend(attributes.filters);
 		}
 
 		/* Copy remaining attributes normally */

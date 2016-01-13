@@ -6,11 +6,15 @@ import ServiceBase from '../ServiceBase';
 import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
-import { Lyric, LyricAttributes } from '../../Models/Lyric';
+import { Lyric } from '../../Models/Lyric';
 import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
-import { Indexable, IndexedObject } from '../../Interfaces/Indexable';
-import Query from "../../Models/Query";
+import * as cheerio from 'cheerio';
+import * as _ from 'underscore';
+import startsWith = require('lodash/string/startsWith');
+import 'backbonefire';
+import { IndexedObject } from '../../Interfaces/Indexable';
+import Query from '../../Models/Query';
 import * as _ from 'underscore';
 
 /** 
@@ -35,8 +39,7 @@ class GeniusService extends ServiceBase {
 	 *
 	 * @return {promise} - Pmise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
-
-	 public fetchData (query: Query) : Promise<IndexedObject[]> {
+	public fetchData (query: Query): Promise<IndexedObject[]> {
 		return new Promise((resolve, reject) => {
 
 			let results: IndexedObject[] = [];
@@ -88,51 +91,47 @@ class GeniusService extends ServiceBase {
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
 	public getData (trackId: string): Promise<GeniusServiceResult> {
-		return new Promise( (resolve, reject) => {
+		return new Promise<GeniusServiceResult>( (resolve, reject) => {
 
 			this.getTrackMetadata(trackId)
 				.then( (meta: any) => {
 					return Promise.all([
 						meta,
-						Artist.fromType(MediaItemSource.Genius, MediaItemType.artist, meta.artist.id),
-						Track.fromType(MediaItemSource.Genius, MediaItemType.track, meta.track.id)
+						Artist.fromType(MediaItemSource.Genius, MediaItemType.artist, meta.artist.genius_id),
+						Track.fromType(MediaItemSource.Genius, MediaItemType.track, meta.track.genius_id)
 					]);
 				})
 				.then( promises => {
 					var data: GeniusData = promises[0];
 					var artist = <Artist> promises[1], track = <Track> promises[2];
 
-					if (artist.trackExists(trackId)) {
+					function done(resultData: GeniusServiceResult) {
 						// Update backend DB with latest genius data
-						artist.setGeniusData(data);
-						track.setGeniusData(data);
+						artist.set(data.artist);
+						track.set(data.track);
+						artist.setGeniusData(resultData);
+						track.setGeniusData(artist, resultData.lyrics);
 
+						resolve(resultData);
+					}
+
+					if (artist.trackExists(trackId)) {
 						/* If track exists then just update meta */
-						return resolve({
-							artist,
-							track,
-							lyrics: this.createLyricModelsFromGeniusData(track.lyrics)
+						return this.createLyricModelsFromGeniusData(track.lyrics).then(lyrics => {
+							done({ artist, track, lyrics });
 						});
 					}
 
-					let callback = function(res) {
+					/* Otherwise, fetch and update lyrics as well */
+					return this.fetchLyrics(data.track.external_url, trackId).then(res => {
 						data.lyrics = res.data;
-
-						// Update backend DB with latest genius data
-						artist.setGeniusData(data);
-						track.setGeniusData(data);
 
 						for (let lyric of res.models) {
 							lyric.setGeniusData(data);
 						}
 
-						// update lyrics here
-						console.log('resolving ', trackId);
-						resolve({artist, track, lyrics: res.models});
-					};
-
-					/* Otherwise, fetch and update lyrics as well */
-					return this.fetchLyrics(artist, track, trackId).then(callback);
+						done({artist, track, lyrics: res.models});
+					});
 				})
 				.catch( err => {
 					console.log('rejecting ', trackId, err);
@@ -147,8 +146,9 @@ class GeniusService extends ServiceBase {
 	 * @param {string} trackId the genius song ID
 	 * @returns {Promise<string[]>}
 	 */
-	private fetchLyrics (artist: Artist, track: Track, trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
-		return new Promise<GeniusLyricData[]>( (resolve, reject) => {
+	private fetchLyrics (trackUrl: string, trackId: string): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
+
+		var getAnnotationsPromise = new Promise<GeniusLyricData[]>( (resolve, reject) => {
 
 			this.rest.get(`${settings.base_url}/referents`, {
 				query: {
@@ -158,7 +158,6 @@ class GeniusService extends ServiceBase {
 				}
 			}).on('success', data => {
 				var lyrics = [];
-				/* check response code */
 				if (data.meta.status !== 200) {
 					reject(new Error('Invalid return status'));
 					return;
@@ -171,8 +170,7 @@ class GeniusService extends ServiceBase {
 
 				for (let ref of data.response.referents) {
 					var lyric: GeniusLyricData = {
-						id: generateId(),
-						genius_id: ref.id,
+						annotation_id: ref.id,
 						external_url: ref.url,
 						text: ref.fragment,
 						score: 0
@@ -196,23 +194,44 @@ class GeniusService extends ServiceBase {
 				reject(err);
 			});
 
+		});
+
+		return Promise.all([
+			getAnnotationsPromise,
+			this.parseLyricPage(trackUrl, trackId)
+		]).then(data => {
+			var annotationData = data[0];
+			var lyricsDataFromPage = data[1];
+
+			for (let lyric of lyricsDataFromPage) {
+				for (let annotation of annotationData) {
+					if (annotation.genius_id === lyric.annotation_id) {
+						lyric.score = annotation.score;
+						lyric.external_url = annotation.external_url;
+					}
+				}
+			}
+
+			return lyricsDataFromPage;
 		}).then(this.processLyrics.bind(this));
 	}
 
-	private createLyricModelsFromGeniusData(lyricsData: GeniusLyricData[]): Lyric[] {
-		let models: Lyric[] = [];
+	private createLyricModelsFromGeniusData(lyricsData: GeniusLyricData[]): Promise<Lyric[]> {
+		let promises: Promise<Lyric>[] = [];
 
 		for (let lyricData of lyricsData) {
 			// Persist lyric data to backend
-			let lyric = new Lyric(_.extend({
-				source: MediaItemSource.Genius,
-				type: MediaItemType.lyric
-			}, lyricData));
-			lyric.registerToIdSpace(lyricData.genius_id);
-			lyric.save();
-			models.push(lyric);
+			promises.push(Lyric.fromType(MediaItemSource.Genius, MediaItemType.lyric, lyricData.genius_id));
 		}
-		return models;
+
+		return Promise.all(promises).then(models => {
+			for (var i = 0, len = models.length; i < len; i++) {
+				let model = models[i];
+				model.set(lyricsData[i]);
+				model.save();
+			}
+			return models;
+		});
 	}
 
 	/**
@@ -222,19 +241,18 @@ class GeniusService extends ServiceBase {
 	 * @returns {Promise<{ models: Lyric[], data: GeniusLyricData[] }>}
      */
 	private processLyrics(lyricsData: GeniusLyricData[]): Promise<{ models: Lyric[], data: GeniusLyricData[] }> {
-		return new Promise<{ models: Lyric[], data: GeniusLyricData[] }>( (resolve, reject) => {
-			lyricsData = this.cleanUpLyrics(lyricsData);
-			resolve({ data: lyricsData, models: this.createLyricModelsFromGeniusData(lyricsData) });
+		return this.createLyricModelsFromGeniusData(lyricsData).then(models => {
+			return { data: lyricsData, models };
 		});
 	}
 
 	/**
 	 * Cleans up raw lyrics by removing lines that don't fit a set of defined criteria.
 	 *
-	 * @param lyrics
+	 * @param lyricsData
 	 * @returns {Array}
 	 */
-	private cleanUpLyrics (lyrics: GeniusLyricData[]): GeniusLyricData[] {
+	private cleanUpLyrics (lyricsData: GeniusLyricData[]): GeniusLyricData[] {
 		function generateLyric(text: string, originalLyric: GeniusLyricData): GeniusLyricData {
 			var newLyric = _.clone(originalLyric);
 			newLyric.text = text;
@@ -242,13 +260,12 @@ class GeniusService extends ServiceBase {
 		}
 
 		var filtered: GeniusLyricData[] = [];
-		for (var lyric of lyrics) {
-
+		for (let lyric of lyricsData) {
 			if (lyric.text.length === 0) {
 				continue;
 			}
 
-			if (lyric[0] === '[') {
+			if (startsWith(lyric.text, '[')) {
 				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
 				continue;
 			}
@@ -279,7 +296,6 @@ class GeniusService extends ServiceBase {
 					filtered.push(generateLyric(lyric.text.substring(start, end + 1).trim(), lyric));
 				}
 			} else {
-				lyric.text.trim();
 				filtered.push(lyric);
 			}
 		}
@@ -310,7 +326,6 @@ class GeniusService extends ServiceBase {
 				let result: any = data.response.song;
 
 				let trackInfo: GeniusTrackData = {
-					id: generateId(),
 					genius_id: result.id,
 					title: result.title,
 					external_url: result.url,
@@ -338,13 +353,14 @@ class GeniusService extends ServiceBase {
 				}
 
 				let artistInfo: GeniusArtistData = {
-					id: generateId(),
 					genius_id: result.primary_artist.id,
 					name: result.primary_artist.name,
 					external_url: result.primary_artist.url,
 					image_url: result.primary_artist.image_url,
 					is_verified: result.primary_artist.is_verified
 				};
+
+				this.parseLyricPage(trackInfo.external_url, trackInfo.genius_id);
 
 				resolve({
 					track: trackInfo,
@@ -356,6 +372,49 @@ class GeniusService extends ServiceBase {
 			});
 
 		});
+	}
+
+	private parseLyricPage (url: string, trackId: string): Promise<GeniusLyricData[]> {
+		return new Promise<GeniusLyricData[]>((resolve, reject) => {
+			this.rest.get(url).on('success', data => {
+				let $ = cheerio.load(data);
+				let elements = $('.lyrics p').toArray();
+				if (elements.length) {
+					let filteredElements = this.traverseTree(elements[0]);
+					for (var i = 0, len = filteredElements.length; i < len; i++) {
+						filteredElements[i].genius_id = `${trackId}_${i}`;
+					}
+					filteredElements = _.uniq(filteredElements, a => a.text);
+					resolve(filteredElements);
+				}
+			});
+		});
+	}
+
+	private traverseTree(root: CheerioElement): GeniusLyricData[] {
+		var lyrics: GeniusLyricData[] = [];
+
+		for (var el of root.children) {
+			switch (el.type) {
+				case 'text':
+					let lyricData: GeniusLyricData = {
+						text: el.data,
+						score: 0
+					};
+					if (root.name === 'a') {
+						lyricData.annotation_id = cheerio(root).data('id');
+					}
+					lyrics = lyrics.concat(this.cleanUpLyrics([lyricData]));
+					break;
+				case 'tag':
+					if (el.children.length) {
+						lyrics = lyrics.concat(this.traverseTree(el));
+					}
+					break;
+			}
+		}
+
+		return this.cleanUpLyrics(lyrics);
 	}
 }
 

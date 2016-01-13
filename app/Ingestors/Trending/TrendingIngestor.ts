@@ -33,13 +33,12 @@ class TrendingIngestor {
 
 			return Promise.all(promises).then( (results: GeniusServiceResult[]) => {
 
-				let topArtists = _.map(results, result => {
-					return result.artist.toIndexingFormat();
-				});
+				let topArtists = _.chain(results)
+					.map(result => result.artist.toIndexingFormat())
+					.uniq(artist => artist.id)
+					.value();
 
-				let topTracks = _.map(results, result => {
-					return result.track.toIndexingFormat();
-				});
+				let topTracks = _.map(results, result => result.track.toIndexingFormat());
 
 				let trendingLyrics = _.map(results, result => {
 
@@ -55,21 +54,21 @@ class TrendingIngestor {
 						id: 'trendingLyrics',
 						title: 'Trending Lyrics',
 						type: 'lyric',
-						results: trendingLyrics,
+						items: trendingLyrics,
 						score: 5.0
 					},
 					{
 						id: 'topArtists',
 						title: 'Top Artists',
 						type: 'artist',
-						results: topArtists,
+						items: topArtists,
 						score: 3.0
 					},
 					{
 						id: 'topTracks',
 						title: 'Top Tracks',
 						type: 'track',
-						results: topTracks,
+						items: topTracks,
 						score: 1.0
 					}
 				];
