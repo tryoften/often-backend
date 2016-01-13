@@ -18,17 +18,17 @@ class Request implements Requestable {
 
 	constructor (attributes: Requestable, options?) {
 
-		if (attributes.query == null) {
+		if (!attributes.query) {
 			throw new Error('Query needs to be defined');
 		}
 		this.query = new Query(attributes.query)
 		delete attributes.query;
 
-		if (attributes.creation_time == null) {
+		if (!attributes.creation_time) {
 			this.creation_time = Date.now();
 		}
 		/* Look at special cases */
-		if (attributes.filters == null) {
+		if (!attributes.filters) {
 			this.filters = [];
 			this._providers = [];
 			delete attributes.filters;

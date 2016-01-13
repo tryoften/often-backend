@@ -31,7 +31,7 @@ export class Response extends BaseModel {
      */
 	constructor (attributes: ResponseAttributes, options?: any) {
 
-		if (attributes.id == null) {
+		if (!attributes.id) {
 			throw new Error('Id must be defined and supplied to the Response constructor.');
 		}
 
