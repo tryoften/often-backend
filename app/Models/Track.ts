@@ -1,4 +1,5 @@
 import { GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
+import { IndexedObject } from '../Interfaces/Indexable';
 import { firebase as FirebaseConfig } from '../config';
 import MediaItem from './MediaItem';
 import Artist from './Artist';
@@ -9,6 +10,20 @@ import * as _ from 'underscore';
  * Track model throughout the platform
  */
 class Track extends MediaItem {
+
+	// TODO(jakub): create an interface for track that guarantees "common" indexed fields
+	get title(): string {
+		return this.get('title');
+	}
+
+	get artist_name(): string {
+		return this.get('artist_name');
+	}
+
+	get album_name(): string {
+		return this.get('album_name');
+	}
+
 	get lyrics(): GeniusLyricData[] {
 		return this.get('lyrics') || [];
 	}
@@ -59,6 +74,15 @@ class Track extends MediaItem {
 		this.save();
 
 		return this;
+	}
+
+	public toIndexingFormat(): IndexedObject {
+		let data = super.toIndexingFormat();
+		data.title = this.title;
+		data.author = this.artist_name;
+		data.description = "";
+
+		return data;
 	}
 }
 

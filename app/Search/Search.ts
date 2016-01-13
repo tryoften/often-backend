@@ -1,10 +1,15 @@
+import {MediaItemGroup} from "../Models/MediaItemGroup";
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
-import Filters from '../Collections/Filters';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
+import { Indexable } from '../Interfaces/Indexable';
+import { Queryable } from "../Interfaces/Queryable";
+import { CommandData } from '../Interfaces/CommandData';
+import {IndexedObject} from "../Interfaces/Indexable";
+import RequestType from "../Models/RequestType";
 
 /**
  * Class for interacting with ElasticSearch.
@@ -18,7 +23,7 @@ class Search {
 	es: Client;
 	esQueries: ElasticSearchQueries;
 	esQuerySettings: ElasticSearchQuerySettings;
-	filters: Filters;
+
 
 	/**
 	 * Initializes the search instance.
@@ -33,7 +38,6 @@ class Search {
 		});
 		this.esQueries = new ElasticSearchQueries();
 		this.esQuerySettings = new ElasticSearchQuerySettings();
-		this.filters = new Filters();
 	}
 
 	/**
@@ -43,31 +47,14 @@ class Search {
 	 *
 	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
 	 */
-	index (index: string, results: any[]) {
-
+	index (indexables: IndexedObject[]) {
+		console.log('indexing...');
 		return new Promise((resolve, reject) => {
 
 			/* Prepare the results to be indexed with ElasticSearch */
-			var formattedResults: any[] = [];
-			for (let type in results) {
-				let individualResults = results[type];
-				for (let item in individualResults) {
-
-					/* Put action in */
-					formattedResults.push({
-						'update': {
-							_index: index,
-							_type: type,
-							_id: individualResults[item].id
-						}
-					});
-					
-					/* Put data in */
-					formattedResults.push({
-						'doc_as_upsert': true,
-						doc: individualResults[item]
-					});
-				}
+			var formattedResults: Object[] = [];
+			for (let indexedObject of indexables) {
+				formattedResults = formattedResults.concat(this.getIndexFormat(indexedObject));
 			}
 
 			this.es.bulk({
@@ -78,6 +65,7 @@ class Search {
 					console.log('Failed to index: ' + err);
 					reject(err);
 				} else {
+					console.log('response');
 					resolve(resp);					
 				}
 			});
@@ -92,42 +80,65 @@ class Search {
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-	query (query, filteredIndex, autocomplete = false) {
 
-		var command;
-		if ( (command = this.processCommands(query)) ) {
-			return command;
-		}
+	query (query: Queryable): Promise<MediaItemGroup[]> {
+
+		var esQuery = this.esQueries.generateQuery(query, "search");
 
 		return new Promise((resolve, reject) => {
 
-			let searchId = new Buffer(query).toString('base64');
-			let queryType = this.esQuerySettings.getQueryType(filteredIndex);
+			this.es.search(esQuery,
+				(error, response: any) => {
+					if (error) {
+						console.log('error' + error);
+						reject(error);
+					} else {
 
-			this.es.msearch({
-				body : this.esQueries.generateQueries(query, filteredIndex, queryType)
-			}, (error, response) => {
-				if (error) {
-					console.log('error' + error);
-					reject(error);
-				} else {
-					let data = this.serializeAndSortResults(response);
-					let results = data.results;
-					resolve(results);
+						let formattedResults = this.formatResults(response);
 
-					this.updateSearchTerms({
-						searchId,
-						query,
-						count: data.totalCount
-					});
-				}
-			});
+						resolve(formattedResults);
+
+						this.updateSearchTerms(
+							this.generateSearchId(query.text),
+							query.text,
+							response.hits.total
+						);
+					}
+
+				});
 
 		});
 	}
 
-	updateSearchTerms({searchId, query, count}) {
-		// index search term for autocompletion
+	getIndexFormat (indexedObject: IndexedObject): Object {
+		return [{
+			'update' : {
+				_index: indexedObject._index,
+				_type: indexedObject._type,
+				_id: indexedObject._id
+			}
+		},
+		{
+			'doc_as_upsert': true,
+			doc: indexedObject
+		}];
+	}
+
+
+
+	formatResults (rawResults: any): MediaItemGroup[] {
+		var results: MediaItemGroup[] = [];
+		for (let groupData of rawResults.aggregations['top-groups'].buckets) {
+			var items = _.map(groupData.top_item_hits.hits.hits, (item: any) => { return item._source });
+			var group = new MediaItemGroup(groupData.key, items);
+			results.push(group);
+		}
+		return results;
+	}
+
+	updateSearchTerms(searchId: string, queryText: string, count: number) {
+
+		//TODO(jakub): Move all ES statements to Firebase
 		this.es.update({
 			index: 'search-terms',
 			type: 'query',
@@ -143,10 +154,10 @@ class Search {
 				},
 
 				upsert: {
-					text: query,
+					text: queryText,
 					suggest: {
-						input: query,
-						output : query,
+						input: queryText,
+						output : queryText,
 						payload: {
 							resultsCount: count,
 							type: "query"
@@ -168,20 +179,15 @@ class Search {
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */
-	suggest (filter, query) {
+	suggest (query: Queryable): Promise<any>  {
 		logger.profile('Suggest ' + query);
-
-		var command;
-		if ( (command = this.processCommands(filter)) ) {
-			return command;
-		}
 
 		return new Promise((resolve, reject) => {
 			this.es.suggest({
 				index: 'search-terms',
 				body: {
 					'query-suggest': {
-						text: query,
+						text: query.text,
 						completion: {
 							field: 'suggest'
 						}
@@ -213,62 +219,15 @@ class Search {
 	}
 
 	/**
-	 * Processes commands parsed out of a search query and matches it against the appropriate handler.
-	 * The format for a command is `# + command_id`
-	 * e.g.: #top-searches:10
-	 *
-	 * @param filter the query string
-	 * @returns {Promise} - resolves with data for particular command
-     */
-	processCommands (filter): any {
-		if (filter == 'filters-list') {
-			var self = this;
-			return new Promise( (resolve, reject) => {
-				resolve([
-					{
-						text: '#' + filter,
-						options: self.filters.toJSON()
-					}
-				]);
-			});
-		}
-
-		if (filter.indexOf('top-searches') === 0) {
-			return this.getTopSearches();
-		}
-
-		if (filter.length > 0) {
-			var matchingFilters = [];
-			var hashedFilter = "#" + filter;
-
-			for ( var actualFilter of this.filters.models) {
-				if (actualFilter.get("text").indexOf(hashedFilter) === 0) {
-					matchingFilters.push(actualFilter.toJSON());
-				}
-			}
-			if (matchingFilters.length === 0) return false;
-			return new Promise( (resolve, reject) => {
-				resolve([
-					{
-						text: hashedFilter,
-						options: matchingFilters
-					}
-				]);
-			});
-					
-		}
-
-		return false;
-	}
-
-	/**
 	 * returns the current top searches on the platform
 	 * @param {int} count - the number of results to return
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
 	 */ 
 	getTopSearches (count = 10) {
-
+		if(!_.isNumber(count)){
+			count = 10;
+		}
 		let parseData = (data) => {
 			var results = [];
 
@@ -309,82 +268,9 @@ class Search {
 		});
 	}
 
-	/**
-	 * Creates a formatted results array using data returned from search and sorts it using the score.
-	 * @param {object} data - object containing data from search
-	 *
-	 * @return {[object]} - array of size bounded by ES Settings
-	 */
-	 serializeAndSortResults (data) {
-		var results = [];
-		var total = 0;
-
-	 	for (let res of data.responses) {
-	 		total += res.hits.total;
-			results = results.concat(res.hits.hits);
-		}
-		/* Not the most optimal solution, but fast and concise enough */
-		results.sort( (a,b) => {
-			return b._score - a._score;
-		});
-
-		var finalResults = [];
-		for (let res of results) {
-			var singleResult = {
-				'_index' : res._index,
-				'_type' : res._type,
-				'_score' : res._score,
-				'_id' : res._id
-			};
-			var source = res._source;
-			for (let k in source) {
-				singleResult[k] = source[k];
-			}
-			finalResults.push(singleResult);
-		}
-		return {
-			totalCount: total,
-			results: finalResults.slice(0, this.esQuerySettings.getResponseSize())
-		};
+	generateSearchId (str: string) {
+		return new Buffer(str).toString('base64');
 	}
-	
-	/**
-	 * Creates a formatted results array using data returned from search and sorts it using the score and bucket grouping.
-	 * @param {object} data - object containing data from search
-	 *
-	 * @return {[object]} - array of objects
-	 */ 
-	serializeAndSortResultsWithBuckets (data) {
-		var results = [];
-		let buckets = data.aggregations['top-providers'].buckets;
-
-		for (let i in buckets) {
-			var indResults = buckets[i]['top-provider-hits'].hits.hits;
-
-			for (let j in indResults) {
-				var singleResult = {
-					'_index' : indResults[j]._index,
-					'_type' : indResults[j]._type,
-					'_score' : indResults[j]._score,
-					'_id' : indResults[j]._id
-				};
-
-				var source = indResults[j]._source;
-				for (let k in source) {
-					singleResult[k] = source[k];
-				}
-				results.push(singleResult);
-			}
-		}
-
-		//sort array by score
-		results.sort( (a,b) => {
-			return b._score - a._score;
-		});
-
-		return results;
-	}
-		
 }
 
 export default Search;

@@ -1,5 +1,4 @@
 import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusServiceResult } from './GeniusDataTypes';
-import { Lyric } from '../../Models/Lyric';
 import { Settings as settings } from './config';
 import { Service as RestService } from 'restler';
 import { generate as generateId } from 'shortid';
@@ -7,12 +6,16 @@ import ServiceBase from '../ServiceBase';
 import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
+import { Lyric } from '../../Models/Lyric';
 import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
 import startsWith = require('lodash/string/startsWith');
 import 'backbonefire';
+import { IndexedObject } from '../../Interfaces/Indexable';
+import Query from '../../Models/Query';
+import * as _ from 'underscore';
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -31,15 +34,15 @@ class GeniusService extends ServiceBase {
 	}
 
 	/**
-	 * Main method for obtaining results from the service provider's API.
+	 * Main method for obtaroining results from the service provider's API.
 	 * @param {object} query - search term
 	 *
-	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
+	 * @return {promise} - Pmise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
-	public fetchData (query: string) {
+	public fetchData (query: Query): Promise<IndexedObject[]> {
 		return new Promise((resolve, reject) => {
 
-			var results: any = {};
+			let results: IndexedObject[] = [];
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
 					q: query,
@@ -59,24 +62,17 @@ class GeniusService extends ServiceBase {
 				}
 
 				Promise.all(promises).then( (categorizedData) => {
-					console.log('resolved all');
-					results = {
-						artist: [],
-						track: [],
-						lyric: []
-					};
+					let geniusServiceResults =  <GeniusServiceResult[]>categorizedData;
 
-					for (var res of categorizedData) {
-						results.artist.push(res.artist);
-						results.track.push(res.track);
-						if (!_.isUndefined(res.lyric)) {
-							for (var lyr of res.lyric) {
-								results.lyric.push(lyr);
-							}
+					for (let gsr of geniusServiceResults) {
+
+						results.push(gsr.artist.toIndexingFormat());
+						results.push(gsr.track.toIndexingFormat());
+						for (let lyric of gsr.lyrics) {
+							results.push(lyric.toIndexingFormat());
 						}
 					}
 
-					console.log('about to return');
 					resolve(results);
 				});
 
