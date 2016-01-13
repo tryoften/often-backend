@@ -2,13 +2,14 @@ import { Service as RestService } from 'restler';
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
 
-class ArtistUrl extends String {};
-class TrackId extends String {};
+type ArtistUrl = string;
+type TrackId = string;
 class PreIngestor {
 	rest: any;
-	geniusRoot: string = "http://genius.com";
+	geniusRoot: string;
 
-	constructor () {
+	constructor (urlRoot: string = "http://genius.com") {
+		this.geniusRoot = urlRoot;
 		this.rest = new RestService({
 			baseURL: this.geniusRoot
 		});
