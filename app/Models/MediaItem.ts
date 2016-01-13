@@ -37,6 +37,14 @@ export class MediaItem extends BaseModel implements Indexable {
 		super(attributes, options);
 	}
 
+	defaults(): any {
+		return {
+			title: '',
+			description: '',
+			author: ''
+		};
+	}
+
 	/**
 	 * Creates media item from a service provider id by specifying the source, type and provider id
 	 *

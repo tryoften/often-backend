@@ -1,13 +1,13 @@
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
-import {IndexedObject} from "../Interfaces/Indexable";
+import {IndexedObject} from '../Interfaces/Indexable';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
 export class Lyric extends MediaItem {
 
-	//TODO(jakub): create an interface for lyric that guarantees "common" indexed fields
+	// TODO(jakub): create an interface for lyric that guarantees "common" indexed fields
 	get text(): string {
 		return this.get('text');
 	}
