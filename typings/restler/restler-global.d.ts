@@ -114,10 +114,10 @@ declare module "restler" {
 
 	export class Service {
 		constructor(options: ServiceOptions);
-		request(path: string, options: RequestOptions): Request;
-		get(url: string, options: RequestOptions): Request;
-		patch(url: string, options: RequestOptions): Request;
-		put(url: string, options: RequestOptions): Request;
+		request(path: string, options?: RequestOptions): Request;
+		get(url: string, options?: RequestOptions): Request;
+		patch(url: string, options?: RequestOptions): Request;
+		put(url: string, options?: RequestOptions): Request;
 	}
 
 	export var parsers: any;

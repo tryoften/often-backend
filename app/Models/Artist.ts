@@ -2,6 +2,7 @@ import { GeniusData } from '../Services/Genius/GeniusDataTypes';
 import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 import MediaItem from './MediaItem';
+import {GeniusServiceResult} from "../Services/Genius/GeniusDataTypes";
 
 /**
  * This class is responsible for providing granular functionality (mostly accessors) for cached responses.
@@ -25,9 +26,9 @@ class Artist extends MediaItem {
 	 * @param {Artist} data.artist an artist
 	 * @returns {any}
      */
-	public setGeniusData (data: GeniusData): Artist {
-		var artistData = data.artist;
-		var trackData = data.track;
+	public setGeniusData (data: GeniusServiceResult): Artist {
+		var artistData = data.artist.toJSON();
+		var trackData = data.track.toJSON();
 		var lyricsData = data.lyrics;
 
 		var properties: any = {};

@@ -5,7 +5,6 @@ import GeniusService from '../../Services/Genius/GeniusService';
 import Lyric from '../../Models/Lyric';
 import { get } from 'restler';
 import { GeniusServiceResult } from '../../Services/Genius/GeniusDataTypes';
-import uniq = require('lodash/array/uniq');
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
@@ -36,12 +35,8 @@ class TrendingIngestor {
 
 				let topArtists = _.chain(results)
 					.map(result => result.artist.toIndexingFormat())
+					.uniq(artist => artist.id)
 					.value();
-
-				topArtists = uniq(topArtists, artist => {
-					console.log(artist.id);
-					return artist.id;
-				});
 
 				let topTracks = _.map(results, result => result.track.toIndexingFormat());
 

@@ -13,10 +13,6 @@ class IDSpace extends BaseModel {
 	constructor() {
 		this.autoSync = true;
 		super();
-
-		this.on('sync', function() {
-			console.log('idspace data changed');
-		});
 	}
 
 	get url(): any {

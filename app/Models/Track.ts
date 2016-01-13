@@ -1,6 +1,9 @@
-import { GeniusData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
+import { GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { firebase as FirebaseConfig } from '../config';
 import MediaItem from './MediaItem';
+import Artist from './Artist';
+import Lyric from './Lyric';
+import * as _ from 'underscore';
 
 /**
  * Track model throughout the platform
@@ -25,22 +28,13 @@ class Track extends MediaItem {
 		this.idAttribute = 'id';
 	}
 
-	public setGeniusData (data: GeniusData) {
+	public setGeniusData (artist: Artist, lyrics: Lyric[]) {
 		// save any properties that have been set up until this point.
 		this.save();
 
-		var artistData = data.artist;
-		var trackData = data.track;
-		var lyricsData = data.lyrics;
+		var artistData = artist.toJSON();
+		var lyricsData = _.map(lyrics, lyric => lyric.toJSON());
 		var properties: any = {};
-
-		/* Set track properties */
-		for (let prop in trackData) {
-			if (prop === 'id') {
-				continue;
-			}
-			properties[prop] = trackData[prop];
-		}
 
 		/* Set artist properties */
 		for (let prop in artistData) {
@@ -62,7 +56,6 @@ class Track extends MediaItem {
 
 		this.set(properties);
 		this.set('time_modified', Date.now());
-		this.registerToIdSpace(trackData.id);
 		this.save();
 
 		return this;
