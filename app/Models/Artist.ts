@@ -1,8 +1,7 @@
-import { GeniusData } from '../Services/Genius/GeniusDataTypes';
 import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 import MediaItem from './MediaItem';
-import {GeniusServiceResult} from "../Services/Genius/GeniusDataTypes";
+import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
 
 /**
  * This class is responsible for providing granular functionality (mostly accessors) for cached responses.
