@@ -48,7 +48,7 @@ class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 		}
 
 		var esQuery =  this.get(type);
-		if (esQuery == null) {
+		if (!esQuery) {
 			throw new Error("No query defined for given type");
 		}
 

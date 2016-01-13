@@ -13,7 +13,7 @@ export default class CommandType extends String {
 
 	private static mapping: any;
 	static get classMapping(): any {
-		if (CommandType.mapping == null) {
+		if (!CommandType.mapping) {
 			CommandType.mapping = {
 				listFilters: require('./ListFilters').default,
 				topSearches: require('./TopSearches').default,
