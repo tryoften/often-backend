@@ -1,5 +1,4 @@
 import {MediaItemGroup} from "../Models/MediaItemGroup";
-console.log('Search');
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
