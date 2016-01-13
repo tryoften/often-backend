@@ -4,8 +4,8 @@ import Artist from '../../Models/Artist';
 
 interface GeniusObject {
 	id?: string;
-	genius_id: string;
-	external_url: string;
+	genius_id?: string;
+	external_url?: string;
 }
 
 export interface GeniusTrackData extends GeniusObject {
@@ -29,6 +29,7 @@ export interface GeniusArtistData extends GeniusObject {
 export interface GeniusLyricData extends GeniusObject {
 	text: string;
 	score?: number;
+	annotation_id?: string;
 }
 
 /**

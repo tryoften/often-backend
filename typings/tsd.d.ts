@@ -10,6 +10,7 @@
 /// <reference path="serve-static/serve-static.d.ts" />
 /// <reference path="minimist/minimist.d.ts" />
 /// <reference path="cheerio/cheerio.d.ts" />
+/// <reference path="lodash/lodash.d.ts" />
 
 declare module "firebase-queue" {
 	class Queue {
@@ -82,4 +83,9 @@ declare module "request" {
 
 declare module "shortid" {
 	export function generate(): string;
+}
+
+declare module "object-path" {
+	export function get(object: any, path: string);
+	export function get(object: any, path: string[]);
 }

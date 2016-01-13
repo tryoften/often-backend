@@ -1,13 +1,13 @@
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
-import {IndexedObject} from "../Interfaces/Indexable";
+import {IndexedObject} from '../Interfaces/Indexable';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
 export class Lyric extends MediaItem {
 
-	//TODO(jakub): create an interface for lyric that guarantees "common" indexed fields
+	// TODO(jakub): create an interface for lyric that guarantees "common" indexed fields
 	get text(): string {
 		return this.get('text');
 	}
@@ -50,7 +50,8 @@ export class Lyric extends MediaItem {
 		}
 
 		if (artist) {
-			for (let prop in artist) {
+			let props = ['id', 'name', 'genius_id', 'image_url', 'is_verified', 'lyrics_count', 'score'];
+			for (let prop in props) {
 				if (artist.hasOwnProperty(prop)) {
 					properties[`artist_${prop}`] = artist[prop];
 				}
