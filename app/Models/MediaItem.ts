@@ -19,11 +19,11 @@ export interface MediaItemAttributes {
 export class MediaItem extends BaseModel implements Indexable {
 
 	constructor(attributes: MediaItemAttributes, options?: any) {
-		if (attributes.id == null) {
+		if (!attributes.id) {
 			attributes.id = generateId();
 		}
 
-		if (attributes.score == null) {
+		if (!attributes.score) {
 			attributes.score = 0.0;
 		}
 		this.autoSync = true;
