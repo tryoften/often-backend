@@ -1,4 +1,4 @@
 export interface CommandData {
-	text: string,
-	options: any
+	text: string;
+	options: any;
 }

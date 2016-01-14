@@ -2,7 +2,6 @@ import 'backbonefire';
 import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import Recent from '../Models/Recent';
-import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from '../Models/Logger';
 
@@ -52,9 +51,9 @@ class Recents extends Firebase.Collection<Recent> {
 	 					false if that item is already found in the recents or an error upon rejection
 	 */
 	addRecent (item: any) {
-		logger.info("Recents:addRecent()", "added recent", item._id);
+		logger.info('Recents:addRecent()', 'added recent', item._id);
 		return new Promise( (resolve, reject) => {
-			let rec = this.find(mod => mod.get('_id') == item._id);
+			let rec = this.find(mod => mod.get('_id') === item._id);
 
 			if (rec) {
 				rec.set('time_added', Date.now());

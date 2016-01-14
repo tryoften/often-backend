@@ -1,16 +1,15 @@
-import logger from '../Models/Logger';
-import URLHelper from "../Utilities/URLHelper";
+import URLHelper from '../Utilities/URLHelper';
 import Search from '../Search/Search';
 import { Service as RestService } from 'restler';
-import {IndexedObject} from "../Interfaces/Indexable";
-import Query from "../Models/Query";
+import {IndexedObject} from '../Interfaces/Indexable';
+import Query from '../Models/Query';
 
-//export interface ServiceProviderOptions {
+// export interface ServiceProviderOptions {
 //	provider_id: string;
 //	fetch_interval?: number;
 //	search?: Search;
 //	urlHelper?: URLHelper;
-//}
+// }
 
 /** 
  *	This class is a base class for all service providers. 
@@ -57,7 +56,7 @@ class ServiceBase {
 	}
 
 	fetchData (query: Query) : Promise<IndexedObject[]>  {
-		throw new Error("fetchData not implemented");
+		throw new Error('fetchData not implemented');
 	}
 
 	/**

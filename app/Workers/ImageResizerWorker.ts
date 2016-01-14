@@ -2,7 +2,6 @@ import * as http from 'http';
 import * as https from 'https';
 import * as gcloud from 'gcloud';
 import Worker from './Worker';
-import FeedPage from '../Models/FeedPage';
 import ImageResizer from '../Models/ImageResizer';
 import * as _ from 'underscore';
 import { Transform as Stream } from 'stream';
@@ -34,7 +33,7 @@ class ImageResizerWorker extends Worker {
 
 	process (data, progress, resolve, reject) {
 		this.ingest(data.originType, data.sourceId, data.resourceId, data.url)
-			.then(data => {
+			.then( data => {
 				resolve(data);
 			})
 			.catch(err => {
@@ -45,7 +44,7 @@ class ImageResizerWorker extends Worker {
 	ingest (originType, sourceId, resourceId, url) {
 		return new Promise((resolve, reject) => {
 			if (_.isUndefined(url) || _.isNull(url)) {
-				reject("Bad Url: " + url);
+				reject('Bad Url: ' + url);
 				return;
 			}
 			/* download the image */
@@ -91,7 +90,7 @@ class ImageResizerWorker extends Worker {
 	}
 	
 	generatePath (originType, sourceId, resourceId, transformation, extension) {
-		if (originType == 'rss') {
+		if (originType === 'rss') {
 			let pathComponents = resourceId.split('/');
 			resourceId = pathComponents[pathComponents.length - 1];
 		}
@@ -104,8 +103,8 @@ class ImageResizerWorker extends Worker {
 			/* download image */
 			var protocol = (url.indexOf('https') === 0) ? https : http;
 			protocol.get(url, (response: any) => {
-				if(response.statusCode !=  "200") {
-					reject("Response code not 200");
+				if(response.statusCode !==  '200') {
+					reject('Response code not 200');
 					return;
 				}
 				var data = new Stream();
@@ -132,7 +131,7 @@ class ImageResizerWorker extends Worker {
 		        );
 			})
 			.on('error', (e) => {
-			  console.log("Error found: " + e.message);
+			  console.log('Error found: ' + e.message);
 			  reject(e);
 			}); 
 		});

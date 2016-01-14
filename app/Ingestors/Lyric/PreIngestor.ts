@@ -8,7 +8,7 @@ class PreIngestor {
 	rest: any;
 	geniusRoot: string;
 
-	constructor (urlRoot: string = "http://genius.com") {
+	constructor (urlRoot: string = 'http://genius.com') {
 		this.geniusRoot = urlRoot;
 		this.rest = new RestService({
 			baseURL: this.geniusRoot
@@ -27,11 +27,11 @@ class PreIngestor {
 				for (let url of artistUrls) {
 					popularTrackPromises.push(this.getPopularTracksForArtist(url));
 				}
-				return Promise.all(popularTrackPromises)
+				return Promise.all(popularTrackPromises);
 			}).then( popularTracks => {
 				resolve(_.flatten(popularTracks));
 			});
-		})
+		});
 	}
 
 	/**
@@ -50,7 +50,7 @@ class PreIngestor {
 			Promise.all(artistResultPromises).then(results => {
 				resolve(_.flatten(results));
 			}).catch( err => {
-				console.log("Error fetching artist results:  ", err);
+				console.log('Error fetching artist results:  ', err);
 				reject(err);
 			});
 
@@ -68,12 +68,12 @@ class PreIngestor {
 				.on('success', data => {
 					var results = []
 					let $ = cheerio.load(data);
-					$("html body #main ul[class=artists_index_list] li[class=artists_index_list-popular_artist] a[class=artists_index_list-artist_name]").each(function(){
-						results.push($(this).attr("href"));
+					$('html body #main ul[class=artists_index_list] li[class=artists_index_list-popular_artist] a[class=artists_index_list-artist_name]').each(function(){
+						results.push($(this).attr('href'));
 					});
 					resolve(results);
 				}).on('error', err => {
-					console.log("Failed to get popular artists for index: ", err);
+					console.log('Failed to get popular artists for index: ', err);
 					reject(err);
 				});
 		});
@@ -90,13 +90,13 @@ class PreIngestor {
 				.on('success', data => {
 					var results = []
 					let $ = cheerio.load(data);
-					var songList = $("html body #container #main .clearfix .song_column .song_list").get(0);
+					var songList = $('html body #container #main .clearfix .song_column .song_list').get(0);
 					$(songList).children().each(function(){
-						results.push($(this).attr("data-id"));
+						results.push($(this).attr('data-id'));
 					});
 					resolve(results);
 				}).on('error', err => {
-					console.log("Failed to get popular tracks for artist: ", err);
+					console.log('Failed to get popular tracks for artist: ', err);
 					reject(err);
 				});
 		});

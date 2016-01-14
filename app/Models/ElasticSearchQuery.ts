@@ -1,7 +1,5 @@
 import { Model } from 'backbone';
-import * as _ from 'underscore';
-import Query from "./Query";
-import {Queryable} from "../Interfaces/Queryable";
+import {Queryable} from '../Interfaces/Queryable';
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for ElasticSearchQueries.
  */ 
@@ -17,11 +15,11 @@ class ElasticSearchQuery extends Model {
 	injectQuery (query: Queryable): Object {
 
 		/* Perform a deep copy on an object */
-		var paths = this.get("queryPaths");
-		var header = this.get("header");
+		var paths = this.get('queryPaths');
+		var header = this.get('header');
 
 		/* Get the deep copy of the body since we don't want the changes to propagate to firebase */
-		var body = JSON.parse(JSON.stringify(this.get("body")));
+		var body = JSON.parse(JSON.stringify(this.get('body')));
 
 		for (let path of paths) {
 			this.substituteQuery(body, path, query.text);
@@ -46,10 +44,10 @@ class ElasticSearchQuery extends Model {
 	 * @return {void} 
 	 */
 	substituteQuery(template: any, path: string, text: string) {
-    	var arr = path.split(".");
+    	var arr = path.split('.');
     	/* iteratively pop elements in arr from left to right, and use them as indices into the body of the query, 
-    	   until the very last "query" key is reached  */
-    	while(arr.length > 1 && (template = template[arr.shift()]));
+    	   until the very last 'query' key is reached  */
+    	while(arr.length > 1 && (template = template[arr.shift()])){};
     	template[arr[arr.length - 1]] = text;
     	
 	}

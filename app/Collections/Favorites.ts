@@ -50,10 +50,10 @@ class Favorites extends Firebase.Collection<Favorite> {
 	 false if that item is already found in the favorites or an error upon rejection
 	 */
 	favorite (item: any) {
-		logger.info("Favorites:favorite()", "favorited item", item._id);
+		logger.info('Favorites:favorite()', 'favorited item', item._id);
 		return new Promise( (resolve, reject) => {
 			for (let model of this.models) {
-				if (model.get('id') == item.id) {
+				if (model.get('id') === item.id) {
 					resolve(false);
 					return;
 				}
@@ -74,7 +74,7 @@ class Favorites extends Firebase.Collection<Favorite> {
 	 false if that item is not found in the favorites or an error upon rejection
 	 */
 	unfavorite (item: any) {
-		logger.info("Favorites:unfavorite()", "unfavorited item", item._id);
+		logger.info('Favorites:unfavorite()', 'unfavorited item', item._id);
 		return new Promise( (resolve, reject) => {
 			for (let model of this.models) {
 				if (model.get('_id') == item._id) {

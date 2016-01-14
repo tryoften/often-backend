@@ -1,5 +1,4 @@
-import MediaItem from "./MediaItem";
-import MediaItemType from "./MediaItemType";
+import MediaItemType from './MediaItemType';
 
 export class MediaItemGroup {
 	results: any;

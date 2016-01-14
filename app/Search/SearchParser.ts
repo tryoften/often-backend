@@ -1,22 +1,9 @@
-import ServiceProviders from '../Collections/ServiceProviders';
-import Feeds from '../Collections/Feeds';
 import * as _ from 'underscore';
 
 /**
  * This class is responsible for parsing out search filters / parameters
  */
 class SearchParser {
-
-	/**
-	 * Initializes the search parser
-	 * @param {object} models - supporting models
-	 * @param {object} opts - supporting options
-	 *
-	 * @return {void}
-	 */
-	constructor (opts = {}) {
-
-	}
 
 	/**
 	 * Parses a query string in order to obtain the filter, actual query, and feeds & service providers relevant to the query
@@ -52,7 +39,7 @@ class SearchParser {
 		var tokens: any = {};
 		var filter, actualQuery;
 
-		if (trimmedQuery[0] == '#') {
+		if (trimmedQuery[0] === '#') {
 			var firstWord = trimmedQuery.split(' ')[0];
 			filter = firstWord.substring(1, firstWord.length);
 			actualQuery = trimmedQuery.substring(filter.length + 2, trimmedQuery.length);

@@ -1,7 +1,7 @@
 import 'backbonefire';
 import ServiceBase from '../ServiceBase';
 import { Settings as settings } from './config';
-import { Service as RestService, parsers } from 'restler';
+import { Service as RestService } from 'restler';
 import logger from '../../Models/Logger';
 /** 
  * This class is responsible for fetching data from the Giphy API
@@ -58,7 +58,7 @@ class YouTubeService extends ServiceBase {
 					for (let item of videoData.items) {
 						videos.push({
 							id: item.id,
-							external_url: "https://www.youtube.com/watch?v=" + item.id ,
+							external_url: 'https://www.youtube.com/watch?v=' + item.id ,
 							title: item.snippet.title,
 							description: item.snippet.description,
 							channel_title: item.snippet.channelTitle,

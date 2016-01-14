@@ -11,7 +11,7 @@ import * as _ from 'underscore';
  */
 class Track extends MediaItem {
 
-	// TODO(jakub): create an interface for track that guarantees "common" indexed fields
+	// TODO(jakub): create an interface for track that guarantees 'common' indexed fields
 	get title(): string {
 		return this.get('title');
 	}

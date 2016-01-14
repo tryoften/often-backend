@@ -3,8 +3,7 @@ import { Firebase } from 'backbone';
 import ElasticSearchQuery from '../Models/ElasticSearchQuery';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import Query from "../Models/Query";
-import {Queryable} from "../Interfaces/Queryable";
+import {Queryable} from '../Interfaces/Queryable';
 
 class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 
@@ -44,12 +43,12 @@ class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 	generateQuery (query: Queryable, type: string): Object {
 
 		if (this.models.length === 0) {
-			throw new Error("The query collection is empty!");
+			throw new Error('The query collection is empty!');
 		}
 
 		var esQuery =  this.get(type);
 		if (!esQuery) {
-			throw new Error("No query defined for given type");
+			throw new Error('No query defined for given type');
 		}
 
 		return esQuery.injectQuery(query);

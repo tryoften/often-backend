@@ -5,11 +5,10 @@ import * as elasticsearch from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import { firebase as FirebaseConfig } from '../config';
 import logger from '../Models/Logger';
-import { Client } from "elasticsearch";
+import { Client } from 'elasticsearch';
 
 class FeedPageWorker extends Worker {
 	search: Client;
-	
 	constructor (opts = {}) {
 		let options = _.defaults(opts, {
 			specId: 'feed_page_parsing',
@@ -33,7 +32,7 @@ class FeedPageWorker extends Worker {
 		
 		let page = new FeedPage(data);
 		page.request()
-			.then(data => {
+			.then( (data) => {
 				resolve(data);
 			})
 			.catch(err => {

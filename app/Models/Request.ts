@@ -1,7 +1,7 @@
-import { Requestable } from "../Interfaces/Requestable";
-import Query from "./Query";
-import RequestType from "./RequestType";
-import MediaItemSource from "./MediaItemSource";
+import { Requestable } from '../Interfaces/Requestable';
+import Query from './Query';
+import RequestType from './RequestType';
+import MediaItemSource from './MediaItemSource';
 import * as _ from 'underscore';
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for requests.
@@ -21,7 +21,7 @@ class Request implements Requestable {
 		if (!attributes.query) {
 			throw new Error('Query needs to be defined');
 		}
-		this.query = new Query(attributes.query)
+		this.query = new Query(attributes.query);
 		delete attributes.query;
 
 		if (!attributes.creation_time) {
@@ -56,7 +56,7 @@ class Request implements Requestable {
 
 	removeProvider (provider: MediaItemSource) {
 		let index = _.indexOf(this._providers, provider);
-			if (index == -1) {
+			if (index === -1) {
 			//TODO(jakub): Possibly throw error here, because tried removing provider. To be decided...
 			return;
 		}

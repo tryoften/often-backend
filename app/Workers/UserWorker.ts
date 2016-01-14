@@ -23,8 +23,8 @@ class UserWorker extends Worker {
 	 *  Example:
 	 *
 	 *  data : {
-	 *		user : "myUser123",
-	 *		task : "addFavorites",
+	 *		user : 'myUser123',
+	 *		task : 'addFavorites',
 	 *		result : {
 	 *			_id : someGuid,
 	 *			//more stuff here
@@ -38,7 +38,7 @@ class UserWorker extends Worker {
 	 */
 	process (data, progress, resolve, reject) {
 		try {
-			if (data.task == 'addFavorite') {
+			if (data.task === 'addFavorite') {
 				// Instantiate favorites collection for user
 				let favs = new Favorites(data.user);
 
@@ -49,7 +49,7 @@ class UserWorker extends Worker {
 					reject(err);
 				});
 
-			} else if (data.task == 'removeFavorite') {
+			} else if (data.task === 'removeFavorite') {
 				//instantiate favorites collection for user
 				let favs = new Favorites(data.user);
 
@@ -60,7 +60,7 @@ class UserWorker extends Worker {
 					reject(err);
 				});
 
-			} else if (data.task == 'addRecent') {
+			} else if (data.task === 'addRecent') {
 				//instantiate recents collection for user
 				let recs = new Recents(data.user);
 				recs.addRecent(data.result)
@@ -70,7 +70,7 @@ class UserWorker extends Worker {
 						reject(err);
 					});
 
-			} else if (data.task == 'createToken') {
+			} else if (data.task === 'createToken') {
 				var token = UserTokenGenerator.generateToken(data.user, data.data);
 				var user = new User(data);
 				user.setToken(token);

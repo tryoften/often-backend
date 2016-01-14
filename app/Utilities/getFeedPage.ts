@@ -17,7 +17,7 @@ export default function getFeedPage(url) {
 		req.on('response', function (res) {
 			var stream = this;
 
-			if (res.statusCode != 200) {
+			if (res.statusCode !== 200) {
 				return this.emit('error', new Error('Bad status code'));
 			}
 

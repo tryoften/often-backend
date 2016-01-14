@@ -8,8 +8,8 @@ import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from './Logger';
-import Search from "../Search/Search";
-import Feed from "./Feed";
+import Search from '../Search/Search';
+import Feed from './Feed';
 
 class FeedPage {
 	url: string;
@@ -123,11 +123,11 @@ class FeedPage {
 				return o.enclosures[0].url;
 			}
 
-			if (o["media:content"] !== undefined && 
-				o["media:content"]["@"] !== undefined && 
-				o["media:content"]["@"].url !== undefined && 
-				o["media:content"]["@"].medium === "image") {
-				return o["media:content"]["@"].url;
+			if (o['media:content'] !== undefined &&
+				o['media:content']['@'] !== undefined &&
+				o['media:content']['@'].url !== undefined &&
+				o['media:content']['@'].medium === 'image') {
+				return o['media:content']['@'].url;
 			}
 
 			try {
@@ -135,7 +135,7 @@ class FeedPage {
 				let $image = $description('img');
 
 				if ($image.length) {
-					return $image.attr("src");
+					return $image.attr('src');
 				}
 
 			} catch (e) {}
@@ -149,18 +149,18 @@ class FeedPage {
 
 			// TODO(luc): define interface from this object
 			let data: any = {
-				"title": item.title,
-				"author": item.author,
-				"date": item.date,
-				"description": item.description,
-				"guid": item.guid,
-				"link": item.link,
-				"original_url": item.link,
-				"summary": item.summary,
-				"categories": item.categories,
-				"image": image,
-				"source": {
-					"id": this.feed.id
+				'title': item.title,
+				'author': item.author,
+				'date': item.date,
+				'description': item.description,
+				'guid': item.guid,
+				'link': item.link,
+				'original_url': item.link,
+				'summary': item.summary,
+				'categories': item.categories,
+				'image': image,
+				'source': {
+					'id': this.feed.id
 				}
 			};
 			data.link = this.urlHelper.shortenUrl(data.link);
