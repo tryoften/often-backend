@@ -40,9 +40,9 @@ class UserTokenGenerator {
 		var ref = new Firebase(url);
 		ref.authWithCustomToken(FirebaseConfig.Secret, (error, result) => {
 			if (error) {
-				logger.error("Authentication failed for: " + url);
+				logger.error('Authentication failed for: ' + url);
 			} else {
-				logger.info("Authentication successful for: " + url);
+				logger.info('Authentication successful for: ' + url);
 			}
 		});
 		return ref;

@@ -1,5 +1,4 @@
 import 'backbonefire';
-import * as _ from 'underscore';
 import * as Backbone from 'backbone';
 import * as Firebase from 'firebase';
 import ServiceProvider from '../Models/ServiceProvider';

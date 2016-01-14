@@ -1,8 +1,8 @@
 import * as _ from 'underscore';
 
 export interface Filterable {
-	id: string,
-	image: string,
+	id: string;
+	image: string;
 	text: string;
 	type: string;
 }

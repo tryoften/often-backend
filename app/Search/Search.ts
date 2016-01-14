@@ -1,4 +1,4 @@
-import {MediaItemGroup} from "../Models/MediaItemGroup";
+import {MediaItemGroup} from '../Models/MediaItemGroup';
 import { Client } from 'elasticsearch';
 import { elasticsearch as ElasticSearchConfig } from '../config';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
@@ -6,10 +6,9 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import { Indexable } from '../Interfaces/Indexable';
-import { Queryable } from "../Interfaces/Queryable";
-import { CommandData } from '../Interfaces/CommandData';
-import {IndexedObject} from "../Interfaces/Indexable";
-import RequestType from "../Models/RequestType";
+import { Queryable } from '../Interfaces/Queryable';
+import {IndexedObject} from '../Interfaces/Indexable';
+import RequestType from '../Models/RequestType';
 
 /**
  * Class for interacting with ElasticSearch.
@@ -83,7 +82,7 @@ class Search {
 
 	query (query: Queryable): Promise<MediaItemGroup[]> {
 
-		var esQuery = this.esQueries.generateQuery(query, "search");
+		var esQuery = this.esQueries.generateQuery(query, 'search');
 
 		return new Promise((resolve, reject) => {
 
@@ -160,7 +159,7 @@ class Search {
 						output : queryText,
 						payload: {
 							resultsCount: count,
-							type: "query"
+							type: 'query'
 						}
 					},
 					counter: 1,
@@ -202,11 +201,11 @@ class Search {
 						item.type = item.payload.type;
 
 						if (_.isUndefined(item.type) || _.isNull(item.type)) {
-							item.type = "query";
+							item.type = 'query';
 						}
 
-						if (item.type == "filter") {
-							item.image = item.text.substring(1, item.text.length) + "-tag";
+						if (item.type === 'filter') {
+							item.image = item.text.substring(1, item.text.length) + '-tag';
 						}
 						item.id = new Buffer(item.text).toString('base64');
 						return item;
@@ -254,7 +253,7 @@ class Search {
 			this.es.search({
 				body: {
 					sort: [{
-						counter: { order: "desc" }
+						counter: { order: 'desc' }
 					}],
 					size: count
 				}

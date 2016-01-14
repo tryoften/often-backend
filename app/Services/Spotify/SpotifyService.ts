@@ -1,6 +1,5 @@
 import 'backbonefire';
 import ServiceBase from '../ServiceBase';
-import { Settings as settings } from './config';
 import logger from '../../Models/Logger';
 var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
@@ -123,7 +122,7 @@ class SpotifyService extends ServiceBase {
 						image_large: trackData.album.images[0].url,
 						album_name: trackData.album.name,
 						artist_name: trackData.artists[0].name,
-						external_url : "https://play.spotify.com/track/"+trackData.id,
+						external_url : 'https://play.spotify.com/track/'+trackData.id,
 						url: trackData.href,
 						uri: trackData.uri,
 						explicit: trackData.explicit,

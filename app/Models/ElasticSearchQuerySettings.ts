@@ -37,7 +37,7 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 	 * @return {int} - Size of the response
 	 */
 	getResponseSize () {
-		return this.get("responseSize");
+		return this.get('responseSize');
 	}
 
 	/**
@@ -46,7 +46,7 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 	 * @return {int} - Size of the response
 	 */
 	getQueryType (index: number) {
-		return this.get("sourceToQueryMap")[index];
+		return this.get('sourceToQueryMap')[index];
 	}
 
 	

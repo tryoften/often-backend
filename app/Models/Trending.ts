@@ -1,5 +1,5 @@
 import 'backbonefire';
-import { Firebase, Model } from 'backbone';
+import { Firebase } from 'backbone';
 import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import * as _ from 'underscore';

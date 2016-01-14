@@ -1,21 +1,20 @@
 import config from '../config';
-import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import * as _ from 'underscore';
-import BaseModel from "./BaseModel";
-import {Requestable} from "../Interfaces/Requestable";
-import {Queryable} from "../Interfaces/Queryable";
-import RequestType from "../Models/RequestType";
+import BaseModel from './BaseModel';
+import {Requestable} from '../Interfaces/Requestable';
+import {Queryable} from '../Interfaces/Queryable';
+import RequestType from '../Models/RequestType';
 
 
 export interface ResponseAttributes extends Requestable {
-	id: string,
-	userId: string,
-	time_created: number,
-	time_modified: number,
-	time_completed?: number,
-	query: Queryable,
-	type: RequestType,
-	doneUpdating: boolean
+	id: string;
+	userId: string;
+	time_created: number;
+	time_modified: number;
+	time_completed?: number;
+	query: Queryable;
+	type: RequestType;
+	doneUpdating: boolean;
 }
 
 /**
@@ -56,8 +55,7 @@ export class Response extends BaseModel {
 		response.save();
 		return response;
 	}
-
-    updateResults (data: any) {
+	updateResults (data: any) {
         this.set({
             time_modified: Date.now(),
             results: data

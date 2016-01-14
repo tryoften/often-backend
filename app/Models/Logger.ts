@@ -1,6 +1,5 @@
 import * as winston from 'winston';
 import { GCL } from 'winston-gcl';
-import { Firebase } from 'winston-firebase';
 import config from '../config';
 import { firebase as FirebaseConfig } from '../config';
 import { winston as WinstonConfig } from '../config';

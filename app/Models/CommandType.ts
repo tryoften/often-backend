@@ -1,9 +1,9 @@
 import * as _ from 'underscore';
 
 export default class CommandType extends String {
-	static listFilters: CommandType = "filters-list";
-	static topSearches: CommandType = "top-seraches";
-	static filteredSearch: CommandType = "filtered-search";
+	static listFilters: CommandType = 'filters-list';
+	static topSearches: CommandType = 'top-seraches';
+	static filteredSearch: CommandType = 'filtered-search';
 
 	static allCommands: CommandType[] = [
 		CommandType.listFilters,
@@ -31,7 +31,7 @@ export default class CommandType extends String {
 	 */
 	static fromType(str: string): CommandType {
 		if (!_.contains(CommandType.allCommands, str)) {
-			throw new Error("Cannot create CommandType from passed in string. You must pass in one of the defined types");
+			throw new Error('Cannot create CommandType from passed in string. You must pass in one of the defined types');
 		}
 		return <CommandType>str;
 	}

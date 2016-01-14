@@ -1,5 +1,4 @@
 import 'backbonefire';
-import * as _ from 'underscore';
 import { Firebase } from 'backbone';
 import Feed from '../Models/Feed';
 import config from '../config';

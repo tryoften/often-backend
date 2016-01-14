@@ -32,9 +32,9 @@ class ElasticSearchQuerySettings extends Firebase.Model {
 
 	getResponseSize () {
 		return new Promise( (resolve, reject) => {
-			this.once("sync", () => {
-				console.log(this.get("responseSize"));
-				resolve(this.get("responseSize"));
+			this.once('sync', () => {
+				console.log(this.get('responseSize'));
+				resolve(this.get('responseSize'));
 			});
 			this.fetch();
 		});

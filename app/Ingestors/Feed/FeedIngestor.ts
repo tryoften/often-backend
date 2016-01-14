@@ -8,7 +8,6 @@ class FeedIngestor {
 		this.feeds = new Feeds([], {
 			queueEnabled: true
 		});
-		
 		setInterval(() => {
 			this.ingest();
 		}, 15 * 60000);
@@ -23,7 +22,6 @@ class FeedIngestor {
 		return new Promise((resolve, reject) => {
 			this.feeds.once('sync', (data: Feeds) => {
 				this.feedCount = this.feeds.models.length;
-				
 				for (let feed of this.feeds.models) {
 					feed.processPages(reingest);
 				}

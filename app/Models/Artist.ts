@@ -9,7 +9,7 @@ import { IndexedObject } from '../Interfaces/Indexable';
  */
 class Artist extends MediaItem {
 
-	// TODO(jakub): create an interface for artist that guarantees "common" indexed fields
+	// TODO(jakub): create an interface for artist that guarantees 'common' indexed fields
 	constructor(attributes?: any, options?: any) {
 		this.urlRoot = `${FirebaseConfig.BaseURL}/artists`;
 		this.autoSync = true;

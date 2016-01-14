@@ -4,4 +4,4 @@ class Filter extends Model {
 
 }
 
-export default Filter;
+export default Filter

@@ -3,12 +3,12 @@ import { Response } from '../Models/Response';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
-import Search from "./Search";
-import Request from "../Models/Request";
-import RequestType from "../Models/RequestType";
-import MediaItemSource from "../Models/MediaItemSource";
-import Filters from "../Collections/Filters";
-import FilterType from "../Models/FilterType";
+import Search from './Search';
+import Request from '../Models/Request';
+import RequestType from '../Models/RequestType';
+import MediaItemSource from '../Models/MediaItemSource';
+import Filters from '../Collections/Filters';
+import FilterType from '../Models/FilterType';
 
 /**
  * This class is responsible for figuring out which service provider must handle a given incoming request.
@@ -35,7 +35,7 @@ class SearchRequestDispatcher {
 		this.filters = new Filters();
 
 		if (_.isUndefined(opts.services) || _.isNull(opts.services)) {
-			throw "Services required to instantiate SearchRequestDispatcher";
+			throw 'Services required to instantiate SearchRequestDispatcher';
 		}
 
 		/* service provider name to service instances map */
@@ -89,7 +89,7 @@ class SearchRequestDispatcher {
 					break;
 
 				default:
-					throw new Error("Invalid request type");
+					throw new Error('Invalid request type');
 
 			}
 		})();
@@ -97,7 +97,7 @@ class SearchRequestDispatcher {
 		promise.then( (data: any) => {
 			response.updateResults(data);
 
-			if(request.providersLeftToProcess === 0 || !!(request.type == RequestType.autocomplete)) {
+			if(request.providersLeftToProcess === 0 || !!(request.type === RequestType.autocomplete)) {
 				this.completeResponse(response);
 			}
 
@@ -127,7 +127,7 @@ class SearchRequestDispatcher {
 
 			//this.processQueryUpdate(request, response, resolve, reject);
 
-			if (request.type == RequestType.search) {
+			if (request.type === RequestType.search) {
 				//Execute the request every user provider that the user is subscribed
 				for (var providerName of request.providers) {
 					this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled:any) => {

@@ -7,7 +7,7 @@ export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
 export class Lyric extends MediaItem {
 
-	// TODO(jakub): create an interface for lyric that guarantees "common" indexed fields
+	// TODO(jakub): create an interface for lyric that guarantees 'common' indexed fields
 	get text(): string {
 		return this.get('text');
 	}

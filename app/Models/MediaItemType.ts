@@ -1,9 +1,9 @@
 import * as _ from 'underscore';
 
 export default class MediaItemType extends String {
-	static artist: MediaItemType = "artist";
-	static track: MediaItemType = "track";
-	static lyric: MediaItemType = "lyric";
+	static artist: MediaItemType = 'artist';
+	static track: MediaItemType = 'track';
+	static lyric: MediaItemType = 'lyric';
 
 	static allTypes: MediaItemType[] = [
 		MediaItemType.artist,
@@ -31,7 +31,7 @@ export default class MediaItemType extends String {
 	 */
 	static fromType(str: string): MediaItemType {
 		if (!_.contains(MediaItemType.allTypes, str)) {
-			throw new Error("Cannot create MediaItemType from passed in string. You must pass in one of the defined types");
+			throw new Error('Cannot create MediaItemType from passed in string. You must pass in one of the defined types');
 		}
 		return <MediaItemType>str;
 	}

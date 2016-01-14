@@ -1,7 +1,7 @@
 import 'backbonefire';
 import ServiceBase from '../ServiceBase';
 import { Settings as settings } from './config';
-import { Service as RestService, parsers } from 'restler';
+import { Service as RestService } from 'restler';
 import logger from '../../Models/Logger';
 
 /** 

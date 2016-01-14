@@ -2,7 +2,6 @@ import { Model } from 'backbone';
 import config from '../config';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import getFeedPage from '../Utilities/getFeedPage';
-import * as URL from 'url';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from './Logger';
@@ -121,7 +120,7 @@ class Feed extends Model {
 			if (shouldIngest) {
 				logger.info(`Feed(${this.id}): ingesting`);
 
-				let url = (this.get('pagination') == 'none') ? 
+				let url = (this.get('pagination') === 'none') ?
 					this.get('url') :
 					this.get('baseURL') + this.get('currentPage');
 
@@ -145,7 +144,7 @@ class Feed extends Model {
 			_state: 'start_page_parsing'
 		};
 
-		if (this.get('pagination') == 'none') {
+		if (this.get('pagination') === 'none') {
 			taskData.pageURL = this.get('url');
 		}
 
@@ -158,7 +157,7 @@ class Feed extends Model {
 		let currentPage = this.get('currentPage');
 		let pagination = this.get('pagination');
 
-		if (pagination == 'none') {
+		if (pagination === 'none') {
 			return;
 		}
 
@@ -166,11 +165,11 @@ class Feed extends Model {
 		if (currentPage >= this.get('pageCount')) {
 			let pagination = this.get('pagination');
 
-			if (pagination == 'link' || pagination == 'none') {
+			if (pagination === 'link' || pagination === 'none') {
 				return;
 			}
 
-			if (pagination == 'paged') {
+			if (pagination === 'paged') {
 				this.set('pageCount', this.get('pageCount') + 10);
 			}
 
@@ -213,7 +212,7 @@ class Feed extends Model {
 
 		this.set('currentPage', currentPage);
 
-		if (this.get('pagination') == 'none') {
+		if (this.get('pagination') === 'none') {
 			return this.get('url');
 		}
 

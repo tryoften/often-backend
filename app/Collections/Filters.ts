@@ -5,7 +5,7 @@ import { Firebase } from 'backbone';
 import Filter from '../Models/Filter';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import {FilterInfo} from '../Models/FilterInfo';
-import {FilterSuggestion} from "../Models/FilterSuggestions";
+import {FilterSuggestion} from '../Models/FilterSuggestions';
 
 class Filters extends Firebase.Collection<Filter> {
 
@@ -22,7 +22,7 @@ class Filters extends Firebase.Collection<Filter> {
 
 	suggestFilters (filterInfo: FilterInfo): FilterSuggestion[] {
 
-		if (filterInfo.value.length == 0) {
+		if (filterInfo.value.length === 0) {
 			/* If text is empty then return all filters */
 			return [new FilterSuggestion(`#${filterInfo.value}`, this.toJSON())];
 		}
@@ -30,7 +30,7 @@ class Filters extends Firebase.Collection<Filter> {
 		/* Otherwise return the ones that match the prefix of the passed in filter */
 		var suggestions: FilterSuggestion[] = [];
 		for (var filter of this.models) {
-			if (filter.get("text").indexOf(`#${filterInfo.value}`) === 0) {
+			if (filter.get('text').indexOf(`#${filterInfo.value}`) === 0) {
 				suggestions.push(filter.toJSON());
 			}
 		}

@@ -1,4 +1,4 @@
-import { Firebase, Model } from 'backbone';
+import { Firebase } from 'backbone';
 import config from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 

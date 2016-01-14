@@ -1,6 +1,5 @@
-import {Queryable, QueryData} from "../Interfaces/Queryable";
-import MediaItemSource from "./MediaItemSource";
-import {FilterInfo} from "./FilterInfo";
+import {Queryable, QueryData} from '../Interfaces/Queryable';
+import {FilterInfo} from './FilterInfo';
 
 class Query implements Queryable {
 	text: string;

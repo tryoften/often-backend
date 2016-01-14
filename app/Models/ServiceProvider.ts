@@ -7,4 +7,4 @@ class ServiceProvider extends Model {
 
 }
 
-export default ServiceProvider;
+export default ServiceProvider

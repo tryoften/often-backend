@@ -1,21 +1,18 @@
 import { GeniusData, GeniusTrackData, GeniusArtistData, GeniusLyricData, GeniusServiceResult } from './GeniusDataTypes';
 import { Settings as settings } from './config';
 import { Service as RestService } from 'restler';
-import { generate as generateId } from 'shortid';
 import ServiceBase from '../ServiceBase';
-import logger from '../../Models/Logger';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
 import { Lyric } from '../../Models/Lyric';
 import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
+import startsWith = require('lodash/string/startsWith');
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
-import startsWith = require('lodash/string/startsWith');
 import 'backbonefire';
 import { IndexedObject } from '../../Interfaces/Indexable';
 import Query from '../../Models/Query';
-import * as _ from 'underscore';
 
 /** 
  * This class is responsible for fetching data from the Genius API

@@ -62,7 +62,7 @@ class URIConverterService {
 		this.app.get('/:hash', (req, res) => {
 			var hash = req.params.hash;
 
-			if (hash === "favicon.ico" || hash === "health-check") {
+			if (hash === 'favicon.ico' || hash === 'health-check') {
 				res.status(200).end();
 				return;
 			}
