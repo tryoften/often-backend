@@ -186,7 +186,9 @@ class GeniusService extends ServiceBase {
 				}
 
 				if (data.response.referents.length === 0) {
-					reject(new Error('There are no referent lyrics for this track.'));
+					console.log('There are no referents');
+					resolve([]);
+					//reject(new Error('There are no referent lyrics for this track.'));
 					return;
 				}
 
@@ -213,8 +215,7 @@ class GeniusService extends ServiceBase {
 				resolve(lyrics);
 			}).on('error', err => {
 				console.log('err' + err);
-				resolve([]);
-				//reject(err);
+				reject(err);
 			});
 
 		});
@@ -425,7 +426,9 @@ class GeniusService extends ServiceBase {
 						score: 0
 					};
 					if (root.name === 'a') {
-						lyricData.annotation_id = cheerio(root).data('id');
+						if (cheerio(root).data('id')) {
+							lyricData.annotation_id = cheerio(root).data('id');
+						}
 					}
 					lyrics = lyrics.concat(this.cleanUpLyrics([lyricData]));
 					break;
