@@ -65,7 +65,7 @@ class Search {
 					reject(err);
 				} else {
 					console.log('response');
-					resolve(resp);					
+					resolve(resp);
 				}
 			});
 
@@ -137,7 +137,7 @@ class Search {
 
 	updateSearchTerms(searchId: string, queryText: string, count: number) {
 
-		//TODO(jakub): Move all ES statements to Firebase
+		// TODO(jakub): Move all ES statements to Firebase
 		this.es.update({
 			index: 'search-terms',
 			type: 'query',
