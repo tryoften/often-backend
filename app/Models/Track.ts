@@ -80,7 +80,7 @@ class Track extends MediaItem {
 		let data = super.toIndexingFormat();
 		data.title = this.title;
 		data.author = this.artist_name;
-		data.description = "";
+		data.description = '';
 
 		return data;
 	}

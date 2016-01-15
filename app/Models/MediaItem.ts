@@ -37,13 +37,6 @@ export class MediaItem extends BaseModel implements Indexable {
 		super(attributes, options);
 	}
 
-	defaults(): any {
-		return {
-			title: '',
-			description: '',
-			author: ''
-		};
-	}
 
 	/**
 	 * Creates media item from a service provider id by specifying the source, type and provider id
@@ -108,17 +101,6 @@ export class MediaItem extends BaseModel implements Indexable {
 	}
 
 	// Getters
-	get title(): string {
-		return this.get('title');
-	}
-
-	get author(): string {
-		return this.get('author');
-	}
-
-	get description(): string {
-		return this.get('description');
-	}
 
 	get type(): MediaItemType {
 		return this.get('type');
@@ -129,17 +111,6 @@ export class MediaItem extends BaseModel implements Indexable {
 	}
 
 	// Setters
-	set title(value: string) {
-		this.set('title', value);
-	}
-
-	set author(value: string) {
-		this.set('author', value);
-	}
-
-	set description(value: string) {
-		this.set('description', value);
-	}
 
 	set type(value: MediaItemType) {
 		this.set('type', value);

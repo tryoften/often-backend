@@ -80,7 +80,32 @@ class GeniusService extends ServiceBase {
 		});
 
 	}
+	ingest (trackIds: string[]): Promise<IndexedObject[]> {
+		return new Promise( (resolve, reject) => {
+			let results: IndexedObject[] = [];
+			var promises = [];
 
+			for (var trackId of trackIds) {
+				// Add all songs to songs list
+				promises.push(this.getData(trackId));
+			}
+
+			Promise.all(promises).then( (categorizedData) => {
+				let geniusServiceResults =  <GeniusServiceResult[]>categorizedData;
+
+				for (let gsr of geniusServiceResults) {
+
+					results.push(gsr.artist.toIndexingFormat());
+					results.push(gsr.track.toIndexingFormat());
+					for (let lyric of gsr.lyrics) {
+						results.push(lyric.toIndexingFormat());
+					}
+				}
+
+				resolve(results);
+			});
+		});
+	}
 	/**
 	 * Gets all metadata for given track ID including artist, album, and lyrics data
 	 *
@@ -188,7 +213,8 @@ class GeniusService extends ServiceBase {
 				resolve(lyrics);
 			}).on('error', err => {
 				console.log('err' + err);
-				reject(err);
+				resolve([]);
+				//reject(err);
 			});
 
 		});

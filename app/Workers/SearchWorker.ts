@@ -15,8 +15,8 @@ class SearchWorker extends Worker {
 		this.dispatcher = new SearchRequestDispatcher({
 			search: new Search(),
 			services: {
-				genius: GeniusService
-			}
+				genius: GeniusService}
+
 		});
 	}
 

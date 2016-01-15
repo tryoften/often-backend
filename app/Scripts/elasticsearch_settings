@@ -1,0 +1,116 @@
+/* Settings */
+// use keyword analyzer
+
+/* Spotify */
+
+PUT /spotify
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "folding": {
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "track": {
+      "properties": {
+        "name": {
+          "type" : "string",
+          "analyzer" : "standard",
+          "fields" : {
+            "raw" : {
+              "type": "string",
+            "analyzer": "folding"
+            }
+          }
+        },
+        "artist_name": {
+          "type" : "string",
+          "analyzer" : "standard",
+          "fields" : {
+            "raw" : {
+              "type": "string",
+            "analyzer": "folding"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* SoundCloud */
+PUT /soundcloud
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "folding": {
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "track": {
+      "properties": {
+        "name": {
+          "type" : "string",
+          "analyzer" : "standard",
+          "fields" : {
+            "raw" : {
+              "type": "string",
+            "analyzer": "folding"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/* YouTube */
+PUT /youtube
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "folding": {
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "video": {
+      "properties": {
+        "title": {
+          "type" : "string",
+          "analyzer" : "standard",
+          "fields" : {
+            "raw" : {
+              "type": "string",
+            "analyzer": "folding"
+            }
+          }
+        }
+      }
+    }
+  }
+}
