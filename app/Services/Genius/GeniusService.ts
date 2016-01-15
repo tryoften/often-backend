@@ -186,7 +186,7 @@ class GeniusService extends ServiceBase {
 				}
 
 				if (data.response.referents.length === 0) {
-					reject(new Error('There are no referent lyrics for this track.'));
+					resolve([]);
 					return;
 				}
 
@@ -213,8 +213,6 @@ class GeniusService extends ServiceBase {
 				resolve(lyrics);
 			}).on('error', err => {
 				console.log('err' + err);
-				resolve([]);
-				//reject(err);
 			});
 
 		});
@@ -425,7 +423,10 @@ class GeniusService extends ServiceBase {
 						score: 0
 					};
 					if (root.name === 'a') {
-						lyricData.annotation_id = cheerio(root).data('id');
+						let annotation_id = cheerio(root).data('id');
+						if (annotation_id) {
+							lyricData.annotation_id = annotation_id;
+						}
 					}
 					lyrics = lyrics.concat(this.cleanUpLyrics([lyricData]));
 					break;

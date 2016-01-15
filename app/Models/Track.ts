@@ -78,8 +78,8 @@ class Track extends MediaItem {
 
 	public toIndexingFormat(): IndexedObject {
 		let data = super.toIndexingFormat();
-		data.title = this.title;
-		data.author = this.artist_name;
+		data.title = this.title || '';
+		data.author = this.artist_name || '';
 		data.description = '';
 
 		return data;
