@@ -69,9 +69,9 @@ export class Lyric extends MediaItem {
 
 	public toIndexingFormat(): IndexedObject {
 		let data = super.toIndexingFormat();
-		data.title = this.track_name;
-		data.author = this.artist_name;
-		data.description = this.text;
+		data.title = this.track_name || '';
+		data.author = this.artist_name || '';
+		data.description = this.text || '';
 
 		return data;
 	}

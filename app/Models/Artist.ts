@@ -71,7 +71,7 @@ class Artist extends MediaItem {
 	public toIndexingFormat(): IndexedObject {
 		let data = super.toIndexingFormat();
 		data.title = '';
-		data.author = this.name;
+		data.author = this.name || '';
 		data.description = '';
 
 		return data;
