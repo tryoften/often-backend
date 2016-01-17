@@ -186,13 +186,8 @@ class GeniusService extends ServiceBase {
 				}
 
 				if (data.response.referents.length === 0) {
-<<<<<<< HEAD
 					console.log('There are no referents');
 					resolve([]);
-					//reject(new Error('There are no referent lyrics for this track.'));
-=======
-					resolve([]);
->>>>>>> a7dc8b35e1e4037f429081aef143f0208ddfde2c
 					return;
 				}
 
@@ -219,10 +214,7 @@ class GeniusService extends ServiceBase {
 				resolve(lyrics);
 			}).on('error', err => {
 				console.log('err' + err);
-<<<<<<< HEAD
 				reject(err);
-=======
->>>>>>> a7dc8b35e1e4037f429081aef143f0208ddfde2c
 			});
 
 		});
