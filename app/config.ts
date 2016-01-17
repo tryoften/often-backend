@@ -39,7 +39,7 @@ var config: any = {
 		scopes: ['email', 'profile']
 	},
 	firebase: {
-		BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com',
+		BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com/',
 		Secret: args['firebase-secret'] || 'kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2',
 		queues: {}
 	},
@@ -79,6 +79,14 @@ config.firebase.queues = {
 		sanitize: false,
 		suppressStack: false,
 		retries: 0
+	},
+	track_ingestion: {
+		specId: 'track_ingestion',
+		url: `${config.firebase.BaseURL}/queues/track_ingestion`,
+		numWorkers: 2,
+		sanitize: false,
+		suppressStack: false,
+		retries: 3
 	},
 	imageResizing: {
 		specId: 'image_resizing',
