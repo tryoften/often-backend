@@ -62,7 +62,6 @@ class Artist extends MediaItem {
 
 		this.set('time_modified', Date.now());
 		this.set(properties);
-		this.registerToIdSpace(artistData.id);
 		this.save();
 
 		return this;

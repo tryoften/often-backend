@@ -1,6 +1,7 @@
 import SearchWorker from './Workers/SearchWorker';
 import FeedIngestorWorker from './Workers/FeedIngestorWorker';
 import FeedPageWorker from './Workers/FeedPageWorker';
+import IngestionWorker from './Workers/IngestionWorker';
 import UserWorker from './Workers/UserWorker';
 import URIConverterService from './Utilities/URIConverterService';
 import * as minimist from 'minimist';
@@ -34,6 +35,11 @@ if (_.contains(argv._, 'user')) {
 if (_.contains(argv._, 'link-redirector')) {
 	console.log('starting the link-redirector');
 	new URIConverterService().start();
+}
+
+if (_.contains(argv._, 'ingestion')) {
+	console.log('starting the ingestion-worker');
+	new IngestionWorker().start();
 }
 
 console.log('firebase root URL: ', config.firebase.BaseURL);

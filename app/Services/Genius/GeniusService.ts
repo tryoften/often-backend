@@ -186,6 +186,7 @@ class GeniusService extends ServiceBase {
 				}
 
 				if (data.response.referents.length === 0) {
+					console.log('There are no referents');
 					resolve([]);
 					return;
 				}
@@ -213,6 +214,7 @@ class GeniusService extends ServiceBase {
 				resolve(lyrics);
 			}).on('error', err => {
 				console.log('err' + err);
+				reject(err);
 			});
 
 		});
