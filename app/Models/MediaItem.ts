@@ -48,8 +48,8 @@ export class MediaItem extends BaseModel implements Indexable {
      */
 	public static fromType(source: MediaItemSource, type: MediaItemType, providerId: string): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(type);
-
 		return new Promise<MediaItem>( (resolve, reject) => {
+
 			IDSpace.instance.syncData().then(() => {
 				let oftenId = IDSpace.instance.getOftenIdFrom(source, type, providerId);
 				var model: typeof MediaItemClass;
@@ -66,6 +66,7 @@ export class MediaItem extends BaseModel implements Indexable {
 
 				resolve(model);
 			});
+
 		});
 	}
 
@@ -126,7 +127,7 @@ export class MediaItem extends BaseModel implements Indexable {
 		data._index = this.source;
 		data._score = data.score;
 		data._type = this.type;
-		delete data.id;
+
 		return data;
 	}
 }
