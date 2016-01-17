@@ -1,25 +1,16 @@
 import PreIngestor from '../Ingestors/Lyric/PreIngestor';
-import GeniusService from '../Services/Genius/GeniusService';
-import Search from '../Search/Search';
+import * as Firebase from 'firebase';
+import { firebase as FirebaseConfig} from '../config';
 
 var pi = new PreIngestor();
-var gs = new GeniusService({
-	provider_id: 'genius'
-});
-var search = new Search();
-//21 - 24
-pi.ingestPopularTracks().then((tracks) => {
-	var p = new Promise((resolve, reject) => {
-		resolve(true);
-	});
-	var count = 0;
-	tracks.forEach((trackId) => {
-		console.log("Count: "+ count + " trackId: "+ trackId);
-		count++;
-		p = p.then(function(){
-			return gs.ingest([trackId]);
-		});
-	});
+var ref = new Firebase(`${FirebaseConfig.BaseURL}/queues/track_ingestion/tasks`);
 
+pi.ingestPopularTracks().then((tracks) => {
+
+	for (var track of tracks) {
+		ref.push({
+			trackId: track
+		});
+	}
 });
 
