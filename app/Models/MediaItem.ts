@@ -1,10 +1,8 @@
 import BaseModel from './BaseModel';
 import MediaItemType from './MediaItemType';
 import MediaItemSource from './MediaItemSource';
-import { firebase as FirebaseConfig } from '../config';
 import { generate as generateId } from 'shortid';
 import { Indexable, IndexedObject } from '../Interfaces/Indexable';
-import Firebase = require('firebase');
 import IDSpace from './IDSpace';
 
 export interface MediaItemAttributes {
@@ -50,44 +48,19 @@ export class MediaItem extends BaseModel implements Indexable {
 		var MediaItemClass = MediaItemType.toClass(type);
 		return new Promise<MediaItem>( (resolve, reject) => {
 
-			IDSpace.instance.syncData().then(() => {
-				let oftenId = IDSpace.instance.getOftenIdFrom(source, type, providerId);
-				var model: typeof MediaItemClass;
-
-				if (oftenId) {
-					console.log(`Found often id for ${source}:${type}:${providerId} = ${oftenId}`);
-					model = new MediaItemClass({source, type, id: oftenId});
-				} else {
-					console.log(`Often id not found for ${source}:${type}:${providerId}, creating new model`);
-					model = new MediaItemClass({ source, type });
-					IDSpace.instance.registerId(model, providerId);
-					model.save();
-				}
-
+			var model: typeof MediaItemClass;
+			IDSpace.instance.getOftenIdFrom(source, type, providerId).then(oftenId => {
+				console.log(`Found often id for ${source}:${type}:${providerId} = ${oftenId}`);
+				model = new MediaItemClass({source, type, id: oftenId});
+				resolve(model);
+			}).catch(err => {
+				console.log(`Often id not found for ${source}:${type}:${providerId}, creating new model`);
+				model = new MediaItemClass({ source, type });
+				IDSpace.instance.registerId(model, providerId);
+				model.save();
 				resolve(model);
 			});
 
-		});
-	}
-
-	/**
-	 * Looks up an often id for a given service provider Id
-	 *
-	 * @param source - source id (e.g. Spotify, Soundcloud, etc...)
-	 * @param type - type of the id (e.g. lyric, track, etc...)
-	 * @param id - service provider id (e.g. spotify:track:xxx)
-	 * @returns {Promise<string>} resolves with often id or fails if id is not found
-     */
-	public static getOftenIdFrom(source: MediaItemSource, type: MediaItemType, id: string): Promise<string> {
-		return new Promise<string> ( (resolve, reject) => {
-			var url = `${FirebaseConfig.BaseURL}/idspace/${source}/${type}/${id}`;
-			new Firebase(url).on('value', snap => {
-				if (snap.exists()) {
-					resolve(snap.val());
-				} else {
-					reject(new Error('id not found'));
-				}
-			});
 		});
 	}
 
