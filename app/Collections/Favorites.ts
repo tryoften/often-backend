@@ -58,8 +58,6 @@ class Favorites extends Firebase.Collection<Favorite> {
 					return;
 				}
 			}
-
-			item.id = generateURIfromGuid(item.id);
 			item.time_added = Date.now();
 			this.add(item);
 			resolve(true);
@@ -77,7 +75,7 @@ class Favorites extends Firebase.Collection<Favorite> {
 		logger.info('Favorites:unfavorite()', 'unfavorited item', item._id);
 		return new Promise( (resolve, reject) => {
 			for (let model of this.models) {
-				if (model.get('_id') == item._id) {
+				if (model.get('_id') === item._id) {
 					this.remove(model);
 					resolve(true);
 					return;
