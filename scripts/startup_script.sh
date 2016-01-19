@@ -60,17 +60,11 @@ git clone https://source.developers.google.com/p/$PROJECTID /opt/app
 cd /opt/app
 npm install
 
-echo "Installing grunt"
-npm install -g grunt-cli
+echo "Installing npm dependencies"
+npm install -g grunt-cli tsd typescript
 
-echo "Installing Forever"
-npm install -g forever
-
-echo "NPM install finished"
-
-
-echo "Launching grunt"
-grunt
+echo "Running typescript compiler"
+tsd install && tsc
 
 echo "Node version: "
 node --version

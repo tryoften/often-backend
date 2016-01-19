@@ -75,7 +75,6 @@ class UserWorker extends Worker {
 				var user = new User(data);
 				user.setToken(token);
 				resolve(token);
-				
 			} else {
 				//no task found return an error
 				reject('Invalid user task detected');
