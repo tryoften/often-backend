@@ -1,11 +1,11 @@
 import BaseModel from './BaseModel';
 import MediaItemType from './MediaItemType';
 import MediaItemSource from './MediaItemSource';
-import { firebase as FirebaseConfig } from '../config';
 import { generate as generateId } from 'shortid';
 import { Indexable, IndexedObject } from '../Interfaces/Indexable';
-import Firebase = require('firebase');
 import IDSpace from './IDSpace';
+import Firebase = require('firebase');
+import { firebase as FirebaseConfig } from '../config';
 
 export interface MediaItemAttributes {
 	id?: string;
@@ -18,6 +18,7 @@ export interface MediaItemAttributes {
  * Base model for media items. Includes all the metadata to query object from backend database
  */
 export class MediaItem extends BaseModel implements Indexable {
+	imageQueue: Firebase;
 	/**
 	 * Designated constructor
 	 *
@@ -35,6 +36,8 @@ export class MediaItem extends BaseModel implements Indexable {
 		this.autoSync = true;
 
 		super(attributes, options);
+
+		this.imageQueue = new Firebase(`${FirebaseConfig.BaseURL}/queues/image_resizing/tasks`);
 	}
 
 
@@ -50,44 +53,19 @@ export class MediaItem extends BaseModel implements Indexable {
 		var MediaItemClass = MediaItemType.toClass(type);
 		return new Promise<MediaItem>( (resolve, reject) => {
 
-			IDSpace.instance.syncData().then(() => {
-				let oftenId = IDSpace.instance.getOftenIdFrom(source, type, providerId);
-				var model: typeof MediaItemClass;
-
-				if (oftenId) {
-					console.log(`Found often id for ${source}:${type}:${providerId} = ${oftenId}`);
-					model = new MediaItemClass({source, type, id: oftenId});
-				} else {
-					console.log(`Often id not found for ${source}:${type}:${providerId}, creating new model`);
-					model = new MediaItemClass({ source, type });
-					IDSpace.instance.registerId(model, providerId);
-					model.save();
-				}
-
+			var model: typeof MediaItemClass;
+			IDSpace.instance.getOftenIdFrom(source, type, providerId).then(oftenId => {
+				console.log(`Found often id for ${source}:${type}:${providerId} = ${oftenId}`);
+				model = new MediaItemClass({source, type, id: oftenId});
+				resolve(model);
+			}).catch(err => {
+				console.log(`Often id not found for ${source}:${type}:${providerId}, creating new model`);
+				model = new MediaItemClass({ source, type });
+				IDSpace.instance.registerId(model, providerId);
+				model.save();
 				resolve(model);
 			});
 
-		});
-	}
-
-	/**
-	 * Looks up an often id for a given service provider Id
-	 *
-	 * @param source - source id (e.g. Spotify, Soundcloud, etc...)
-	 * @param type - type of the id (e.g. lyric, track, etc...)
-	 * @param id - service provider id (e.g. spotify:track:xxx)
-	 * @returns {Promise<string>} resolves with often id or fails if id is not found
-     */
-	public static getOftenIdFrom(source: MediaItemSource, type: MediaItemType, id: string): Promise<string> {
-		return new Promise<string> ( (resolve, reject) => {
-			var url = `${FirebaseConfig.BaseURL}/idspace/${source}/${type}/${id}`;
-			new Firebase(url).on('value', snap => {
-				if (snap.exists()) {
-					resolve(snap.val());
-				} else {
-					reject(new Error('id not found'));
-				}
-			});
 		});
 	}
 
@@ -119,6 +97,15 @@ export class MediaItem extends BaseModel implements Indexable {
 
 	set source(value: MediaItemSource) {
 		this.set('source', value);
+	}
+
+	resizeImages (imageFields: string[]) {
+		this.imageQueue.push({
+			option: "mediaitem",
+			id: this.id,
+			type: this.type,
+			imageFields: imageFields
+		});
 	}
 
 	public toIndexingFormat(): IndexedObject {

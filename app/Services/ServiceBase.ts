@@ -3,7 +3,6 @@ import Search from '../Search/Search';
 import { Service as RestService } from 'restler';
 import {IndexedObject} from '../Interfaces/Indexable';
 import Query from '../Models/Query';
-
 // export interface ServiceProviderOptions {
 //	provider_id: string;
 //	fetch_interval?: number;
@@ -55,7 +54,7 @@ class ServiceBase {
 			});
 	}
 
-	fetchData (query: Query) : Promise<IndexedObject[]>  {
+	fetchData (query: Query): Promise<IndexedObject[]>  {
 		throw new Error('fetchData not implemented');
 	}
 

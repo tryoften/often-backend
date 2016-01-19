@@ -164,7 +164,7 @@ class SpotifyService extends ServiceBase {
 					albums.push({
 						id: albumData.id,
 						name: albumData.name,
-						image_large: (albumData.images.length > 0) ? albumData.images[0].url : ""
+						image_large: (albumData.images.length > 0) ? albumData.images[0].url : ''
 					});
 				}
 
@@ -203,7 +203,7 @@ class SpotifyService extends ServiceBase {
 						id : artistData.id,
 						name : artistData.name,
 						popularity : artistData.popularity,
-						image_large : (artistData.images.length > 0) ? artistData.images[0].url : ""
+						image_large : (artistData.images.length > 0) ? artistData.images[0].url : ''
 					});
 				}
 				results.artist = artists;

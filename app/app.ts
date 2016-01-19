@@ -4,6 +4,7 @@ import FeedPageWorker from './Workers/FeedPageWorker';
 import IngestionWorker from './Workers/IngestionWorker';
 import UserWorker from './Workers/UserWorker';
 import URIConverterService from './Utilities/URIConverterService';
+import ImageResizerWorker from './Workers/ImageResizerWorker';
 import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
@@ -40,6 +41,11 @@ if (_.contains(argv._, 'link-redirector')) {
 if (_.contains(argv._, 'ingestion')) {
 	console.log('starting the ingestion-worker');
 	new IngestionWorker().start();
+}
+
+if (_.contains(argv._, 'image-resizer')) {
+	console.log('starting the image-resizer-worker');
+	new ImageResizerWorker().start();
 }
 
 console.log('firebase root URL: ', config.firebase.BaseURL);

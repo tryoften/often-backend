@@ -51,7 +51,7 @@ class SearchRequestDispatcher {
 		}
 	}
 
-	getProviders () : MediaItemSource[] {
+	getProviders (): MediaItemSource[] {
 		return <MediaItemSource[]> Object.keys(this.serviceProviders);
 	}
 

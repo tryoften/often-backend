@@ -7,19 +7,43 @@ import * as _ from 'underscore';
 import { Transform as Stream } from 'stream';
 import { firebase as FirebaseConfig } from '../config';
 import { gcloud as GoogleStorageConfig } from '../config';
+import MediaItemType from '../Models/MediaItemType';
+import MediaItem from '../Models/MediaItem';
+import Search from '../Search/Search';
+
+class ResizeType {
+	static general: ResizeType = 'general';
+	static mediaitem: ResizeType = 'mediaitem';
+}
+
+interface Resizable {
+	option: string;
+}
+
+interface ResizableMediaItem extends Resizable {
+	id: string;
+	type: MediaItemType;
+	imageFields: string[];
+}
+
+interface GeneralRequest extends Resizable {
+	originType: string;
+	sourceId: string;
+	resourceId: string;
+	url: string;
+}
+
 
 class ImageResizerWorker extends Worker {
 	default_transformations: string[];
 	gcs: any;
 	bucket: any;
-	
+	resizer: ImageResizer;
+	search: Search;
+
 	constructor (opts = {}) {
 
-		let options = _.defaults(opts, {
-			numWorkers: 3,
-			url: FirebaseConfig.queues.imageResizing
-		});
-
+		let options = _.defaults(opts, FirebaseConfig.queues.image_resizing);
 		super(options);
 
 		this.default_transformations = ['rectangle', 'original', 'square', 'medium'];
@@ -27,18 +51,84 @@ class ImageResizerWorker extends Worker {
 			projectId : GoogleStorageConfig.projectId,
 			key : GoogleStorageConfig.key
 		});
+		this.resizer = new ImageResizer();
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.bucket_name);
+		this.search = new Search();
 
 	}
 
-	process (data, progress, resolve, reject) {
-		this.ingest(data.originType, data.sourceId, data.resourceId, data.url)
-			.then( data => {
-				resolve(data);
-			})
-			.catch(err => {
+	process (data: Resizable, progress, resolve, reject) {
+
+		var promise;
+		switch (data.option) {
+			case (ResizeType.mediaitem):
+				promise = this.processMediaItem(<ResizableMediaItem>data);
+				break;
+
+			case (ResizeType.general):
+				promise = this.processGeneral(<GeneralRequest>data);
+				break;
+
+			default:
+				reject('Invalid option type specified.');
+				return;
+		}
+		promise.then(result => {
+			resolve(result);
+		}).catch( err => {
+			reject(err);
+		});
+}
+
+	processGeneral (data: GeneralRequest): Promise<Object> {
+		return this.ingest(data.originType, data.sourceId, data.resourceId, data.url);
+	}
+
+	processMediaItem (data: ResizableMediaItem): Promise<MediaItem> {
+		return new Promise((resolve, reject) => {
+			var MediaItemClass = MediaItemType.toClass(data.type);
+			var mediaItem = new MediaItemClass({
+				id: data.id
+			});
+			mediaItem.syncData().then( synced => {
+				var promises = [];
+				for (var imgProp of data.imageFields) {
+					var mediaItemImgProp = mediaItem.get(imgProp);
+					if (mediaItemImgProp) {
+						promises.push(this.getResizedImage(mediaItem, imgProp, mediaItemImgProp));
+					}
+				}
+				return Promise.all(promises);
+			}).then(resizedImages => {
+				var imagesObj = {};
+				for (var resizedImage of resizedImages) {
+					var key = Object.keys(resizedImage)[0];
+					imagesObj[key] = resizedImage[key];
+				}
+				mediaItem.set('images', imagesObj);
+				return this.search.index([mediaItem.toIndexingFormat()]);
+			}).then( indexResults => {
+				resolve(indexResults);
+			}).catch( err => {
+				console.log('Error ' + err);
 				reject(err);
 			});
+		});
+
+	}
+
+	getResizedImage (item: MediaItem, propertyName: string, imageUrl: string): Promise<Object> {
+		return new Promise((resolve, reject) => {
+			this.ingest(item.source, item.type, item.id, imageUrl)
+				.then(images => {
+					var returnObj = {};
+					returnObj[propertyName] = images;
+					resolve(returnObj);
+				}).catch(err => {
+					console.log('Image resizer error ' + err);
+					reject(err);
+			});
+		});
 	}
 
 	ingest (originType, sourceId, resourceId, url) {
@@ -50,14 +140,11 @@ class ImageResizerWorker extends Worker {
 			/* download the image */
 			this.download(url).then(data => {
 				/* Process */
-				var img = new ImageResizer();
-				img.bulkResize(data, this.default_transformations).then((dataArr) => {
-					var response = this.saveAndGenerateResponse(originType, sourceId, resourceId, dataArr);
-					resolve(response);
-				}).catch((err) => {
-					reject(err);
-				});
-			}).catch(err => {
+				return this.resizer.bulkResize(data, this.default_transformations);
+			}).then((dataArr) => {
+				var response = this.saveAndGenerateResponse(originType, sourceId, resourceId, dataArr);
+				resolve(response);
+			}).catch((err) => {
 				reject(err);
 			});
 		});
@@ -103,7 +190,7 @@ class ImageResizerWorker extends Worker {
 			/* download image */
 			var protocol = (url.indexOf('https') === 0) ? https : http;
 			protocol.get(url, (response: any) => {
-				if(response.statusCode !==  '200') {
+				if (response.statusCode !==  200) {
 					reject('Response code not 200');
 					return;
 				}

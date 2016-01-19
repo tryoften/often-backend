@@ -4,6 +4,7 @@ import MediaItem from './MediaItem';
 import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
 import { IndexedObject } from '../Interfaces/Indexable';
 
+
 /**
  * This class is responsible for providing granular functionality (mostly accessors) for cached responses.
  */
@@ -13,7 +14,6 @@ class Artist extends MediaItem {
 	constructor(attributes?: any, options?: any) {
 		this.urlRoot = `${FirebaseConfig.BaseURL}/artists`;
 		this.autoSync = true;
-
 		super(attributes, options);
 	}
 
@@ -62,7 +62,10 @@ class Artist extends MediaItem {
 
 		this.set('time_modified', Date.now());
 		this.set(properties);
+
 		this.save();
+
+		this.resizeImages(_.intersection(Object.keys(this.attributes), ['image_url']));
 
 		return this;
 	}
