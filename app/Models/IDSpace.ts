@@ -37,31 +37,12 @@ class IDSpace {
      */
 	public registerId(model: MediaItem, providerId: string) {
 		let source = model.source, type = model.type.toString(), id = model.id;
-		var url = `${config.firebase.BaseURL}/idspace/${source}/${type}`;
+		var url = `${config.firebase.BaseURL}/idspace/${source}/${type}/${id}`;
 		console.log('Registering url to idspace: ', url);
 		var ref = new Firebase(url);
-		var updObj = {};
-		updObj[providerId] = id;
-		ref.update(updObj);
+		ref.set(providerId);
 	}
 
-	/*
-	 public registerId(model: MediaItem, providerId: string) {
-	 let source = model.source, type = model.type.toString(), id = model.id;
-	 var url = `${config.firebase.BaseURL}/idspace/${source}/${type}/${id}`;
-	 console.log('Registering url to idspace: ', url);
-
-	 var obj: any = {};
-	 var s = source.toString(), t = type.toString();
-	 obj[s] = {};
-	 obj[s][t] = {};
-	 obj[s][t][providerId] = id;
-
-	 obj = merge(obj, this.attributes);
-
-	 this.set(obj);
-	 }
-	*/
 }
 
 export default IDSpace;
