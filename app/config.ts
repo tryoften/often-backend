@@ -88,6 +88,14 @@ config.firebase.queues = {
 		suppressStack: false,
 		retries: 3
 	},
+	image_resizing: {
+		specId: 'image_resizing',
+		url: `${config.firebase.BaseURL}/queues/image_resizing`,
+		numWorkers: 2,
+		sanitize: false,
+		suppressStack: true,
+		retries: 3
+	},
 	imageResizing: {
 		specId: 'image_resizing',
 		url: `${config.firebase.BaseURL}/queues/feed`,
