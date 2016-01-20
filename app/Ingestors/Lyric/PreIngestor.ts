@@ -2,18 +2,18 @@ import { Service as RestService } from 'restler';
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
 
-type ArtistUrl = string;
+type ArtistURL = string;
 type TrackId = string;
+
 class PreIngestor {
 	rest: any;
 	geniusRoot: string;
 
-	constructor (urlRoot: string = 'http://genius.com') {
+	constructor (urlRoot = 'http://genius.com') {
 		this.geniusRoot = urlRoot;
 		this.rest = new RestService({
 			baseURL: this.geniusRoot
 		});
-
 	}
 
 	/**
@@ -21,8 +21,8 @@ class PreIngestor {
 	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of track ids
      */
 	ingestPopularTracks (): Promise<TrackId[]> {
-		return new Promise( (resolve, reject) => {
-			this.getPopularArtists().then( artistUrls =>{
+		return new Promise<TrackId[]>( (resolve, reject) => {
+			this.getPopularArtists().then( artistUrls => {
 				var popularTrackPromises: Promise<TrackId[]>[] = [];
 				for (let url of artistUrls) {
 					popularTrackPromises.push(this.getPopularTracksForArtist(url));
@@ -36,11 +36,11 @@ class PreIngestor {
 
 	/**
 	 *
-	 * @returns {Promise<ArtistUrl[]>} - Returns a promise that resolves to an array of artist urls
+	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of artist urls
      */
-	getPopularArtists (): Promise<ArtistUrl[]> {
-		return new Promise( (resolve, reject) => {
-			var artistResultPromises: Promise<ArtistUrl[]>[] = [];
+	getPopularArtists (): Promise<ArtistURL[]> {
+		return new Promise<ArtistURL[]>( (resolve, reject) => {
+			var artistResultPromises: Promise<ArtistURL[]>[] = [];
 
 			for (let currentCode = 'a'.charCodeAt(0); currentCode <= 'z'.charCodeAt(0); currentCode++) {
 				var index = String.fromCharCode(currentCode);
@@ -60,15 +60,15 @@ class PreIngestor {
 	/**
 	 *
 	 * @param index {string} - character (a to z) indicating letter index from popular artists should be fetched
-	 * @returns {Promise<ArtistUrl[]>} - Returns a promise that resolves to an array of artist Urls
+	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of artist Urls
      */
-	getPopularArtistsForIndex (index: string): Promise<ArtistUrl[]> {
-		return new Promise((resolve, reject) => {
+	getPopularArtistsForIndex (index: string): Promise<ArtistURL[]> {
+		return new Promise<ArtistURL[]>((resolve, reject) => {
 			this.rest.get(`${this.geniusRoot}/artists-index/${index}`)
 				.on('success', data => {
 					var results = []
 					let $ = cheerio.load(data);
-					$('html body #main ul[class=artists_index_list] li[class=artists_index_list-popular_artist] a[class=artists_index_list-artist_name]').each(function(){
+					$('a.artists_index_list-artist_name').each(function() {
 						results.push($(this).attr('href'));
 					});
 					resolve(results);
@@ -81,17 +81,17 @@ class PreIngestor {
 
 	/**
 	 *
-	 * @param artistUrl {ArtistUrl} - url of an artist containing popular tracks for the artist
+	 * @param artistUrl {ArtistURL} - url of an artist containing popular tracks for the artist
 	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of track ids
      */
-	getPopularTracksForArtist (artistUrl: ArtistUrl): Promise<TrackId[]> {
-		return new Promise((resolve, reject) => {
+	getPopularTracksForArtist (artistUrl: ArtistURL): Promise<TrackId[]> {
+		return new Promise<TrackId[]>((resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
 					var results = []
 					let $ = cheerio.load(data);
-					var songList = $('html body #container #main .clearfix .song_column .song_list').get(0);
-					$(songList).children().each(function(){
+					var songList = $('.song_list').get(0);
+					$(songList).children().each(function() {
 						results.push($(this).attr('data-id'));
 					});
 					resolve(results);

@@ -7,7 +7,6 @@ import Track from '../../Models/Track';
 import { Lyric } from '../../Models/Lyric';
 import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
-import startsWith = require('lodash/string/startsWith');
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
 import 'backbonefire';
@@ -37,7 +36,7 @@ class GeniusService extends ServiceBase {
 	 * @return {promise} - Pmise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
 	public fetchData (query: Query): Promise<IndexedObject[]> {
-		return new Promise((resolve, reject) => {
+		return new Promise<IndexedObject[]>((resolve, reject) => {
 
 			let results: IndexedObject[] = [];
 			this.rest.get(`${settings.base_url}/search`, {
@@ -81,7 +80,7 @@ class GeniusService extends ServiceBase {
 
 	}
 	ingest (trackIds: string[]): Promise<IndexedObject[]> {
-		return new Promise( (resolve, reject) => {
+		return new Promise<IndexedObject[]>( (resolve, reject) => {
 			let results: IndexedObject[] = [];
 			var promises = [];
 
@@ -113,6 +112,7 @@ class GeniusService extends ServiceBase {
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
 	public getData (trackId: string): Promise<GeniusServiceResult> {
+
 		return new Promise<GeniusServiceResult>( (resolve, reject) => {
 
 			this.getTrackMetadata(trackId)
@@ -228,7 +228,7 @@ class GeniusService extends ServiceBase {
 
 			for (let lyric of lyricsDataFromPage) {
 				for (let annotation of annotationData) {
-					if (annotation.genius_id === lyric.annotation_id) {
+					if (!_.isUndefined(annotation) && annotation.genius_id === lyric.annotation_id) {
 						lyric.score = annotation.score;
 						lyric.external_url = annotation.external_url;
 					}
@@ -244,17 +244,29 @@ class GeniusService extends ServiceBase {
 
 		for (let lyricData of lyricsData) {
 			// Persist lyric data to backend
-			promises.push(Lyric.fromType(MediaItemSource.Genius, MediaItemType.lyric, lyricData.genius_id));
+			promises.push(<Promise<Lyric>>Lyric.fromType(MediaItemSource.Genius, MediaItemType.lyric, lyricData.genius_id));
 		}
 
 		return Promise.all(promises).then(models => {
+
 			for (var i = 0, len = models.length; i < len; i++) {
-				let model = models[i];
+				let model = models[i]
+				let text = this.cleanUpLine(lyricsData[i].text);
+				lyricsData[i].text = text;
 				model.set(lyricsData[i]);
 				model.save();
 			}
 			return models;
 		});
+	}
+
+	private cleanUpLine(text: string): string {
+		let removeVerseHeadersRegEx = /\[.*]|{.*}|\*.*\*/g;
+		return text
+			.replace(/\n/, ' ')
+			.replace(removeVerseHeadersRegEx, '')
+			.trim()
+			.replace(/^.\s/, '');
 	}
 
 	/**
@@ -276,53 +288,49 @@ class GeniusService extends ServiceBase {
 	 * @returns {Array}
 	 */
 	private cleanUpLyrics (lyricsData: GeniusLyricData[]): GeniusLyricData[] {
-		function generateLyric(text: string, originalLyric: GeniusLyricData): GeniusLyricData {
-			var newLyric = _.clone(originalLyric);
-			newLyric.text = text;
-			return newLyric;
-		}
+		var resultSet: GeniusLyricData[] = [];
+		let removeVerseHeadersRegEx = /\[.*]|{.*}|\*.*\*/g;
 
-		var filtered: GeniusLyricData[] = [];
-		for (let lyric of lyricsData) {
-			if (lyric.text.length === 0) {
+		/* If lyric starts with bracket then its just a verse indicator, don't ingest */
+		var filteredLyrics = _.filter(lyricsData, item => {
+			let text = item.text;
+			return !(text.length === 0 || text === '\n' || text.match(removeVerseHeadersRegEx));
+		});
+
+		var aggregatedLyric = filteredLyrics[0];
+		aggregatedLyric.text = this.cleanUpLine(aggregatedLyric.text);
+
+		let characterCount = 100;
+
+		for (var i = 0, len = filteredLyrics.length; i < len; i++) {
+			let lyric = filteredLyrics[i];
+			let text = this.cleanUpLine(lyric.text);
+
+			if (aggregatedLyric.text === lyric.text) {
 				continue;
 			}
 
-			if (startsWith(lyric.text, '[')) {
-				/* If lyric starts with bracket then its just a verse indicator, don't ingest */
-				continue;
-			}
+			let aggregatedText = aggregatedLyric.text.trim() + '. ' + text;
 
-			if (lyric.text.indexOf(' ') === -1) {
-				/* If lyric is composed of only one word then it's too short, don't ingest */
-				continue;
-			}
-
-			// if contains newline characters
-			if (lyric.text.indexOf('\n') !== -1) {
-				var splitInterval = 2;
-				var currSplit = splitInterval;
-				var start = 0;
-				var end = 0;
-				for (var i = 0; i < lyric.text.length; i++) {
-					if (lyric[i] === '\n') {
-						currSplit--;
-						if (!currSplit) {
-							filtered.push(generateLyric(lyric.text.substring(start, end + 1).trim(), lyric));
-							start = end + 1;
-							currSplit = splitInterval;
-						}
-					}
-					end++;
-				}
-				if (start !== end) {
-					filtered.push(generateLyric(lyric.text.substring(start, end + 1).trim(), lyric));
+			if (aggregatedText.length >= characterCount) {
+				resultSet.push(aggregatedLyric);
+				aggregatedLyric = filteredLyrics[i + 1];
+				if (aggregatedLyric) {
+					aggregatedLyric.text = this.cleanUpLine(aggregatedLyric.text);
 				}
 			} else {
-				filtered.push(lyric);
+				aggregatedLyric.text = aggregatedText;
+			}
+
+			// if the last lyric hasn't been added, add it
+			if (i === len - 1) {
+				let lastText = filteredLyrics[i].text;
+				if (aggregatedLyric && aggregatedLyric.text.indexOf(lastText) === -1) {
+					resultSet.push(filteredLyrics[i]);
+				}
 			}
 		}
-		return filtered;
+		return resultSet;
 	}
 
 	/**
@@ -403,12 +411,19 @@ class GeniusService extends ServiceBase {
 				let $ = cheerio.load(data);
 				let elements = $('.lyrics p').toArray();
 				if (elements.length) {
-					let filteredElements = this.traverseTree(elements[0]);
-					for (var i = 0, len = filteredElements.length; i < len; i++) {
-						filteredElements[i].genius_id = `${trackId}_${i}`;
+					try {
+						let filteredElements = this.traverseTree(elements[0]);
+						filteredElements = this.cleanUpLyrics(filteredElements);
+						filteredElements = _.compact(filteredElements);
+						for (var i = 0, len = filteredElements.length; i < len; i++) {
+							filteredElements[i].genius_id = `${trackId}_${i}`;
+						}
+						filteredElements = _.uniq(filteredElements, a => a.text);
+						resolve(filteredElements);
+					} catch (err: Error) {
+						console.error(err.stack);
+						throw err;
 					}
-					filteredElements = _.uniq(filteredElements, a => a.text);
-					resolve(filteredElements);
 				}
 			});
 		});
@@ -430,7 +445,7 @@ class GeniusService extends ServiceBase {
 							lyricData.annotation_id = annotation_id;
 						}
 					}
-					lyrics = lyrics.concat(this.cleanUpLyrics([lyricData]));
+					lyrics = lyrics.concat([lyricData]);
 					break;
 				case 'tag':
 					if (el.children.length) {
@@ -440,7 +455,7 @@ class GeniusService extends ServiceBase {
 			}
 		}
 
-		return this.cleanUpLyrics(lyrics);
+		return lyrics;
 	}
 }
 

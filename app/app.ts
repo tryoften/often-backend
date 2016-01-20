@@ -29,17 +29,17 @@ if (_.contains(argv._, 'feedpage-parser')) {
 }
 
 if (_.contains(argv._, 'user')) {
-	console.log('starting the user worker');
+	console.log('starting user worker');
 	new UserWorker().start();
 }
 
 if (_.contains(argv._, 'link-redirector')) {
-	console.log('starting the link-redirector');
+	console.log('starting link-redirector');
 	new URIConverterService().start();
 }
 
 if (_.contains(argv._, 'ingestion')) {
-	console.log('starting the ingestion-worker');
+	console.log('starting ingestion-worker');
 	new IngestionWorker().start();
 }
 

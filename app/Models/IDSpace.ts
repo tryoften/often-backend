@@ -7,7 +7,6 @@ import Firebase =  require('firebase');
 class IDSpace {
 	public static instance = new IDSpace();
 
-
 	/**
 	 * Looks up an often id for a given service provider Id
 	 *
