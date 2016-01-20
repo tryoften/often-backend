@@ -7,5 +7,4 @@ export interface Requestable {
 	creation_time?: number;
 	query: QueryData;
 	type: RequestType;
-	filters?: MediaItemSource[];
 }
