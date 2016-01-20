@@ -1,7 +1,6 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
-import { generateURIfromGuid } from '../Utilities/generateURI';
 import Favorite from '../Models/Favorite';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import logger from '../Models/Logger';

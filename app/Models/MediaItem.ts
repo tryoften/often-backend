@@ -101,7 +101,7 @@ export class MediaItem extends BaseModel implements Indexable {
 
 	resizeImages (imageFields: string[]) {
 		this.imageQueue.push({
-			option: "mediaitem",
+			option: 'mediaitem',
 			id: this.id,
 			type: this.type,
 			imageFields: imageFields
