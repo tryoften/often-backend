@@ -125,7 +125,7 @@ class SearchRequestDispatcher {
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 			request.initProviders(Object.keys(this.serviceProviders));
 
-			//this.processQueryUpdate(request, response, resolve, reject);
+			this.processQueryUpdate(request, response, resolve, reject);
 
 			if (request.type === RequestType.search) {
 				//Execute the request every user provider that the user is subscribed

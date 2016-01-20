@@ -37,10 +37,10 @@ class IDSpace {
      */
 	public registerId(model: MediaItem, providerId: string) {
 		let source = model.source, type = model.type.toString(), id = model.id;
-		var url = `${config.firebase.BaseURL}/idspace/${source}/${type}/${id}`;
+		var url = `${config.firebase.BaseURL}/idspace/${source}/${type}/${providerId}`;
 		console.log('Registering url to idspace: ', url);
 		var ref = new Firebase(url);
-		ref.set(providerId);
+		ref.set(id);
 	}
 
 }
