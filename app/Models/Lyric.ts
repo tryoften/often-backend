@@ -51,7 +51,7 @@ export class Lyric extends MediaItem {
 
 		if (artist) {
 			let props = ['id', 'name', 'genius_id', 'image_url', 'is_verified', 'lyrics_count', 'score'];
-			for (let prop in props) {
+			for (let prop of props) {
 				if (artist.hasOwnProperty(prop)) {
 					properties[`artist_${prop}`] = artist[prop];
 				}
