@@ -36,6 +36,7 @@ class TrendingIngestor {
 				let topArtists = _.chain(results)
 					.map(result => result.artist.toIndexingFormat())
 					.uniq(artist => artist.id)
+					.uniq(artist => artist.name)
 					.value();
 
 				let topTracks = _.map(results, result => result.track.toIndexingFormat());

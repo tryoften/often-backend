@@ -42,8 +42,6 @@ class Request implements Requestable {
 		for (var key in attributes) {
 			this[key] = attributes[key];
 		}
-
-
 	}
 
 	get providers () {
@@ -60,7 +58,7 @@ class Request implements Requestable {
 			//TODO(jakub): Possibly throw error here, because tried removing provider. To be decided...
 			return;
 		}
-		this._providers.splice(index,1);
+		this._providers.splice(index, 1);
 	}
 
 	initProviders(providers: string[]) {

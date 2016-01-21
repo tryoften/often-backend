@@ -263,7 +263,7 @@ class GeniusService extends ServiceBase {
 	private cleanUpLine(text: string): string {
 		let removeVerseHeadersRegEx = /\[.*]|{.*}|\*.*\*/g;
 		return text
-			.replace(/\n/, ' ')
+			.replace(/\n/, '')
 			.replace(removeVerseHeadersRegEx, '')
 			.trim()
 			.replace(/^.\s/, '');
