@@ -409,7 +409,7 @@ class GeniusService extends ServiceBase {
 		return new Promise<GeniusLyricData[]>((resolve, reject) => {
 			this.rest.get(url).on('success', data => {
 				let $ = cheerio.load(data);
-				let elements = $('.lyrics p').toArray();
+				let elements = $('.lyrics').toArray();
 				if (elements.length) {
 					try {
 						let filteredElements = this.traverseTree(elements[0]);
