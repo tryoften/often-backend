@@ -1,5 +1,5 @@
 import SearchParser from '../Search/SearchParser';
-import { Response } from '../Models/Response';
+import Response from '../Models/Response';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
@@ -67,13 +67,11 @@ class SearchRequestDispatcher {
 							switch (request.query.filter.type) {
 								case FilterType.searchTerms:
 									return this.search.getTopSearches(request.query.filter.value);
-									break;
 
 								case FilterType.general:
 									return new Promise((resolve, reject) => {
 										resolve(this.filters.suggestFilters(request.query.filter));
 									});
-									break;
 							}
 							break;
 
@@ -86,7 +84,6 @@ class SearchRequestDispatcher {
 
 				case RequestType.search:
 					return this.search.query(request.query);
-					break;
 
 				default:
 					throw new Error('Invalid request type');
@@ -97,7 +94,7 @@ class SearchRequestDispatcher {
 		promise.then( (data: any) => {
 			response.updateResults(data);
 
-			if(request.providersLeftToProcess === 0 || !!(request.type === RequestType.autocomplete)) {
+			if (request.providersLeftToProcess === 0 || !!(request.type === RequestType.autocomplete)) {
 				this.completeResponse(response);
 			}
 
@@ -128,13 +125,13 @@ class SearchRequestDispatcher {
 			this.processQueryUpdate(request, response, resolve, reject);
 
 			if (request.type === RequestType.search) {
-				//Execute the request every user provider that the user is subscribed
+				// Execute the request every user provider that the user is subscribed
 				for (var providerName of request.providers) {
-					this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled:any) => {
+					this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled: any) => {
 						request.removeProvider(providerName);
 						this.processQueryUpdate(request, response, resolve, reject);
 
-					}).catch((rejected:any) => {
+					}).catch((rejected: any) => {
 						request.removeProvider(providerName);
 					});
 				}

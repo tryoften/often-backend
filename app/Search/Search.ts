@@ -7,7 +7,7 @@ import * as _ from 'underscore';
 import logger from '../Models/Logger';
 import { Indexable } from '../Interfaces/Indexable';
 import { Queryable } from '../Interfaces/Queryable';
-import {IndexedObject} from '../Interfaces/Indexable';
+import { IndexedObject } from '../Interfaces/Indexable';
 import RequestType from '../Models/RequestType';
 
 /**

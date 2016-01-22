@@ -20,7 +20,7 @@ export interface ResponseAttributes extends Requestable {
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for cached responses.
  */
-export class Response extends BaseModel {
+export default class Response extends BaseModel {
 
 
     /**
@@ -43,7 +43,7 @@ export class Response extends BaseModel {
 
 	public static fromRequest(request: Requestable): Response {
 		/* Filter out any attributes not defined in the interface to avoid unwanted properties being passed in (like methods) to the backbone model */
-		var attrs = _.pick(request, 'id', 'userId', 'creation_time', 'query', 'type');
+		var attrs: any = _.pick(request, 'id', 'userId', 'creation_time', 'query', 'type');
 		attrs['request_time'] = attrs['creation_time'];
 		delete attrs['creation_time'];
 		attrs = <ResponseAttributes> _.extend(attrs, {
@@ -55,6 +55,7 @@ export class Response extends BaseModel {
 		response.save();
 		return response;
 	}
+
 	updateResults (data: any) {
         this.set({
             time_modified: Date.now(),
