@@ -173,7 +173,7 @@ class GeniusService extends ServiceBase {
 
 		var getAnnotationsPromise = new Promise<GeniusLyricData[]>( (resolve, reject) => {
 
-			var request = this.rest.get(`${settings.base_url}/referents`, {
+			this.rest.get(`${settings.base_url}/referents`, {
 				query: {
 					song_id: trackId,
 					access_token: settings.access_token,
@@ -217,7 +217,6 @@ class GeniusService extends ServiceBase {
 				console.error(err.stack);
 				reject(err);
 			});
-			console.log(request.toString());
 		});
 
 		return Promise.all([
