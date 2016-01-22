@@ -1,22 +1,25 @@
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
-import Trending from '../../Models/Trending';
 import GeniusService from '../../Services/Genius/GeniusService';
 import Lyric from '../../Models/Lyric';
 import { get } from 'restler';
 import { GeniusServiceResult } from '../../Services/Genius/GeniusDataTypes';
+import Search from '../../Search/Search';
+import Trending from '../../Models/Trending';
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
  */
 class TrendingIngestor {
 	private genius: GeniusService;
+	private search: Search;
 	private trending: Trending;
 
 	constructor () {
 		this.genius = new GeniusService({
 			provider_id: 'genius'
 		});
+		this.search = new Search();
 		this.trending = new Trending();
 	}
 
@@ -32,7 +35,6 @@ class TrendingIngestor {
 			}
 
 			return Promise.all(promises).then( (results: GeniusServiceResult[]) => {
-
 				let topArtists = _.chain(results)
 					.map(result => result.artist.toIndexingFormat())
 					.uniq(artist => artist.id)
@@ -49,6 +51,10 @@ class TrendingIngestor {
 
 					return sortedLyrics[0].toIndexingFormat();
 				});
+
+				this.search.index(topArtists);
+				this.search.index(topTracks);
+				this.search.index(trendingLyrics);
 
 				var response = [
 					{
@@ -73,7 +79,18 @@ class TrendingIngestor {
 						score: 1.0
 					}
 				];
+
 				this.trending.set(response);
+
+				// Schedule image resizing
+				for (var result of results) {
+					result.artist.resizeImages();
+					result.track.resizeImages();
+
+					for (var lyric of result.lyrics) {
+						lyric.resizeImages();
+					}
+				}
 			}).catch((error) => {
 				console.log(error);
 			});

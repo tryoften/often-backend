@@ -67,6 +67,14 @@ export class Lyric extends MediaItem {
 		return this;
 	}
 
+	imageProperties(): string[] {
+		return [
+			'image_url',
+			'artist_image_url',
+			'track_song_art_image_url'
+		];
+	}
+
 	public toIndexingFormat(): IndexedObject {
 		let data = super.toIndexingFormat();
 		data.title = this.track_name || '';

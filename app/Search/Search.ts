@@ -5,10 +5,8 @@ import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import * as _ from 'underscore';
 import logger from '../Models/Logger';
-import { Indexable } from '../Interfaces/Indexable';
 import { Queryable } from '../Interfaces/Queryable';
 import { IndexedObject } from '../Interfaces/Indexable';
-import RequestType from '../Models/RequestType';
 
 /**
  * Class for interacting with ElasticSearch.
@@ -46,7 +44,7 @@ class Search {
 	 *
 	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
 	 */
-	index (indexables: IndexedObject[]) {
+	index (indexables: IndexedObject[]): Promise<any> {
 		console.log('indexing...');
 		return new Promise((resolve, reject) => {
 
@@ -222,9 +220,9 @@ class Search {
 	 * @param {int} count - the number of results to return
 	 *
 	 * @return {Promise} - a promise that resolves an array of the top results
-	 */ 
+	 */
 	getTopSearches (count = 10) {
-		if(!_.isNumber(count)){
+		if(!_.isNumber(count)) {
 			count = 10;
 		}
 		let parseData = (data) => {

@@ -73,10 +73,17 @@ class Track extends MediaItem {
 		this.set('time_modified', Date.now());
 
 		this.save();
-
-		this.resizeImages(_.intersection(Object.keys(this.attributes), ['album_cover_art_url', 'header_image_url', 'song_art_image_url']));
+		this.resizeImages();
 
 		return this;
+	}
+
+	public imageProperties(): string[] {
+		return [
+			'album_cover_art_url',
+			'header_image_url',
+			'song_art_image_url'
+		];
 	}
 
 	public toIndexingFormat(): IndexedObject {
