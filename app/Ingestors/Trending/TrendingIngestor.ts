@@ -52,9 +52,7 @@ class TrendingIngestor {
 					return sortedLyrics[0].toIndexingFormat();
 				});
 
-				this.search.index(topArtists);
-				this.search.index(topTracks);
-				this.search.index(trendingLyrics);
+				this.search.index(topArtists.concat(topTracks, trendingLyrics));
 
 				var response = [
 					{
