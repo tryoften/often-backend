@@ -30,10 +30,10 @@ class GeniusService extends ServiceBase {
 	}
 
 	/**
-	 * Main method for obtaroining results from the service provider's API.
+	 * Main method for obtaining results from the service provider's API.
 	 * @param {object} query - search term
 	 *
-	 * @return {promise} - Pmise that when resolved returns the results of the data fetch, or an error upon rejection.
+	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
 	public fetchData (query: Query): Promise<IndexedObject[]> {
 		return new Promise<IndexedObject[]>((resolve, reject) => {
@@ -157,6 +157,7 @@ class GeniusService extends ServiceBase {
 				})
 				.catch( err => {
 					console.log('rejecting ', trackId, err);
+					console.error(err.stack);
 					reject(err);
 				});
 		});
@@ -213,10 +214,9 @@ class GeniusService extends ServiceBase {
 
 				resolve(lyrics);
 			}).on('error', err => {
-				console.log('err' + err);
+				console.error(err.stack);
 				reject(err);
 			});
-
 		});
 
 		return Promise.all([

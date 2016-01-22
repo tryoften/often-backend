@@ -6,6 +6,7 @@ import { Indexable, IndexedObject } from '../Interfaces/Indexable';
 import IDSpace from './IDSpace';
 import Firebase = require('firebase');
 import { firebase as FirebaseConfig } from '../config';
+import * as _ from 'underscore';
 
 export interface MediaItemAttributes {
 	id?: string;
@@ -34,10 +35,9 @@ export class MediaItem extends BaseModel implements Indexable {
 			attributes.score = 0.0;
 		}
 		this.autoSync = true;
+		this.imageQueue = new Firebase(`${FirebaseConfig.BaseURL}/queues/image_resizing/tasks`);
 
 		super(attributes, options);
-
-		this.imageQueue = new Firebase(`${FirebaseConfig.BaseURL}/queues/image_resizing/tasks`);
 	}
 
 
@@ -69,6 +69,20 @@ export class MediaItem extends BaseModel implements Indexable {
 		});
 	}
 
+	public imageProperties(): string[] {
+		return ['image_url'];
+	}
+
+	public resizeImages() {
+		let imageFields = _.intersection(Object.keys(this.attributes), this.imageProperties());
+		this.imageQueue.push({
+			option: 'mediaitem',
+			id: this.id,
+			type: this.type,
+			imageFields: imageFields
+		});
+	}
+
 	/**
 	 * Registers a given provider id to the *idspace* collection where the value is the MediaItem often id
 	 *
@@ -97,15 +111,6 @@ export class MediaItem extends BaseModel implements Indexable {
 
 	set source(value: MediaItemSource) {
 		this.set('source', value);
-	}
-
-	resizeImages (imageFields: string[]) {
-		this.imageQueue.push({
-			option: 'mediaitem',
-			id: this.id,
-			type: this.type,
-			imageFields: imageFields
-		});
 	}
 
 	public toIndexingFormat(): IndexedObject {

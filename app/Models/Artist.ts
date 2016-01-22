@@ -64,8 +64,7 @@ class Artist extends MediaItem {
 		this.set(properties);
 
 		this.save();
-
-		this.resizeImages(_.intersection(Object.keys(this.attributes), ['image_url']));
+		this.resizeImages();
 
 		return this;
 	}
