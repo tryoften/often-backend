@@ -17,7 +17,7 @@ class ImageResizer {
 		this.small_pixels = 200;
 		this.medium_pixels = 400;
 	}
- 
+
 	/**
 	 * Transforms the image
 	 * @param {object} data - binary data containing a source image
@@ -29,10 +29,10 @@ class ImageResizer {
 	transform(data: any, transformation: string, attr: any) {
 		try {
 			switch (transformation) {
-				case 'rectangle': 
+				case 'rectangle':
 					return (attr.height > attr.width) ? sharp(data).resize(this.small_pixels, null) : sharp(data).resize(null, this.small_pixels); 
 
-				case 'original': 
+				case 'original':
 					return sharp(data);
 					
 				case 'square':
@@ -61,7 +61,7 @@ class ImageResizer {
 			promises.push(this.resize(data, tran));
 		});
 		return Promise.all(promises);
-	} 
+	}
 
 	/**
 	 * Resizes the image
@@ -73,19 +73,19 @@ class ImageResizer {
 	resize (data: any, tran: any) {
 		return new Promise((resolve, reject) => {
 			try {
-				sharp(data).metadata().then((metadata:any, err:Error) => {
+				sharp(data).metadata().then((metadata: any, err: Error) => {
 					if (err) {
 						reject(err);
 						return;
 					}
 
 					this.transform(data, tran, {width: metadata.width, height: metadata.height})
-						.toBuffer((err:Error, buff:Buffer) => {
+						.toBuffer((err: Error, buff: Buffer) => {
 							if (err) {
 								reject(err);
 							} else {
 								var ref = sharp(buff);
-								ref.metadata().then((newMeta:any, err:Error) => {
+								ref.metadata().then((newMeta: any, err: Error) => {
 									if (err) {
 										reject(err);
 									} else {

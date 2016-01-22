@@ -44,7 +44,7 @@ var config: any = {
 		queues: {}
 	},
 	elasticsearch: {
-		BaseURL: args['elasticsearch-root'] || 'http://1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+		BaseURL: args['elasticsearch-root'] || 'http://admin:JNkEnrKtg7DTY4@1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
 	},
 	bitly: {
 		clientId: '22a6e134c49f8ccc283660563fb3d4e9d86d42db',
