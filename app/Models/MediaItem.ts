@@ -103,6 +103,10 @@ export class MediaItem extends BaseModel implements Indexable {
 		return this.get('source');
 	}
 
+	get images(): Object {
+		return this.get('images') || {};
+	}
+
 	// Setters
 
 	set type(value: MediaItemType) {

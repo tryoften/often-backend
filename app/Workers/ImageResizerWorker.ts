@@ -36,6 +36,7 @@ interface GeneralRequest extends Resizable {
 
 class ImageResizerWorker extends Worker {
 	default_transformations: string[];
+	main_tran: string;
 	gcs: any;
 	bucket: any;
 	resizer: ImageResizer;
@@ -47,9 +48,10 @@ class ImageResizerWorker extends Worker {
 		super(options);
 
 		this.default_transformations = ['rectangle', 'original', 'square', 'medium'];
+		this.main_tran = 'square';
 		this.gcs = gcloud.storage({
-			projectId : GoogleStorageConfig.projectId,
-			key : GoogleStorageConfig.key
+			projectId: GoogleStorageConfig.projectId,
+			key: GoogleStorageConfig.key
 		});
 		this.resizer = new ImageResizer();
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.bucket_name);
@@ -92,6 +94,9 @@ class ImageResizerWorker extends Worker {
 			});
 			mediaItem.syncData().then( synced => {
 				var promises = [];
+				if (!_.isEmpty(mediaItem.images)) {
+					return Promise.reject('Images already exist');
+				}
 				for (var imgProp of data.imageFields) {
 					var mediaItemImgProp = mediaItem.get(imgProp);
 					if (mediaItemImgProp) {
@@ -104,6 +109,8 @@ class ImageResizerWorker extends Worker {
 				for (var resizedImage of resizedImages) {
 					var key = Object.keys(resizedImage)[0];
 					imagesObj[key] = resizedImage[key];
+					mediaItem.set(`${key}_source`, mediaItem.get(key));
+					mediaItem.set(key, resizedImage[key][this.main_tran].url);
 				}
 				mediaItem.set('images', imagesObj);
 				return this.search.index([mediaItem.toIndexingFormat()]);
@@ -151,7 +158,7 @@ class ImageResizerWorker extends Worker {
 	}
 
 	saveAndGenerateResponse (originType, sourceId, resourceId, dataArr) {
-		var responseArray = [];
+		var responseObj = {};
 		for (let dataObj of dataArr) {
 			var path = this.generatePath(originType, sourceId, resourceId, dataObj.transformation, dataObj.meta.format);
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
@@ -165,17 +172,17 @@ class ImageResizerWorker extends Worker {
 
 			let url = `https://www.googleapis.com/download/storage/v1/b/${GoogleStorageConfig.bucket_name}/o/${encodeURIComponent(path)}?alt=media`;
 
-			responseArray.push({
-				transformation : dataObj.transformation,
-				url : url,
-				width : dataObj.meta.width,
-				height : dataObj.meta.height,
-				format : dataObj.meta.format
-			});
+			responseObj[dataObj.transformation] = {
+				transformation: dataObj.transformation,
+				url: url,
+				width: dataObj.meta.width,
+				height: dataObj.meta.height,
+				format: dataObj.meta.format
+			};
 		}
-		return responseArray;
+		return responseObj;
 	}
-	
+
 	generatePath (originType, sourceId, resourceId, transformation, extension) {
 		if (originType === 'rss') {
 			let pathComponents = resourceId.split('/');
@@ -185,7 +192,7 @@ class ImageResizerWorker extends Worker {
 		return `${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`;
 	}
 
-	download (url) { 
+	download (url) {
 		return new Promise((resolve, reject) => {
 			/* download image */
 			var protocol = (url.indexOf('https') === 0) ? https : http;
@@ -196,34 +203,26 @@ class ImageResizerWorker extends Worker {
 				}
 				var data = new Stream();
 
-				response.on('data', 
-					(chunk) => {
-		            	data.push(chunk);
-		        	}, 
-		        	(err) => {
-		        		reject(err);
-		        		return;
-		        	}
-		        );
-
-		        response.on('end', 
-		        	() => {
-		            	resolve(data.read());
-		            	return;
-		        	}, 
-		        	(err) => {
-		        		reject(err);
-		        		return;
-		        	}
-		        );
-			})
-			.on('error', (e) => {
-			  console.log('Error found: ' + e.message);
-			  reject(e);
-			}); 
+				response.on('data', (chunk) => {
+						data.push(chunk);
+					}, (err) => {
+						reject(err);
+						return;
+					}
+				);
+				response.on('end', () => {
+					resolve(data.read());
+					return;
+				}, (err) => {
+					reject(err);
+					return;
+				});
+			}).on('error', (e) => {
+				console.log('Error found: ' + e.message);
+				reject(e);
+			});
 		});
 	}
-	
 }
 
 export default ImageResizerWorker;
