@@ -2,6 +2,8 @@ import Worker from './Worker';
 import { firebase as FirebaseConfig } from '../config';
 import Search from '../Search/Search';
 import MediaItemType from '../Models/MediaItemType';
+import * as _ from 'underscore';
+
 
 
 class ESWorker extends Worker {
@@ -40,13 +42,12 @@ class ESWorker extends Worker {
 		}
 		Promise.all(promises).then(indexables => {
 			console.log('Indexing...');
-			this.search.index(indexables).then(resp => {
-				console.log('Indexed data');
-			}).catch(err => {
-				console.log(err);
-			});
-		}).catch( err => {
-			console.log('err' + err);
+			return this.search.index(indexables);
+		}).then(resp => {
+			console.log('Indexed data');
+			resolve(resp);
+		}).catch(err => {
+			reject(err);
 		});
 
 
