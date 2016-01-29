@@ -42,7 +42,7 @@ class ESWorker extends Worker {
 		}
 		Promise.all(promises).then(indexables => {
 			console.log('Indexing...');
-			return this.search.index(indexables);
+			return this.search.index(indexables, type);
 		}).then(resp => {
 			console.log('Indexed data');
 			resolve(resp);
