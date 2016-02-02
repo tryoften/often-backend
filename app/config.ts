@@ -80,9 +80,17 @@ config.firebase.queues = {
 		suppressStack: false,
 		retries: 0
 	},
-	track_ingestion: {
-		specId: 'track_ingestion',
-		url: `${config.firebase.BaseURL}/queues/track_ingestion`,
+	ingestion: {
+		specId: 'ingestion',
+		url: `${config.firebase.BaseURL}/queues/ingestion`,
+		numWorkers: 2,
+		sanitize: false,
+		suppressStack: false,
+		retries: 3
+	},
+	bulk_ingest: {
+		specId: 'bulk_ingest',
+		url: `${config.firebase.BaseURL}/queues/bulk_ingest`,
 		numWorkers: 2,
 		sanitize: false,
 		suppressStack: false,
