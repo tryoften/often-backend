@@ -3,7 +3,7 @@ import { firebase as FirebaseConfig } from '../config';
 import GeniusService from '../Services/Genius/GeniusService';
 import * as _ from 'underscore';
 import Search from '../Search/Search';
-import {IndexedObject} from "../Interfaces/Indexable";
+import { IndexedObject } from '../Interfaces/Indexable';
 
 class IngestionWorker extends Worker {
 	genius: GeniusService;

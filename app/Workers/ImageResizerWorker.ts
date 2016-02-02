@@ -60,7 +60,6 @@ class ImageResizerWorker extends Worker {
 	}
 
 	process (data: Resizable, progress, resolve, reject) {
-
 		var promise;
 		switch (data.option) {
 			case (ResizeType.mediaitem):
@@ -80,7 +79,7 @@ class ImageResizerWorker extends Worker {
 		}).catch( err => {
 			reject(err);
 		});
-}
+	}
 
 	processGeneral (data: GeneralRequest): Promise<Object> {
 		return this.ingest(data.originType, data.sourceId, data.resourceId, data.url);
@@ -115,10 +114,10 @@ class ImageResizerWorker extends Worker {
 				}
 				mediaItem.set('images', imagesObj);
 				resolve(true);
-				//return this.search.index([mediaItem.toIndexingFormat()]);
-			})/*.then( indexResults => {
+				return this.search.index([mediaItem.toIndexingFormat()]);
+			}).then( indexResults => {
 				resolve(indexResults);
-			})*/.catch( err => {
+			}).catch( err => {
 				console.log('Error ' + err);
 				reject(err);
 			});
