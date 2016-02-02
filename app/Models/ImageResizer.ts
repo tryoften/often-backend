@@ -4,8 +4,10 @@ import * as sharp from 'sharp';
  * This class is responsible for resizing images.
  */
 class ImageResizer {
+	tiny_pixels: number;
 	small_pixels: number;
 	medium_pixels: number;
+	large_pixels: number;
 
 	/**
 	 * Initializes the client request dispatcher.
@@ -14,8 +16,10 @@ class ImageResizer {
 	 * @return {void}
 	 */
 	constructor (opts?: any) {
+		this.tiny_pixels = 50;
 		this.small_pixels = 200;
 		this.medium_pixels = 400;
+		this.large_pixels = 800;
 	}
 
 	/**
@@ -34,12 +38,18 @@ class ImageResizer {
 
 				case 'original':
 					return sharp(data);
-					
+
 				case 'square':
 					return sharp(data).resize(this.small_pixels, this.small_pixels);
-					
+
+				case 'square_small':
+					return sharp(data).resize(this.tiny_pixels, this.tiny_pixels);
+
 				case 'medium':
-					return (attr.height > attr.width) ? sharp(data).resize(this.medium_pixels, null) : sharp(data).resize(null, this.medium_pixels); 
+					return (attr.height > attr.width) ? sharp(data).resize(this.medium_pixels, null) : sharp(data).resize(null, this.medium_pixels);
+
+				case 'large':
+					return (attr.height > attr.width) ? sharp(data).resize(this.large_pixels, null) : sharp(data).resize(null, this.large_pixels);
 			}
 		} catch (err) {
 			return new Promise((resolve, reject) => {

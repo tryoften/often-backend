@@ -92,13 +92,17 @@ class SearchRequestDispatcher {
 		})();
 
 		promise.then( (data: any) => {
+			console.log('in processing mode')
 			response.updateResults(data);
 
-			if (request.providersLeftToProcess === 0 || !!(request.type === RequestType.autocomplete)) {
+			//if (request.providersLeftToProcess === 0 || !!(request.type === RequestType.autocomplete)) {
 				this.completeResponse(response);
-			}
+			//}
 
 			resolve(true);
+		}).catch(err => {
+			console.log('erry');
+			console.log('Caught error in query: ' + err.stack);
 		});
 	}
 
@@ -123,7 +127,7 @@ class SearchRequestDispatcher {
 			request.initProviders(Object.keys(this.serviceProviders));
 
 			this.processQueryUpdate(request, response, resolve, reject);
-
+/*
 			if (request.type === RequestType.search) {
 				// Execute the request every user provider that the user is subscribed
 				for (var providerName of request.providers) {
@@ -144,7 +148,7 @@ class SearchRequestDispatcher {
 				}
 				this.completeResponse(response);
 			}, 8000, 'timeout');
-
+*/
 		});
 
 	}

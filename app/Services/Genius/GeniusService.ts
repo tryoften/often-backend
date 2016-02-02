@@ -52,7 +52,7 @@ class GeniusService extends ServiceBase {
 
 				var promises = [];
 
-				for (var result of data.response.hits) {
+				for (var result of _.first(data.response.hits, 5)) {
 					// Add all songs to songs list
 					promises.push(this.getData(result.result.id));
 				}

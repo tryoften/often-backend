@@ -47,7 +47,7 @@ class ImageResizerWorker extends Worker {
 		let options = _.defaults(opts, FirebaseConfig.queues.image_resizing);
 		super(options);
 
-		this.default_transformations = ['rectangle', 'original', 'square', 'medium'];
+		this.default_transformations = ['rectangle', 'original', 'square', 'square_small', 'medium'];
 		this.main_tran = 'square';
 		this.gcs = gcloud.storage({
 			projectId: GoogleStorageConfig.projectId,
@@ -60,7 +60,6 @@ class ImageResizerWorker extends Worker {
 	}
 
 	process (data: Resizable, progress, resolve, reject) {
-
 		var promise;
 		switch (data.option) {
 			case (ResizeType.mediaitem):
@@ -80,7 +79,7 @@ class ImageResizerWorker extends Worker {
 		}).catch( err => {
 			reject(err);
 		});
-}
+	}
 
 	processGeneral (data: GeneralRequest): Promise<Object> {
 		return this.ingest(data.originType, data.sourceId, data.resourceId, data.url);
@@ -94,9 +93,10 @@ class ImageResizerWorker extends Worker {
 			});
 			mediaItem.syncData().then( synced => {
 				var promises = [];
+				/*
 				if (!_.isEmpty(mediaItem.images)) {
 					return Promise.reject('Images already exist');
-				}
+				}*/
 				for (var imgProp of data.imageFields) {
 					var mediaItemImgProp = mediaItem.get(imgProp);
 					if (mediaItemImgProp) {
@@ -113,6 +113,7 @@ class ImageResizerWorker extends Worker {
 					mediaItem.set(key, resizedImage[key][this.main_tran].url);
 				}
 				mediaItem.set('images', imagesObj);
+				resolve(true);
 				return this.search.index([mediaItem.toIndexingFormat()]);
 			}).then( indexResults => {
 				resolve(indexResults);
