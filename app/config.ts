@@ -44,7 +44,7 @@ var config: any = {
 		queues: {}
 	},
 	elasticsearch: {
-		BaseURL: args['elasticsearch-root'] || 'http://admin:JNkEnrKtg7DTY4@1b3ec485645a42fe201d499442877842.us-east-1.aws.found.io:9200'
+		BaseURL: args['elasticsearch-root'] || 'http://localhost:9200'
 	},
 	bitly: {
 		clientId: '22a6e134c49f8ccc283660563fb3d4e9d86d42db',
@@ -84,6 +84,14 @@ config.firebase.queues = {
 		specId: 'track_ingestion',
 		url: `${config.firebase.BaseURL}/queues/track_ingestion`,
 		numWorkers: 2,
+		sanitize: false,
+		suppressStack: false,
+		retries: 3
+	},
+	es_ingestion: {
+		specId: 'es_ingestion',
+		url: `${config.firebase.BaseURL}/queues/es_ingestion`,
+		numWorkers: 1,
 		sanitize: false,
 		suppressStack: false,
 		retries: 3
