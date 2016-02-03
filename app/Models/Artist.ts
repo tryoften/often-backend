@@ -64,7 +64,6 @@ class Artist extends MediaItem {
 		this.set(properties);
 
 		this.save();
-		this.resizeImages();
 
 		return this;
 	}
