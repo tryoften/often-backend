@@ -160,7 +160,7 @@ class Search {
 						}
 					},
 					counter: 1,
-					resultsCount: count 
+					resultsCount: count
 				}
 			}
 		}, (error, response) => {

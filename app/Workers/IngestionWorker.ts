@@ -28,7 +28,7 @@ class IngestionWorker extends Worker {
 
 	process (data, progress, resolve, reject) {
 		var request = new Request(<Requestable>data);
-		// returns a promise when all providers are resolved
+
 		return this.serviceDispatcher.process(request)
 			.then((response) => {
 				/* Queue up the request to be picked up by Search */
@@ -36,6 +36,7 @@ class IngestionWorker extends Worker {
 				requestObj[request.id] = request;
 				this.searchQueueRef.update(requestObj);
 				resolve(response);
+
 			})
 			.catch(err => {
 				/* Make sure that request is updated appropriately */

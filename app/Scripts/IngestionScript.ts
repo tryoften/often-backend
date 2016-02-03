@@ -6,7 +6,7 @@ var pi = new PreIngestor();
 var ref = new Firebase(`${FirebaseConfig.BaseURL}/queues/bulk_ingest/tasks`);
 console.log('about to get tracks');
 pi.ingestPopularTracks().then((tracks) => {
-	console.log("Got tracks");
+	console.log('Got tracks');
 	console.log(tracks.length);
 	var interval = 1;
 	var start = 0;

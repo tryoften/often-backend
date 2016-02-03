@@ -92,13 +92,21 @@ class SearchRequestDispatcher {
 		})();
 
 		promise.then( (data: any) => {
+			console.log('in processing mode')
 			response.updateResults(data);
 
+<<<<<<< HEAD
 			if (request.doneUpdating) {
+=======
+			//if (request.providersLeftToProcess === 0 || !!(request.type === RequestType.autocomplete)) {
+>>>>>>> 5a9b2b2ef62ad27f9f4c49a33b9aa62d91560a24
 				this.completeResponse(response);
-			}
+			//}
 
 			resolve(true);
+		}).catch(err => {
+			console.log('erry');
+			console.log('Caught error in query: ' + err.stack);
 		});
 	}
 
@@ -122,15 +130,33 @@ class SearchRequestDispatcher {
 			logger.info('SearchRequestDispatcher:process()', 'request started processing', request);
 
 			this.processQueryUpdate(request, response, resolve, reject);
+<<<<<<< HEAD
 
 			// if nothing happens after 8 seconds: timeout
+=======
+/*
+			if (request.type === RequestType.search) {
+				// Execute the request every user provider that the user is subscribed
+				for (var providerName of request.providers) {
+					this.serviceProviders[<string>providerName].execute(request.query).then((fulfilled: any) => {
+						request.removeProvider(providerName);
+						this.processQueryUpdate(request, response, resolve, reject);
+
+					}).catch((rejected: any) => {
+						request.removeProvider(providerName);
+					});
+				}
+			}
+
+			// if nothing happens after 2 seconds: timeout
+>>>>>>> 5a9b2b2ef62ad27f9f4c49a33b9aa62d91560a24
 			setTimeout(() => {
 				if (!response.get('doneUpdating')) {
 					reject(false);
 				}
 				this.completeResponse(response);
 			}, 8000, 'timeout');
-
+*/
 		});
 
 	}
