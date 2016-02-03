@@ -48,8 +48,7 @@ class Search {
 			}
 
 			this.es.bulk({
-				body: formattedResults,
-				refresh: true
+				body: formattedResults
 			}, (err, resp) => {
 				if (err) {
 					console.log('Failed to index: ' + err);

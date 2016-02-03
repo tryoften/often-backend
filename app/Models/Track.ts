@@ -16,6 +16,10 @@ class Track extends MediaItem {
 		return this.get('title');
 	}
 
+	get artist_id(): string {
+		return this.get('artist_id');
+	}
+
 	get artist_name(): string {
 		return this.get('artist_name');
 	}
@@ -81,6 +85,7 @@ class Track extends MediaItem {
 
 	public imageProperties(): string[] {
 		return [
+			'artist_image_url',
 			'album_cover_art_url',
 			'header_image_url',
 			'song_art_image_url'

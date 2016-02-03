@@ -3,7 +3,7 @@ import * as Firebase from 'firebase';
 import { firebase as FirebaseConfig} from '../config';
 
 var pi = new PreIngestor();
-var ref = new Firebase(`${FirebaseConfig.BaseURL}/queues/track_ingestion/tasks`);
+var ref = new Firebase(`${FirebaseConfig.BaseURL}/queues/bulk_ingest/tasks`);
 console.log('about to get tracks');
 pi.ingestPopularTracks().then((tracks) => {
 	console.log('Got tracks');

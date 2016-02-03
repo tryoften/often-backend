@@ -13,36 +13,47 @@ class Request implements Requestable {
 	creation_time: number;
 	query: Query;
 	type: RequestType;
-	filters: MediaItemSource[];
-	private _providers: string[];
+	doneUpdating: boolean;
+	ingestData: boolean;
 
+	private _providers: string[];
 	constructor (attributes: Requestable, options?) {
+
+		if (attributes.id == null) {
+			throw new Error('Id has to be set on a request object.');
+		}
+		this.id = attributes.id;
+
+		if (attributes.creation_time != null) {
+			this.creation_time = attributes.creation_time;
+		} else {
+			this.creation_time = Date.now();
+		}
 
 		if (!attributes.query) {
 			throw new Error('Query needs to be defined');
 		}
 		this.query = new Query(attributes.query);
-		delete attributes.query;
 
-		if (!attributes.creation_time) {
-			this.creation_time = Date.now();
-		}
-		/* Look at special cases */
-		if (!attributes.filters) {
-			this.filters = [];
-			this._providers = [];
-			delete attributes.filters;
+		if (!!attributes.type) {
+			this.type = attributes.type;
 		} else {
-			//TODO(jakub): Filter out the providers from filters to exclude feeds
-			/* copy all filter properties to service properties */
-			this._providers = _.extend(attributes.filters);
+			throw new Error ('Request Type must be specified');
 		}
 
-		/* Copy remaining attributes normally */
-		for (var key in attributes) {
-			this[key] = attributes[key];
+		this.doneUpdating = !!attributes.doneUpdating;
+
+		if (_.isUndefined(attributes.ingestData)) {
+			/* The first time, this attribute is not set and it must be initiated to true */
+			this.ingestData = true;
+		} else {
+			this.ingestData = attributes.ingestData;
 		}
+
+		this._providers = [];
+
 	}
+
 
 	get providers () {
 		return this._providers;

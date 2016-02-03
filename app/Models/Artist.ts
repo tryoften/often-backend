@@ -71,7 +71,6 @@ class Artist extends MediaItem {
 			this.save();
 		});
 
-		this.resizeImages();
 		return this;
 	}
 

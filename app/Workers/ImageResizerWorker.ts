@@ -1,3 +1,4 @@
+
 import * as http from 'http';
 import * as https from 'https';
 import * as gcloud from 'gcloud';
@@ -10,6 +11,8 @@ import { gcloud as GoogleStorageConfig } from '../config';
 import MediaItemType from '../Models/MediaItemType';
 import MediaItem from '../Models/MediaItem';
 import Search from '../Search/Search';
+import Firebase = require('firebase');
+import Track from '../Models/Track';
 
 class ResizeType {
 	static general: ResizeType = 'general';
@@ -61,6 +64,7 @@ class ImageResizerWorker extends Worker {
 
 	process (data: Resizable, progress, resolve, reject) {
 		var promise;
+		console.log(data);
 		switch (data.option) {
 			case (ResizeType.mediaitem):
 				promise = this.processMediaItem(<ResizableMediaItem>data);
@@ -71,7 +75,7 @@ class ImageResizerWorker extends Worker {
 				break;
 
 			default:
-				reject('Invalid option type specified.');
+				reject('Invalid option type specified.' + data.option);
 				return;
 		}
 		promise.then(result => {
@@ -110,6 +114,12 @@ class ImageResizerWorker extends Worker {
 					mediaItem.set(key, resizedImage[key][this.main_tran].url);
 				}
 				mediaItem.set('images', imagesObj);
+
+				if (data.type === MediaItemType.track) {
+					//Insert the images in appropriate place
+					this.injectImages(mediaItem, imagesObj);
+				}
+
 				resolve(true);
 				return this.search.index([mediaItem.toIndexingFormat()]);
 			}).then( indexResults => {
@@ -122,6 +132,29 @@ class ImageResizerWorker extends Worker {
 
 	}
 
+	injectImages (track: Track, imagesObj: any) {
+
+		var images = {
+			images : imagesObj
+		};
+		/* Create a map of lyricIds to imageObjs */
+		var trackLyricIds = Object.keys(track.lyrics);
+		for (var lyrId of trackLyricIds) {
+			console.log('updating lyrics');
+			var trackLyricRef = new Firebase(`${FirebaseConfig.BaseURL}/tracks/${track.id}/lyrics/${lyrId}/images`);
+			trackLyricRef.update(imagesObj);
+			var lyricRootRef = new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${lyrId}/images`);
+			lyricRootRef.update(imagesObj);
+		}
+
+		/* Update images on artist items */
+		if (!!imagesObj.artist_image_url) {
+			var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
+			artistRef.update(imagesObj.artist_image_url);
+		}
+
+	}
+
 	getResizedImage (item: MediaItem, propertyName: string, imageUrl: string): Promise<Object> {
 		return new Promise((resolve, reject) => {
 			this.ingest(item.source, item.type, item.id, imageUrl)
@@ -130,8 +163,8 @@ class ImageResizerWorker extends Worker {
 					returnObj[propertyName] = images;
 					resolve(returnObj);
 				}).catch(err => {
-					console.log('Image resizer error ' + err);
-					reject(err);
+				console.log('Image resizer error ' + err);
+				reject(err);
 			});
 		});
 	}

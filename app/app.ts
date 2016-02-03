@@ -8,6 +8,7 @@ import ImageResizerWorker from './Workers/ImageResizerWorker';
 import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
+import BulkDataIngestor from './Workers/BulkDataIngestor';
 
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);
@@ -41,6 +42,11 @@ if (_.contains(argv._, 'link-redirector')) {
 if (_.contains(argv._, 'ingestion')) {
 	console.log('starting ingestion-worker');
 	new IngestionWorker().start();
+}
+
+if (_.contains(argv._, 'bulk-ingest')) {
+	console.log('starting bulk ingestion-worker');
+	new BulkDataIngestor().start();
 }
 
 if (_.contains(argv._, 'image-resizer')) {
