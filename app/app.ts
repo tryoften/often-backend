@@ -9,6 +9,7 @@ import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
 import BulkDataIngestor from './Workers/BulkDataIngestor';
+import ElasticSearchDump from "./Workers/ElasticSearchDump";
 
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);
@@ -53,6 +54,12 @@ if (_.contains(argv._, 'image-resizer')) {
 	console.log('starting the image-resizer-worker');
 	new ImageResizerWorker().start();
 }
+
+if (_.contains(argv._, 'elastic-ingestion')) {
+	console.log('starting the elastic-ingestion-worker');
+	new ElasticSearchDump().start();
+}
+
 
 console.log('firebase root URL: ', config.firebase.BaseURL);
 console.log('elasticsearch root URL: ', config.elasticsearch.BaseURL);

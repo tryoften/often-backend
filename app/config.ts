@@ -96,6 +96,14 @@ config.firebase.queues = {
 		suppressStack: false,
 		retries: 3
 	},
+	elastic_dump_file: {
+		specId: 'elastic_dump_file',
+		url: `${config.firebase.BaseURL}/queues/elastic_dump_file`,
+		numWorkers: 2,
+		sanitize: false,
+		suppressStack: false,
+		retries: 3
+	},
 	image_resizing: {
 		specId: 'image_resizing',
 		url: `${config.firebase.BaseURL}/queues/image_resizing`,
