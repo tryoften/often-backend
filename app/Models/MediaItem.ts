@@ -7,6 +7,7 @@ import IDSpace from './IDSpace';
 import Firebase = require('firebase');
 import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
+import * as Backbone from 'backbone';
 
 export interface MediaItemAttributes {
 	id?: string;

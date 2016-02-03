@@ -37,13 +37,6 @@ class Search {
 		this.esQuerySettings = new ElasticSearchQuerySettings();
 	}
 
-	/**
-	 * Initializes the client request dispatcher.
-	 * @param {string} index - name of index for elastic search ex. spotify
-	 * @param {array} results - array of objects containing data to be indexed
-	 *
-	 * @return {Promise} - Promise resolving to a boolean indicating whether bulk indexing has been successful.
-	 */
 	index (indexables: IndexedObject[]): Promise<any> {
 		console.log('indexing...');
 		return new Promise((resolve, reject) => {
@@ -76,9 +69,7 @@ class Search {
 	 *
 	 * @return {Promise} - a promise resolving in an array of search results
 	 */
-
 	query (query: Queryable): Promise<MediaItemGroup[]> {
-
 		var esQuery = this.esQueries.generateQuery(query, 'search');
 
 		return new Promise((resolve, reject) => {
