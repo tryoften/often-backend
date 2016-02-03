@@ -93,10 +93,7 @@ class ImageResizerWorker extends Worker {
 			});
 			mediaItem.syncData().then( synced => {
 				var promises = [];
-				/*
-				if (!_.isEmpty(mediaItem.images)) {
-					return Promise.reject('Images already exist');
-				}*/
+
 				for (var imgProp of data.imageFields) {
 					var mediaItemImgProp = mediaItem.get(imgProp);
 					if (mediaItemImgProp) {
