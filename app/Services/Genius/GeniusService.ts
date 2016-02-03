@@ -90,10 +90,9 @@ class GeniusService extends ServiceBase {
 			}
 
 			Promise.all(promises).then( (categorizedData) => {
-				let geniusServiceResults =  <GeniusServiceResult[]>categorizedData;
+				let geniusServiceResults = <GeniusServiceResult[]>categorizedData;
 
 				for (let gsr of geniusServiceResults) {
-
 					results.push(gsr.artist.toIndexingFormat());
 					results.push(gsr.track.toIndexingFormat());
 					for (let lyric of gsr.lyrics) {
@@ -300,7 +299,7 @@ class GeniusService extends ServiceBase {
 		var aggregatedLyric = filteredLyrics[0];
 		aggregatedLyric.text = this.cleanUpLine(aggregatedLyric.text);
 
-		let characterCount = 100;
+		let characterCount = 50;
 
 		for (var i = 0, len = filteredLyrics.length; i < len; i++) {
 			let lyric = filteredLyrics[i];
@@ -310,9 +309,11 @@ class GeniusService extends ServiceBase {
 				continue;
 			}
 
-			let aggregatedText = aggregatedLyric.text.trim() + '. ' + text;
+			let aggregatedLyricText = aggregatedLyric.text.trim();
+			let aggregatedText = aggregatedLyricText === '' ? text : aggregatedLyricText + '. ' + text;
 
 			if (aggregatedText.length >= characterCount) {
+				aggregatedLyric.text = aggregatedText;
 				resultSet.push(aggregatedLyric);
 				aggregatedLyric = filteredLyrics[i + 1];
 				if (aggregatedLyric) {
@@ -324,8 +325,8 @@ class GeniusService extends ServiceBase {
 
 			// if the last lyric hasn't been added, add it
 			if (i === len - 1) {
-				let lastText = filteredLyrics[i].text;
-				if (aggregatedLyric && aggregatedLyric.text.indexOf(lastText) === -1) {
+				let lastText: string = this.cleanUpLine(filteredLyrics[i].text);
+				if (aggregatedLyric && lastText !== ''  && aggregatedLyric.text.indexOf(lastText) === -1) {
 					resultSet.push(filteredLyrics[i]);
 				}
 			}
@@ -417,6 +418,7 @@ class GeniusService extends ServiceBase {
 						filteredElements = _.compact(filteredElements);
 						for (var i = 0, len = filteredElements.length; i < len; i++) {
 							filteredElements[i].genius_id = `${trackId}_${i}`;
+							filteredElements[i].index = i;
 						}
 						filteredElements = _.uniq(filteredElements, a => a.text);
 						resolve(filteredElements);

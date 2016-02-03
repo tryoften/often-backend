@@ -37,6 +37,9 @@ class Artist extends MediaItem {
 		var trackData = data.track.toJSON();
 		var lyricsData = data.lyrics;
 
+		// remove lyrics on track object since they won't be used here
+		delete trackData.lyrics;
+
 		var properties: any = {};
 
 		/* Set artist properties */
@@ -57,15 +60,18 @@ class Artist extends MediaItem {
 			}
 		}
 
-		properties.tracks = this.get('tracks') || {};
-		properties.tracks[trackData.id] = trackData;
 
-		this.set('time_modified', Date.now());
-		this.set(properties);
+		this.syncData().then(model => {
+			properties.tracks = this.get('tracks') || {};
+			properties.tracks[trackData.id] = _.pick(trackData,
+				'id', 'album_cover_art_url', 'title', 'album_name',
+				'external_url', 'song_art_image_url', 'score');
+			properties.time_modified = Date.now();
+			this.set(properties);
+			this.save();
+		});
 
-		this.save();
 		this.resizeImages();
-
 		return this;
 	}
 

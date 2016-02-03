@@ -52,7 +52,8 @@ class Track extends MediaItem {
 		var properties: any = {};
 
 		/* Set artist properties */
-		for (let prop in artistData) {
+		let artistProps = ['id', 'images', 'image_url', 'name', 'source'];
+		for (let prop of artistProps) {
 			if (artistData.hasOwnProperty(prop)) {
 				properties[`artist_${prop}`] = artistData[prop];
 			}

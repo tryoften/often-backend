@@ -22,7 +22,7 @@ class IngestionWorker extends Worker {
 	}
 
 	process (data, progress, resolve, reject) {
-		console.log("Processing: " + Object.keys(data));
+		console.log('Processing: ' + Object.keys(data));
 		// returns a promise when all providers are resolved
 		return this.genius.ingest(data.tracks)
 			/*.then(indexableData => {
