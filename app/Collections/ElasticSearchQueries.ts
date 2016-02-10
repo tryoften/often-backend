@@ -3,7 +3,7 @@ import { Firebase } from 'backbone';
 import ElasticSearchQuery from '../Models/ElasticSearchQuery';
 import { firebase as FirebaseConfig } from '../config';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import {Queryable} from '../Interfaces/Queryable';
+import { Queryable } from '../Interfaces/Queryable';
 
 class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 

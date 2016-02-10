@@ -5,6 +5,7 @@
 PROJECTID=$(curl -s "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google")
 SERVER_TYPE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/server-type" -H "Metadata-Flavor: Google")
 FIREBASE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/firebase-root" -H "Metadata-Flavor: Google")
+FIREBASE_SECRET=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/firebase-secret" -H "Metadata-Flavor: Google")
 ELASTICSEARCH=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/elasticsearch-root" -H "Metadata-Flavor: Google")
 
 # Install logging monitor and configure it to pickup application logs
@@ -84,7 +85,7 @@ buffer_size=1000
 stdout_logfile_maxbytes=50MB 
 
 [program:nodeapp]
-command=node /opt/app/build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --elasticsearch-root=$ELASTICSEARCH
+command=node /opt/app/build/app.js $SERVER_TYPE --firebase-root=$FIREBASE --firebase-secret=$FIREBASE_SECRET --elasticsearch-root=$ELASTICSEARCH
 autostart=true
 autorestart=true
 user=nodeapp
