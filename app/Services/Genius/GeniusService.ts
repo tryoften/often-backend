@@ -17,6 +17,7 @@ import Query from '../../Models/Query';
  * This class is responsible for fetching data from the Genius API
  */
 class GeniusService extends ServiceBase {
+	access_token: string;
 	/**
 	 * Initializes the genius service provider.
 	 *
@@ -27,6 +28,9 @@ class GeniusService extends ServiceBase {
 		this.rest = new RestService({
 			baseURL: settings.base_url
 		});
+		var randomIndex = Math.floor(Math.random() * settings.access_tokens.length);
+		this.access_token = settings.access_tokens[randomIndex];
+		console.log('Using access_token ', this.access_token);
 	}
 
 	/**
@@ -42,7 +46,7 @@ class GeniusService extends ServiceBase {
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
 					q: query,
-					access_token: settings.access_token
+					access_token: this.access_token
 				}
 			}).on('success', data => {
 				/* check response code */
