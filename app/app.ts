@@ -5,6 +5,7 @@ import IngestionWorker from './Workers/IngestionWorker';
 import UserWorker from './Workers/UserWorker';
 import URIConverterService from './Utilities/URIConverterService';
 import ImageResizerWorker from './Workers/ImageResizerWorker';
+import PreIngestionWorker from './Workers/PreIngestionWorker';
 import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
@@ -43,6 +44,11 @@ if (_.contains(argv._, 'link-redirector')) {
 if (_.contains(argv._, 'ingestion')) {
 	console.log('starting ingestion-worker');
 	new IngestionWorker().start();
+}
+
+if (_.contains(argv._, 'preingestion')) {
+	console.log('starting preingestion-worker');
+	new PreIngestionWorker().start();
 }
 
 if (_.contains(argv._, 'bulk-ingest')) {
