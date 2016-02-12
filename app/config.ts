@@ -99,7 +99,7 @@ config.firebase.queues = {
 	bulk_ingest: {
 		specId: 'bulk_ingest',
 		url: `${config.firebase.BaseURL}/queues/bulk_ingest`,
-		numWorkers: 30,
+		numWorkers: 40,
 		sanitize: false,
 		suppressStack: false,
 		retries: 3
