@@ -179,7 +179,7 @@ class GeniusService extends ServiceBase {
 			this.rest.get(`${settings.base_url}/referents`, {
 				query: {
 					song_id: trackId,
-					access_token: settings.access_token,
+					access_token: this.access_token,
 					per_page: settings.per_page
 				}
 			}).on('success', data => {
@@ -351,7 +351,7 @@ class GeniusService extends ServiceBase {
 
 			this.rest.get(url, {
 				query: {
-					access_token: settings.access_token
+					access_token: this.access_token
 				}
 			}).on('success', data => {
 				if (data.meta.status !== 200) {
