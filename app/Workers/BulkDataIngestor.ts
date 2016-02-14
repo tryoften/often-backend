@@ -10,6 +10,7 @@ class BulkDataIngestor extends Worker {
 	search: Search;
 	buffer: IndexedObject[];
 	flushSize: number;
+	lastProcessed: number;
 
 	constructor (opts = {}) {
 		console.log('initiating');
@@ -19,9 +20,14 @@ class BulkDataIngestor extends Worker {
 			provider_id: 'genius'
 		});
 		this.search = new Search();
+		this.lastProcessed = new Date().getMilliseconds();
 	}
 
 	process (data, progress, resolve, reject) {
+		var timeReceived = new Date().getMilliseconds();
+		console.log("Time taken to get data ", timeReceived - this.lastProcessed);
+		this.lastProcessed = timeReceived;
+
 		console.log("Processing: " + Object.keys(data));
 		// returns a promise when all providers are resolved
 		return this.genius.ingest(data.tracks)
