@@ -77,7 +77,7 @@ class GeniusService extends ServiceBase {
 				});
 
 			}).on('error', err => {
-				console.log('err' + err);
+				console.error('Error fetching data', err.stack);
 				reject(err);
 			});
 		});
@@ -115,7 +115,7 @@ class GeniusService extends ServiceBase {
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
 	public getData (trackId: string): Promise<GeniusServiceResult> {
-
+		var t0 = new Date().getMilliseconds();
 		return new Promise<GeniusServiceResult>( (resolve, reject) => {
 
 			this.getTrackMetadata(trackId)
@@ -127,6 +127,8 @@ class GeniusService extends ServiceBase {
 					]);
 				})
 				.then( promises => {
+					var t1 = new Date().getMilliseconds();
+					console.log('Time to get track metadata', t1 - t0);
 					var data: GeniusData = promises[0];
 					var artist = <Artist> promises[1], track = <Track> promises[2];
 
@@ -148,13 +150,17 @@ class GeniusService extends ServiceBase {
 					}
 
 					/* Otherwise, fetch and update lyrics as well */
+					var t2 = new Date().getMilliseconds();
 					return this.fetchLyrics(data.track.external_url, trackId).then(res => {
+						var t3 = new Date().getMilliseconds();
+						console.log('Time to get lyrics ', t3 - t2);
 						data.lyrics = res.data;
 
 						for (let lyric of res.models) {
 							lyric.setGeniusData(data);
 						}
-
+						var t4 = new Date().getMilliseconds();
+						console.log('Time to set genius data ', t4 - t3);
 						done({artist, track, lyrics: res.models});
 					});
 				})
@@ -217,7 +223,7 @@ class GeniusService extends ServiceBase {
 
 				resolve(lyrics);
 			}).on('error', err => {
-				console.error(err.stack);
+				console.error("Error fetching referents", err.stack);
 				reject(err);
 			});
 		});
@@ -354,6 +360,7 @@ class GeniusService extends ServiceBase {
 					access_token: this.access_token
 				}
 			}).on('success', data => {
+				console.log('Got track metadata');
 				if (data.meta.status !== 200) {
 					reject(new Error('Invalid return status'));
 					return;
@@ -403,7 +410,7 @@ class GeniusService extends ServiceBase {
 					artist: artistInfo
 				});
 			}).on('error', err => {
-				console.log('err' + err);
+				console.error('Error fetching track metadata ', err.stack);
 				reject(err);
 			});
 
@@ -427,7 +434,7 @@ class GeniusService extends ServiceBase {
 						filteredElements = _.uniq(filteredElements, a => a.text);
 						resolve(filteredElements);
 					} catch (err: Error) {
-						console.error(err.stack);
+						console.error("Error pasring lyric page ", err.stack);
 						throw err;
 					}
 				}
