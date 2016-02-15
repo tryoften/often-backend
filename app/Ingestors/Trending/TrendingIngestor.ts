@@ -149,6 +149,8 @@ class TrendingIngestor {
 				}).get();
 
 				resolve(songItems);
+			}).on('fail', (err, response) => {
+				reject(err);
 			}).on('error', (err, response) => {
 				reject(err);
 			});
