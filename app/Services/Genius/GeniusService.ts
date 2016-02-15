@@ -47,7 +47,8 @@ class GeniusService extends ServiceBase {
 				query: {
 					q: query,
 					access_token: this.access_token
-				}
+				},
+				timeout: settings.timeout
 			}).on('success', data => {
 				/* check response code */
 				if (data.meta.status !== 200) {
@@ -76,8 +77,14 @@ class GeniusService extends ServiceBase {
 					resolve(results);
 				});
 
+			}).on('fail', failedEvent => {
+				console.log('Request failed', failedEvent);
+				reject(failedEvent);
+			}).on('timeout', timedOut => {
+				console.log('Fetching of track metadata timed out after ', timedOut);
+				reject(timedOut);
 			}).on('error', err => {
-				console.error('Error fetching data', err.stack);
+				console.log('Error fetching track metadata ', err);
 				reject(err);
 			});
 		});
@@ -105,6 +112,9 @@ class GeniusService extends ServiceBase {
 				}
 
 				resolve(results);
+			}).catch(err => {
+				console.log('Rejecting...');
+				reject(err);
 			});
 		});
 	}
@@ -115,7 +125,6 @@ class GeniusService extends ServiceBase {
 	 * @returns {Promise<GeniusData>} promise that resolves with an object containing all fetched metadata
      */
 	public getData (trackId: string): Promise<GeniusServiceResult> {
-		var t0 = new Date().getMilliseconds();
 		return new Promise<GeniusServiceResult>( (resolve, reject) => {
 
 			this.getTrackMetadata(trackId)
@@ -127,8 +136,6 @@ class GeniusService extends ServiceBase {
 					]);
 				})
 				.then( promises => {
-					var t1 = new Date().getMilliseconds();
-					console.log('Time to get track metadata', t1 - t0);
 					var data: GeniusData = promises[0];
 					var artist = <Artist> promises[1], track = <Track> promises[2];
 
@@ -150,17 +157,12 @@ class GeniusService extends ServiceBase {
 					}
 
 					/* Otherwise, fetch and update lyrics as well */
-					var t2 = new Date().getMilliseconds();
 					return this.fetchLyrics(data.track.external_url, trackId).then(res => {
-						var t3 = new Date().getMilliseconds();
-						console.log('Time to get lyrics ', t3 - t2);
 						data.lyrics = res.data;
 
 						for (let lyric of res.models) {
 							lyric.setGeniusData(data);
 						}
-						var t4 = new Date().getMilliseconds();
-						console.log('Time to set genius data ', t4 - t3);
 						done({artist, track, lyrics: res.models});
 					});
 				})
@@ -187,7 +189,8 @@ class GeniusService extends ServiceBase {
 					song_id: trackId,
 					access_token: this.access_token,
 					per_page: settings.per_page
-				}
+				},
+				timeout: settings.timeout
 			}).on('success', data => {
 				var lyrics = [];
 				if (data.meta.status !== 200) {
@@ -222,8 +225,14 @@ class GeniusService extends ServiceBase {
 				}
 
 				resolve(lyrics);
+			}).on('fail', failedEvent => {
+				console.log('Request failed', failedEvent);
+				reject(failedEvent);
+			}).on('timeout', timedOut => {
+				console.log('Fetching of track metadata timed out after ', timedOut);
+				reject(timedOut);
 			}).on('error', err => {
-				console.error("Error fetching referents", err.stack);
+				console.log('Error fetching track metadata ', err);
 				reject(err);
 			});
 		});
@@ -358,7 +367,8 @@ class GeniusService extends ServiceBase {
 			this.rest.get(url, {
 				query: {
 					access_token: this.access_token
-				}
+				},
+				timeout: 10000
 			}).on('success', data => {
 				console.log('Got track metadata');
 				if (data.meta.status !== 200) {
@@ -409,8 +419,14 @@ class GeniusService extends ServiceBase {
 					track: trackInfo,
 					artist: artistInfo
 				});
+			}).on('fail', failedEvent => {
+					console.log('Request failed', failedEvent);
+					reject(failedEvent);
+			}).on('timeout', timedOut => {
+				console.log('Fetching of track metadata timed out after ', timedOut);
+				reject(timedOut);
 			}).on('error', err => {
-				console.error('Error fetching track metadata ', err.stack);
+				console.log('Error fetching track metadata ', err);
 				reject(err);
 			});
 
@@ -419,7 +435,9 @@ class GeniusService extends ServiceBase {
 
 	private parseLyricPage (url: string, trackId: string): Promise<GeniusLyricData[]> {
 		return new Promise<GeniusLyricData[]>((resolve, reject) => {
-			this.rest.get(url).on('success', data => {
+			this.rest.get(url, {
+				timeout: 10000
+			}).on('success', data => {
 				let $ = cheerio.load(data);
 				let elements = $('.lyrics').toArray();
 				if (elements.length) {
@@ -438,6 +456,15 @@ class GeniusService extends ServiceBase {
 						throw err;
 					}
 				}
+			}).on('fail', failedEvent => {
+				console.log('Request failed', failedEvent);
+				reject(failedEvent);
+			}).on('timeout', timedOut => {
+				console.log('Fetching  timed out after ', timedOut);
+				reject(timedOut);
+			}).on('error', err => {
+				console.log('Error fetching metadata ', err);
+				reject(err);
 			});
 		});
 	}
