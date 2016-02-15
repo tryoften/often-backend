@@ -1,8 +1,9 @@
 import { Model } from 'backbone';
 import {Queryable} from '../Interfaces/Queryable';
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for ElasticSearchQueries.
- */ 
+ */
 class ElasticSearchQuery extends Model {
 
 	/**
@@ -43,7 +44,7 @@ class ElasticSearchQuery extends Model {
 	 *
 	 * @return {void} 
 	 */
-	substituteQuery(template: any, path: string, text: string) {
+	substituteQuery (template: any, path: string, text: string) {
     	var arr = path.split('.');
     	/* iteratively pop elements in arr from left to right, and use them as indices into the body of the query, 
     	   until the very last 'query' key is reached  */

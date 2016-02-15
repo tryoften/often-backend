@@ -34,7 +34,7 @@ class ImageResizer {
 		try {
 			switch (transformation) {
 				case 'rectangle':
-					return (attr.height > attr.width) ? sharp(data).resize(this.small_pixels, null) : sharp(data).resize(null, this.small_pixels); 
+					return (attr.height > attr.width) ? sharp(data).resize(this.small_pixels, null) : sharp(data).resize(null, this.small_pixels);
 
 				case 'original':
 					return sharp(data);
