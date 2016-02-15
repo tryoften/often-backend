@@ -12,7 +12,7 @@ class BulkDataIngestor extends Worker {
 	flushSize: number;
 
 	constructor (opts = {}) {
-		console.log('initiating');
+		console.log('Bulk Data ingestion settings: ', FirebaseConfig.queues.bulk_ingest);
 		let options = _.defaults(opts, FirebaseConfig.queues.bulk_ingest);
 		super(options);
 		this.genius = new GeniusService({

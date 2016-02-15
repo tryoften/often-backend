@@ -98,7 +98,7 @@ config.firebase.queues = {
 	},
 	bulk_ingest: {
 		specId: 'bulk_ingest',
-		url: `${config.firebase.BaseURL}/queues/bulk_ingest`,
+		url: args['queue-path'] ?  `${config.firebase.BaseURL}/${args['queue-path']}` : `${config.firebase.BaseURL}/queues/bulk_ingest`,
 		numWorkers: 2,
 		sanitize: false,
 		suppressStack: false,
