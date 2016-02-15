@@ -368,7 +368,7 @@ class GeniusService extends ServiceBase {
 				query: {
 					access_token: this.access_token
 				},
-				timeout: 10000
+				timeout: settings.timeout
 			}).on('success', data => {
 				console.log('Got track metadata');
 				if (data.meta.status !== 200) {
@@ -436,7 +436,7 @@ class GeniusService extends ServiceBase {
 	private parseLyricPage (url: string, trackId: string): Promise<GeniusLyricData[]> {
 		return new Promise<GeniusLyricData[]>((resolve, reject) => {
 			this.rest.get(url, {
-				timeout: 10000
+				timeout: settings.timeout
 			}).on('success', data => {
 				let $ = cheerio.load(data);
 				let elements = $('.lyrics').toArray();
