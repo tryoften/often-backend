@@ -64,7 +64,6 @@ class ImageResizerWorker extends Worker {
 
 	process (data: Resizable, progress, resolve, reject) {
 		var promise;
-		console.log(data);
 		switch (data.option) {
 			case (ResizeType.mediaitem):
 				promise = this.processMediaItem(<ResizableMediaItem>data);

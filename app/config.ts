@@ -88,9 +88,17 @@ config.firebase.queues = {
 		suppressStack: false,
 		retries: 3
 	},
+	preingestion: {
+		specId: 'preingestion',
+		url: `${config.firebase.BaseURL}/queues/preingestion`,
+		numWorkers: 10,
+		sanitize: false,
+		suppressStack: false,
+		retries: 3
+	},
 	bulk_ingest: {
 		specId: 'bulk_ingest',
-		url: `${config.firebase.BaseURL}/queues/bulk_ingest`,
+		url: args['queue-path'] ?  `${config.firebase.BaseURL}/${args['queue-path']}` : `${config.firebase.BaseURL}/queues/bulk_ingest`,
 		numWorkers: 2,
 		sanitize: false,
 		suppressStack: false,

@@ -1,27 +1,15 @@
 import PreIngestor from '../Ingestors/Lyric/PreIngestor';
 import * as Firebase from 'firebase';
 import { firebase as FirebaseConfig} from '../config';
+import * as _ from 'underscore';
 
 var pi = new PreIngestor();
-var ref = new Firebase(`${FirebaseConfig.BaseURL}/queues/bulk_ingest/tasks`);
-console.log('about to get tracks');
-pi.ingestPopularTracks().then((tracks) => {
-	console.log('Got tracks');
-	console.log(tracks.length);
-	var interval = 1;
-	var start = 0;
-	for (; start + interval  < tracks.length; start += interval) {
+var ref = new Firebase(`${FirebaseConfig.BaseURL}/queues/preingestion/tasks`);
+
+pi.getArtists(false).then(results => {
+	for (var res of results) {
 		ref.push({
-			tracks: tracks.slice(start, start + interval)
+			url: res
 		});
 	}
-	var remaining = tracks.length % start;
-	if (remaining > 0) {
-		ref.push({
-			tracks: tracks.slice(start, start + remaining)
-		});
-	}
-
-
 });
-
