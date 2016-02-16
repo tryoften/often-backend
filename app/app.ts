@@ -8,13 +8,10 @@ import ImageResizerWorker from './Workers/ImageResizerWorker';
 import PreIngestionWorker from './Workers/PreIngestionWorker';
 import BulkDataIngestor from './Workers/BulkDataIngestor';
 import ElasticSearchDump from './Workers/ElasticSearchDump';
+import TrackTaskScheduler from './Schedulers/TrackTaskScheduler';
 import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
-import BulkDataIngestor from './Workers/BulkDataIngestor';
-import ElasticSearchDump from './Workers/ElasticSearchDump';
-import TrackTaskScheduler from './Schedulers/TrackTaskScheduler';
-
 
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);
