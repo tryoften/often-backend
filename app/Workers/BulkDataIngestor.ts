@@ -40,12 +40,7 @@ class BulkDataIngestor extends Worker {
 				resolve(results);
 			})
 			.catch(err => {
-				console.log('Got an error', err);
-				this.errQueue.push({
-					data: data,
-					err: JSON.stringify(err)
-				});
-				resolve(err);
+				reject(err);
 			});
 
 	}
