@@ -7,67 +7,67 @@ console.dir(argv);
 config.workers = argv._;
 
 if (_.contains(argv._, 'search')) {
-	let SearchWorker = require('./Workers/SearchWorker');
+	let SearchWorker = require('./Workers/SearchWorker').default;
 	console.log('starting search\n');
 	new SearchWorker().start();
 }
 
 if (_.contains(argv._, 'feed-ingestor')) {
-	let FeedIngestorWorker = require('./Workers/FeedIngestorWorker');
+	let FeedIngestorWorker = require('./Workers/FeedIngestorWorker').default;
 	console.log('starting feed ingestor\n');
 	new FeedIngestorWorker().start();
 }
 
 if (_.contains(argv._, 'feedpage-parser')) {
-	let FeedPageWorker = require('./Workers/FeedPageWorker');
+	let FeedPageWorker = require('./Workers/FeedPageWorker').default;
 	console.log('starting feed page parser');
 	new FeedPageWorker().start();
 }
 
 if (_.contains(argv._, 'user')) {
-	let UserWorker = require('./Workers/UserWorker');
+	let UserWorker = require('./Workers/UserWorker').default;
 	console.log('starting user worker');
 	new UserWorker().start();
 }
 
 if (_.contains(argv._, 'link-redirector')) {
-	let URIConverterService = require('./Utilities/URIConverterService');
+	let URIConverterService = require('./Utilities/URIConverterService').default;
 	console.log('starting link-redirector');
 	new URIConverterService().start();
 }
 
 if (_.contains(argv._, 'ingestion')) {
-	let IngestionWorker = require('./Workers/IngestionWorker');
+	let IngestionWorker = require('./Workers/IngestionWorker').default;
 	console.log('starting ingestion-worker');
 	new IngestionWorker().start();
 }
 
 if (_.contains(argv._, 'preingestion')) {
-	let PreIngestionWorker = require('./Workers/PreIngestionWorker');
+	let PreIngestionWorker = require('./Workers/PreIngestionWorker').default;
 	console.log('starting preingestion-worker');
 	new PreIngestionWorker().start();
 }
 
 if (_.contains(argv._, 'bulk-ingest')) {
-	let BulkDataIngestor = require('./Workers/BulkDataIngestor');
+	let BulkDataIngestor = require('./Workers/BulkDataIngestor').default;
 	console.log('starting bulk ingestion-worker');
 	new BulkDataIngestor().start();
 }
 
 if (_.contains(argv._, 'track-task-scheduler')) {
-	let TrackTaskScheduler = require('./Schedulers/TrackTaskScheduler');
+	let TrackTaskScheduler = require('./Schedulers/TrackTaskScheduler').default;
 	console.log('starting track-task-scheduler');
 	new TrackTaskScheduler().start();
 }
 
 if (_.contains(argv._, 'image-resizer')) {
-	let ImageResizerWorker = require('./Workers/ImageResizerWorker');
+	let ImageResizerWorker = require('./Workers/ImageResizerWorker').default;
 	console.log('starting the image-resizer-worker');
 	new ImageResizerWorker().start();
 }
 
 if (_.contains(argv._, 'elastic-ingestion')) {
-	let ElasticSearchDump = require('./Workers/ElasticSearchDump');
+	let ElasticSearchDump = require('./Workers/ElasticSearchDump').default;
 	console.log('starting the elastic-ingestion-worker');
 	new ElasticSearchDump().start();
 }
