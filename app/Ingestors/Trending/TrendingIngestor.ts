@@ -99,9 +99,41 @@ class TrendingIngestor {
 	 * Fetches trending track ids
 	 * @return {Promise} - Promise that when resolved returns the results of the data fetch, or an error if failed
 	 * */
-	private getTrendingTracks (): Promise<any> {
+	private getTrendingTracks (pages = 2): Promise<any> {
+		let urlTemplate = 'http://genius.com/home/show_more_cards?page=';
+		let songs = [];
+		let count = 1;
+
 		return new Promise((resolve, reject) => {
-			let url = 'http://genius.com/home/show_more_cards?page=1';
+			let handlePayload = (currentSongs) => {
+				songs = songs.concat(currentSongs);
+
+				if (count >= pages) {
+					resolve(songs);
+					return;
+				}
+
+				let nextURL = urlTemplate + (++count);
+
+				for (let currentSong of currentSongs) {
+					nextURL += ('&exclude[]=' + currentSong.id);
+				}
+				nextURL = encodeURI(nextURL);
+
+				this.getPage(nextURL).then(handlePayload);
+			};
+
+			this.getPage(urlTemplate + count).then(handlePayload);
+		});
+	}
+
+	/**
+	 * Gets an individual page of genius trending songs
+	 * @param url The page URL
+	 * @returns {Promise<T>}
+     */
+	private getPage(url: string): Promise<any> {
+		return new Promise((resolve, reject) => {
 
 			get(url).on('complete', (result, response) => {
 				let $ = cheerio.load(result);
@@ -117,13 +149,14 @@ class TrendingIngestor {
 				}).get();
 
 				resolve(songItems);
+			}).on('fail', (err, response) => {
+				reject(err);
 			}).on('error', (err, response) => {
 				reject(err);
 			});
 
 		});
 	}
-
 }
 
 export default TrendingIngestor;

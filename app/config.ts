@@ -2,7 +2,13 @@ var args = require('minimist')(process.argv.slice(2));
 
 var config: any = {
 	port: process.env.PORT || '8080',
-	worker: 'not-set',
+	worker: (function() {
+		if (args._.length > 0) {
+			return args._[0];
+		}
+		return 'not-set';
+	})(),
+
 	/* Secret is used by sessions to encrypt the cookie */
 	secret: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E',
 	logPath: process.env.LOG_PATH || './',
@@ -26,17 +32,6 @@ var config: any = {
 		projectId: 'acoustic-rider-104419',
 		bucket_name: 'resized_images',
 		key: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E'
-	},
-
-	/*
-		The client ID and secret can be obtained by generating a new Client ID for
-		a web application on Google Developers Console.
-	*/
-	oauth2: {
-		clientId: 'your-client-id-here',
-		clientSecret: 'your-client-secret-here',
-		redirectUrl: process.env.OAUTH2_CALLBACK || 'http://localhost:8080/oauth2callback',
-		scopes: ['email', 'profile']
 	},
 	firebase: {
 		BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com',

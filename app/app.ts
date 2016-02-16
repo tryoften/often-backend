@@ -6,6 +6,8 @@ import UserWorker from './Workers/UserWorker';
 import URIConverterService from './Utilities/URIConverterService';
 import ImageResizerWorker from './Workers/ImageResizerWorker';
 import PreIngestionWorker from './Workers/PreIngestionWorker';
+import BulkDataIngestor from './Workers/BulkDataIngestor';
+import ElasticSearchDump from './Workers/ElasticSearchDump';
 import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
@@ -16,8 +18,8 @@ import TrackTaskScheduler from './Schedulers/TrackTaskScheduler';
 
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);
-
 config.workers = argv._;
+
 if (_.contains(argv._, 'search')) {
 	console.log('starting search\n');
 	new SearchWorker().start();
