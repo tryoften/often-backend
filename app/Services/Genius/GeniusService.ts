@@ -82,7 +82,7 @@ class GeniusService extends ServiceBase {
 				reject(failedEvent);
 			}).on('timeout', timedOut => {
 				console.log('Fetching of track metadata timed out after ', timedOut);
-				reject(timedOut);
+				reject('Fetching of track metadata timed out after ' + timedOut);
 			}).on('error', err => {
 				console.log('Error fetching track metadata ', err);
 				reject(err);
@@ -229,8 +229,8 @@ class GeniusService extends ServiceBase {
 				console.log('Request failed', failedEvent);
 				reject(failedEvent);
 			}).on('timeout', timedOut => {
-				console.log('Fetching of track metadata timed out after ', timedOut);
-				reject(timedOut);
+				console.log('Fetching of track referents timed out after ', timedOut);
+				reject('Fetching of track referents timed out after ' + timedOut);
 			}).on('error', err => {
 				console.log('Error fetching track metadata ', err);
 				reject(err);
@@ -423,7 +423,7 @@ class GeniusService extends ServiceBase {
 					console.log('Request failed', failedEvent);
 					reject(failedEvent);
 			}).on('timeout', timedOut => {
-				console.log('Fetching of track metadata timed out after ', timedOut);
+				console.log('Fetching of track metadata timed out after ' + timedOut);
 				reject(timedOut);
 			}).on('error', err => {
 				console.log('Error fetching track metadata ', err);
@@ -460,7 +460,7 @@ class GeniusService extends ServiceBase {
 				console.log('Request failed', failedEvent);
 				reject(failedEvent);
 			}).on('timeout', timedOut => {
-				console.log('Fetching  timed out after ', timedOut);
+				console.log('Fetching of lyric page timed out after ' + timedOut);
 				reject(timedOut);
 			}).on('error', err => {
 				console.log('Error fetching metadata ', err);
