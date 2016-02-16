@@ -1,7 +1,7 @@
 export var Settings = {
 	provider_name: 'genius',
 	fetch_interval: 10000,
-	timeout: 10000,
+	timeout: 30000,
 	access_tokens: [
 		'q6ZBnt3jxWYutT10TJyR8z_nJF-Xi2nv_wvGll2WMikR6b0wMX6et-uywoFKpeHG',
 		'8p-ZhjeWHp5Jo4AGDtD3cx4Hwix4_BHlSgMLtOGvBydF7K5dDXb1fP9YWSZhW3BK',
