@@ -11,6 +11,10 @@ import ElasticSearchDump from './Workers/ElasticSearchDump';
 import * as minimist from 'minimist';
 import config from './config';
 import * as _ from 'underscore';
+import BulkDataIngestor from './Workers/BulkDataIngestor';
+import ElasticSearchDump from './Workers/ElasticSearchDump';
+import TrackTaskScheduler from './Schedulers/TrackTaskScheduler';
+
 
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);
@@ -54,6 +58,10 @@ if (_.contains(argv._, 'preingestion')) {
 if (_.contains(argv._, 'bulk-ingest')) {
 	console.log('starting bulk ingestion-worker');
 	new BulkDataIngestor().start();
+
+}if (_.contains(argv._, 'track-task-scheduler')) {
+	console.log('starting track-task-scheduler');
+	new TrackTaskScheduler().start();
 }
 
 if (_.contains(argv._, 'image-resizer')) {
