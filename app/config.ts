@@ -54,6 +54,15 @@ var config: any = {
 	}
 };
 
+config.trackSchedulerOptions = {
+	limit: args['limit'] || 500,
+	taskCap: args['taskCap'] || 10,
+	startTrack: args['startTrack'] || '0',
+	tracksUrl: args['tracksUrl'] || `${config.firebase.BaseURL}/allTrackIdsForPopularArtists`,
+	queueUrl: args['queueUrl'] || `${config.firebase.BaseURL}/queues/bulk_ingest/tasks`
+
+};
+
 config.firebase.queues = {
 	default: {
 		url: `${config.firebase.BaseURL}/queues/default`,
@@ -97,7 +106,7 @@ config.firebase.queues = {
 		numWorkers: 2,
 		sanitize: false,
 		suppressStack: false,
-		retries: 3
+		retries: 0
 	},
 	elastic_dump_file: {
 		specId: 'elastic_dump_file',
@@ -185,6 +194,7 @@ config.winston = {
 };
 
 export default config;
+export var trackSchedulerOptions = config.trackSchedulerOptions;
 export var firebase = config.firebase;
 export var winston = config.winston;
 export var elasticsearch = config.elasticsearch;
