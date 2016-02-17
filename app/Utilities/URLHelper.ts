@@ -3,7 +3,7 @@ import { url_shortener } from '../config';
 import ShortenedURL from '../Models/ShortenedURL';
 import { generateURIfromGuid } from '../Utilities/generateURI';
 import * as _ from 'underscore';
-import logger from '../Models/Logger';
+import logger from '../logger';
 import sha1 from 'sha1';
 /**
  * Helper class for Url related functionalities

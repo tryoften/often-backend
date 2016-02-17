@@ -2,7 +2,7 @@ import Worker from './Worker';
 import FeedIngestor from '../Ingestors/Feed/FeedIngestor';
 import config from '../config';
 import * as _ from 'underscore';
-import logger from '../Models/Logger';
+import logger from '../logger';
 
 /**
  * This worker handles

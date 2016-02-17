@@ -1,8 +1,8 @@
 import * as winston from 'winston';
 import { GCL } from 'winston-gcl';
-import config from '../config';
-import { firebase as FirebaseConfig } from '../config';
-import { winston as WinstonConfig } from '../config';
+import config from './config';
+import { firebase as FirebaseConfig } from './config';
+import { winston as WinstonConfig } from './config';
 import * as _ from 'underscore';
 import * as google from 'googleapis';
 import * as os from 'os';

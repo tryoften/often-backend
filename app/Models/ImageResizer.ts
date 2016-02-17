@@ -1,4 +1,5 @@
 import * as sharp from 'sharp';
+import logger from '../logger';
 
 /**
  * This class is responsible for resizing images.
