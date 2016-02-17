@@ -67,9 +67,9 @@ if (_.contains(argv._, 'image-resizer')) {
 }
 
 if (_.contains(argv._, 'elastic-ingestion')) {
-	let ElasticSearchDump = require('./Workers/ElasticSearchDump').default;
-	console.log('starting the elastic-ingestion-worker');
-	new ElasticSearchDump().start();
+	let BulkElasticSearchWorker = require('./Workers/BulkElasticSearchWorker').default;
+	console.log('starting the bulk-elastic-search-worker');
+	new BulkElasticSearchWorker().start();
 }
 
 
