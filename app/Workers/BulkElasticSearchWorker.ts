@@ -5,7 +5,8 @@ import * as _ from 'underscore';
 import Search from '../Search/Search';
 var fs = require('fs');
 import MediaItemType from '../Models/MediaItemType';
-import {IndexedObject} from "../Interfaces/Indexable";
+import {IndexedObject} from '../Interfaces/Indexable';
+import logger from '../logger';
 
 interface IngestionRequest {
 	ids: string[];
@@ -24,19 +25,19 @@ class IngestionTarget extends String {
 	static file: MediaItemType = 'file';
 }
 
-class ElasticSearchDump extends Worker {
+class BulkElasticSearchWorker extends Worker {
 	genius: GeniusService;
 	search: Search;
 
 	constructor (opts = {}) {
-		console.log('initiating');
 		let options = _.defaults(opts, FirebaseConfig.queues.elastic_dump_file);
 		super(options);
 		this.search = new Search();
 	}
 
 	process (data, progress, resolve, reject) {
-		console.log('processing...');
+		logger.info('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type);
+
 		var ids = data.ids;
 		var type = data.type;
 		var targets = data.targets;
@@ -51,7 +52,7 @@ class ElasticSearchDump extends Worker {
 		}
 
 		Promise.all(promises).then( syncedMediaItems => {
-			console.log('All data is synced up.');
+			logger.info('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' event: Synced all data.');
 			var indexables = [];
 			for (var smi of syncedMediaItems) {
 				var indexingFormat = smi.toIndexingFormat();
@@ -78,8 +79,10 @@ class ElasticSearchDump extends Worker {
 			return Promise.all(targetPromises);
 
 		}).then((results) => {
+			logger.info('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' results: ', results);
 			resolve(results);
 		}).catch( err => {
+			logger.error('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' error: ', err);
 			reject(err);
 		});
 	}
@@ -111,4 +114,4 @@ class ElasticSearchDump extends Worker {
 
 }
 
-export default ElasticSearchDump;
+export default BulkElasticSearchWorker;
