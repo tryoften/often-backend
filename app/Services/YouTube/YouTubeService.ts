@@ -2,7 +2,7 @@ import 'backbonefire';
 import ServiceBase from '../ServiceBase';
 import { Settings as settings } from './config';
 import { Service as RestService } from 'restler';
-import logger from '../../Models/Logger';
+import logger from '../../logger';
 /** 
  * This class is responsible for fetching data from the Giphy API
  */

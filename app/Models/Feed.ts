@@ -4,7 +4,7 @@ import { generateURIfromGuid } from '../Utilities/generateURI';
 import getFeedPage from '../Utilities/getFeedPage';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import logger from './Logger';
+import logger from './../logger';
 import Queue = require('firebase-queue');
 
 /**

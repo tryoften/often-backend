@@ -1,7 +1,7 @@
 import FirebaseTokenGenerator = require('firebase-token-generator');
 import { firebase as FirebaseConfig } from '../config';
 import * as Firebase from 'firebase';
-import logger from '../Models/Logger';
+import logger from '../logger';
 
 /**
  * This singleton class is responsible for generating authentication tokens for user accounts

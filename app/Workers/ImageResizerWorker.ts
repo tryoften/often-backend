@@ -36,7 +36,6 @@ interface GeneralRequest extends Resizable {
 	url: string;
 }
 
-
 class ImageResizerWorker extends Worker {
 	default_transformations: string[];
 	main_tran: string;
