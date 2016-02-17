@@ -4,7 +4,7 @@ import { elasticsearch as ElasticSearchConfig } from '../config';
 import ElasticSearchQueries from '../Collections/ElasticSearchQueries';
 import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import * as _ from 'underscore';
-import logger from '../Models/Logger';
+import logger from '../logger';
 import { Queryable } from '../Interfaces/Queryable';
 import { IndexedObject } from '../Interfaces/Indexable';
 

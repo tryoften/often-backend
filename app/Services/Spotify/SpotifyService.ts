@@ -1,6 +1,6 @@
 import 'backbonefire';
 import ServiceBase from '../ServiceBase';
-import logger from '../../Models/Logger';
+import logger from '../../logger';
 var spotifyWebApi = require('spotify-web-api-node');
 var spotifyApi = new spotifyWebApi();
 

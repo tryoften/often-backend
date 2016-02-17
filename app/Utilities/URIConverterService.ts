@@ -2,7 +2,7 @@ import ShortenedURL from '../Models/ShortenedURL';
 import { url_redirector } from '../config';
 import * as express from 'express';
 import * as _ from 'underscore';
-import logger from '../Models/Logger';
+import logger from '../logger';
 /**
  * Helper class for Url related functionalities
  */

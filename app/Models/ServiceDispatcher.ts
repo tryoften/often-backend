@@ -1,7 +1,7 @@
 import SearchParser from '../Search/SearchParser';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
-import logger from '../Models/Logger';
+import logger from '../logger';
 import Search from '../Search/Search';
 import Request from '../Models/Request';
 import MediaItemSource from '../Models/MediaItemSource';

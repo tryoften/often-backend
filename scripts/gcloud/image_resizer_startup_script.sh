@@ -42,10 +42,10 @@ service google-fluentd restart &
 # [END logging]
 
 # Add nodejs repository (NodeSource)
-curl -sL https://deb.nodesource.com/setup_0.12 | bash -
+curl -sL https://deb.nodesource.com/setup_5.x | bash -
 
 # Install dependencies from apt
-apt-get install -y git nodejs build-essential supervisor pkg-config
+apt-get install -y git build-essential supervisor pkg-config
 
 # Install other dependencies
 curl -s https://raw.githubusercontent.com/lovell/sharp/master/preinstall.sh | bash -

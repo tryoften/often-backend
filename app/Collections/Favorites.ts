@@ -3,7 +3,7 @@ import { Firebase } from 'backbone';
 import { firebase as FirebaseConfig } from '../config';
 import Favorite from '../Models/Favorite';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import logger from '../Models/Logger';
+import logger from '../logger';
 
 /**
  * This class is responsible for maintaining the favorite collection.

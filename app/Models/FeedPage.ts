@@ -7,7 +7,7 @@ import * as cheerio from 'cheerio';
 import URLHelper from '../Utilities/URLHelper';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import logger from './Logger';
+import logger from './../logger';
 import Search from '../Search/Search';
 import Feed from './Feed';
 
