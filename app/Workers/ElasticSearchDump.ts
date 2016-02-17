@@ -5,6 +5,24 @@ import * as _ from 'underscore';
 import Search from '../Search/Search';
 var fs = require('fs');
 import MediaItemType from '../Models/MediaItemType';
+import {IndexedObject} from "../Interfaces/Indexable";
+
+interface IngestionRequest {
+	ids: string[];
+	type: MediaItemType;
+	targets: Target[];
+}
+
+interface Target {
+	type: IngestionTarget;
+	data: any;
+}
+
+
+class IngestionTarget extends String {
+	static elasticsearch: MediaItemType = 'elasticsearch';
+	static file: MediaItemType = 'file';
+}
 
 class ElasticSearchDump extends Worker {
 	genius: GeniusService;
@@ -21,44 +39,75 @@ class ElasticSearchDump extends Worker {
 		console.log('processing...');
 		var ids = data.ids;
 		var type = data.type;
+		var targets = data.targets;
+
+
 		var MediaItemClass = MediaItemType.toClass(type);
 		var promises = [];
-
 
 		for (var id of ids) {
 			var mediaItem = new MediaItemClass({id: id});
 			promises.push(mediaItem.syncData());
 		}
 
-		Promise.all(promises).then(syncedMediaItems => {
-			console.log('synced');
-			console.log(syncedMediaItems);
-			var indexables = '';
-
+		Promise.all(promises).then( syncedMediaItems => {
+			console.log('All data is synced up.');
+			var indexables = [];
 			for (var smi of syncedMediaItems) {
-				var indexed = smi.toIndexingFormat();
-				var reqVal = this.search.getIndexFormat(indexed);
-				indexables  += JSON.stringify(reqVal[0]) + '\n' + JSON.stringify(reqVal[1]) + '\n';
+				var indexingFormat = smi.toIndexingFormat();
+				indexables.push(indexingFormat);
+			}
+			return indexables;
+		}).then( allIndexables => {
+
+			let targetPromises = [];
+			for (let target of targets) {
+				switch (target.type) {
+					case (IngestionTarget.file):
+						targetPromises.push(this.writeToFS(target.data, allIndexables, type));
+						break;
+					case (IngestionTarget.elasticsearch):
+						targetPromises.push(this.indexToES(allIndexables));
+						break;
+
+					default:
+						reject(targetPromises);
+						return;
+				}
+			}
+			return Promise.all(targetPromises);
+
+		}).then((results) => {
+			resolve(results);
+		}).catch( err => {
+			reject(err);
+		});
+	}
+
+	indexToES (indexables: IndexedObject[]) {
+		return this.search.index(indexables);
+	}
+
+	writeToFS (dir: string, indexables: IndexedObject[], type: MediaItemType) {
+
+		return new Promise((resolve, reject) => {
+			var writeString = '';
+			for (var index of indexables) {
+				var esFormat = this.search.getIndexFormat(index);
+				writeString += JSON.stringify(esFormat[0]) + '\n' + JSON.stringify((esFormat[1])) + '\n';
 			}
 
-			return indexables;
-		}).then(myIndexables => {
-
-
-			/* Write to disk */
-			var fileName = `/Users/jdc/Documents/work/elastidump-2/dump-${type}-${Date.now()}`;
-			fs.writeFile(fileName, myIndexables, (err) => {
+			var fileName = `${dir}/${type}-${Date.now()}`;
+			fs.writeFile(fileName, writeString, (err) => {
 				if (err) {
 					reject(err);
 				} else {
 					resolve(fileName);
 				}
-
 			});
-		}).catch( err => {
-			reject(err);
 		});
 	}
+
 
 }
 
