@@ -6,6 +6,13 @@ import Artist from './Artist';
 import Lyric from './Lyric';
 import * as _ from 'underscore';
 
+interface TrackIndexedObject extends IndexedObject {
+	images?: any;
+	artist_id: string;
+	artist_name: string;
+	album_name: string;
+}
+
 /**
  * Track model throughout the platform
  */
@@ -93,10 +100,18 @@ class Track extends MediaItem {
 	}
 
 	public toIndexingFormat(): IndexedObject {
-		let data = super.toIndexingFormat();
+		let data: TrackIndexedObject = super.toIndexingFormat();
 		data.title = this.title || '';
 		data.author = this.artist_name || '';
 		data.description = '';
+		data.images = this.images;
+		data.artist_id = this.artist_id || '';
+		data.artist_name = this.artist_name || '';
+		data.album_name = this.album_name || '';
+		data.song_art_image_url = this.get('song_art_image_url') || '';
+		data.album_cover_art_url = this.get('album_cover_art_url') || '';
+		data.header_image_url = this.get('header_image_url') || '';
+		data.artist_image_url = this.get('artist_image_url') || '';
 
 		return data;
 	}
