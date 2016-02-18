@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 import MediaItem from './MediaItem';
 import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
 import { IndexedObject } from '../Interfaces/Indexable';
-
+import * as Firebase from 'firebase';
 
 /**
  * This class is responsible for providing granular functionality (mostly accessors) for cached responses.
@@ -59,17 +59,16 @@ class Artist extends MediaItem {
 				properties.lyrics_count = (this.get('lyrics_count') || 0) + lyricsData.length;
 			}
 		}
+		properties.time_modified = Date.now();
+		
+		var tracks = this.get('tracks') || {};
+		tracks[trackData.id] = _.pick(trackData,
+			'id', '_id', 'album_cover_art_url', 'title', 'album_name',
+			'external_url', 'song_art_image_url', 'score', 'type');
+		tracks[trackData.id].type = 'track';
 
-		var self = this;
-		this.syncData().then(model => {
-			properties.tracks = this.get('tracks') || {};
-			properties.tracks[trackData.id] = _.pick(trackData,
-				'id', '_id', 'album_cover_art_url', 'title', 'album_name',
-				'external_url', 'song_art_image_url', 'score', 'type');
-			properties.time_modified = Date.now();
-			self.set(properties);
-			self.save();
-		});
+		properties.tracks = tracks;
+		new Firebase(this.url()).update(properties);
 
 		return this;
 	}
@@ -79,10 +78,11 @@ class Artist extends MediaItem {
 		data.title = '';
 		data.author = this.name || '';
 		data.description = '';
-		data.image_url = this.get('image_url') || ''
+		data.image_url = this.get('image_url') || '';
 		data.name = this.name;
 		data.lyrics_count = this.get('lyrics_count') || 0;
 		data.tracks_count = this.get('tracks_count') || 0;
+		data.tracks = this.get('tracks') || {};
 
 		return data;
 	}
