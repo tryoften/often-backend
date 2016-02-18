@@ -128,7 +128,7 @@ export class MediaItem extends BaseModel implements Indexable {
 		var data =  {
 			_id: this.id,
 			_index: (this.source || '').toString(),
-			_score: this.score,
+			_score: this.score || 0,
 			_type: (this.type || '').toString(),
 			id: this.id,
 			title: this.get('title') || '',

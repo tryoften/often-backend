@@ -36,7 +36,7 @@ class PreIngestor {
 					//console.log('running one');
 					//return this.getTracksForArtist(prev, popularTracksOnly).then(this.getTracksForArtist(curr, popularTracksOnly));
 				}, Promise.resolve());
-/*
+				/*
 				for (let url of artistUrls) {
 					trackPromises.push(this.getTracksForArtist(url, popularTracksOnly));
 				}
