@@ -119,9 +119,9 @@ class ImageResizerWorker extends Worker {
 					//Insert the images in appropriate place
 					this.injectImages(mediaItem, imagesObj);
 				}
+				//update images on elasticsearch
+				return this.search.update(mediaItem.source, mediaItem.type, mediaItem.id, updObj);
 
-				resolve(true);
-				return this.search.index([mediaItem.toIndexingFormat()]);
 			}).then( indexResults => {
 				resolve(indexResults);
 			}).catch( err => {
@@ -131,6 +131,8 @@ class ImageResizerWorker extends Worker {
 		});
 
 	}
+
+
 
 	injectImages (track: Track, imagesObj: any) {
 
