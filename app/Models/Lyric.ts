@@ -5,6 +5,15 @@ import {IndexedObject} from '../Interfaces/Indexable';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
+interface LyricIndexedObject extends IndexedObject {
+	images?: any;
+	text: string;
+	artist_name: string;
+	track_title: string;
+	track_id: string;
+	artist_image_url: string;
+}
+
 export class Lyric extends MediaItem {
 
 	// TODO(jakub): create an interface for lyric that guarantees 'common' indexed fields
@@ -42,7 +51,8 @@ export class Lyric extends MediaItem {
 		var properties: any = {};
 
 		if (track) {
-			for (let prop in track) {
+			let props = ['title'];
+			for (let prop of props) {
 				if (track.hasOwnProperty(prop)) {
 					properties[`track_${prop}`] = track[prop];
 				}
@@ -50,7 +60,7 @@ export class Lyric extends MediaItem {
 		}
 
 		if (artist) {
-			let props = ['id', 'name', 'genius_id', 'image_url', 'is_verified', 'lyrics_count', 'score'];
+			let props = ['id', 'name', 'image_url'];
 			for (let prop of props) {
 				if (artist.hasOwnProperty(prop)) {
 					properties[`artist_${prop}`] = artist[prop];
@@ -76,10 +86,15 @@ export class Lyric extends MediaItem {
 	}
 
 	public toIndexingFormat(): IndexedObject {
-		let data = super.toIndexingFormat();
+		let data: LyricIndexedObject = super.toIndexingFormat();
 		data.title = this.track_name || '';
 		data.author = this.artist_name || '';
 		data.description = this.text || '';
+		data.text = this.text || '';
+		data.images = this.images;
+		data.artist_name = this.get('artist_name') || '';
+		data.track_title = this.get('track_title') || '';
+		data.artist_image_url = this.get('artist_image_url') || '';
 
 		return data;
 	}

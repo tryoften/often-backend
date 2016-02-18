@@ -3,6 +3,7 @@ import * as Firebase from 'firebase';
 import * as _ from 'underscore';
 import { firebase as FirebaseConfig } from '../config';
 import { trackSchedulerOptions } from '../config';
+import logger from '../logger';
 
 class TrackTaskScheduler {
 	tracks: any;
@@ -16,19 +17,19 @@ class TrackTaskScheduler {
 	constructor () {
 		this.tracks = [];
 		this.tracksRef = new Firebase(trackSchedulerOptions.tracksUrl);
-		console.log('Tracks Reference: ', trackSchedulerOptions.tracksUrl);
+		logger.log('Tracks Reference: ', trackSchedulerOptions.tracksUrl);
 
 		this.queueRef = new Firebase(trackSchedulerOptions.queueUrl);
-		console.log('Queue Reference: ', trackSchedulerOptions.queueUrl);
+		logger.log('Queue Reference: ', trackSchedulerOptions.queueUrl);
 
 		this.limit = trackSchedulerOptions.limit;
-		console.log('Limit: ', trackSchedulerOptions.limit);
+		logger.log('Limit: ', trackSchedulerOptions.limit);
 
 		this.taskCap = trackSchedulerOptions.taskCap;
-		console.log('Task Cap: ', trackSchedulerOptions.taskCap);
+		logger.log('Task Cap: ', trackSchedulerOptions.taskCap);
 
 		this.startTrack = trackSchedulerOptions.startTrack;
-		console.log('StartTrack: ', trackSchedulerOptions.startTrack);
+		logger.log('StartTrack: ', trackSchedulerOptions.startTrack);
 
 	}
 
@@ -67,7 +68,7 @@ class TrackTaskScheduler {
 
 
 	setListeners() {
-		console.log('Setting up listeners');
+		logger.log('Setting up listeners');
 		this.queueListener = this.queueRef.on('child_removed', () => {
 
 			if (this.tracks.length > 0) {
@@ -85,7 +86,7 @@ class TrackTaskScheduler {
 
 	removeFirstTaskAndEnqueue () {
 		var nextTrack = this.tracks.shift();
-		console.log(`Enqueueing.. Track id: ${nextTrack} Tracks size: ${this.tracks.length}`);
+		logger.log(`Enqueueing.. Track id: ${nextTrack} Tracks size: ${this.tracks.length}`);
 		this.startTrack = nextTrack;
 		this.queueRef.push({
 			tracks: [nextTrack]
@@ -94,22 +95,22 @@ class TrackTaskScheduler {
 
 	pushNTasks (n: number) {
 		if (this.tracks.length > 0) {
-			console.log(`Pushing ${n} tasks onto work queue`);
+			logger.log(`Pushing ${n} tasks onto work queue`);
 			while (n > 0) {
 				this.removeFirstTaskAndEnqueue();
 				n--;
 			}
 		} else {
-			console.log('Tracks array is empty.');
+			logger.log('Tracks array is empty.');
 		}
 
 	}
 
-	getMoreTracks() {
+	getMoreTracks () {
 		this.tracksRef.startAt(this.startTrack).limitToFirst(this.limit).once('value', (tracksSnap) => {
-			console.log('Fetched more tracks');
+			logger.log('Fetched more tracks');
 			this.loadTracks(tracksSnap.val());
-			console.log('Tracks length ', this.tracks.length);
+			logger.log('Tracks length ', this.tracks.length);
 			this.setListeners();
 			this.pushNTasks(this.taskCap);
 		}, (err) => {

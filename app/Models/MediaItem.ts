@@ -95,9 +95,12 @@ export class MediaItem extends BaseModel implements Indexable {
 	}
 
 	// Getters
-
 	get type(): MediaItemType {
 		return this.get('type');
+	}
+
+	get score(): number {
+		return this.get('score');
 	}
 
 	get source(): MediaItemSource {
@@ -109,7 +112,6 @@ export class MediaItem extends BaseModel implements Indexable {
 	}
 
 	// Setters
-
 	set type(value: MediaItemType) {
 		this.set('type', value);
 	}
@@ -118,12 +120,22 @@ export class MediaItem extends BaseModel implements Indexable {
 		this.set('source', value);
 	}
 
+	set score(value: number) {
+		this.set('score', value);
+	}
+
 	public toIndexingFormat(): IndexedObject {
-		var data =  this.toJSON();
-		data._id = data.id;
-		data._index = this.source;
-		data._score = data.score;
-		data._type = this.type;
+		var data =  {
+			_id: this.id,
+			_index: this.source.toString(),
+			_score: this.score,
+			_type: this.type.toString(),
+			id: this.id,
+			title: this.get('title') || '',
+			type: this.type.toString(),
+			description: this.get('description') || '',
+			author: this.get('author') || ''
+		};
 
 		return data;
 	}

@@ -1,6 +1,6 @@
 import MediaItemType from './MediaItemType';
 
-export class MediaItemGroup {
+export default class MediaItemGroup {
 	results: any;
 	type: MediaItemType;
 	constructor(type, items) {

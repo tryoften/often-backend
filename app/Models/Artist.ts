@@ -60,15 +60,15 @@ class Artist extends MediaItem {
 			}
 		}
 
-
+		var self = this;
 		this.syncData().then(model => {
 			properties.tracks = this.get('tracks') || {};
 			properties.tracks[trackData.id] = _.pick(trackData,
-				'id', 'album_cover_art_url', 'title', 'album_name',
-				'external_url', 'song_art_image_url', 'score');
+				'id', '_id', 'album_cover_art_url', 'title', 'album_name',
+				'external_url', 'song_art_image_url', 'score', 'type');
 			properties.time_modified = Date.now();
-			this.set(properties);
-			this.save();
+			self.set(properties);
+			self.save();
 		});
 
 		return this;
@@ -79,6 +79,10 @@ class Artist extends MediaItem {
 		data.title = '';
 		data.author = this.name || '';
 		data.description = '';
+		data.image_url = this.get('image_url') || ''
+		data.name = this.name;
+		data.lyrics_count = this.get('lyrics_count') || 0;
+		data.tracks_count = this.get('tracks_count') || 0;
 
 		return data;
 	}
