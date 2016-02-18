@@ -1,7 +1,8 @@
 import * as Firebase from 'firebase';
 import { firebase as FirebaseConfig} from '../config';
-var chunkSize = 1000;
-var dumpRef = new Firebase(`${FirebaseConfig.BaseURL}/queues/elastic_dump_file/tasks`);
+var chunkSize = 10000;
+
+var queueRef = new Firebase(`https://often-prod.firebaseio.com/queues/elastic_dump_file/tasks`);
 
 function splitArr(arr, chunkSize) {
 	var chunked = [];
@@ -11,62 +12,57 @@ function splitArr(arr, chunkSize) {
 	return chunked;
 }
 
-var artistsRef = new Firebase(`${FirebaseConfig.BaseURL}/artists`);
-artistsRef.on('value', snap => {
-	console.log("Artists sync");
-	 var obi = snap.val();
-	 var keys = Object.keys(obi);
-	 var ids = [];
-	 for (var k of keys) {
-		 var oftenId = obi[k];
-		 ids.push(oftenId);
-	 }
-	 var groups = splitArr(ids, chunkSize);
-	 for (var gr of groups) {
-		dumpRef.push({
-			ids: gr,
-			type: 'artist'
-		});
-	}
-});
+function formatTask(ids: string[], type: string, targets: string[]) {
+	return {
+		type: type,
+		ids: ids,
+		targets: targets
+	};
+}
 
-var tracksRef = new Firebase(`${FirebaseConfig.BaseURL}/tracks`);
-tracksRef.on('value', snap => {
-	console.log("Tracks sync");
-	var obi = snap.val();
-	var keys = Object.keys(obi);
-	var ids = [];
-	for (var k of keys) {
-		var oftenId = obi[k];
-		ids.push(oftenId);
+function fetchInChunks(rootRef, size, type, targets, start?) {
+	var currRef = rootRef.orderByKey();
+	if (start) {
+		currRef = currRef.startAt(start);
 	}
-	var groups = splitArr(ids, chunkSize);
-	for (var gr of groups) {
-		dumpRef.push({
-			ids: gr,
-			type: 'track'
-		});
-	}
-});
+	console.log('about to fetch', start);
+	currRef.limitToFirst(size).once('value', (snap) => {
+		console.log('loaded...');
+		var allKeys = Object.keys(snap.val());
+		var resultObject = snap.val();
+		var ids = [];
+		for (var k of allKeys) {
+			var oftenId = resultObject[k];
+			ids.push(oftenId);
+		}
+		console.log(ids);
+
+		var task = formatTask(ids, type, targets);
+		queueRef.push(task);
+
+
+		var lastOne = allKeys[allKeys.length - 1];
+
+		if (allKeys.length < size) {
+			console.log('done fetching');
+			return;
+		} else {
+			fetchInChunks(rootRef, size, type, targets, lastOne);
+		}
+
+	});
+
+
+}
+
+var artistsRef = new Firebase(`https://often-prod.firebaseio.com/idspace/genius/artist`);
+fetchInChunks(artistsRef, chunkSize, 'artist', [{type: 'elasticsearch'}]);
+
+
+var tracksRef = new Firebase(`https://often-prod.firebaseio.com/idspace/genius/track`);
+fetchInChunks(tracksRef, chunkSize, 'track', [{type: 'elasticsearch'}]);
 
 
 var lyricsRef = new Firebase(`${FirebaseConfig.BaseURL}/idspace/genius/lyric`);
-lyricsRef.on('value', snap => {
-	console.log("Lyrics sync");
-	var obi = snap.val();
-	var keys = Object.keys(obi);
-	var ids = [];
-	for (var k of keys) {
-		var oftenId = obi[k];
-		ids.push(oftenId);
-	}
-
-	var groups = splitArr(ids, chunkSize);
-	for (var gr of groups) {
-		dumpRef.push({
-			ids: gr,
-			type: 'lyric'
-		});
-	}
-});
+fetchInChunks(lyricsRef, chunkSize, 'lyric', [{type: 'elasticsearch'}]);
 
