@@ -16,7 +16,7 @@ class FeedIngestor {
 	/**
 	 * Ingests data into elasticsearch
 	 *
-	 * @param reingest {Bool} - whether we should trackIdsToIndexableObjects data that has already been ingested
+	 * @param reingest {Bool} - whether we should ingest data that has already been ingested
 	 */
 	ingest (reingest: boolean = false) {
 		return new Promise((resolve, reject) => {
