@@ -4,6 +4,14 @@ import { firebase as FirebaseConfig, port } from '../config';
 import * as _ from 'underscore';
 import { createServer } from 'http';
 
+export interface Task {
+	_state: string;
+	_state_changed: string;
+	_owner: string;
+	_progress: number;
+	_error_details?: any;
+}
+
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
  */
@@ -36,8 +44,8 @@ class Worker {
 	/**
 	 * Processes jobs
 	 */
-	process(data, progress, resolve, reject) {
-		throw new Error('Worker(): worker.process must be implemented by a child class');
+	process(data: Task, progress: Function, resolve: Function, reject: Function): void {
+		throw new Error('Worker.process(): worker.process must be implemented by a child class');
 	}
 
 	setupHealthCheckServer () {

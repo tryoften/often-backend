@@ -111,7 +111,7 @@ config.firebase.queues = {
 	elastic_dump_file: {
 		specId: 'elastic_dump_file',
 		url: `${config.firebase.BaseURL}/queues/elastic_dump_file`,
-		numWorkers: 2,
+		numWorkers: 1,
 		sanitize: false,
 		suppressStack: false,
 		retries: 3

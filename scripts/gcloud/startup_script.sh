@@ -42,10 +42,10 @@ service google-fluentd restart &
 # [END logging]
 
 # Add nodejs repository (NodeSource)
-curl -sL https://deb.nodesource.com/setup_5.x | bash -
+curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 
 # Install dependencies from apt
-apt-get install -y git build-essential supervisor pkg-config
+apt-get install -y nodejs git build-essential supervisor pkg-config
 
 # Remove the remote
 rm -rf /opt/app

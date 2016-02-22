@@ -1,6 +1,6 @@
 import * as Firebase from 'firebase';
 import { firebase as FirebaseConfig} from '../config';
-var chunkSize = 10000;
+var chunkSize = 200;
 
 var queueRef = new Firebase(`https://often-prod.firebaseio.com/queues/elastic_dump_file/tasks`);
 
@@ -58,11 +58,14 @@ function fetchInChunks(rootRef, size, type, targets, start?) {
 var artistsRef = new Firebase(`https://often-prod.firebaseio.com/idspace/genius/artist`);
 fetchInChunks(artistsRef, chunkSize, 'artist', [{type: 'elasticsearch'}]);
 
+//
+//var tracksRef = new Firebase(`https://often-prod.firebaseio.com/idspace/genius/track`);
+//fetchInChunks(tracksRef, chunkSize, 'track', [{type: 'elasticsearch'}]);
+//
+//
+//fetchInChunks(lyricsRef, chunkSize, 'lyric', [{type: 'elasticsearch'}]);
 
-var tracksRef = new Firebase(`https://often-prod.firebaseio.com/idspace/genius/track`);
-fetchInChunks(tracksRef, chunkSize, 'track', [{type: 'elasticsearch'}]);
-
-
-var lyricsRef = new Firebase(`${FirebaseConfig.BaseURL}/idspace/genius/lyric`);
-fetchInChunks(lyricsRef, chunkSize, 'lyric', [{type: 'elasticsearch'}]);
-
+//
+//queueRef.orderByChild("_state").equalTo("done").on('child_added', function(snap) {
+//	queueRef.child(snap.key()).remove();
+//});

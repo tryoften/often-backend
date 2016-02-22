@@ -41,7 +41,6 @@ class URIConverterService {
 	handleURL (req, res, model) {
 		var long_url = model.get('long_url');
 
-
 		if (!_.isUndefined(long_url) && !_.isNull(long_url)) {
 			logger.info('URIConverterService.handleURL(): ', 'success redirect URL', req.originalUrl, long_url);
 			model.set('time_accessed', Date.now());

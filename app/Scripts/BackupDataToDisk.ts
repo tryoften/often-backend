@@ -10,7 +10,7 @@ function getUserHome() {
 }
 
 function backupFirebaseLocation(rootURL: string, relativeObjectPath: string, max_count = 5000) {
-	var dateString = dateformat(new Date(), 'yyyy-mm-dd-HH:MM');
+	var dateString = dateformat(new Date(), 'yyyy-mm-dd');
 	var baseDir = path.join(getUserHome(), '/firebase-backups/', relativeObjectPath, dateString, '/');
 	var rootRef = new Firebase(rootURL + relativeObjectPath);
 
@@ -69,4 +69,4 @@ function backupFirebaseLocation(rootURL: string, relativeObjectPath: string, max
 	})
 }
 
-backupFirebaseLocation('https://often-prod.firebaseio.com/', 'lyrics/', 5000);
+backupFirebaseLocation('https://often-prod.firebaseio.com/', 'tracks/', 500);

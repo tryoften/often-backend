@@ -60,7 +60,7 @@ class Artist extends MediaItem {
 			}
 		}
 		properties.time_modified = Date.now();
-		
+
 		var tracks = this.get('tracks') || {};
 		tracks[trackData.id] = _.pick(trackData,
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',

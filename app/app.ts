@@ -67,7 +67,7 @@ if (_.contains(argv._, 'image-resizer')) {
 }
 
 if (_.contains(argv._, 'elastic-ingestion')) {
-	let BulkElasticSearchWorker = require('./Workers/BulkElasticSearchWorker').default;
+	let BulkElasticSearchWorker = require('./Workers/GeniusServiceIngestionWorker').default;
 	console.log('starting the bulk-elastic-search-worker');
 	new BulkElasticSearchWorker().start();
 }
