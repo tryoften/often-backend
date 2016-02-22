@@ -1,27 +1,35 @@
 import * as Firebase from 'firebase';
-import * as _ from 'underscore';
 import { firebase as FirebaseConfig} from '../config';
+var ref = new Firebase(`${FirebaseConfig.BaseURL}/tracks`);
+var imageQueue = new Firebase(`${FirebaseConfig.BaseURL}/queues/image_resizing/tasks`);
+ref.on('value', snap => {
+	console.log('got tracks back');
+	var tracks = snap.val();
+	var trackIds = Object.keys(tracks);
+	for (var id of trackIds) {
+		var trackData = tracks[id];
+		var imageFields = [];
 
-var trackIdsObject = JSON.parse(require('fs').readFileSync('often-prod-track-ids.json', 'utf8'));
-var trackIds = Object.keys(trackIdsObject);
+		if (!!trackData.artist_image_url) {
+			imageFields.push('artist_image_url');
+		}
+		if (!!trackData.album_cover_art_url) {
+			imageFields.push('album_cover_art_url');
+		}
+		if (!!trackData.header_image_url) {
+			imageFields.push('header_image_url');
+		}
+		if (!!trackData.song_art_image_url) {
+			imageFields.push('song_art_image_url');
+		}
+		var obiWonKenobi = {};
+		obiWonKenobi[id] = {
+			option: 'mediaitem',
+			id: id,
+			type: 'track',
+			imageFields: imageFields
+		};
+		imageQueue.update(obiWonKenobi);
+	}
 
-var BaseURL = 'https://often-prod.firebaseio.com/';
-
-var count = 0;
-var totalCount = trackIds.length;
-
-for (let i = count; i < totalCount; i++) {
-	new Firebase(BaseURL + 'tracks/' + trackIds[i]).on('value', processTrack);
-}
-
-function processTrack(snap) {
-	let data = snap.val();
-	let trackData = _.pick(data, 'id', 'images', 'album_cover_art_url', 'title', 'album_name',
-		'external_url', 'song_art_image_url', 'score', 'type', 'lyrics_count');
-
-	let artistTrackRef = new Firebase(BaseURL + 'artists/' + data.artist_id + '/tracks/' + data.id);
-	artistTrackRef.update(trackData);
-
-	console.log("Track ", ++count, "of ", totalCount);
-	console.log(artistTrackRef.toString());
-}
+});
