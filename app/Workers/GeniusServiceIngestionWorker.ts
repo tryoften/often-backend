@@ -4,24 +4,24 @@ import GeniusService from '../Services/Genius/GeniusService';
 import * as _ from 'underscore';
 import Search from '../Search/Search';
 import MediaItemType from '../Models/MediaItemType';
-import { IndexedObject } from '../Interfaces/Indexable';
+import { IndexableObject } from '../Interfaces/Indexable';
 import logger from '../logger';
 let fs = require('fs');
 
 interface GeniusServiceIngestionRequest extends Task {
 	ids: string[];
 	type: MediaItemType;
-	targets: Target[];
+	targets: IngestionTarget[];
 }
 
-interface Target {
-	type: IngestionTarget;
+interface IngestionTarget {
+	type: IngestionTargetType;
 	data: any;
 }
 
-class IngestionTarget extends String {
-	static elasticsearch: IngestionTarget = 'elasticsearch';
-	static file: IngestionTarget = 'file';
+class IngestionTargetType extends String {
+	static elasticsearch: IngestionTargetType = 'elasticsearch';
+	static file: IngestionTargetType = 'file';
 }
 
 class GeniusServiceIngestionWorker extends Worker {
@@ -62,10 +62,11 @@ class GeniusServiceIngestionWorker extends Worker {
 			let targetPromises = [];
 			for (let target of targets) {
 				switch (target.type) {
-					case (IngestionTarget.file):
+					case (IngestionTargetType.file):
 						targetPromises.push(this.writeToFS(target.data, allIndexables, type));
 						break;
-					case (IngestionTarget.elasticsearch):
+
+					case (IngestionTargetType.elasticsearch):
 						targetPromises.push(this.indexToES(allIndexables));
 						break;
 
@@ -85,11 +86,11 @@ class GeniusServiceIngestionWorker extends Worker {
 		});
 	}
 
-	indexToES (indexables: IndexedObject[]) {
+	indexToES (indexables: IndexableObject[]) {
 		return this.search.index(indexables);
 	}
 
-	writeToFS (dir: string, indexables: IndexedObject[], type: MediaItemType) {
+	writeToFS (dir: string, indexables: IndexableObject[], type: MediaItemType) {
 
 		return new Promise((resolve, reject) => {
 			var writeString = '';

@@ -2,7 +2,7 @@ import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 import MediaItem from './MediaItem';
 import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
-import { IndexedObject } from '../Interfaces/Indexable';
+import { IndexableObject } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 
 /**
@@ -73,7 +73,7 @@ class Artist extends MediaItem {
 		return this;
 	}
 
-	public toIndexingFormat(): IndexedObject {
+	public toIndexingFormat(): IndexableObject {
 		let data = super.toIndexingFormat();
 		data.title = '';
 		data.author = this.name || '';

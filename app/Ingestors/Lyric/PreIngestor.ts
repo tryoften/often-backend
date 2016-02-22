@@ -202,9 +202,6 @@ class PreIngestor {
 		});
 	}
 
-
-
-
 	getArtistsPage (index, page) {
 		return new Promise<ArtistURL[]>((resolve, reject) => {
 			var url = `http://genius.com/artists-index/${index}/all`;

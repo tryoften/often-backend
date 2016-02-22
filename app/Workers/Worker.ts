@@ -4,6 +4,9 @@ import { firebase as FirebaseConfig, port } from '../config';
 import * as _ from 'underscore';
 import { createServer } from 'http';
 
+/**
+ * Internal Firebase queue task
+ */
 export interface Task {
 	_state: string;
 	_state_changed: string;

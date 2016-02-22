@@ -8,7 +8,7 @@ export interface CommonIndexedFields {
 	description: string;
 }
 
-export interface IndexedObject extends CommonIndexedFields {
+export interface IndexableObject extends CommonIndexedFields {
 	_id: string;
 	_type: string;
 	_index: string;

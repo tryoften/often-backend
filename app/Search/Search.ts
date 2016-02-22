@@ -6,7 +6,7 @@ import ElasticSearchQuerySettings from '../Models/ElasticSearchQuerySettings';
 import * as _ from 'underscore';
 import logger from '../logger';
 import { Queryable } from '../Interfaces/Queryable';
-import { IndexedObject } from '../Interfaces/Indexable';
+import { IndexableObject } from '../Interfaces/Indexable';
 
 /**
  * Class for interacting with ElasticSearch.
@@ -37,7 +37,7 @@ class Search {
 		this.esQuerySettings = new ElasticSearchQuerySettings();
 	}
 
-	index (indexables: IndexedObject[]): Promise<any> {
+	index (indexables: IndexableObject[]): Promise<any> {
 		console.log('indexing...');
 		return new Promise((resolve, reject) => {
 
@@ -97,7 +97,7 @@ class Search {
 		});
 	}
 
-	getIndexFormat (indexedObject: IndexedObject): Object {
+	getIndexFormat (indexedObject: IndexableObject): Object {
 		return [{
 			'update' : {
 				_index: indexedObject._index,

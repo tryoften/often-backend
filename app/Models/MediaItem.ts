@@ -2,7 +2,7 @@ import BaseModel from './BaseModel';
 import MediaItemType from './MediaItemType';
 import MediaItemSource from './MediaItemSource';
 import { generate as generateId } from 'shortid';
-import { Indexable, IndexedObject } from '../Interfaces/Indexable';
+import { Indexable, IndexableObject } from '../Interfaces/Indexable';
 import IDSpace from './IDSpace';
 import Firebase = require('firebase');
 import { firebase as FirebaseConfig } from '../config';
@@ -124,7 +124,7 @@ export class MediaItem extends BaseModel implements Indexable {
 		this.set('score', value);
 	}
 
-	public toIndexingFormat(): IndexedObject {
+	public toIndexingFormat(): IndexableObject {
 		var data =  {
 			_id: this.id,
 			_index: (this.source || '').toString(),

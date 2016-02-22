@@ -3,13 +3,13 @@ import { firebase as FirebaseConfig } from '../config';
 import GeniusService from '../Services/Genius/GeniusService';
 import * as _ from 'underscore';
 import Search from '../Search/Search';
-import { IndexedObject } from '../Interfaces/Indexable';
+import { IndexableObject } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 
 class BulkDataIngestor extends Worker {
 	genius: GeniusService;
 	search: Search;
-	buffer: IndexedObject[];
+	buffer: IndexableObject[];
 	errQueue: any;
 	flushSize: number;
 
@@ -27,7 +27,7 @@ class BulkDataIngestor extends Worker {
 	process (data, progress, resolve, reject) {
 		console.log("Processing: " + Object.keys(data));
 		// returns a promise when all providers are resolved
-		return this.genius.ingest(data.tracks)
+		return this.genius.trackIdsToIndexableObjects(data.tracks)
 			/*.then(indexableData => {
 			 // Ingest data to ElasticSearch
 			 this.search.index(indexableData);

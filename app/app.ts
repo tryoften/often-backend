@@ -48,7 +48,7 @@ if (_.contains(argv._, 'preingestion')) {
 	new PreIngestionWorker().start();
 }
 
-if (_.contains(argv._, 'bulk-ingest')) {
+if (_.contains(argv._, 'bulk-trackIdsToIndexableObjects')) {
 	let BulkDataIngestor = require('./Workers/BulkDataIngestor').default;
 	console.log('starting bulk ingestion-worker');
 	new BulkDataIngestor().start();
