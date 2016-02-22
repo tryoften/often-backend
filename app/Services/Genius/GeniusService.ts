@@ -10,7 +10,7 @@ import MediaItemType from '../../Models/MediaItemType';
 import * as cheerio from 'cheerio';
 import * as _ from 'underscore';
 import 'backbonefire';
-import { IndexedObject } from '../../Interfaces/Indexable';
+import { IndexableObject } from '../../Interfaces/Indexable';
 import Query from '../../Models/Query';
 
 /** 
@@ -39,10 +39,10 @@ class GeniusService extends ServiceBase {
 	 *
 	 * @return {promise} - Promise that when resolved returns the results of the data fetch, or an error upon rejection.
 	 */
-	public fetchData (query: Query): Promise<IndexedObject[]> {
-		return new Promise<IndexedObject[]>((resolve, reject) => {
+	public fetchData (query: Query): Promise<IndexableObject[]> {
+		return new Promise<IndexableObject[]>((resolve, reject) => {
 
-			let results: IndexedObject[] = [];
+			let results: IndexableObject[] = [];
 			this.rest.get(`${settings.base_url}/search`, {
 				query: {
 					q: query,
@@ -88,11 +88,17 @@ class GeniusService extends ServiceBase {
 				reject(err);
 			});
 		});
-
 	}
-	ingest (trackIds: string[]): Promise<IndexedObject[]> {
-		return new Promise<IndexedObject[]>( (resolve, reject) => {
-			let results: IndexedObject[] = [];
+
+	/**
+	 * Converts an array of track Ids into indexable objects
+	 *
+	 * @param trackIds
+	 * @returns {Promise<IndexableObject[]>}
+     */
+	public trackIdsToIndexableObjects (trackIds: string[]): Promise<IndexableObject[]> {
+		return new Promise<IndexableObject[]>( (resolve, reject) => {
+			let results: IndexableObject[] = [];
 			var promises = [];
 
 			for (var trackId of trackIds) {
@@ -118,6 +124,7 @@ class GeniusService extends ServiceBase {
 			});
 		});
 	}
+
 	/**
 	 * Gets all metadata for given track ID including artist, album, and lyrics data
 	 *

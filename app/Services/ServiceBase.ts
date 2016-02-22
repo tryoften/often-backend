@@ -1,7 +1,7 @@
 import URLHelper from '../Utilities/URLHelper';
 import Search from '../Search/Search';
 import { Service as RestService } from 'restler';
-import {IndexedObject} from '../Interfaces/Indexable';
+import {IndexableObject} from '../Interfaces/Indexable';
 import Query from '../Models/Query';
 // export interface ServiceProviderOptions {
 //	provider_id: string;
@@ -54,7 +54,7 @@ class ServiceBase {
 			});
 	}
 
-	fetchData (query: Query): Promise<IndexedObject[]>  {
+	fetchData (query: Query): Promise<IndexableObject[]>  {
 		throw new Error('fetchData not implemented');
 	}
 

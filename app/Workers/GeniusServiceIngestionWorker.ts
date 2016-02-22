@@ -1,31 +1,30 @@
-import Worker from './Worker';
+import { Worker, Task } from './Worker';
 import { firebase as FirebaseConfig } from '../config';
 import GeniusService from '../Services/Genius/GeniusService';
 import * as _ from 'underscore';
 import Search from '../Search/Search';
-var fs = require('fs');
 import MediaItemType from '../Models/MediaItemType';
-import {IndexedObject} from '../Interfaces/Indexable';
+import { IndexableObject } from '../Interfaces/Indexable';
 import logger from '../logger';
+let fs = require('fs');
 
-interface IngestionRequest {
+interface GeniusServiceIngestionRequest extends Task {
 	ids: string[];
 	type: MediaItemType;
-	targets: Target[];
+	targets: IngestionTarget[];
 }
 
-interface Target {
-	type: IngestionTarget;
+interface IngestionTarget {
+	type: IngestionTargetType;
 	data: any;
 }
 
-
-class IngestionTarget extends String {
-	static elasticsearch: MediaItemType = 'elasticsearch';
-	static file: MediaItemType = 'file';
+class IngestionTargetType extends String {
+	static elasticsearch: IngestionTargetType = 'elasticsearch';
+	static file: IngestionTargetType = 'file';
 }
 
-class BulkElasticSearchWorker extends Worker {
+class GeniusServiceIngestionWorker extends Worker {
 	genius: GeniusService;
 	search: Search;
 
@@ -35,13 +34,12 @@ class BulkElasticSearchWorker extends Worker {
 		this.search = new Search();
 	}
 
-	process (data, progress, resolve, reject) {
-		logger.info('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type);
+	process (data: GeniusServiceIngestionRequest, progress, resolve, reject) {
+		logger.info('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type);
 
 		var ids = data.ids;
 		var type = data.type;
 		var targets = data.targets;
-
 
 		var MediaItemClass = MediaItemType.toClass(type);
 		var promises = [];
@@ -52,7 +50,7 @@ class BulkElasticSearchWorker extends Worker {
 		}
 
 		Promise.all(promises).then( syncedMediaItems => {
-			logger.info('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' event: Synced all data.');
+			logger.info('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner, ' ids: ', data.ids, ' event: Synced all data.');
 			var indexables = [];
 			for (var smi of syncedMediaItems) {
 				var indexingFormat = smi.toIndexingFormat();
@@ -64,10 +62,11 @@ class BulkElasticSearchWorker extends Worker {
 			let targetPromises = [];
 			for (let target of targets) {
 				switch (target.type) {
-					case (IngestionTarget.file):
+					case (IngestionTargetType.file):
 						targetPromises.push(this.writeToFS(target.data, allIndexables, type));
 						break;
-					case (IngestionTarget.elasticsearch):
+
+					case (IngestionTargetType.elasticsearch):
 						targetPromises.push(this.indexToES(allIndexables));
 						break;
 
@@ -79,19 +78,19 @@ class BulkElasticSearchWorker extends Worker {
 			return Promise.all(targetPromises);
 
 		}).then((results) => {
-			logger.info('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' results: ', results);
+			logger.info('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' results: ', results);
 			resolve(results);
 		}).catch( err => {
-			logger.error('BulkElasticSearchorker(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' error: ', err);
+			logger.error('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' error: ', err);
 			reject(err);
 		});
 	}
 
-	indexToES (indexables: IndexedObject[]) {
+	indexToES (indexables: IndexableObject[]) {
 		return this.search.index(indexables);
 	}
 
-	writeToFS (dir: string, indexables: IndexedObject[], type: MediaItemType) {
+	writeToFS (dir: string, indexables: IndexableObject[], type: MediaItemType) {
 
 		return new Promise((resolve, reject) => {
 			var writeString = '';
@@ -114,4 +113,4 @@ class BulkElasticSearchWorker extends Worker {
 
 }
 
-export default BulkElasticSearchWorker;
+export default GeniusServiceIngestionWorker;

@@ -1,11 +1,11 @@
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
-import {IndexedObject} from '../Interfaces/Indexable';
+import {IndexableObject} from '../Interfaces/Indexable';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
-interface LyricIndexedObject extends IndexedObject {
+interface LyricIndexedObject extends IndexableObject {
 	images?: any;
 	text: string;
 	artist_name: string;
@@ -85,7 +85,7 @@ export class Lyric extends MediaItem {
 		];
 	}
 
-	public toIndexingFormat(): IndexedObject {
+	public toIndexingFormat(): IndexableObject {
 		let data: LyricIndexedObject = super.toIndexingFormat();
 		data.title = this.track_name || '';
 		data.author = this.artist_name || '';

@@ -5,7 +5,7 @@ import * as _ from 'underscore';
 import Search from '../Search/Search';
 import Firebase = require('firebase');
 import Request from '../Models/Request';
-import {Requestable} from '../Interfaces/Requestable';
+import { Requestable } from '../Interfaces/Requestable';
 import ServiceDispatcher from '../Models/ServiceDispatcher';
 
 class IngestionWorker extends Worker {

@@ -13,9 +13,13 @@
 /// <reference path="lodash/lodash.d.ts" />
 
 declare module "firebase-queue" {
+
+	let ProcessCallback = (data: Task, progress: Function, resolve: Function, reject: Function) => void;
+
 	class Queue {
-		constructor(ref: Firebase, options: any, process: () => void);
+		constructor(ref: Firebase, options: any, process: ProcessCallback);
 	}
+
 	export = Queue
 }
 
@@ -57,9 +61,11 @@ declare module "winston" {
 		add(transport: any, options: any): this;
 	}
 }
+
 declare module "winston-gcl" {
 	export var GCL: any;
 }
+
 declare module "winston-firebase" {
 	export var Firebase: any;
 }
