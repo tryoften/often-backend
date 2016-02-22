@@ -7,8 +7,8 @@ var trackIds = Object.keys(trackIdsObject);
 
 var BaseURL = 'https://often-prod.firebaseio.com/';
 
-var count = 55642;
-var totalCount = 66955;
+var count = 0;
+var totalCount = trackIds.length;
 
 for (let i = count; i < totalCount; i++) {
 	new Firebase(BaseURL + 'tracks/' + trackIds[i]).on('value', processTrack);
