@@ -6,7 +6,7 @@
     "name": "Often",
     "email": "support@tryoften.com"
   },
-  "repository": "october-labs/october-backend",
+  "repository": "tryoften/often-backend",
   "license": "MIT",
   "files": [
     "index.js"

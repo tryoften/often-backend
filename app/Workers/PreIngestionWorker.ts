@@ -14,7 +14,6 @@ class PreIngestionWorker extends Worker {
 		super(options);
 		this.preIngestor = new PreIngestor();
 		this.taskIdsRef = new Firebase(`${FirebaseConfig.BaseURL}/trackIds`);
-
 	}
 
 	process (data, progress, resolve, reject) {
