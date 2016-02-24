@@ -30,7 +30,7 @@ class Worker {
 	 * @return {void}
 	 */
 	constructor (opts = {}) {
-		this.options = _.defaults(opts, FirebaseConfig.queues.default);
+		this.options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.default);
 	}
 
 	/**

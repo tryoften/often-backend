@@ -9,7 +9,7 @@ import User from '../Models/User';
 class UserWorker extends Worker {
 
 	constructor (opts = {}) {
-		let options = _.defaults(opts, FirebaseConfig.queues.user);
+		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.user);
 		super(options);
 	}
 

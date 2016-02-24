@@ -14,9 +14,9 @@ class SearchWorker extends Worker {
 	ingestionQueueRef: Firebase;
 
 	constructor (opts = {}) {
-		let options = _.defaults(opts, FirebaseConfig.queues.search);
+		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.search);
 		super(options);
-		this.ingestionQueueRef = new Firebase(`${FirebaseConfig.queues.ingestion.url}/tasks`);
+		this.ingestionQueueRef = new Firebase(`${FirebaseConfig.BaseURL + FirebaseConfig.queues.ingestion.url}/tasks`);
 		this.dispatcher = new SearchRequestDispatcher({
 			search: new Search(),
 			services: {

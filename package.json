@@ -6,7 +6,7 @@
     "name": "Often",
     "email": "support@tryoften.com"
   },
-  "repository": "october-labs/october-backend",
+  "repository": "tryoften/often-backend",
   "license": "MIT",
   "files": [
     "index.js"
@@ -20,6 +20,7 @@
     "backbone-relational": "~0.9.0",
     "backbonefire": "git://github.com/october-labs/backbonefire",
     "cheerio": "^0.19.0",
+    "config": "^1.19.0",
     "cycle": "^1.0.3",
     "dateformat": "^1.0.12",
     "elasticsearch": "^6.0.0",

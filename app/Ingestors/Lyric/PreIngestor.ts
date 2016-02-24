@@ -144,10 +144,6 @@ class PreIngestor {
 		});
 	}
 
-
-
-
-
 	/**
 	 *
 	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of artist urls
