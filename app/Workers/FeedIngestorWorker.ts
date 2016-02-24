@@ -11,7 +11,7 @@ class FeedIngestorWorker extends Worker {
 	ingestor: FeedIngestor;
 
 	constructor (opts = {}) {
-		let options = _.defaults(opts, config.firebase.queues.feed);
+		let options = _.defaults(opts, config.firebase.BaseURL + config.firebase.queues.feed);
 
 		super(options);
 		this.ingestor = new FeedIngestor();

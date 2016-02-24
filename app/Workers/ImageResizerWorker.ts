@@ -1,4 +1,3 @@
-
 import * as http from 'http';
 import * as https from 'https';
 import * as gcloud from 'gcloud';
@@ -46,7 +45,7 @@ class ImageResizerWorker extends Worker {
 
 	constructor (opts = {}) {
 
-		let options = _.defaults(opts, FirebaseConfig.queues.image_resizing);
+		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.image_resizing);
 		super(options);
 
 		this.default_transformations = ['rectangle', 'original', 'square', 'square_small', 'medium'];
@@ -131,7 +130,6 @@ class ImageResizerWorker extends Worker {
 	}
 
 	injectImages (track: Track, imagesObj: any) {
-
 		var images = {
 			images : imagesObj
 		};

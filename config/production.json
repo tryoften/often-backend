@@ -1,0 +1,54 @@
+{
+	"firebase": {
+		"BaseURL": "https://often-prod.firebaseio.com",
+		"Secret": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY"
+	},
+	"elasticsearch": {
+		"BaseURL": "http://search1-elasticsearch-1-vm:9200"
+	},
+	"winston": {
+		"transports": [
+			{
+				"type": "Console",
+				"details": {
+					"level": "silly"
+				}
+			},
+			{
+				"type": "File",
+				"details": {
+					"filename": "filelog-info.log"
+				}
+			},
+			{
+				"type": "GCL",
+				"details": {
+					"logId": "1337",
+					"projectId": "acoustic-rider-104419",
+					"googleMetadata": {
+						"id": "winston-logger",
+						"zone": "us-central1-a",
+						"region": "us-central1"
+					}
+				},
+				"credentials": {
+					"private_key_id": "827eff2262d5994f6163fdf31bf0fa23b5860447",
+					"private_key": "-----BEGIN PRIVATE KEY-----\nMIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDPcngDbnspPSrA\n7r+Y+Qi2NuQohwg97LEaxe2TEOEkGyosgvyhuD59chS2zAKq2MXCVtFo94JDrG+G\nEZSgpxa+sWG69+ubCVPPE5pRoYDg4UO1HSCe24VZ1l0j7YbpG4XikWclFCoISLml\n8gMcrje4Tq6zcaE2Pw638HL4PWu9ABqclPcZVwrlfm9/pk/aGl6BruAfFuYhlwK9\nM6P5YDPR9/GrxPtqk3kiAfU/BkLV7vkbr9Ze4WFvlJr6SvlfO+HliPwRu+qdBpFW\ne84+0YuS1iLKvQwj17kJRCtRW1m17/1QTaiF1Jr6QT6ORv/NO7HQE8SMDkcH6Ico\nG8NgMwr9AgMBAAECggEBAI/tnbLTzoO4OpeNjkV2U0MJJpevyFoehGpM9R5aUbqZ\nVlN3tgwGJuUmZ5TESv16VQsW7Ufkoe6ODvp37CTiiPdZXrM4G7F/cTR1J1aHtUFR\nSYa5ZM6TBBxmjEzHGhlVzTh7JZMmQFtrCdNG7D3T6jjn7nH13qIicfXQ0BPHmZ6Q\n2XyhZCyK/6MXPxEVRJZZZUGCCAs7NaxYTE8f2spOEZ5nM/aIPcPkERmXorsidC5U\nEiML+QTKusNgUNxtgc0FRTed+8N3ggXwoonxvQM8E+2owDAuAqplF/lTe6FyFiuS\nDOctzQqoD4Cahe3aMnEeqRoEJeCEzLodYmR1dzj0GgECgYEA9WjtulJhF7j5ZEqH\nIjB90RnP+l536at4uQ1nLZqT4j6iqB+z8AheluqeRkr2p5Ynpu2702Wu+KUl9ol6\nwh5xcqZRGrKmi9YQSs+M6gYIhLqlKLv89JbwY2Lvy8EDehJJxH3Wt+ssOCzvpF8P\nfXP4ulFCVnLL2U0PsC83JBIgxL0CgYEA2GYpVTkwRs19ed7g1SjliCGCiGYDv5SF\nXBmwO84lJow5Lgo/NaGLxde4BTDQbfHvhGejbvcmI2TKtESuwrUUbH6VcdHrNwsM\nbs0sLNsPiuqhtAZ+22hU++pBBd8QkKmPRWSPtgPPb3GGlBFr9Rf67EbE6MwIjjub\nQUfIWYu8Y0ECgYEAjlrPi8U9jQU/pW2V9b8rPKA8hH9ID8Pnw3CC6XFBV3v93oiF\nWDeCpwhxx1S0v4Hafnpo+beCR7mEy/3zt6bxKBBR+6ql8Xe6+6ppk1bsmhGqvHZP\nxZHI394EO6061xTEtbZJV2aTwAJRAIgj9CHRpkJ8uKjelq6c6xZ4ZfQeDgECgYEA\nuTxCF0x70a+mv8KUDIMUb8HXfbBtdvnIaj0nCRp93JBdhdaJovvkrHbqc68ES4i0\ncU9Rq/PtdpCZn1PHkK32jKSSgjqhsJ1JiDMipEbj+BK+Vl7VCjU1weoUvNTj1iD+\nnfTlu3VphEjWXTrIgaWESeqONYQpsq69SFUM3/HoUcECgYEAqL4ZrltYcmF1K6ZZ\nrre2RYX+eABycPnUckF89vnhIWTibAgCaf6oPQnA/Ihz0Cgb9/HBH3sbyMW9ldP7\n/lUaFr08VnSIAm2jmC9yiksjzltWlMsnKTaFBbvYr500zfXMLTa/gwnGVD/xnyzH\n7UYNdx/IiHGfKQvzA8ZZV3/iP0Q\u003d\n-----END PRIVATE KEY-----\n",
+					"client_email": "215408970444-03ulfcdavngo6n4e6itsldmeq39gju7q@developer.gserviceaccount.com",
+					"client_id": "215408970444-03ulfcdavngo6n4e6itsldmeq39gju7q.apps.googleusercontent.com",
+					"type": "service_account"
+				},
+				"gcloud_endpoint" : "https://www.googleapis.com/auth/logging.write"
+			},
+			{
+				"type": "Firebase",
+				"details": {
+					"rootRef": "https://often-prod.firebaseio.com/events",
+					"secretKey": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY",
+					"UID": "logger",
+					"admin": true
+				}
+			}
+		]
+	}
+}

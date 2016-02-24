@@ -16,7 +16,7 @@ class BulkDataIngestor extends Worker {
 	constructor (opts = {}) {
 		console.log('Bulk Data ingestion settings: ', FirebaseConfig.queues.bulk_ingest);
 		this.errQueue = new Firebase(`${FirebaseConfig.BaseURL}/bulk_ingest_errors`);
-		let options = _.defaults(opts, FirebaseConfig.queues.bulk_ingest);
+		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.bulk_ingest);
 		super(options);
 		this.genius = new GeniusService({
 			provider_id: 'genius'

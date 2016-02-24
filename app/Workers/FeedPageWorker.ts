@@ -13,7 +13,7 @@ class FeedPageWorker extends Worker {
 		let options = _.defaults(opts, {
 			specId: 'feed_page_parsing',
 			numWorkers: 1,
-			url: FirebaseConfig.queues.feed.url,
+			url: FirebaseConfig.BaseURL + FirebaseConfig.queues.feed.url,
 			suppressStack: true,
 			sanitize: false
 		});
@@ -32,7 +32,7 @@ class FeedPageWorker extends Worker {
 		
 		let page = new FeedPage(data);
 		page.request()
-			.then( (data) => {
+			.then(data => {
 				resolve(data);
 			})
 			.catch(err => {
