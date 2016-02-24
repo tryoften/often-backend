@@ -103,22 +103,24 @@ class ImageResizerWorker extends Worker {
 				}
 				return Promise.all(promises);
 			}).then(resizedImages => {
+				var updObj = {};
 				var imagesObj = {};
 				for (var resizedImage of resizedImages) {
 					var key = Object.keys(resizedImage)[0];
 					imagesObj[key] = resizedImage[key];
-					mediaItem.set(`${key}_source`, mediaItem.get(key));
-					mediaItem.set(key, resizedImage[key][this.main_tran].url);
+					updObj[`${key}_source`] = mediaItem.get(key);
+					updObj[key] = resizedImage[key][this.main_tran].url;
 				}
-				mediaItem.set('images', imagesObj);
+				updObj.images = imagesObj;
+				new Firebase(mediaItem.url()).update(updObj);
 
 				if (data.type === MediaItemType.track) {
 					//Insert the images in appropriate place
 					this.injectImages(mediaItem, imagesObj);
 				}
+				//update images on elasticsearch
+				return this.search.update(mediaItem.source, mediaItem.type, mediaItem.id, updObj);
 
-				resolve(true);
-				return this.search.index([mediaItem.toIndexingFormat()]);
 			}).then( indexResults => {
 				resolve(indexResults);
 			}).catch( err => {
@@ -128,6 +130,8 @@ class ImageResizerWorker extends Worker {
 		});
 
 	}
+
+
 
 	injectImages (track: Track, imagesObj: any) {
 		var images = {

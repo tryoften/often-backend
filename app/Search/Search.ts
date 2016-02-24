@@ -62,6 +62,24 @@ class Search {
 		});
 	}
 
+
+
+	update (index, type, id, doc) {
+
+		return new Promise((resolve, reject) => {
+			var updateObj = this.getUpdateFormat(index, type, id, doc);
+			this.es.update(updateObj, (err, resp) => {
+				if (err) {
+					console.log('Failed to update: ' + err);
+					reject(err);
+				} else {
+					resolve(resp);
+				}
+			});
+
+		});
+	}
+
 	/**
 	 * Queries the search database with the given query
 	 * @param {string} query - The search query
@@ -110,6 +128,19 @@ class Search {
 			doc: indexedObject
 		}];
 	}
+
+	getUpdateFormat (index, type, id, doc) {
+		return {
+			index: index,
+			type: type,
+			id: id,
+			body: {
+				doc: doc
+			}
+		};
+	}
+
+
 
 
 
