@@ -23,16 +23,7 @@ var config: any = {
   		This can also be your project id as each project has a default
   		bucket with the same name as the project id.
   	*/
-	cloudStorageBucket: 'acoustic-rider-104419',
 
-	/*
-  		This is the id of your project in the Google Developers Console.
-  	*/
-	gcloud: {
-		projectId: 'acoustic-rider-104419',
-		bucket_name: 'resized_images',
-		key: 'AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E'
-	},
 	firebase: {
 		BaseURL: args['firebase-root'] || 'https://often-dev.firebaseio.com',
 		Secret: args['firebase-secret'] || 'kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2',
@@ -52,6 +43,12 @@ var config: any = {
 	url_redirector: {
 		port: args['redirect-port'] || 9999
 	}
+};
+
+config.gcloud = {
+	projectId: 'often-dev',
+	image_bucket: 'resized_images_dev',
+	key: '00b4903a97116b9900c3be215112464bf9e60979d5ca4c3994a334fc60cefc63'
 };
 
 config.trackSchedulerOptions = {
@@ -165,7 +162,7 @@ config.winston = {
 	  type: 'GCL',
 	  details: {
 		logId: '1337',
-		projectId: 'acoustic-rider-104419',
+		projectId: `${ config.gcloud.projectId }`,
 		googleMetadata: {
 		  'id': 'winston-logger',
 		  'zone': 'us-central1-a',

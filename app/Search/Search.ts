@@ -8,6 +8,7 @@ import logger from '../logger';
 import { Queryable } from '../Interfaces/Queryable';
 import { IndexableObject } from '../Interfaces/Indexable';
 
+
 /**
  * Class for interacting with ElasticSearch.
  * Format:
@@ -60,6 +61,32 @@ class Search {
 			});
 
 		});
+	}
+
+	update (index: string, type: string, id: string, doc): Promise<any> {
+		return new Promise((resolve, reject) => {
+			var updateObj = this.getUpdateFormat(index, type, id, doc);
+			this.es.update(updateObj, (err, resp) => {
+					if (err) {
+							console.log('Failed to update: ' + err);
+							reject(err);
+						} else {
+							resolve(resp);
+						}
+				});
+
+		});
+	}
+
+	getUpdateFormat (index, type, id, doc): Object {
+		return {
+			index: index,
+			type: type,
+			id: id,
+			body: {
+				doc: doc
+			}
+		};
 	}
 
 	/**
