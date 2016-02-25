@@ -1,0 +1,10 @@
+{
+	"gcloud": {
+		"projectId": "often-dev",
+		"image_bucket": "resized_images",
+		"key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
+	},
+	"elasticsearch": {
+		"BaseURL": "http://search1-elasticsearch-dev-1-vm:9200"
+	}
+}
