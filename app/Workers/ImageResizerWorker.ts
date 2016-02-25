@@ -119,7 +119,7 @@ class ImageResizerWorker extends Worker {
 	/**
 	 * Entry-point for resizing arbitrary images (i.e. Does NOT update Firebase models)
 	 *
-	 * @param {GeneralRqeues} data - Input
+	 * @param {GeneralRqeuest} data - Input
 	 * @return {Promise<Object>} - Returns a promise that resolves to...
 	 */
 	private processGeneral (data: GeneralRequest): Promise<Object> {
@@ -233,7 +233,7 @@ class ImageResizerWorker extends Worker {
 	 * @param {Url} url - url from which to download the image
 	 * @returns {Promise<TransformedImage>} - Returns a promise that resolves to a transformed image
 	 */
-	private ingest (originType: OriginType, sourceId: string, resourceId: string, url: Url): Promise<TransformedImage> {
+	public ingest (originType: OriginType, sourceId: string, resourceId: string, url: Url): Promise<TransformedImage> {
 		return new Promise((resolve, reject) => {
 			if (_.isUndefined(url) || _.isNull(url)) {
 				reject('Bad Url: ' + url);

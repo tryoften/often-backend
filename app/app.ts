@@ -66,12 +66,5 @@ if (_.contains(argv._, 'image-resizer')) {
 	new ImageResizerWorker().start();
 }
 
-if (_.contains(argv._, 'elastic-ingestion')) {
-	let BulkElasticSearchWorker = require('./Workers/GeniusServiceIngestionWorker').default;
-	console.log('starting the bulk-elastic-search-worker');
-	new BulkElasticSearchWorker().start();
-}
-
-
 console.log('firebase root URL: ', config.firebase.BaseURL);
 console.log('elasticsearch root URL: ', config.elasticsearch.BaseURL);

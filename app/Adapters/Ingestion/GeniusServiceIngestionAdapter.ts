@@ -1,11 +1,12 @@
-import { Worker, Task } from './Worker';
-import { firebase as FirebaseConfig } from '../config';
-import GeniusService from '../Services/Genius/GeniusService';
+import { Task } from '../../Workers/Worker';
+import IngestionAdapter  from './IngestionAdapter';
+import { firebase as FirebaseConfig } from '../../config';
+import GeniusService from '../../Services/Genius/GeniusService';
 import * as _ from 'underscore';
-import Search from '../Search/Search';
-import MediaItemType from '../Models/MediaItemType';
-import { IndexableObject } from '../Interfaces/Indexable';
-import logger from '../logger';
+import Search from '../../Search/Search';
+import MediaItemType from '../../Models/MediaItemType';
+import { IndexableObject } from '../../Interfaces/Indexable';
+import logger from '../../logger';
 let fs = require('fs');
 
 interface GeniusServiceIngestionRequest extends Task {
@@ -24,7 +25,7 @@ class IngestionTargetType extends String {
 	static file: IngestionTargetType = 'file';
 }
 
-class GeniusServiceIngestionWorker extends Worker {
+class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	genius: GeniusService;
 	search: Search;
 
@@ -115,4 +116,4 @@ class GeniusServiceIngestionWorker extends Worker {
 
 }
 
-export default GeniusServiceIngestionWorker;
+export default GeniusServiceIngestionAdapter;
