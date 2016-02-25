@@ -78,9 +78,9 @@
     "esnext": true
   },
   "bugs": {
-    "url": "https://github.com/october-labs/october-backend/issues"
+    "url": "https://github.com/tryoften/often-backend/issues"
   },
-  "homepage": "https://github.com/october-labs/october-backend#readme",
+  "homepage": "https://github.com/tryoften/often-backend/issues#readme",
   "main": "index.js",
   "directories": {
     "test": "test"
