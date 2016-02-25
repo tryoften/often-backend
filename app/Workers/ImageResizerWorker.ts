@@ -58,7 +58,6 @@ class ImageResizerWorker extends Worker {
 	private search: Search;
 
 	constructor (opts = {}) {
-		console.log('init');
 
 		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.image_resizing);
 		super(options);
