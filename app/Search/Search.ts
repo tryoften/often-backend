@@ -8,6 +8,15 @@ import logger from '../logger';
 import { Queryable } from '../Interfaces/Queryable';
 import { IndexableObject } from '../Interfaces/Indexable';
 
+interface Updatable {
+	index: string,
+	type: string,
+	id: string,
+	body: {
+		doc: any
+	}
+};
+
 
 /**
  * Class for interacting with ElasticSearch.
@@ -63,22 +72,38 @@ class Search {
 		});
 	}
 
-	update (index: string, type: string, id: string, doc): Promise<any> {
+
+	/**
+	 * Updates the elasticsearch document field data without overwriting other fields not specifying in the update object
+	 * @param {string} index - Valid elasticsearch index (i.e. 'genius')
+	 * @param {string} type - Valid elasticsearch type of an index (i.e. 'artist' or 'lyric')
+	 * @param {string} id - Valid elasticsearch id of a document (i.e. 'N1YPnyFqg')
+	 * @param {any} doc - An arbitrary object containing data to be propagated to elasticsearch
+	 * @return {Promise<any>} - Arbitrary elasticsearch response for updates
+	 */
+	update (index: string, type: string, id: string, doc: any): Promise<any> {
 		return new Promise((resolve, reject) => {
 			var updateObj = this.getUpdateFormat(index, type, id, doc);
 			this.es.update(updateObj, (err, resp) => {
-					if (err) {
-							console.log('Failed to update: ' + err);
-							reject(err);
-						} else {
-							resolve(resp);
-						}
-				});
-
+				if (err) {
+					console.log('Failed to update: ' + err);
+					reject(err);
+				} else {
+					resolve(resp);
+				}
+			});
 		});
 	}
 
-	getUpdateFormat (index, type, id, doc): Object {
+	/**
+	 *
+	 * @param {string} index - Valid elasticsearch index (i.e. 'genius')
+	 * @param {string} type - Valid elasticsearch type of an index (i.e. 'artist' or 'lyric')
+	 * @param {string} id - Valid elasticsearch id of a document (i.e. 'N1YPnyFqg')
+	 * @param {any} doc - An arbitrary object containing data to be propagated to elasticsearch
+	 * @return {Updatable} - Format ready for being passed into ElasticSearch
+	 */
+	getUpdateFormat (index: string, type: string, id: string, doc: any): Updatable {
 		return {
 			index: index,
 			type: type,
