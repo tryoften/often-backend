@@ -189,6 +189,7 @@ config.winston = {
 	}
   ]
 };
+const config = require('config');
 
 export default config;
 export var trackSchedulerOptions = config.trackSchedulerOptions;

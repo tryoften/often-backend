@@ -60,7 +60,7 @@ class ImageResizerWorker extends Worker {
 	constructor (opts = {}) {
 		console.log('init');
 
-		let options = _.defaults(opts, FirebaseConfig.queues.image_resizing);
+		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.image_resizing);
 		super(options);
 
 		this.default_transformations = [

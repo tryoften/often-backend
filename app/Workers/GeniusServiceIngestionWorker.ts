@@ -29,7 +29,7 @@ class GeniusServiceIngestionWorker extends Worker {
 	search: Search;
 
 	constructor (opts = {}) {
-		let options = _.defaults(opts, FirebaseConfig.queues.elastic_dump_file);
+		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.elastic_dump_file);
 		super(options);
 		this.search = new Search();
 	}
@@ -78,10 +78,12 @@ class GeniusServiceIngestionWorker extends Worker {
 			return Promise.all(targetPromises);
 
 		}).then((results) => {
-			logger.info('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' results: ', results);
+			logger.info('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner,
+				' ids: ', data.ids, ' type: ', data.type, ' results: ', results);
 			resolve(results);
 		}).catch( err => {
-			logger.error('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner, ' ids: ', data.ids, ' type: ', data.type, ' error: ', err);
+			logger.error('GeniusServiceIngestionWorker.process(): owner-id: ', data._owner,
+				' ids: ', data.ids, ' type: ', data.type, ' error: ', err);
 			reject(err);
 		});
 	}
