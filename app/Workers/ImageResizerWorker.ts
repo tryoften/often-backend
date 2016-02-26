@@ -311,7 +311,8 @@ class ImageResizerWorker extends Worker {
 			var protocol = (url.indexOf('https') === 0) ? https : http;
 			protocol.get(url, (response: any) => {
 				if (response.statusCode !== 200) {
-					reject('Response code not 200');
+					var rejectionMessage = `Response code not 200 ${response.statusCode} for url ${url}`;
+					reject(rejectionMessage);
 					return;
 				}
 				var data = new Stream();
