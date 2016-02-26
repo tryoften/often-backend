@@ -9,7 +9,6 @@ class PreIngestionWorker extends Worker {
 	preIngestor: PreIngestor;
 
 	constructor (opts = {}) {
-		console.log('initiating');
 		let options = _.defaults(opts, FirebaseConfig.queues.preingestion);
 		super(options);
 		this.preIngestor = new PreIngestor();
