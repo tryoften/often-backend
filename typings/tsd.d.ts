@@ -14,10 +14,8 @@
 
 declare module "firebase-queue" {
 
-	let ProcessCallback = (data: Task, progress: Function, resolve: Function, reject: Function) => void;
-
 	class Queue {
-		constructor(ref: Firebase, options: any, process: ProcessCallback);
+		constructor(ref: Firebase, options: any, process: () => void);
 	}
 
 	export = Queue

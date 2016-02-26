@@ -6,6 +6,7 @@ class TrendingIngestionWorker extends Worker {
 	ingestor: TrendingIngestor;
 
 	constructor(opts = {}) {
+
 		super(opts);
 
 		var rule = new schedule.RecurrenceRule();

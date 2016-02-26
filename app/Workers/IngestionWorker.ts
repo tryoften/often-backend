@@ -7,23 +7,54 @@ import Firebase = require('firebase');
 import Request from '../Models/Request';
 import { Requestable } from '../Interfaces/Requestable';
 import ServiceDispatcher from '../Models/ServiceDispatcher';
+import GeniusServiceIngestionAdapter from '../Adapters/GeniusServiceIngestionAdapter';
+import IngestionAdapter from '../Adapters/Ingestion/IngestionAdapter';
+
+class IngestionServiceAdapterType extends String {
+	static genius: IngestionServiceAdapterType = 'genius';
+}
+
+
+interface IngestionWorkerOptions {
+	searchQueueRef: Firebase;
+	ingestionAdapters: IngestionAdapter[];
+}
+
+interface IngestionRequestOptions {
+	updateSearchResult: boolean;
+	firebaseOnly: boolean;
+	indexedResultsDestination: any;
+}
+
 
 class IngestionWorker extends Worker {
 	searchQueueRef: Firebase;
 	serviceDispatcher: ServiceDispatcher;
+	ingestionAdapters: IngestionAdapter[];
 
-	constructor (opts = {}) {
-		console.log('initiating');
-		let options = _.defaults(opts, FirebaseConfig.queues.ingestion);
-		super(options);
-		this.searchQueueRef = new Firebase(`${FirebaseConfig.BaseURL + FirebaseConfig.queues.search.url}/tasks`);
-		this.serviceDispatcher = new ServiceDispatcher({
-			search: new Search(),
-			services: {
-				genius: GeniusService
-			}
-		});
+	constructor (opts: IngestionWorkerOptions) {
+
+		super();
+
+		/* Put insantiation logic here */
+
+		let ingestionAdapters = [
+			GeniusServiceIngestionAdapter
+		];
+
+		this.ingestionAdapters = [];
+		if (opts.ingestionAdapters) {
+			ingestionAdapters = opts.ingestionAdapters;
+		}
+
+		for (var adapter of this.ingestionAdapters) {
+			let IngestionAdapterClass = opts.ingestionAdapters[adapter];
+			this.ingestionAdapters[adapter] = new IngestionAdapterClass();
+		}
+
+
 	}
+
 
 	process (data, progress, resolve, reject) {
 		var request = new Request(<Requestable>data);
