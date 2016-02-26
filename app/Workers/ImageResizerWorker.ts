@@ -1,12 +1,17 @@
 import * as http from 'http';
+console.log('post http');
 import * as https from 'https';
+console.log('post https');
 import * as gcloud from 'gcloud';
-import Worker, { Task } from './Worker';
+console.log('post gcloud');
+import { Worker, Task } from './Worker';
+console.log('post worker');
 import ImageResizer, { TransformationType, ImageInfo } from '../Models/ImageResizer';
 import * as _ from 'underscore';
 import { Transform as Stream } from 'stream';
 import { firebase as FirebaseConfig } from '../config';
 import { gcloud as GoogleStorageConfig } from '../config';
+console.log('load');
 import MediaItemType from '../Models/MediaItemType';
 import MediaItem from '../Models/MediaItem';
 import Search from '../Search/Search';
