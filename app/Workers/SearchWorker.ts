@@ -5,7 +5,7 @@ import * as _ from 'underscore';
 import Search from '../Search/Search';
 import GeniusService from '../Services/Genius/GeniusService';
 import Request from '../Models/Request';
-import {Requestable} from '../Interfaces/Requestable';
+import { Requestable } from '../Interfaces/Requestable';
 import RequestType from '../Models/RequestType';
 import Firebase = require('firebase');
 

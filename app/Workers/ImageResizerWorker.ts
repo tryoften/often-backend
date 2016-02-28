@@ -59,7 +59,8 @@ class ImageResizerWorker extends Worker {
 
 	constructor (opts = {}) {
 
-		let options = _.defaults(opts, FirebaseConfig.BaseURL + FirebaseConfig.queues.image_resizing);
+		FirebaseConfig.queues.image_resizing.url = FirebaseConfig.BaseURL + FirebaseConfig.queues.image_resizing.url;
+		let options = _.defaults(opts, FirebaseConfig.queues.image_resizing);
 		super(options);
 
 		this.default_transformations = [
@@ -310,7 +311,8 @@ class ImageResizerWorker extends Worker {
 			var protocol = (url.indexOf('https') === 0) ? https : http;
 			protocol.get(url, (response: any) => {
 				if (response.statusCode !== 200) {
-					reject('Response code not 200');
+					var rejectionMessage = `Response code not 200 ${response.statusCode} for url ${url}`;
+					reject(rejectionMessage);
 					return;
 				}
 				var data = new Stream();
