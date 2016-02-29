@@ -3,7 +3,6 @@
 		"projectId": "often-dev",
 		"image_bucket": "resized_images_dev",
 		"key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
-
 	},
 	"firebase": {
 		"BaseURL": "https://often-dev.firebaseio.com",

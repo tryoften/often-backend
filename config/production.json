@@ -1,10 +1,15 @@
 {
+	"gcloud": {
+		"projectId": "acoustic-rider-104419",
+		"image_buckete": "resized_images",
+		"key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
+	},
 	"firebase": {
 		"BaseURL": "https://often-prod.firebaseio.com",
 		"Secret": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY"
 	},
 	"elasticsearch": {
-		"BaseURL": "http://search1-elasticsearch-1-vm:9200"
+		"BaseURL": "http://localhost:9200"
 	},
 	"winston": {
 		"transports": [
