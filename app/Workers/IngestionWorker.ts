@@ -21,7 +21,7 @@ class IngestionServiceAdapterType extends String {
 	static genius: IngestionServiceAdapterType = 'genius';
 }
 
-class InputFormat extends String {
+export class InputFormat extends String {
 	static Url: InputFormat = 'url';
 	static Index: InputFormat = 'index';
 	static Id: InputFormat = 'id';
@@ -39,7 +39,7 @@ export interface ArtistIndex {
 }
 
 export type ArtistId = String;
-export type TrackId = number;
+export type TrackId = String;
 type Id = number;
 
 export interface IngestionTask extends Task {

@@ -7,8 +7,9 @@ import Search from '../../Search/Search';
 import MediaItemType from '../../Models/MediaItemType';
 import { IndexableObject } from '../../Interfaces/Indexable';
 import logger from '../../logger';
-import { IngestionTask, DestinationType, ArtistUrl, ArtistIndex, ArtistId, TrackId } from '../../Workers/IngestionWorker';
+import { IngestionTask, DestinationType, ArtistUrl, ArtistIndex, ArtistId, TrackId, InputFormat } from '../../Workers/IngestionWorker';
 let fs = require('fs');
+import { Service as RestService } from 'restler';
 
 
 interface GeniusServiceIngestionRequest extends Task {
@@ -27,10 +28,16 @@ type Url = string;
 class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	genius: GeniusService;
 	search: Search;
+	geniusRoot: string;
+	rest: any;
 
 	constructor (opts = {}) {
 		super(opts);
 		this.search = new Search();
+		this.geniusRoot = 'http://genius.com';
+		this.rest = new RestService({
+			baseURL: this.geniusRoot
+		});
 	}
 
 
@@ -47,8 +54,25 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 		var destinations = task.destinations;
 		if (!_.contains(destinations, DestinationType.Firebase)) {
-			logger.warn("Option to not persist ignored");
+			logger.warn('Option to not persist ignored');
 		}
+
+		this.getTrackIdsForTask(task).then( (trackIds) => {
+			return this.genius.trackIdsToIndexableObjects(trackIds);
+		}).then( indexableTrackIds => {
+			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
+				logger.warn(`Results for ${task} NOT being indexed in ElasticSearch`);
+				return Promise.resolve(true);
+			} else {
+				logger.info(`Results for ${task} are being indexed in ElasticSearch`);
+				return this.search.index(indexableTrackIds);
+			}
+		}).then( done => {
+			resolve(done);
+		}).catch( err => {
+			reject(err);
+		});
+
 /*
 		this.getGeniusData().then( (indexables: IndexableObject[]) => {
 			if (_.contains(destinations, DestinationType.ElasticSearch)) {
@@ -69,19 +93,24 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
-	private getTrackIdsFromArtistIndex(artistIndex: ArtistIndex): Promise<TrackId> {
+	private fetchTracksWithArtistIndex(artistIndex: ArtistIndex): Promise<TrackId[]> {
 
-		if (!isValidLetter(artistIndex.index)) {
+		if (!this.isValidLetter(artistIndex.index)) {
 			throw new Error('Invalid artist index supplied. The index must be in an alphabetical range form a to z');
 		}
 		return new Promise( (resolve, reject) => {
 			this.getArtistsForIndex(artistIndex.index, artistIndex.popularArtistsOnly).then( (relevantArtistUrls: Url[]) => {
-
-				//TODO(jakub): Build on top of getTrackIdsFromArtistUrl
-				//return this.getTrackIdsFromArtistUrls (relevantArtistUrls, artistIndex.popularTracksOnly);
-			}).then((trackIds) => {
+				var artistUrlObjs: ArtistUrl[] = [];
+				for (var url of relevantArtistUrls) {
+					artistUrlObjs.push({
+						url: url,
+						popularTracksOnly: artistIndex.popularTracksOnly
+					});
+				}
+				return this.fetchTracksWithArtistUrl(artistUrlObjs);
+			}).then( (trackIds) => {
 				resolve(trackIds);
-			}).catch((err) => {
+			}).catch( (err) => {
 				reject(err);
 			});
 		});
@@ -89,26 +118,19 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
-	private getTrackIdsFromArtistUrl (artistUrls: ArtistUrl | ArtistUrl[]): Promise<TrackId> {
+	private fetchTracksWithArtistUrl (artistUrls: ArtistUrl | ArtistUrl[] ): Promise<TrackId[]> {
 
-
-
-
-
-		return this.getTrackIdsForArtistUrls (artistUrl, artistIndex.popularTracksOnly);
-
-		getTracksForArtist (artistUrl: ArtistURL, popularTracksOnly = true) {
-			return popularTracksOnly ? this.getPopularTracksForArtist(artistUrl) : this.parseInitialTrackPage(artistUrl);
+		if (!_.isArray(artistUrls)) {
+			artistUrls = <ArtistUrl[]> [artistUrls];
 		}
 
-		getTrackIdsForUrls
+		return this.getTrackIdsForArtistUrls(<ArtistUrl[]>artistUrls);
 
-		return null;
 	}
 
-	private getTrackIdsFromArtistId(artistId: ArtistId | ArtistId[]): Promise<TrackId> {
+	private fetchTracksWithArtistId(artistId: ArtistId | ArtistId[]): Promise<TrackId[]> {
 		// TODO(general): Implement this method
-		throw new Error('getTrackIdsFromArtistId not implemented (yet)');
+		throw new Error('fetchTracksWithArtistId not implemented (yet)');
 	}
 
 
@@ -119,19 +141,19 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	 * @param {Ingestion Task} task - Task describing the type and format of input data to be ingested
 	 * @returns {null}
 	 */
-	private getTrackIds (task: IngestionTask): Promise<TrackId[]> {
+	private getTrackIdsForTask (task: IngestionTask): Promise<TrackId[]> {
 		switch (task.type) {
 			case MediaItemType.artist:
 				switch (task.format) {
 					case InputFormat.Url:
-						return this.getTrackIdsFromArtistUrl(task.data);
-						break;
+						return this.fetchTracksWithArtistUrl(<ArtistUrl | ArtistUrl[]>task.data);
+
 					case InputFormat.Index:
-						return this.getTrackIdsFromArtistIndex(task.data);
-						break;
+						return this.fetchTracksWithArtistIndex(<ArtistIndex>task.data);
+
 					case InputFormat.Id:
-						return this.getTrackIdsFromArtistId(task.data);
-						break;
+						return this.fetchTracksWithArtistId(<ArtistId | ArtistId[]>task.data);
+
 					default:
 						throw new Error('Invalid format type for artist ingestion request. Permitted values are Url, Index, Id');
 				}
@@ -141,14 +163,26 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 					case InputFormat.Id:
 						// Naive case: All track id(s) already supplied
 						return Promise.resolve(task.data);
-						break;
+
 					default:
 						throw new Error('Invalid format type for track ingestion request. Permitted values are Id');
 				}
+				break;
 			default:
 				throw new Error('Invalid task supplied.');
 		}
 	}
+
+
+	// 	_    _      _
+	// | |  | |    | |
+	// | |__| | ___| |_ __   ___ _ __ ___
+	// |  __  |/ _ \ | '_ \ / _ \ '__/ __|
+	// | |  | |  __/ | |_) |  __/ |  \__ \
+	// |_|  |_|\___|_| .__/ \___|_|  |___/
+	// 				 | |
+	// 				 |_|
+
 
 	/**
 	 * Checks whether a passed in letter belongs to an alphabetical range from a to z
@@ -168,30 +202,14 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 
 
-	private indexToES (indexables: IndexableObject[]) {
-		return this.search.index(indexables);
-	}
+	private getTrackIdsForArtistUrls (artistUrls: ArtistUrl[]): Promise<TrackId[]> {
 
+		// Fetch popular tracks only from each artistUrl object
 
-
-	// 	_    _      _
-	// | |  | |    | |
-	// | |__| | ___| |_ __   ___ _ __ ___
-	// |  __  |/ _ \ | '_ \ / _ \ '__/ __|
-	// | |  | |  __/ | |_) |  __/ |  \__ \
-	// |_|  |_|\___|_| .__/ \___|_|  |___/
-	// 				 | |
-	// 				 |_|
-
-
-	private getTrackIdsForArtistUrls (artistUrls: AristUrl[], popularTracksOnly: boolean): Promise<TrackId[]> {
-
-		var getTracksInSequence = artistUrls.reduce( (prev, curr) => {
+		var getTracksInSequence = artistUrls.reduce( (prev, curr: ArtistUrl) => {
 
 			return prev.then(() => {
-				console.log(curr);
-				console.log('running one');
-				return this.getTracksForArtist(curr, popularTracksOnly);
+				return this.getTracksForArtist(curr.url, curr.popularTracksOnly);
 			});
 		}, Promise.resolve());
 
@@ -213,15 +231,15 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	 * @param index {string} - character (a to z) indicating letter index from popular artists should be fetched
 	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of artist Urls
 	 */
-	private getArtistsForIndex (index: string, popularArtistsOnly = true): Promise<ArtistURL[]> {
+	private getArtistsForIndex (index: string, popularArtistsOnly = true): Promise<string[]> {
 		return popularArtistsOnly ? this.getPopularArtistsForIndex(index) : this.parseArtistPage(index);
 	}
 
-	private getTracksForArtist (artistUrl: ArtistURL, popularTracksOnly = true): Promise<TrackId[]> {
+	private getTracksForArtist (artistUrl: string, popularTracksOnly = true): Promise<TrackId[]> {
 		return popularTracksOnly ? this.getPopularTracksForArtist(artistUrl) : this.parseInitialTrackPage(artistUrl);
 	}
 
-	private parseInitialTrackPage (artistUrl: ArtistURL) {
+	private parseInitialTrackPage (artistUrl: string) {
 		return new Promise( (resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
@@ -248,7 +266,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		});
 	}
 
-	private getPopularTracksForArtist (artistUrl: ArtistURL): Promise<TrackId[]> {
+	private getPopularTracksForArtist (artistUrl: string): Promise<TrackId[]> {
 		return new Promise<TrackId[]>((resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
@@ -290,7 +308,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 	private getArtistsPage (index, page) {
-		return new Promise<ArtistURL[]>((resolve, reject) => {
+		return new Promise<string[]>((resolve, reject) => {
 			var url = `http://genius.com/artists-index/${index}/all`;
 			console.log('processing page', url, page);
 			this.rest.get(url, {
