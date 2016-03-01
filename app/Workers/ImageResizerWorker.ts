@@ -81,6 +81,7 @@ class ImageResizerWorker extends Worker {
 		this.resizer = new ImageResizer();
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.image_bucket);
 		this.search = new Search();
+		console.log(' after search ');
 
 	}
 
