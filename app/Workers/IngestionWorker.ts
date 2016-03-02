@@ -1,11 +1,6 @@
 import Worker, { Task } from './Worker';
-import { firebase as FirebaseConfig } from '../config';
-import GeniusService from '../Services/Genius/GeniusService';
 import * as _ from 'underscore';
-import Search from '../Search/Search';
 import Firebase = require('firebase');
-import Request from '../Models/Request';
-import { Requestable } from '../Interfaces/Requestable';
 import ServiceDispatcher from '../Models/ServiceDispatcher';
 import GeniusServiceIngestionAdapter from '../Adapters/Ingestion/GeniusServiceIngestionAdapter';
 import IngestionAdapter from '../Adapters/Ingestion/IngestionAdapter';
@@ -66,17 +61,14 @@ interface IngestionRequestOptions {
 class IngestionWorker extends Worker {
 	searchQueueRef: Firebase;
 	serviceDispatcher: ServiceDispatcher;
-	ingestionAdapters: IngestionAdapter[];
+	ingestionAdapters: any;
 
-	constructor (opts: IngestionWorkerOptions) {
+	constructor (opts: IngestionWorkerOptions = {}) {
 
-		super();
+		super(opts);
 
-		/* Put insantiation logic here */
-
-		this.ingestionAdapters = [
-			GeniusServiceIngestionAdapter
-		];
+		this.ingestionAdapters = {};
+		this.ingestionAdapters[<string>IngestionServiceAdapterType.genius] =  new GeniusServiceIngestionAdapter();
 
 		if (opts.ingestionAdapters) {
 			this.ingestionAdapters = opts.ingestionAdapters;
@@ -89,8 +81,8 @@ class IngestionWorker extends Worker {
 
 	public process (task: IngestionTask, progress: any, resolve: any, reject: any) {
 
-		// TODO(jakub): Expand to include multiple services
-		this.ingestionAdapters[data.service].process(task, process, resolve, reject);
+		// TODO(jakub): Expand to include task being handled by multiple servicesß
+		this.ingestionAdapters[<string>task.service].process(task, process, resolve, reject);
 
 /*
 

@@ -8,7 +8,7 @@ import logger from '../../logger';
 import { IngestionTask, DestinationType, ArtistUrl, ArtistIndex, ArtistId, TrackId, InputFormat } from '../../Workers/IngestionWorker';
 //let fs = require('fs');
 import { Service as RestService } from 'restler';
-
+import * as cheerio from 'cheerio';
 
 interface GeniusServiceIngestionRequest extends Task {
 	ids: string[];
@@ -52,12 +52,14 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 		var destinations = task.destinations;
 		if (!_.contains(destinations, DestinationType.Firebase)) {
-			logger.warn('Option to not persist ignored');
+			logger.warn('Option to not persist to firebase ignored');
 		}
 
 		this.getTrackIdsForTask(task).then( (trackIds: TrackId[]) => {
-			return this.genius.trackIdsToIndexableObjects(<string[]>trackIds);
+			console.log('Printing track Id', trackIds);
+			//return this.genius.trackIdsToIndexableObjects(<string[]>trackIds);
 		}).then( indexableTrackIds => {
+			/*
 			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
 				logger.warn(`Results for ${task} NOT being indexed in ElasticSearch`);
 				return Promise.resolve(true);
@@ -65,9 +67,11 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 				logger.info(`Results for ${task} are being indexed in ElasticSearch`);
 				return this.search.index(indexableTrackIds);
 			}
+			*/
 		}).then( done => {
 			resolve(done);
 		}).catch( err => {
+			console.log(err);
 			reject(err);
 		});
 
@@ -132,7 +136,6 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 	private fetchTracksWithTrackId(trackIds: TrackId | TrackId[]): Promise<TrackId[]> {
-		// TODO(general): Implement this method
 		if (!_.isArray(trackIds)) {
 			trackIds = <TrackId[]> [trackIds];
 		}
@@ -211,16 +214,18 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	private getTrackIdsForArtistUrls (artistUrls: ArtistUrl[]): Promise<TrackId[]> {
 
 		// Fetch popular tracks only from each artistUrl object
-
+		var tracks = [];
 		var getTracksInSequence = artistUrls.reduce( (prev, curr: ArtistUrl) => {
 
-			return prev.then(() => {
+			return prev.then((newTracks) => {
+				tracks = tracks.concat(newTracks);
 				return this.getTracksForArtist(curr.url, curr.popularTracksOnly);
 			});
-		}, Promise.resolve());
+		}, Promise.resolve([]));
 
 		return new Promise((resolve, reject) => {
-			getTracksInSequence.then( (tracks) => {
+			getTracksInSequence.then( (newTracks) => {
+				tracks = tracks.concat(newTracks);
 				resolve(_.flatten(tracks));
 			}).catch( err => {
 				reject(err);
@@ -245,7 +250,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		return popularTracksOnly ? this.getPopularTracksForArtist(artistUrl) : this.parseInitialTrackPage(artistUrl);
 	}
 
-	private parseInitialTrackPage (artistUrl: string) {
+	private parseInitialTrackPage (artistUrl: Url) {
 		return new Promise( (resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
@@ -377,7 +382,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		});
 	}
 
-	private getTrackIds (trackIds: string[], artistNum: string, artistId: string, pageNum: number): Promise<TrackId[]> {
+	private getTrackIds (trackIds: TrackId[], artistNum: string, artistId: string, pageNum: number): Promise<TrackId[]> {
 		return new Promise( (resolve, reject) => {
 			this.rest.get('http://genius.com/artists/songs', {
 				query: {
