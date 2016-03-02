@@ -24,7 +24,6 @@ class PreIngestor {
 		return new Promise<TrackId[]>( (resolve, reject) => {
 			this.getArtists(popularArtistsOnly).then( artistUrls => {
 				console.log(artistUrls);
-				var trackPromises: Promise<TrackId[]>[] = [];
 
 				return artistUrls.reduce( (prev, curr) => {
 

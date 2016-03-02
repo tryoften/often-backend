@@ -7,7 +7,7 @@ import Firebase = require('firebase');
 import Request from '../Models/Request';
 import { Requestable } from '../Interfaces/Requestable';
 import ServiceDispatcher from '../Models/ServiceDispatcher';
-import GeniusServiceIngestionAdapter from '../Adapters/GeniusServiceIngestionAdapter';
+import GeniusServiceIngestionAdapter from '../Adapters/Ingestion/GeniusServiceIngestionAdapter';
 import IngestionAdapter from '../Adapters/Ingestion/IngestionAdapter';
 import MediaItemType from '../Models/MediaItemType';
 
@@ -38,16 +38,15 @@ export interface ArtistIndex {
 	popularTracksOnly: boolean;
 }
 
-export type ArtistId = String;
-export type TrackId = String;
-type Id = number;
+export type ArtistId = string;
+export type TrackId = string;
 
 export interface IngestionTask extends Task {
 	destinations: DestinationType[];
 	service: IngestionServiceAdapterType;
 	type: MediaItemType;
 	format: InputFormat;
-	data: (ArtistUrl[] | ArtistUrl) | (ArtistIndex[] | ArtistIndex) | (Id[] | Id);
+	data: (ArtistUrl[] | ArtistUrl) | (ArtistIndex[] | ArtistIndex) | (TrackId[] | TrackId);
 }
 
 
@@ -88,21 +87,19 @@ class IngestionWorker extends Worker {
 	}
 
 
-	public process (data: IngestionTask, progress: any, resolve: any, reject: any) {
+	public process (task: IngestionTask, progress: any, resolve: any, reject: any) {
 
 		// TODO(jakub): Expand to include multiple services
-		return this.ingestionAdapters[data.service].process(data, process, resolve, reject);
+		this.ingestionAdapters[data.service].process(task, process, resolve, reject);
 
-
-
-
+/*
 
 		var request = new Request(<Requestable>data);
 
 
 		return this.serviceDispatcher.process(request)
 			.then((response) => {
-				/* Queue up the request to be picked up by Search */
+				// Queue up the request to be picked up by Search
 				var requestObj = {};
 				requestObj[request.id] = request;
 				this.searchQueueRef.update(requestObj);
@@ -110,12 +107,13 @@ class IngestionWorker extends Worker {
 
 			})
 			.catch(err => {
-				/* Make sure that request is updated appropriately */
+				// Make sure that request is updated appropriately
 				var requestObj = {};
 				requestObj[request.id] = request;
 				this.searchQueueRef.set(requestObj);
 				reject(err);
 			});
+*/
 
 	}
 }
