@@ -8,17 +8,21 @@ import { createServer } from 'http';
  * Internal Firebase queue task
  */
 export interface Task {
-	_state: string;
-	_state_changed: string;
-	_owner: string;
-	_progress: number;
+	_state?: string;
+	_state_changed?: string;
+	_owner?: string;
+	_progress?: number;
 	_error_details?: any;
+}
+
+interface WorkerOptions {
+	url: string;
 }
 
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
  */
-class Worker {
+export class Worker {
 	options: any;
 	ref: any;
 	queue: Queue;
@@ -30,8 +34,9 @@ class Worker {
 	 * @return {void}
 	 */
 	constructor (opts) {
+		opts.url = FirebaseConfig.BaseURL + opts.url;
 		FirebaseConfig.queues.default.url = FirebaseConfig.BaseURL + FirebaseConfig.queues.default.url;
-		this.options = _.defaults(opts,  FirebaseConfig.queues.default);
+		this.options = _.defaults(opts, FirebaseConfig.queues.default);
 	}
 
 	/**
@@ -61,5 +66,3 @@ class Worker {
 		console.log(`Health check server running at http://127.0.0.1:${port}/`);
 	}
 }
-
-export default Worker;

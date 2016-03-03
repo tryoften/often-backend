@@ -7,7 +7,7 @@ import Firebase = require('firebase');
 import Request from '../Models/Request';
 import { Requestable } from '../Interfaces/Requestable';
 import ServiceDispatcher from '../Models/ServiceDispatcher';
-import GeniusServiceIngestionAdapter from '../Adapters/GeniusServiceIngestionAdapter';
+import GeniusServiceIngestionAdapter from '../Adapters/Ingestion/GeniusServiceIngestionAdapter';
 import IngestionAdapter from '../Adapters/Ingestion/IngestionAdapter';
 
 class IngestionServiceAdapterType extends String {
@@ -33,7 +33,6 @@ class IngestionWorker extends Worker {
 	ingestionAdapters: IngestionAdapter[];
 
 	constructor (opts: IngestionWorkerOptions) {
-
 		super();
 
 		/* Put insantiation logic here */
