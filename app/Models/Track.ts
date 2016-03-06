@@ -85,7 +85,6 @@ class Track extends MediaItem {
 		this.set('time_modified', Date.now());
 
 		this.save();
-		this.resizeImages();
 
 		return this;
 	}

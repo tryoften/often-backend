@@ -6,6 +6,9 @@ import { get } from 'restler';
 import { GeniusServiceResult } from '../../Services/Genius/GeniusDataTypes';
 import Search from '../../Search/Search';
 import Trending from '../../Models/Trending';
+import { TrackId } from '../../Workers/IngestionWorker';
+import MediaItem from '../../Models/MediaItem';
+import MediaItemType from '../../Models/MediaItemType';
 
 /**
  * This class gets trending artists, songs and lyrics from genius and ingests that data into storage
@@ -23,83 +26,91 @@ class TrendingIngestor {
 		this.trending = new Trending();
 	}
 
-	/**
-	 * Fetches trending songs, lyrics and artists data and
-	 * stores appropriate data stores.
-	 */
-	public ingestData (): Promise<any> {
-		return this.getTrendingTracks().then(data => {
-			let promises: Promise<GeniusServiceResult>[] = [];
-			for (let trackData of data) {
-				promises.push(this.genius.getData(trackData.id));
+	public getTrendingTrackIds(): Promise<TrackId[]> {
+		return new Promise((resolve, reject) => {
+			var tracks = [];
+			this.getTrendingTracks().then( data => {
+				for (var trackData of data) {
+					tracks.push(trackData.id);
+				}
+				resolve(tracks);
+			});
+
+		});
+	}
+
+	public updateTrendingWithMediaItems (mediaItems: MediaItem[]) {
+		return new Promise( (resolve, reject) => {
+			// Spread array on type and in indexing format
+			var artistResults = [];
+			var trackResults = [];
+			var lyricResults = [];
+
+			for (let item of mediaItems) {
+				if (item.type === MediaItemType.artist) {
+					artistResults.push(item);
+				}
+
+				if (item.type === MediaItemType.track) {
+					trackResults.push(item);
+				}
+				if (item.type === MediaItemType.lyric) {
+					lyricResults.push(item);
+				}
 			}
 
-			return Promise.all(promises).then( (results: GeniusServiceResult[]) => {
-				let topArtists = _.chain(results)
-					.map(result => result.artist.toIndexingFormat())
-					.uniq(artist => artist.id)
-					.uniq(artist => artist.name)
-					.value();
+			let topArtists = _.chain(artistResults)
+				.map(result => result.toIndexingFormat())
+				.uniq(artist => artist.id)
+				.uniq(artist => artist.name)
+				.value();
 
-				let topTracks = _.map(results, result => result.track.toIndexingFormat());
+			let topTracks = _.map(trackResults, result => result.toIndexingFormat());
 
-				let trendingLyrics = _.map(results, result => {
+			let trendingLyrics = _.map(lyricResults, result => {
 
-					let sortedLyrics: Lyric[] = result.lyrics.sort((a, b) => {
-						return b.score - a.score;
-					});
-
-					return sortedLyrics[0].toIndexingFormat();
+				let sortedLyrics: Lyric[] = result.sort((a, b) => {
+					return b.score - a.score;
 				});
 
-				this.search.index(topArtists.concat(topTracks, trendingLyrics));
-
-				var response = [
-					{
-						id: 'trendingLyrics',
-						title: 'Trending Lyrics',
-						type: 'lyric',
-						items: trendingLyrics,
-						score: 5.0
-					},
-					{
-						id: 'topArtists',
-						title: 'Top Artists',
-						type: 'artist',
-						items: topArtists,
-						score: 3.0
-					},
-					{
-						id: 'topTracks',
-						title: 'Top Tracks',
-						type: 'track',
-						items: topTracks,
-						score: 1.0
-					}
-				];
-
-				this.trending.set(response);
-
-				// Schedule image resizing
-				for (var result of results) {
-					result.artist.resizeImages();
-					result.track.resizeImages();
-
-					for (var lyric of result.lyrics) {
-						lyric.resizeImages();
-					}
-				}
-			}).catch((error) => {
-				console.log(error);
+				return sortedLyrics[0].toIndexingFormat();
 			});
+
+			var response = [
+				{
+					id: 'trendingLyrics',
+					title: 'Trending Lyrics',
+					type: 'lyric',
+					items: trendingLyrics,
+					score: 5.0
+				},
+				{
+					id: 'topArtists',
+					title: 'Top Artists',
+					type: 'artist',
+					items: topArtists,
+					score: 3.0
+				},
+				{
+					id: 'topTracks',
+					title: 'Top Tracks',
+					type: 'track',
+					items: topTracks,
+					score: 1.0
+				}
+			];
+
+			this.trending.set(response);
+			resolve(mediaItems);
 		});
+
 	}
 
 	/**
 	 * Fetches trending track ids
 	 * @return {Promise} - Promise that when resolved returns the results of the data fetch, or an error if failed
 	 * */
-	private getTrendingTracks (pages = 2): Promise<any> {
+	public getTrendingTracks (pages = 2): Promise<any> {
 		let urlTemplate = 'http://genius.com/home/show_more_cards?page=';
 		let songs = [];
 		let count = 1;
@@ -160,6 +171,3 @@ class TrendingIngestor {
 }
 
 export default TrendingIngestor;
-
-var trending = new TrendingIngestor();
-trending.ingestData();

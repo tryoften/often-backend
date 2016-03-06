@@ -125,6 +125,33 @@ class GeniusService extends ServiceBase {
 		});
 	}
 
+
+	/**
+	 * Converts an array of track Ids into indexable objects
+	 *
+	 * @param trackIds
+	 * @returns {Promise<IndexableObject[]>}
+	 */
+	public trackIdsToGeniusServiceResults (trackIds: string[]): Promise<GeniusServiceResult[]> {
+		return new Promise<IndexableObject[]>( (resolve, reject) => {
+			let results: IndexableObject[] = [];
+			var promises = [];
+
+			for (var trackId of trackIds) {
+				// Add all songs to songs list
+				promises.push(this.getData(trackId));
+			}
+
+			Promise.all(promises).then( (categorizedData: GeniusServiceResult[]) => {
+				resolve(categorizedData);
+
+			}).catch(err => {
+				console.log('Rejecting...');
+				reject(err);
+			});
+		});
+	}
+
 	/**
 	 * Gets all metadata for given track ID including artist, album, and lyrics data
 	 *

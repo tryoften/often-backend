@@ -81,7 +81,6 @@ class ImageResizerWorker extends Worker {
 		this.resizer = new ImageResizer();
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.image_bucket);
 		this.search = new Search();
-		console.log(' after search ');
 
 	}
 
@@ -118,6 +117,60 @@ class ImageResizerWorker extends Worker {
 		});
 	}
 
+	public resizeMediaItem (mediaItem: MediaItem): Promise<MediaItem> {
+		return new Promise((resolve, reject) => {
+
+			var imageFields = mediaItem.getImageFields();
+
+			var promises = [];
+
+			for (var imgProp of imageFields) {
+				var mediaItemImgProp = mediaItem.get(imgProp);
+				if (mediaItemImgProp && (mediaItemImgProp.indexOf('.gif') === -1)) {
+					promises.push(this.getResizedImage(mediaItem, imgProp, mediaItemImgProp));
+				}
+			}
+
+			Promise.all(promises).then(resizedImages => {
+				var updObj = {};
+				var imagesObj = {};
+				for (var resizedImage of resizedImages) {
+					var key = Object.keys(resizedImage)[0];
+					imagesObj[key] = resizedImage[key];
+					updObj[`${mediaItem.type}s/${mediaItem.id}/${key}_source`] = mediaItem.get(key);
+					updObj[`${mediaItem.type}s/${mediaItem.id}/${key}`] = resizedImage[key][this.main_tran].url;
+				}
+
+				updObj[`${mediaItem.type}s/${mediaItem.id}/images`] = imagesObj;
+
+				if (mediaItem.type === MediaItemType.track) {
+					var trackLyricIds = Object.keys((<Track>mediaItem).lyrics);
+					for (var lyrId of trackLyricIds) {
+						updObj[`tracks/${mediaItem.id}/lyrics/${lyrId}/images`] = imagesObj;
+						updObj[`lyrics/${lyrId}/images`] = imagesObj;
+					}
+
+					if (!!imagesObj.artist_image_url) {
+						updObj[`artists/${mediaItem.artist_id}/images/image_url`] = imagesObj.artist_image_url;
+					}
+
+				}
+
+				new Firebase(FirebaseConfig.BaseURL).update(updObj, (error) => {
+					if (error) {
+						reject(error);
+					} else {
+						resolve(mediaItem);
+					}
+				});
+
+			}).catch( err => {
+				logger.error('Error ' + err);
+				reject(err);
+			});
+		});
+	}
+
 	/**
 	 * Entry-point for resizing arbitrary images (i.e. Does NOT update Firebase models)
 	 *
@@ -132,7 +185,7 @@ class ImageResizerWorker extends Worker {
 	 * Entry-point for resizing media items (i.e. Propagates updates to Firebase models)
 	 *
 	 * @param {ResizableMediaItem} data - Input object of type ResizableMediaItem
-	 * @return {Promise<MediaItem>} - Returns a promise that resolves to a media item
+	 * @return {Promise<MediaItem>} - Returns a promise that resolves to a media item with updated Images
 	 */
 	private processMediaItem (data: ResizableMediaItem): Promise<MediaItem> {
 		return new Promise((resolve, reject) => {

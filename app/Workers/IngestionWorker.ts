@@ -22,6 +22,10 @@ export class InputFormat extends String {
 	static Id: InputFormat = 'id';
 }
 
+export class IngestionOption extends String {
+	static Trending: IngestionOption = 'trending';
+}
+
 export interface ArtistUrl {
 	url: string;
 	popularTracksOnly: boolean;
@@ -41,6 +45,7 @@ export interface IngestionTask extends Task {
 	service: IngestionServiceAdapterType;
 	type: MediaItemType;
 	format: InputFormat;
+	ingestionOption: IngestionOption;
 	data: (ArtistUrl[] | ArtistUrl) | (ArtistIndex[] | ArtistIndex) | (TrackId[] | TrackId);
 }
 

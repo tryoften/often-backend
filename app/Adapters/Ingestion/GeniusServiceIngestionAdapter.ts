@@ -6,19 +6,18 @@ import Search from '../../Search/Search';
 import MediaItemType from '../../Models/MediaItemType';
 import logger from '../../logger';
 import { IngestionTask, DestinationType, ArtistUrl, ArtistIndex, ArtistId, TrackId, InputFormat } from '../../Workers/IngestionWorker';
-//let fs = require('fs');
 import { Service as RestService } from 'restler';
 import * as cheerio from 'cheerio';
+import {GeniusServiceResult} from '../../Services/Genius/GeniusDataTypes';
+import {IndexableObject} from '../../Interfaces/Indexable';
+import ImageResizerWorker from '../../Workers/ImageResizerWorker';
+import MediaItem from '../../Models/MediaItem';
+import { IngestionOption } from '../../Workers/IngestionWorker';
+import TrendingIngestor from '../../Ingestors/Trending/TrendingIngestor';
 
 interface GeniusServiceIngestionRequest extends Task {
 	ids: string[];
 	type: MediaItemType;
-	targets: IngestionTarget[];
-}
-
-interface IngestionTarget {
-//	type: IngestionTargetType;
-	data: any;
 }
 
 type Url = string;
@@ -28,6 +27,8 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	search: Search;
 	geniusRoot: string;
 	rest: any;
+	imageResizerWorker: ImageResizerWorker;
+	trendingIngestor: TrendingIngestor;
 
 	constructor (opts = {}) {
 		super(opts);
@@ -36,6 +37,9 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		this.rest = new RestService({
 			baseURL: this.geniusRoot
 		});
+		this.imageResizerWorker = new ImageResizerWorker();
+		this.genius = new GeniusService({provider_id: 'genius'});
+		this.trendingIngestor = new TrendingIngestor();
 	}
 
 
@@ -48,49 +52,81 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	// | |  | | (_| | | | | | | |  | |  __/ |_| | | | (_) | (_| \__ \
 	// |_|  |_|\__,_|_|_| |_| |_|  |_|\___|\__|_| |_|\___/ \__,_|___/
 
-	public process (task: IngestionTask, progress: any, resolve: any, reject: any) {
 
+	public process (task: IngestionTask, progress: any, resolve: any, reject: any) {
+		console.log('processing');
 		var destinations = task.destinations;
 		if (!_.contains(destinations, DestinationType.Firebase)) {
 			logger.warn('Option to not persist to firebase ignored');
 		}
 
-		this.getTrackIdsForTask(task).then( (trackIds: TrackId[]) => {
+		let getTracksPromise: Promise<TrackId[]>;
+		getTracksPromise = (task.ingestionOption === IngestionOption.Trending) ?
+			this.trendingIngestor.getTrendingTrackIds() :
+			this.getTrackIdsForTask(task);
+
+		var mediaItems = [];
+
+		var doneImageResizing = getTracksPromise.then( (trackIds: TrackId[]) => {
 			console.log('Printing track Id', trackIds);
-			//return this.genius.trackIdsToIndexableObjects(<string[]>trackIds);
-		}).then( indexableTrackIds => {
-			/*
-			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
-				logger.warn(`Results for ${task} NOT being indexed in ElasticSearch`);
-				return Promise.resolve(true);
-			} else {
-				logger.info(`Results for ${task} are being indexed in ElasticSearch`);
-				return this.search.index(indexableTrackIds);
+			return this.genius.trackIdsToGeniusServiceResults(<string[]>trackIds);
+		}).then( (geniusServiceResults: GeniusServiceResult[]) => {
+			console.log('Got Genius Service Results');
+			var imagePromises = [];
+
+			for (let gsr of geniusServiceResults) {
+				mediaItems.push(gsr.artist);
+				imagePromises.push(this.imageResizerWorker.resizeMediaItem(gsr.track));
+				mediaItems.push(gsr.track);
+				for (let lyr of gsr.lyrics) {
+					mediaItems.push(lyr);
+				}
 			}
-			*/
-		}).then( done => {
-			resolve(done);
+
+			return Promise.all(imagePromises);
+
+
+		});
+
+		doneImageResizing.then( () => {
+
+			// resync media items
+			var updateMediaItemPromises = [];
+			for (let mi of mediaItems) {
+				updateMediaItemPromises.push(mi.syncData());
+			}
+
+			return Promise.all(updateMediaItemPromises);
+		}).then((updatedMediaItems) => {
+			if (task.ingestionOption === IngestionOption.Trending) {
+				return this.trendingIngestor.updateTrendingWithMediaItems(updatedMediaItems);
+
+			} else {
+				return Promise.resolve(updatedMediaItems);
+			}
+
+		}).then( (updatedMediaItems: MediaItem[]) => {
+
+			var indexableMediaItems: IndexableObject[] = [];
+
+			for (var item of updatedMediaItems) {
+				indexableMediaItems.push(item.toIndexingFormat());
+			}
+			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
+				logger.warn('NOT persisting to ElasticSearch. Add ElasticSearch to destinations field for persistence');
+				return Promise.resolve(updatedMediaItems);
+			}
+
+			return this.search.index(indexableMediaItems);
+
+		}).then( indexed => {
+			resolve(indexed);
+
 		}).catch( err => {
 			console.log(err);
 			reject(err);
 		});
 
-/*
-		this.getGeniusData().then( (indexables: IndexableObject[]) => {
-			if (_.contains(destinations, DestinationType.ElasticSearch)) {
-				logger.info('Indexing results of task in ElasticSearch', JSON.stringify(task));
-				return this.indexToES(indexables);
-			} else {
-				return Promise.resolve(true);
-			}
-		}).then(() => {
-			logger.info('Task successfully processed', JSON.stringify(task));
-			resolve(true);
-		}).catch(err => {
-			logger.error('Error caught in Genius Service Ingestion Adapter', err.stack);
-			reject(JSON.stringify(err));
-		})
-*/
 
 	}
 

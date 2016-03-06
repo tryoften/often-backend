@@ -4,13 +4,10 @@ var iw = new IngestionWorker();
 var testTask = {
 	destinations: 'firebase',
 	service: 'genius',
-	type: 'artist',
-	format: 'index',
-	data: {
-		index: '!',
-		popularArtistsOnly: true,
-		popularTracksOnly: true
-	}
+	type: 'track',
+	format: 'id',
+	//data: '93539'
+	ingestionOption: 'trending'
 };
 
 iw.process(testTask, null, null, null);
