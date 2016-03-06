@@ -67,14 +67,19 @@ class TrendingIngestor {
 
 			let topTracks = _.map(trackResults, result => result.toIndexingFormat());
 
-			let trendingLyrics = _.map(lyricResults, result => {
-
-				let sortedLyrics: Lyric[] = result.sort((a, b) => {
-					return b.score - a.score;
-				});
-
-				return sortedLyrics[0].toIndexingFormat();
+			let sortedLyricItems = lyricResults.sort((a, b) => {
+				return b.score - a.score;
 			});
+			var trendingLyrics = _.map(sortedLyricItems, result => result.toIndexingFormat());
+
+			//let trendingLyrics = _.map(lyricResults, result => {
+            //
+			//	let sortedLyrics: Lyric[] = result.sort((a, b) => {
+			//		return b.score - a.score;
+			//	});
+            //
+			//	return sortedLyrics[0].toIndexingFormat();
+			//});
 
 			var response = [
 				{
