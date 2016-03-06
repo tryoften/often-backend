@@ -45,12 +45,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 
 
-	// 	__  __       _         __  __      _   _               _
-	// |  \/  |     (_)       |  \/  |    | | | |             | |
-	// | \  / | __ _ _ _ __   | \  / | ___| |_| |__   ___   __| |___
-	// | |\/| |/ _` | | '_ \  | |\/| |/ _ \ __| '_ \ / _ \ / _` / __|
-	// | |  | | (_| | | | | | | |  | |  __/ |_| | | | (_) | (_| \__ \
-	// |_|  |_|\__,_|_|_| |_| |_|  |_|\___|\__|_| |_|\___/ \__,_|___/
+	// Main Methods
 
 
 	public process (task: IngestionTask, progress: any, resolve: any, reject: any) {
@@ -219,14 +214,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
-	// 	_    _      _
-	// | |  | |    | |
-	// | |__| | ___| |_ __   ___ _ __ ___
-	// |  __  |/ _ \ | '_ \ / _ \ '__/ __|
-	// | |  | |  __/ | |_) |  __/ |  \__ \
-	// |_|  |_|\___|_| .__/ \___|_|  |___/
-	// 				 | |
-	// 				 |_|
+	// Helpers
 
 
 	/**

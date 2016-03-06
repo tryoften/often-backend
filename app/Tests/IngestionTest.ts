@@ -4,9 +4,12 @@ var iw = new IngestionWorker();
 var testTask = {
 	destinations: 'firebase',
 	service: 'genius',
-	type: 'track',
-	format: 'id',
-	//data: '93539'
+	type: 'artist',
+	format: 'url',
+	//data: {
+	//	url: 'http://genius.com/artists/A-ap-rocky',
+	//	popularTracksOnly: true
+	//}
 	ingestionOption: 'trending'
 };
 
