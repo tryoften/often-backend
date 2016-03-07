@@ -249,11 +249,11 @@ class ImageResizerWorker extends Worker {
 			lyricRootRef.update(imagesObj);
 		}
 
-		/* Update images on artist items */
-		if (!!imagesObj.artist_image_url) {
-			var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
-			artistRef.update(imagesObj.artist_image_url);
-		}
+		///* Update images on artist items */
+		//if (!!imagesObj.artist_image_url) {
+		//	var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
+		//	artistRef.update(imagesObj.artist_image_url);
+		//}
 
 	}
 

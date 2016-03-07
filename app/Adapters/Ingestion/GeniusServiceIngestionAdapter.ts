@@ -26,7 +26,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	genius: GeniusService;
 	search: Search;
 	geniusRoot: string;
-	rest: any;
+	rest: RestService;
 	imageResizerWorker: ImageResizerWorker;
 	trendingIngestor: TrendingIngestor;
 
@@ -42,20 +42,25 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		this.trendingIngestor = new TrendingIngestor();
 	}
 
-
-
-
-	// Main Methods
-
-
+	/**
+	 * Main method for processing Ingestion worker's requests
+	 *
+	 * @param {IngestionTask} task - Object specifying the type of ingestion that is to be performed
+	 * @param {Function} progress - Firebase function for keeping track of task's progress
+	 * @param {Function} resolve - Firebase function for accepting ingestion results
+	 * @param {Function} reject - Firebase function for declining ingestion results that are deemed unacceptable
+	 */
 	public process (task: IngestionTask, progress: any, resolve: any, reject: any) {
-		console.log('processing');
 		var destinations = task.destinations;
 		if (!_.contains(destinations, DestinationType.Firebase)) {
 			logger.warn('Option to not persist to firebase ignored');
 		}
 
 		let getTracksPromise: Promise<TrackId[]>;
+
+		/* Choose a type of ingestion:
+		(1) Trending artists/tracks/lyrics only or
+		(2) Media items related to caller supplied conditional criteria */
 		getTracksPromise = (task.ingestionOption === IngestionOption.Trending) ?
 			this.trendingIngestor.getTrendingTrackIds() :
 			this.getTrackIdsForTask(task);
@@ -63,29 +68,38 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		var mediaItems = [];
 
 		var doneImageResizing = getTracksPromise.then( (trackIds: TrackId[]) => {
-			console.log('Printing track Id', trackIds);
+			logger.info('Fetched the following track ids for processing: ', JSON.stringify(trackIds));
 			return this.genius.trackIdsToGeniusServiceResults(<string[]>trackIds);
 		}).then( (geniusServiceResults: GeniusServiceResult[]) => {
-			console.log('Got Genius Service Results');
+
+			/* This section is reserved for image resizing */
+			logger.info('Successfully generated genius service results...');
 			var imagePromises = [];
 
 			for (let gsr of geniusServiceResults) {
+
+				/* Keep track of all media items for later references */
 				mediaItems.push(gsr.artist);
-				imagePromises.push(this.imageResizerWorker.resizeMediaItem(gsr.track));
 				mediaItems.push(gsr.track);
 				for (let lyr of gsr.lyrics) {
 					mediaItems.push(lyr);
 				}
+
+				/* Queue up media items for image resizing */
+				imagePromises.push(this.imageResizerWorker.resizeMediaItem(gsr.track));
+				imagePromises.push(this.imageResizerWorker.resizeMediaItem(gsr.artist));
+
+
 			}
 
 			return Promise.all(imagePromises);
-
 
 		});
 
 		doneImageResizing.then( () => {
 
-			// resync media items
+			/* Resync all media items with Firebase to ensure that the backbone models have updated images */
+			logger.info('About to re-sync all media items with Firebase...');
 			var updateMediaItemPromises = [];
 			for (let mi of mediaItems) {
 				updateMediaItemPromises.push(mi.syncData());
@@ -93,15 +107,20 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 			return Promise.all(updateMediaItemPromises);
 		}).then((updatedMediaItems) => {
+
+			/* This portion of the promise chain is reserved for trending updates */
 			if (task.ingestionOption === IngestionOption.Trending) {
+				logger.info('About to update trending collection in Firebase...');
 				return this.trendingIngestor.updateTrendingWithMediaItems(updatedMediaItems);
 
 			} else {
+				logger.info('Processed media items are NOT trending. Resolving mediat items...');
 				return Promise.resolve(updatedMediaItems);
 			}
 
 		}).then( (updatedMediaItems: MediaItem[]) => {
 
+			/* This portion of the promise chain is reserved for updating ElasticSearch results */
 			var indexableMediaItems: IndexableObject[] = [];
 
 			for (var item of updatedMediaItems) {
@@ -115,10 +134,12 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			return this.search.index(indexableMediaItems);
 
 		}).then( indexed => {
+
+			/* Final section of the promise chain. Acts as a finalizer to inform the ingestion worker that ingestion is done */
 			resolve(indexed);
 
-		}).catch( err => {
-			console.log(err);
+		}).catch( (err: Error) => {
+			logger.error(err.stack);
 			reject(err);
 		});
 
@@ -126,11 +147,18 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
+	/**
+	 * Fetches track ids based on artist index ('a' to 'z') and artist & track popularity criteria
+	 *
+	 * @param {ArtistIndex} artistIndex - Object containing index and popularity criteria
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
+	 */
 	private fetchTracksWithArtistIndex(artistIndex: ArtistIndex): Promise<TrackId[]> {
 
 		if (!this.isValidLetter(artistIndex.index)) {
 			throw new Error('Invalid artist index supplied. The index must be in an alphabetical range form a to z');
 		}
+
 		return new Promise( (resolve, reject) => {
 			this.getArtistsForIndex(artistIndex.index, artistIndex.popularArtistsOnly).then( (relevantArtistUrls: Url[]) => {
 				var artistUrlObjs: ArtistUrl[] = [];
@@ -151,6 +179,13 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
+	/**
+	 * A wrapper for retrieving track ids with artist url(s)
+	 *
+	 * @param {ArtistUrl | ArtistUrl[]} artistUrls - An object or an array of ArtistUrl objects
+	 * 		containing urls of artists whose tracks are to be ingested
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of TrackIds, or an error upon rejection
+	 */
 	private fetchTracksWithArtistUrl (artistUrls: ArtistUrl | ArtistUrl[] ): Promise<TrackId[]> {
 
 		if (!_.isArray(artistUrls)) {
@@ -161,8 +196,16 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 	}
 
-	private fetchTracksWithArtistId(artistId: ArtistId | ArtistId[]): Promise<TrackId[]> {
-		// TODO(general): Implement this method
+
+	/**
+	 * Retrieves track ids with artist id(s)
+	 *
+	 * @param {ArtistId | ArtistId[]} artistIds - An object or an array of ArtistId objects
+	 * 		containing ids of artists whose tracks are to be ingested
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of TrackIds, or an error upon rejection
+	 */
+	private fetchTracksWithArtistId(artistIds: ArtistId | ArtistId[]): Promise<TrackId[]> {
+		// TODO(general): Implement this method for future use
 		throw new Error('fetchTracksWithArtistId not implemented (yet)');
 	}
 
@@ -174,12 +217,11 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
-
 	/**
+	 * Retrieves track ids with IngestionTask
 	 *
-	 *
-	 * @param {Ingestion Task} task - Task describing the type and format of input data to be ingested
-	 * @returns {null}
+	 * @param {IngestionTask} task - Task describing the type and format of input data to be processed for ingestion
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of TrackIds, or an error upon rejection
 	 */
 	private getTrackIdsForTask (task: IngestionTask): Promise<TrackId[]> {
 		switch (task.type) {
@@ -201,7 +243,8 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			case MediaItemType.track:
 				switch (task.format) {
 					case InputFormat.Id:
-						// Naive case: All track id(s) already supplied
+
+						/* Naive case: All track id(s) already supplied */
 						return this.fetchTracksWithTrackId(<TrackId | TrackId[]> task.data);
 
 					default:
@@ -213,14 +256,10 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		}
 	}
 
-
-	// Helpers
-
-
 	/**
 	 * Checks whether a passed in letter belongs to an alphabetical range from a to z
 	 *
-	 * @param {string} letter - string containing a letter
+	 * @param {string} letter - string containing a letterfrom a to z
 	 * @returns {boolean} - Boolean indicating whether the letter is an alphabetical range or not
 	 */
 	private isValidLetter (letter: string): boolean {
@@ -234,10 +273,15 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
-
+	/**
+	 * Retrieves track ids with artist url(s) by processing artist urls in sequential order
+	 *
+	 * @param {ArtistUrl[]} artistUrls - An array of ArtistUrl objects
+	 * 		containing urls of artists whose tracks are to be ingested
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of TrackIds, or an error upon rejection
+	 */
 	private getTrackIdsForArtistUrls (artistUrls: ArtistUrl[]): Promise<TrackId[]> {
 
-		// Fetch popular tracks only from each artistUrl object
 		var tracks = [];
 		var getTracksInSequence = artistUrls.reduce( (prev, curr: ArtistUrl) => {
 
@@ -258,24 +302,35 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 	}
 
+	/**
+	 * Retrieves an array of artist urls for a given index and artist popularity flag
+	 *
+	 * @param {string} index - character (a to z) indicating letter index from popular artists should be fetched
+	 * @param {boolean} popularArtistsOnly - flag indicating whether to retrieve only popular artists from index page (defaults to true)
+	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of artist Urls, or an error upon rejection
+	 */
+	private getArtistsForIndex (index: string, popularArtistsOnly = true): Promise<Url[]> {
+		return popularArtistsOnly ? this.getPopularArtistsForIndex(index) : this.getAllArtistsForIndex(index);
+	}
 
+	/**
+	 * Retrieves an array of TrackIds for a given artist url and track popularity flag
+	 *
+	 * @param {boolean} popularTracksOnly - flag indicating whether to retrieve only popular tracks from artist page (defaults to true)
+	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
+	 */
+	private getTracksForArtist (artistUrl: Url, popularTracksOnly = true): Promise<TrackId[]> {
+		return popularTracksOnly ? this.getPopularTracksForArtist(artistUrl) : this.getAllTracksForArtist(artistUrl);
+	}
 
 
 	/**
-	 *
-	 * @param index {string} - character (a to z) indicating letter index from popular artists should be fetched
-	 * @returns {Promise<ArtistURL[]>} - Returns a promise that resolves to an array of artist Urls
+	 * Retrieves an array of all tracks for a given artist
+	 * @param {Url} artistUrl - Url of an artist whose tracks are to be retrieved
+	 * @returns {Promise<T>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
 	 */
-	private getArtistsForIndex (index: string, popularArtistsOnly = true): Promise<string[]> {
-		return popularArtistsOnly ? this.getPopularArtistsForIndex(index) : this.parseArtistPage(index);
-	}
-
-	private getTracksForArtist (artistUrl: string, popularTracksOnly = true): Promise<TrackId[]> {
-		return popularTracksOnly ? this.getPopularTracksForArtist(artistUrl) : this.parseInitialTrackPage(artistUrl);
-	}
-
-	private parseInitialTrackPage (artistUrl: Url) {
-		return new Promise( (resolve, reject) => {
+	private getAllTracksForArtist (artistUrl: Url): Promise<TrackId> {
+		return new Promise<TrackId>( (resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
 
@@ -295,23 +350,32 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 					resolve(this.parseTrackPage(trackIds, artistNum, artistId));
 				}).on('error', err => {
-				console.log('Failed to get popular tracks for artist: ', err);
+				logger.error('Failed to get popular tracks for artist: ', err);
 				reject(err);
 			});
 		});
 	}
 
-	private parseTrackPage (trackIds: string[], artistNum: string, artistId: string, pageNum = 1) {
-		return new Promise ((resolve, reject) => {
+	/**
+	 * TODO(jakub): Fill in remaining parameters and test
+	 * Recursively parses track pages
+	 *
+	 * @param {TrackId[]} trackIds - Array of track ids to be populated through recursive parsing of pages (defaults to [])
+	 * @param artistNum
+	 * @param artistId
+	 * @param pageNum - (defaults to 1)
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
+	 */
+	private parseTrackPage (trackIds: TrackId[], artistNum: string, artistId: string, pageNum = 1): Promise<TrackId[]> {
+		return new Promise<TrackId[]>((resolve, reject) => {
 			this.getTrackIds(trackIds, artistNum, artistId, pageNum)
 				.then((tracks) => {
 
 					if (tracks.length === 0) {
-						console.log('track length is 0');
 						resolve(trackIds);
 					} else {
-						console.log(trackIds.length);
 						trackIds = trackIds.concat(tracks);
+
 						/* If page was processed properly then queue up the next one */
 						resolve(this.parseTrackPage(trackIds, artistNum, artistId, pageNum + 1));
 					}
@@ -322,7 +386,15 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 				});
 		});
 	}
-	private getPopularTracksForArtist (artistUrl: string): Promise<TrackId[]> {
+
+
+	/**
+	 * Returns popular tracks for artist url
+	 *
+	 * @param {Url} artistUrl - Url of an artist
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
+	 */
+	private getPopularTracksForArtist (artistUrl: Url): Promise<TrackId[]> {
 		return new Promise<TrackId[]>((resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
@@ -341,19 +413,27 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	}
 
 
-	private parseArtistPage (currentIndex, currentPage = 1, artistArr = []) {
-		return new Promise((resolve, reject) => {
+	/**
+	 * Recursively retries urls of all artists for a given index
+	 *
+	 * @param {string} currentIndex - specifies the index from 'a' to 'z' to be parsed
+	 * @param {number} currentPage - specifies the page to be parsed (defaults to 1)
+	 * @param {Url[]} artistArr - Array of artist urls to be populated through recursive parsing of pages (defaults to [])
+	 * @returns {Promise<Url[]>} - Returns a promise that resolves to an array of artist urls, or an error upon rejection
+	 */
+	private getAllArtistsForIndex (currentIndex: string, currentPage = 1, artistArr = []): Promise<Url[]> {
+		return new Promise<Url[]>((resolve, reject) => {
 			this.getArtistsPage(currentIndex, currentPage)
 				.then((artists) => {
 
 					if (artists.length === 0) {
-						console.log('length is 0');
 						resolve(artistArr);
 					} else {
 						console.log(artistArr.length);
 						artistArr = artistArr.concat(artists);
+
 						/* If page was processed properly then queue up the next one */
-						resolve(this.parseArtistPage(currentIndex, currentPage + 1, artistArr));
+						resolve(this.getAllArtistsForIndex(currentIndex, currentPage + 1, artistArr));
 					}
 
 				})
@@ -363,10 +443,17 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		});
 	}
 
-	private getArtistsPage (index, page) {
-		return new Promise<string[]>((resolve, reject) => {
+	/**
+	 * Retrieves all artist for a given index and page
+	 *
+	 * @param {string} index - character (a to z) indicating letter index from popular artists should be fetched
+	 * @param {number} page - page number of an index page from which artist urls should be retrieved
+	 * @returns {Promise<Url[]>} - Returns a promise that resolves to an array of artist urls, or an error upon rejection
+	 */
+	private getArtistsPage (index: string, page: number): Promise<Url[]> {
+		return new Promise<Url[]>((resolve, reject) => {
 			var url = `http://genius.com/artists-index/${index}/all`;
-			console.log('processing page', url, page);
+			logger.info(`Parsing page ${page} of index: ${index}`);
 			this.rest.get(url, {
 					query: {
 						page: page
@@ -381,14 +468,20 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 					});
 
 					resolve(results);
-				}).on('error', err => {
-				console.log('Failed to get popular artists for index: ', err);
+				}).on('error', (err: Error) => {
+				logger.error(`Failed to get popular artists for index ${index} nad page ${page} `, err.stack);
 				reject(err);
 			});
 		});
 	}
 
-	private getPopularArtistsForIndex (index: string): Promise<string[]> {
+	/**
+	 * Returns urls of popular artists for a given index
+	 *
+	 * @param {string} index - character (a to z) indicating letter index
+	 * @returns {Promise<Url[]>} - Returns a promise that resolves to an array of artist urls, or an error upon rejection
+	 */
+	private getPopularArtistsForIndex (index: string): Promise<Url[]> {
 		return new Promise<string[]>((resolve, reject) => {
 			var url = `${this.geniusRoot}/artists-index/${index}`;
 			this.rest.get(url)
@@ -406,6 +499,17 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 		});
 	}
 
+
+	/**
+	 * TODO(jakub): Fill in remaining parameters and test
+	 * Recursively fetches track ids by arsing artist pages
+	 *
+	 * @param {TrackId[]} trackIds - Array of track ids to be populated through recursive parsing of pages (defaults to [])
+	 * @param artistNum
+	 * @param artistId
+	 * @param pageNum
+	 * @returns {Promise<TrackId[]>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
+	 */
 	private getTrackIds (trackIds: TrackId[], artistNum: string, artistId: string, pageNum: number): Promise<TrackId[]> {
 		return new Promise( (resolve, reject) => {
 			this.rest.get('http://genius.com/artists/songs', {
@@ -424,13 +528,11 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 				});
 				resolve(results);
 			}).on('error', err => {
-				console.log('Failed to get popular tracks for artist: ', err);
+				logger.error('Failed to get popular tracks for artist: ', err);
 				reject(err);
 			});
 		});
 	}
-
-
 
 }
 

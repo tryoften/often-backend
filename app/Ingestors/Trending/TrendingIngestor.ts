@@ -64,22 +64,15 @@ class TrendingIngestor {
 				.uniq(artist => artist.id)
 				.uniq(artist => artist.name)
 				.value();
+			topArtists = topArtists.slice(0, 10);
 
-			let topTracks = _.map(trackResults, result => result.toIndexingFormat());
+			let topTracks = _.map(trackResults, result => result.toIndexingFormat()).slice(0, 10);
 
 			let sortedLyricItems = lyricResults.sort((a, b) => {
 				return b.score - a.score;
 			});
-			var trendingLyrics = _.map(sortedLyricItems, result => result.toIndexingFormat());
+			var trendingLyrics = _.map(sortedLyricItems, result => result.toIndexingFormat()).slice(0, 10);
 
-			//let trendingLyrics = _.map(lyricResults, result => {
-            //
-			//	let sortedLyrics: Lyric[] = result.sort((a, b) => {
-			//		return b.score - a.score;
-			//	});
-            //
-			//	return sortedLyrics[0].toIndexingFormat();
-			//});
 
 			var response = [
 				{

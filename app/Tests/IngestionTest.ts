@@ -5,12 +5,13 @@ var testTask = {
 	destinations: 'firebase',
 	service: 'genius',
 	type: 'artist',
-	format: 'url',
-	//data: {
-	//	url: 'http://genius.com/artists/A-ap-rocky',
-	//	popularTracksOnly: true
-	//}
-	ingestionOption: 'trending'
+	format: 'index',
+	data: {
+		index: 'a',
+		popularArtistsOnly: true,
+		popularTracksOnly: false
+	}
+	//ingestionOption: 'trending'
 };
 
 iw.process(testTask, null, null, null);
