@@ -103,7 +103,6 @@ class Track extends MediaItem {
 		data.title = this.title || '';
 		data.author = this.artist_name || '';
 		data.description = '';
-		data.images = this.images;
 		data.artist_id = this.artist_id || '';
 		data.artist_name = this.artist_name || '';
 		data.album_name = this.album_name || '';

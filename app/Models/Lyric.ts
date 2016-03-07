@@ -91,7 +91,6 @@ export class Lyric extends MediaItem {
 		data.author = this.artist_name || '';
 		data.description = this.text || '';
 		data.text = this.text || '';
-		data.images = this.images;
 		data.artist_name = this.get('artist_name') || '';
 		data.track_title = this.get('track_title') || '';
 		data.artist_image_url = this.get('artist_image_url') || '';
