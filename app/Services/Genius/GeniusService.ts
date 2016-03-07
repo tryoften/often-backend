@@ -486,7 +486,7 @@ class GeniusService extends ServiceBase {
 						filteredElements = _.uniq(filteredElements, a => a.text);
 						resolve(filteredElements);
 					} catch (err: Error) {
-						console.error("Error pasring lyric page ", err.stack);
+						console.error(`Error parsing lyric page ${err.stack} for url ${url} and trackId ${trackId}`);
 						throw err;
 					}
 				}

@@ -6,12 +6,12 @@ var testTask = {
 	service: 'genius',
 	type: 'artist',
 	format: 'index',
-	data: {
-		index: 'a',
-		popularArtistsOnly: true,
-		popularTracksOnly: false
-	}
-	//ingestionOption: 'trending'
+	//data: {
+	//	index: 'a',
+	//	popularArtistsOnly: true,
+	//	popularTracksOnly: false
+	//}
+	ingestionOption: 'trending'
 };
 
 iw.process(testTask, null, null, null);

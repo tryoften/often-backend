@@ -329,8 +329,8 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 	 * @param {Url} artistUrl - Url of an artist whose tracks are to be retrieved
 	 * @returns {Promise<T>} - Returns a promise that resolves to an array of track ids, or an error upon rejection
 	 */
-	private getAllTracksForArtist (artistUrl: Url): Promise<TrackId> {
-		return new Promise<TrackId>( (resolve, reject) => {
+	private getAllTracksForArtist (artistUrl: Url): Promise<TrackId[]> {
+		return new Promise<TrackId[]>( (resolve, reject) => {
 			this.rest.get(artistUrl)
 				.on('success', data => {
 
