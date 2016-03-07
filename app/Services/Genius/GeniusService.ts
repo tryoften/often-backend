@@ -416,7 +416,6 @@ class GeniusService extends ServiceBase {
 					genius_id: result.id,
 					title: result.title,
 					external_url: result.url,
-					header_image_url: result.header_image_url,
 					song_art_image_url: result.song_art_image_url,
 					hot: result.stats.hot
 				};

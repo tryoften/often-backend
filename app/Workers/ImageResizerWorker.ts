@@ -149,12 +149,16 @@ class ImageResizerWorker extends Worker {
 					var track = (<Track>mediaItem);
 					var trackLyricIds = Object.keys(track.lyrics);
 					for (var lyrId of trackLyricIds) {
-						updObj[`tracks/${mediaItem.id}/lyrics/${lyrId}/images`] = imagesObj;
+						updObj[`tracks/${track.id}/lyrics/${lyrId}/images`] = imagesObj;
 						updObj[`lyrics/${lyrId}/images`] = imagesObj;
 					}
 
 					updObj[`artists/${track.artist_id}/tracks/${track.id}/images`] = imagesObj;
-
+					if (!!imagesObj.artist_image_url) {
+						updObj[`artists/${track.artist_id}/image_url_source`] = updObj[`${track.type}s/${track.id}/artist_image_url_source`];
+						updObj[`artists/${track.artist_id}/image_url`] = updObj[`${track.type}s/${track.id}/artist_image_url`];
+						updObj[`artists/${track.artist_id}/images/image_url`] = updObj[`${track.type}s/${track.id}/images`]["artist_image_url"];
+					}
 				}
 
 
@@ -252,11 +256,11 @@ class ImageResizerWorker extends Worker {
 			lyricRootRef.update(imagesObj);
 		}
 
-		///* Update images on artist items */
-		//if (!!imagesObj.artist_image_url) {
-		//	var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
-		//	artistRef.update(imagesObj.artist_image_url);
-		//}
+		/* Update images on artist items */
+		if (!!imagesObj.artist_image_url) {
+			var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
+			artistRef.update(imagesObj.artist_image_url);
+		}
 
 	}
 

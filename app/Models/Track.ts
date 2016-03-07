@@ -93,7 +93,6 @@ class Track extends MediaItem {
 		return [
 			'artist_image_url',
 			'album_cover_art_url',
-			'header_image_url',
 			'song_art_image_url'
 		];
 	}
@@ -108,7 +107,6 @@ class Track extends MediaItem {
 		data.album_name = this.album_name || '';
 		data.song_art_image_url = this.get('song_art_image_url') || '';
 		data.album_cover_art_url = this.get('album_cover_art_url') ||  this.get('song_art_image_url') || '';
-		data.header_image_url = this.get('header_image_url') || '';
 		data.artist_image_url = this.get('artist_image_url') || '';
 
 		return data;

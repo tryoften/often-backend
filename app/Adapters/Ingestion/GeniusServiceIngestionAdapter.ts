@@ -87,7 +87,6 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 				/* Queue up media items for image resizing */
 				imagePromises.push(this.imageResizerWorker.resizeMediaItem(gsr.track));
-				imagePromises.push(this.imageResizerWorker.resizeMediaItem(gsr.artist));
 
 
 			}
@@ -106,7 +105,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			}
 
 			return Promise.all(updateMediaItemPromises);
-		}).then((updatedMediaItems) => {
+		}).then((updatedMediaItems: MediaItem[]) => {
 
 			/* This portion of the promise chain is reserved for trending updates */
 			if (task.ingestionOption === IngestionOption.Trending) {

@@ -11,6 +11,7 @@ interface LyricIndexedObject extends IndexableObject {
 	artist_name: string;
 	track_title: string;
 	track_id: string;
+	artist_id: string;
 	artist_image_url: string;
 }
 
@@ -77,20 +78,14 @@ export class Lyric extends MediaItem {
 		return this;
 	}
 
-	imageProperties(): string[] {
-		return [
-			'image_url',
-			'artist_image_url',
-			'track_song_art_image_url'
-		];
-	}
-
 	public toIndexingFormat(): IndexableObject {
 		let data: LyricIndexedObject = super.toIndexingFormat();
 		data.title = this.track_name || '';
 		data.author = this.artist_name || '';
 		data.description = this.text || '';
 		data.text = this.text || '';
+		data.artist_id = this.get('artist_id') || '';
+		data.track_id  = this.get('track_id') || '';
 		data.artist_name = this.get('artist_name') || '';
 		data.track_title = this.get('track_title') || '';
 		data.artist_image_url = this.get('artist_image_url') || '';
