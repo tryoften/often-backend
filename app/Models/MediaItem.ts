@@ -124,7 +124,8 @@ export class MediaItem extends BaseModel implements Indexable {
 			title: this.get('title') || '',
 			type: (this.type || '').toString(),
 			description: this.get('description') || '',
-			author: this.get('author') || ''
+			author: this.get('author') || '',
+			images: this.get('images') || {}
 		};
 
 		return data;
