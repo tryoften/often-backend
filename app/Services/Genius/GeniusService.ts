@@ -195,7 +195,7 @@ class GeniusService extends ServiceBase {
 						data.lyrics = res.data;
 
 						for (let lyric of res.models) {
-							lyric.setGeniusData(data);
+							lyric.setGeniusData(artist, track, data);
 						}
 						done({artist, track, lyrics: res.models});
 					});

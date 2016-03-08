@@ -12,7 +12,6 @@ import MediaItem from '../Models/MediaItem';
 import Search from '../Search/Search';
 import Firebase = require('firebase');
 import Track from '../Models/Track';
-import Artist from '../Models/Artist';
 import logger from '../logger';
 
 class ResizeType {
@@ -154,10 +153,10 @@ class ImageResizerWorker extends Worker {
 					}
 
 					updObj[`artists/${track.artist_id}/tracks/${track.id}/images`] = imagesObj;
-					if (!!imagesObj.artist_image_url) {
+ 					if (!!imagesObj.artist_image_url) {
 						updObj[`artists/${track.artist_id}/image_url_source`] = updObj[`${track.type}s/${track.id}/artist_image_url_source`];
 						updObj[`artists/${track.artist_id}/image_url`] = updObj[`${track.type}s/${track.id}/artist_image_url`];
-						updObj[`artists/${track.artist_id}/images/image_url`] = updObj[`${track.type}s/${track.id}/images`]["artist_image_url"];
+						updObj[`artists/${track.artist_id}/images/image_url`] = updObj[`${track.type}s/${track.id}/images`]['artist_image_url'];
 					}
 				}
 

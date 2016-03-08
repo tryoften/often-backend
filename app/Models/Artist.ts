@@ -66,6 +66,7 @@ class Artist extends MediaItem {
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',
 			'external_url', 'song_art_image_url', 'score', 'type');
 		tracks[trackData.id].type = 'track';
+		tracks[trackData.id].artist_id = this.get('id') || '';
 
 		properties.tracks = tracks;
 		new Firebase(this.url()).update(properties);

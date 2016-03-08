@@ -2,6 +2,8 @@ import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
 import {IndexableObject} from '../Interfaces/Indexable';
+import Artist from './Artist';
+import Track from './Track';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
@@ -47,7 +49,7 @@ export class Lyric extends MediaItem {
 		super(attributes, options);
 	}
 
-	public setGeniusData (data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
+	public setGeniusData (artistItem: Artist, trackItem: Track, data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
 		var {artist, track, lyric} = data;
 		var properties: any = {};
 
@@ -58,6 +60,7 @@ export class Lyric extends MediaItem {
 					properties[`track_${prop}`] = track[prop];
 				}
 			}
+			properties.track_id = trackItem.get('id') || '';
 		}
 
 		if (artist) {
@@ -67,6 +70,7 @@ export class Lyric extends MediaItem {
 					properties[`artist_${prop}`] = artist[prop];
 				}
 			}
+			properties.artist_id = artistItem.get('id') || '';
 		}
 
 		if (lyric) {
