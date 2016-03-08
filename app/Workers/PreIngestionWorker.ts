@@ -1,4 +1,4 @@
-import Worker from './Worker';
+import { Worker } from './Worker';
 import * as _ from 'underscore';
 import { firebase as FirebaseConfig } from '../config';
 import Firebase = require('firebase');

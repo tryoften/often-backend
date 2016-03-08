@@ -4,13 +4,19 @@ import MediaItem from './MediaItem';
 import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
 import { IndexableObject } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
+import * as Backbone from 'backbone';
+import logger from '../logger';
 
-/**
- * This class is responsible for providing granular functionality (mostly accessors) for cached responses.
- */
+interface ArtistIndexableObject extends IndexableObject {
+	image_url: string;
+	name: string;
+	lyrics_count: number;
+	tracks_count: number;
+	tracks: Object[];
+}
+
 class Artist extends MediaItem {
 
-	// TODO(jakub): create an interface for artist that guarantees 'common' indexed fields
 	constructor(attributes?: any, options?: any) {
 		this.urlRoot = `${FirebaseConfig.BaseURL}/artists`;
 		this.autoSync = true;
@@ -23,6 +29,11 @@ class Artist extends MediaItem {
 
 	get name(): string {
 		return this.get('name');
+	}
+
+	set(obj: any, options?: Backbone.ModelSetOptions): Backbone.Model {
+		console.log(obj);
+		return super.set(obj, options);
 	}
 
 	/**
@@ -62,27 +73,30 @@ class Artist extends MediaItem {
 		properties.time_modified = Date.now();
 
 		var tracks = this.get('tracks') || {};
+		logger.info('track to be added to artist ', artistData.name, trackData.id);
+
 		tracks[trackData.id] = _.pick(trackData,
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',
 			'external_url', 'song_art_image_url', 'score', 'type');
 		tracks[trackData.id].type = 'track';
 
-		properties.tracks = tracks;
 		new Firebase(this.url()).update(properties);
+		new Firebase(`${this.url()}/tracks`).update(tracks);
 
 		return this;
 	}
 
-	public toIndexingFormat(): IndexableObject {
-		let data = super.toIndexingFormat();
-		data.title = '';
-		data.author = this.name || '';
-		data.description = '';
-		data.image_url = this.get('image_url') || '';
-		data.name = this.name;
-		data.lyrics_count = this.get('lyrics_count') || 0;
-		data.tracks_count = this.get('tracks_count') || 0;
-		data.tracks = this.get('tracks') || {};
+	public toIndexingFormat(): ArtistIndexableObject {
+		let data: ArtistIndexableObject = _.extend({
+			title: '',
+			author: this.name || '',
+			description: '',
+			image_url: this.get('image_url') || '',
+			name: this.name,
+			lyrics_count: this.get('lyrics_count') || 0,
+			tracks_count: this.get('tracks_count') || 0,
+			tracks: this.get('tracks') || {}
+		}, super.toIndexingFormat());
 
 		return data;
 	}

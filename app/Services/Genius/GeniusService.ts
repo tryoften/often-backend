@@ -23,8 +23,8 @@ class GeniusService extends ServiceBase {
 	 *
 	 * @return {void}
 	 */
-	constructor (opts: {provider_id: string}) {
-		super(opts);
+	constructor () {
+		super({provider_id: 'genius'});
 		this.rest = new RestService({
 			baseURL: settings.base_url
 		});
