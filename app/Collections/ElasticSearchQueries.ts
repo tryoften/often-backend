@@ -12,7 +12,7 @@ class ElasticSearchQueries extends Firebase.Collection<ElasticSearchQuery> {
 	 *
 	 * @return {void}
 	 */
-	 constructor () {
+	constructor () {
 		let opts = {
 			model: ElasticSearchQuery,
 			autoSync: true

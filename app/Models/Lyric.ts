@@ -4,10 +4,12 @@ import { firebase as FirebaseConfig } from '../config';
 import {IndexableObject} from '../Interfaces/Indexable';
 import Artist from './Artist';
 import Track from './Track';
+import Category from './Category';
+import * as _ from 'underscore';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
-interface LyricIndexedObject extends IndexableObject {
+export interface LyricIndexableObject extends IndexableObject {
 	images?: any;
 	text: string;
 	artist_name: string;
@@ -42,6 +44,14 @@ export class Lyric extends MediaItem {
 
 	set score(value: number) {
 		this.set('score', value);
+	}
+
+	get category(): Category {
+		return new Category(this.get('category'));
+	}
+
+	set category(value: Category) {
+		this.set('category', value.toJSON());
 	}
 
 	constructor (attributes: LyricAttributes, options?: any) {
@@ -83,16 +93,19 @@ export class Lyric extends MediaItem {
 	}
 
 	public toIndexingFormat(): IndexableObject {
-		let data: LyricIndexedObject = super.toIndexingFormat();
-		data.title = this.track_name || '';
-		data.author = this.artist_name || '';
-		data.description = this.text || '';
-		data.text = this.text || '';
-		data.artist_id = this.get('artist_id') || '';
-		data.track_id  = this.get('track_id') || '';
-		data.artist_name = this.get('artist_name') || '';
-		data.track_title = this.get('track_title') || '';
-		data.artist_image_url = this.get('artist_image_url') || '';
+
+		let data: LyricIndexableObject = _.extend({
+			title: this.track_name || '',
+			author: this.artist_name || '',
+			description: this.text || '',
+			text: this.text || '',
+			images: this.images,
+			artist_id: this.get('artist_id') || '',
+			track_id: this.get('track_id') || '',
+			artist_name: this.get('artist_name') || '',
+			track_title: this.get('track_title') || '',
+			artist_image_url: this.get('artist_image_url') || ''
+		}, super.toIndexingFormat());
 
 		return data;
 	}

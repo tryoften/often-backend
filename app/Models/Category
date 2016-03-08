@@ -1,5 +1,0 @@
-import BaseModel from "./BaseModel";
-
-class Category extends BaseModel {
-
-}

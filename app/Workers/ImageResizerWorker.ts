@@ -99,9 +99,6 @@ class ImageResizerWorker extends Worker {
 
 		var promise;
 		switch (data.option) {
-			case (ResizeType.mediaitem):
-				promise = this.processMediaItem(<ResizableMediaItem>data);
-				break;
 
 			case (ResizeType.general):
 				promise = this.processGeneral(<GeneralRequest>data);
@@ -187,81 +184,6 @@ class ImageResizerWorker extends Worker {
 		return this.ingest(data.originType, data.sourceId, data.resourceId, data.url);
 	}
 
-	/**
-	 * Entry-point for resizing media items (i.e. Propagates updates to Firebase models)
-	 *
-	 * @param {ResizableMediaItem} data - Input object of type ResizableMediaItem
-	 * @return {Promise<MediaItem>} - Returns a promise that resolves to a media item with updated Images
-	 */
-	private processMediaItem (data: ResizableMediaItem): Promise<MediaItem> {
-		return new Promise((resolve, reject) => {
-			var MediaItemClass = MediaItemType.toClass(data.type);
-			var mediaItem = new MediaItemClass({
-				id: data.id
-			});
-			mediaItem.syncData().then( synced => {
-				var promises = [];
-
-				for (var imgProp of data.imageFields) {
-					var mediaItemImgProp = mediaItem.get(imgProp);
-					if (mediaItemImgProp) {
-						promises.push(this.getResizedImage(mediaItem, imgProp, mediaItemImgProp));
-					}
-				}
-				return Promise.all(promises);
-			}).then(resizedImages => {
-				var updObj = {};
-				var imagesObj = {};
-				for (var resizedImage of resizedImages) {
-					var key = Object.keys(resizedImage)[0];
-					imagesObj[key] = resizedImage[key];
-					updObj[`${key}_source`] = mediaItem.get(key);
-					updObj[key] = resizedImage[key][this.main_tran].url;
-				}
-				updObj.images = imagesObj;
-				new Firebase(mediaItem.url()).update(updObj);
-
-				if (data.type === MediaItemType.track) {
-					this.updateTrackImages(mediaItem, imagesObj);
-				}
-
-				return this.search.update(mediaItem.source, mediaItem.type, mediaItem.id, updObj);
-			}).then( indexResults => {
-				resolve(indexResults);
-			}).catch( err => {
-				console.log('Error ' + err);
-				reject(err);
-			});
-		});
-
-	}
-
-	/**
-	 * Updates track images across track, artist and lyric Firebase models
-	 *
-	 * @param {Track} track - Firebase track object
-	 * @param {any} imagesObj - Arbitrary objects containing all image transformations
-	 * @return {void}
-	 */
-	private updateTrackImages (track: Track, imagesObj: any) {
-
-		/* Create a map of lyricIds to imageObjs */
-		var trackLyricIds = Object.keys(track.lyrics);
-		for (var lyrId of trackLyricIds) {
-			console.log('updating lyrics');
-			var trackLyricRef = new Firebase(`${FirebaseConfig.BaseURL}/tracks/${track.id}/lyrics/${lyrId}/images`);
-			trackLyricRef.update(imagesObj);
-			var lyricRootRef = new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${lyrId}/images`);
-			lyricRootRef.update(imagesObj);
-		}
-
-		/* Update images on artist items */
-		if (!!imagesObj.artist_image_url) {
-			var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
-			artistRef.update(imagesObj.artist_image_url);
-		}
-
-	}
 
 	/**
 	 * Gets all resized images for a passed in propertyName as one object
