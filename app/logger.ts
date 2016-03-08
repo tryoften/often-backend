@@ -1,3 +1,4 @@
+
 import * as winston from 'winston';
 import { GCL } from 'winston-gcl';
 import config from './config';
@@ -6,7 +7,6 @@ import { winston as WinstonConfig } from './config';
 import * as _ from 'underscore';
 import * as google from 'googleapis';
 import * as os from 'os';
-
 winston.transports.GCL = GCL;
 
 var logger = new winston.Logger(WinstonConfig.global);
@@ -25,7 +25,7 @@ for (var transport of WinstonConfig.transports) {
 	}
 }
 
-logger.rewriters.push( (level, msg, meta) => {
+logger.rewriters.push((level, msg, meta) => {
 	return {
 		date: new Date(),
 		host: os.hostname(),
@@ -35,5 +35,6 @@ logger.rewriters.push( (level, msg, meta) => {
 	};
 
 });
+
 
 export default logger;

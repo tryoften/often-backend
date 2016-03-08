@@ -22,7 +22,7 @@ interface WorkerOptions {
 /**
  * This class is responsible for setting up a priority queue to delegate work to workers
  */
-export class Worker {
+export default class Worker {
 	options: any;
 	ref: any;
 	queue: Queue;
@@ -53,7 +53,7 @@ export class Worker {
 	/**
 	 * Processes jobs
 	 */
-	process(data: Task, progress: Function, resolve: Function, reject: Function): void {
+	process(task: Task, progress: Function, resolve: Function, reject: Function): void {
 		throw new Error('Worker.process(): worker.process must be implemented by a child class');
 	}
 

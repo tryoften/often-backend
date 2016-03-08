@@ -29,6 +29,7 @@
     "gcloud": "^0.21.0",
     "google-compute-metadata": "^1.2.0",
     "googleapis": "^2.1.6",
+    "http": "0.0.0",
     "https": "^1.0.0",
     "konfig": "^0.2.1",
     "lodash": "^3.10.1",
