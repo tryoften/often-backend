@@ -5,6 +5,7 @@ import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
 import { IndexableObject } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 import * as Backbone from 'backbone';
+import logger from '../logger';
 
 interface ArtistIndexableObject extends IndexableObject {
 	image_url: string;
@@ -32,7 +33,7 @@ class Artist extends MediaItem {
 
 	set(obj: any, options?: Backbone.ModelSetOptions): Backbone.Model {
 		console.log(obj);
-		super.set(obj, options);
+		return super.set(obj, options);
 	}
 
 	/**
@@ -72,14 +73,15 @@ class Artist extends MediaItem {
 		properties.time_modified = Date.now();
 
 		var tracks = this.get('tracks') || {};
-		console.log('track to be added to artist ', artistData.name, trackData.id);
+		logger.info('track to be added to artist ', artistData.name, trackData.id);
+
 		tracks[trackData.id] = _.pick(trackData,
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',
 			'external_url', 'song_art_image_url', 'score', 'type');
 		tracks[trackData.id].type = 'track';
 
 		new Firebase(this.url()).update(properties);
-		new Firebase(this.url() + '/tracks').update(tracks);
+		new Firebase(`${this.url()}/tracks`).update(tracks);
 
 		return this;
 	}

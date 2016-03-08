@@ -14,7 +14,6 @@ class IngestionServiceAdapterType extends String {
 	static genius: IngestionServiceAdapterType = 'genius';
 }
 
-
 interface IngestionWorkerOptions {
 	searchQueueRef: Firebase;
 	ingestionAdapters: IngestionAdapter[];

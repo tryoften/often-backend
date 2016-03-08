@@ -95,16 +95,17 @@ export class Lyric extends MediaItem {
 	}
 
 	public toIndexingFormat(): IndexableObject {
-		let data: LyricIndexableObject = super.toIndexingFormat();
-		data.title = this.track_name || '';
-		data.author = this.artist_name || '';
-		data.description = this.text || '';
-		data.text = this.text || '';
-		data.images = this.images;
-		data.artist_name = this.get('artist_name') || '';
-		data.track_title = this.get('track_title') || '';
-		data.artist_image_url = this.get('artist_image_url') || '';
-
+		let data: LyricIndexableObject = _.extend({
+			title: this.track_name || '',
+			author: this.artist_name || '',
+			description: this.text || '',
+			text: this.text || '',
+			images: this.images,
+			artist_name: this.get('artist_name') || '',
+			track_title: this.get('track_title') || '',
+			artist_image_url: this.get('artist_image_url') || ''
+		}, super.toIndexingFormat());
+		
 		return data;
 	}
 }

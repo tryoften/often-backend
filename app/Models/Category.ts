@@ -6,6 +6,9 @@ import MediaItemSource from '../Models/MediaItemSource';
 import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 
+/**
+ * Model that represents a category which can be assigned to a lyric or medium (quotes)
+ */
 class Category extends BaseModel {
 	id: string;
 	name: string;
@@ -20,10 +23,14 @@ class Category extends BaseModel {
 		return `${FirebaseConfig.BaseURL}/categories/${this.id}`;
 	}
 
+	/**
+	 * Adds a lyric to the category in question and updates all the appropriate models
+	 * @param lyric
+	 * @returns {Promise<Firebase.Model>}
+     */
 	addLyric(lyric: LyricIndexableObject): Promise<any> {
 		let lyricRef = new Firebase(`${this.url}/lyrics/${lyric.id}`);
 		lyricRef.set(true);
-
 
 		let lyricModel = new Lyric(lyric);
 

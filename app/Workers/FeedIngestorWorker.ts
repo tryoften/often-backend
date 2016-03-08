@@ -15,8 +15,6 @@ class FeedIngestorWorker extends Worker {
 
 		super(options);
 		this.ingestor = new FeedIngestor();
-
-		// trackIdsToIndexableObjects new data every 5 minutes
 	}
 
 	process (data, progress, resolve, reject) {

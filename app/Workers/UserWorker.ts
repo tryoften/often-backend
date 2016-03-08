@@ -4,7 +4,7 @@ import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import User from '../Models/User';
-import { Task, Worker } from './Worker';
+import Worker, { Task } from './Worker';
 import Category from '../Models/Category';
 import LyricIndexableObject from '../Models/Lyric';
 
@@ -20,7 +20,7 @@ interface UserWorkerTask extends Task {
 	// id of user on whose behalf a given task is to be processed
 	user: string;
 	// specifies the operation to be performed
-	task: UserWorkerTaskType;
+	type: UserWorkerTaskType;
 	result?: Object;
 	category?: Object;
 	data?: any;
@@ -35,7 +35,7 @@ class UserWorker extends Worker {
 
 	/**
 	 * Processes the user related tasks
-	 * @param {object} data - data object from the user queue
+	 * @param {object} task - task object from the user queue
 	 * @param {function} progress - callback function for reporting the state of an item
 	 * @param {function} resolve - callback marking the task as complete
 	 * @param {function} reject - callback marking the task as incomplete
@@ -44,7 +44,7 @@ class UserWorker extends Worker {
 	 *
 	 * @example
 	 *
-	 *  data : {
+	 *  task : {
 	 *		user : 'myUser123',
 	 *		task : 'addFavorites',
 	 *		result : {
@@ -53,22 +53,22 @@ class UserWorker extends Worker {
 	 *		}
 	 *	}
 	 */
-	process (data: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
-		switch (data.task) {
+	process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
+		switch (task.type) {
 			case UserWorkerTaskType.AddFavorite:
-				this.addFavorite(data, resolve, reject);
+				this.addFavorite(task, resolve, reject);
 				break;
 			case UserWorkerTaskType.RemoveFavorite:
-				this.removeFavorite(data, resolve, reject);
+				this.removeFavorite(task, resolve, reject);
 				break;
 			case UserWorkerTaskType.AddRecent:
-				this.addRecent(data, resolve, reject);
+				this.addRecent(task, resolve, reject);
 				break;
 			case UserWorkerTaskType.CreateToken:
-				this.createToken(data, resolve, reject);
+				this.createToken(task, resolve, reject);
 				break;
 			case UserWorkerTaskType.AssignCategory:
-				this.assignCategory(data, resolve, reject);
+				this.assignCategory(task, resolve, reject);
 				break;
 		}
 	}
