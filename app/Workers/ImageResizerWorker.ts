@@ -68,7 +68,8 @@ class ImageResizerWorker extends Worker {
 			TransformationType.original,
 			TransformationType.square,
 			TransformationType.square_small,
-			TransformationType.medium
+			TransformationType.medium,
+			TransformationType.large
 		];
 
 		this.main_tran = TransformationType.square;
@@ -98,9 +99,6 @@ class ImageResizerWorker extends Worker {
 
 		var promise;
 		switch (data.option) {
-			case (ResizeType.mediaitem):
-				promise = this.processMediaItem(<ResizableMediaItem>data);
-				break;
 
 			case (ResizeType.general):
 				promise = this.processGeneral(<GeneralRequest>data);
@@ -117,6 +115,65 @@ class ImageResizerWorker extends Worker {
 		});
 	}
 
+	public resizeMediaItem (mediaItem: MediaItem): Promise<MediaItem> {
+		return new Promise((resolve, reject) => {
+
+			var imageFields = mediaItem.getImageFields();
+
+			var promises = [];
+
+			for (var imgProp of imageFields) {
+				var mediaItemImgProp = mediaItem.get(imgProp);
+				if (mediaItemImgProp && (mediaItemImgProp.indexOf('.gif') === -1)) {
+					promises.push(this.getResizedImage(mediaItem, imgProp, mediaItemImgProp));
+				}
+			}
+
+			Promise.all(promises).then(resizedImages => {
+				var updObj = {};
+				var imagesObj = {};
+				for (var resizedImage of resizedImages) {
+					var key = Object.keys(resizedImage)[0];
+					imagesObj[key] = resizedImage[key];
+					updObj[`${mediaItem.type}s/${mediaItem.id}/${key}_source`] = mediaItem.get(key);
+					updObj[`${mediaItem.type}s/${mediaItem.id}/${key}`] = resizedImage[key][this.main_tran].url;
+				}
+
+				updObj[`${mediaItem.type}s/${mediaItem.id}/images`] = imagesObj;
+
+				if (mediaItem.type === MediaItemType.track) {
+					var track = (<Track>mediaItem);
+					var trackLyricIds = Object.keys(track.lyrics);
+					for (var lyrId of trackLyricIds) {
+						updObj[`tracks/${track.id}/lyrics/${lyrId}/images`] = imagesObj;
+						updObj[`lyrics/${lyrId}/images`] = imagesObj;
+					}
+
+					updObj[`artists/${track.artist_id}/tracks/${track.id}/images`] = imagesObj;
+ 					if (!!imagesObj.artist_image_url) {
+						updObj[`artists/${track.artist_id}/image_url_source`] = updObj[`${track.type}s/${track.id}/artist_image_url_source`];
+						updObj[`artists/${track.artist_id}/image_url`] = updObj[`${track.type}s/${track.id}/artist_image_url`];
+						updObj[`artists/${track.artist_id}/images/image_url`] = updObj[`${track.type}s/${track.id}/images`]['artist_image_url'];
+					}
+				}
+
+
+
+				new Firebase(FirebaseConfig.BaseURL).update(updObj, (error) => {
+					if (error) {
+						reject(error);
+					} else {
+						resolve(mediaItem);
+					}
+				});
+
+			}).catch( err => {
+				logger.error('Error ' + err);
+				reject(err);
+			});
+		});
+	}
+
 	/**
 	 * Entry-point for resizing arbitrary images (i.e. Does NOT update Firebase models)
 	 *
@@ -127,93 +184,18 @@ class ImageResizerWorker extends Worker {
 		return this.ingest(data.originType, data.sourceId, data.resourceId, data.url);
 	}
 
-	/**
-	 * Entry-point for resizing media items (i.e. Propagates updates to Firebase models)
-	 *
-	 * @param {ResizableMediaItem} data - Input object of type ResizableMediaItem
-	 * @return {Promise<MediaItem>} - Returns a promise that resolves to a media item
-	 */
-	private processMediaItem (data: ResizableMediaItem): Promise<MediaItem> {
-		return new Promise((resolve, reject) => {
-			var MediaItemClass = MediaItemType.toClass(data.type);
-			var mediaItem = new MediaItemClass({
-				id: data.id
-			});
-			mediaItem.syncData().then( synced => {
-				var promises = [];
-
-				for (var imgProp of data.imageFields) {
-					var mediaItemImgProp = mediaItem.get(imgProp);
-					if (mediaItemImgProp) {
-						promises.push(this.getResizedImage(mediaItem, imgProp, mediaItemImgProp));
-					}
-				}
-				return Promise.all(promises);
-			}).then(resizedImages => {
-				var updObj = {};
-				var imagesObj = {};
-				for (var resizedImage of resizedImages) {
-					var key = Object.keys(resizedImage)[0];
-					imagesObj[key] = resizedImage[key];
-					updObj[`${key}_source`] = mediaItem.get(key);
-					updObj[key] = resizedImage[key][this.main_tran].url;
-				}
-				updObj.images = imagesObj;
-				new Firebase(mediaItem.url()).update(updObj);
-
-				if (data.type === MediaItemType.track) {
-					this.updateTrackImages(mediaItem, imagesObj);
-				}
-
-				return this.search.update(mediaItem.source, mediaItem.type, mediaItem.id, updObj);
-			}).then( indexResults => {
-				resolve(indexResults);
-			}).catch( err => {
-				console.log('Error ' + err);
-				reject(err);
-			});
-		});
-
-	}
-
-	/**
-	 * Updates track images across track, artist and lyric Firebase models
-	 *
-	 * @param {Track} track - Firebase track object
-	 * @param {any} imagesObj - Arbitrary objects containing all image transformations
-	 * @return {void}
-	 */
-	private updateTrackImages (track: Track, imagesObj: any) {
-
-		/* Create a map of lyricIds to imageObjs */
-		var trackLyricIds = Object.keys(track.lyrics);
-		for (var lyrId of trackLyricIds) {
-			console.log('updating lyrics');
-			var trackLyricRef = new Firebase(`${FirebaseConfig.BaseURL}/tracks/${track.id}/lyrics/${lyrId}/images`);
-			trackLyricRef.update(imagesObj);
-			var lyricRootRef = new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${lyrId}/images`);
-			lyricRootRef.update(imagesObj);
-		}
-
-		/* Update images on artist items */
-		if (!!imagesObj.artist_image_url) {
-			var artistRef = new Firebase(`${FirebaseConfig.BaseURL}/artists/${track.artist_id}/images/image_url`);
-			artistRef.update(imagesObj.artist_image_url);
-		}
-
-	}
 
 	/**
 	 * Gets all resized images for a passed in propertyName as one object
 	 *
 	 * @param {MediaItem} item - Media item for which the images are to be resized
-	 * @param {string} propertyName - Name of image property
+	 * @param {string} propertyName - represents the name of the property for which the image is resized
 	 * @param {Url} imageUrl - Url of an image that is to be resized
 	 * @returns {Promise<Object>} - Returns an object containing all resized images for a given property
 	 */
 	private getResizedImage (item: MediaItem, propertyName: string, imageUrl: Url): Promise<Object> {
 		return new Promise((resolve, reject) => {
-			this.ingest(item.source, item.type, item.id, imageUrl)
+			this.ingest(item.source, item.id, propertyName, imageUrl)
 				.then(images => {
 					var returnObj = {};
 					returnObj[propertyName] = images;
@@ -229,12 +211,12 @@ class ImageResizerWorker extends Worker {
 	 * Downloads an image from the web, and uploads it to the clud
 	 *
 	 * @param {OriginType} originType - string indicating the source of where the image came ( ex. Genius or RSS)
-	 * @param {string} sourceId - represents the type of an image ( ex. artist, track, lyric)
 	 * @param {string} resourceId - represents the id of an image
+	 * @param {string} propertyName - represents the name of the property for which the image is resized
 	 * @param {Url} url - url from which to download the image
 	 * @returns {Promise<TransformedImage>} - Returns a promise that resolves to a transformed image
 	 */
-	public ingest (originType: OriginType, sourceId: string, resourceId: string, url: Url): Promise<TransformedImage> {
+	public ingest (originType: OriginType, resourceId: string, propertyName: string, url: Url): Promise<TransformedImage> {
 		return new Promise((resolve, reject) => {
 			if (_.isUndefined(url) || _.isNull(url)) {
 				reject('Bad Url: ' + url);
@@ -244,7 +226,7 @@ class ImageResizerWorker extends Worker {
 			this.download(url).then( data => {
 				return this.resizer.bulkResize(data, this.default_transformations);
 			}).then((resizedImages: ImageInfo[]) => {
-				var response = this.uploadImageToCloud(originType, sourceId, resourceId, resizedImages);
+				var response = this.uploadImageToCloud(originType, resourceId, propertyName, resizedImages);
 				resolve(response);
 			}).catch((err) => {
 				reject(err);
@@ -253,15 +235,18 @@ class ImageResizerWorker extends Worker {
 	}
 
 	/**
-	 * Generates a path describing the location where an image will be stored on Google Cloud Storage
+	 * Uploads all resized images belonging to a single property to Google Cloud
 	 *
-	 * @param {GeneralRequest} data - Url to an image that is to be downloaded
-	 * @return {Promise<Buffer>} - Returns a promise that resolves to a buffer containing image data
+	 * @param {OriginType} originType - string indicating the source of where the image came ( ex. Genius or RSS)
+	 * @param {string} resourceId - represents the id of an image
+	 * @param {string} propertyName - represents the name of the property for which the image is resized
+	 * @param {ImageInfo[]} resizedImages - Contains image information about all transformations of an image
+	 * @returns {TransformedImage} - Returns a transformed image
 	 */
-	private uploadImageToCloud (originType: OriginType, sourceId: string, resourceId: string, resizedImages: ImageInfo[]): TransformedImage {
+	private uploadImageToCloud (originType: OriginType, resourceId: string, propertyName: string, resizedImages: ImageInfo[]): TransformedImage {
 		var responseObj = {};
 		for (let resizedImg of resizedImages) {
-			var path = this.generatePath(originType, sourceId, resourceId, resizedImg.transformation, resizedImg.meta.format);
+			var path = this.generatePath(originType, resourceId, propertyName, resizedImg.transformation, resizedImg.meta.format);
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			let onError = (err) => {
 				console.error(err);
@@ -288,16 +273,20 @@ class ImageResizerWorker extends Worker {
 	/**
 	 * Generates a path describing the location where an image will be stored on Google Cloud Storage
 	 *
-	 * @param {GeneralRequest} data - Url to an image that is to be downloaded
+	 * @param {OriginType} originType - Describes the origin of an image (ex. genius, spotify, etc.)
+	 * @param {string} resourceId - Describes the property for which the image is to be resized (ex. image_url)
+	 * @param {TransformationType} transformation - Describes the transformation of a resized image (ex. square)
+	 * @param {Extension} extension - Describes the file extension of an image (ex. jpeg)
+	 *
 	 * @return {Path} - Returns a string describing the path where resized image will be stored
 	 */
-	private generatePath (originType: OriginType, sourceId: string, resourceId: string, transformation: TransformationType, extension: Extension) {
+	private generatePath (originType: OriginType, resourceId: string, propertyName: string, transformation: TransformationType, extension: Extension) {
 		if (originType === OriginType.rss) {
 			let pathComponents = resourceId.split('/');
 			resourceId = pathComponents[pathComponents.length - 1];
 		}
 
-		return `${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`;
+		return `${originType}/${resourceId}-${propertyName}-${transformation}.${extension}`;
 	}
 
 	/**
@@ -307,6 +296,7 @@ class ImageResizerWorker extends Worker {
 	 * @return {Promise<Buffer>} - Returns a promise that resolves to a buffer containing image data
 	 */
 	private download (url: Url): Promise<Buffer> {
+		logger.info('Downloading image from ' + url);
 		return new Promise((resolve, reject) => {
 			var protocol = (url.indexOf('https') === 0) ? https : http;
 			protocol.get(url, (response: any) => {

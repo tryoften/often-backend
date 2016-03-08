@@ -2,7 +2,10 @@ import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
 import {IndexableObject} from '../Interfaces/Indexable';
+import Artist from './Artist';
+import Track from './Track';
 import Category from './Category';
+import * as _ from 'underscore';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
@@ -12,6 +15,7 @@ export interface LyricIndexableObject extends IndexableObject {
 	artist_name: string;
 	track_title: string;
 	track_id: string;
+	artist_id: string;
 	artist_image_url: string;
 }
 
@@ -55,7 +59,7 @@ export class Lyric extends MediaItem {
 		super(attributes, options);
 	}
 
-	public setGeniusData (data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
+	public setGeniusData (artistItem: Artist, trackItem: Track, data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {
 		var {artist, track, lyric} = data;
 		var properties: any = {};
 
@@ -66,6 +70,7 @@ export class Lyric extends MediaItem {
 					properties[`track_${prop}`] = track[prop];
 				}
 			}
+			properties.track_id = trackItem.get('id') || '';
 		}
 
 		if (artist) {
@@ -75,6 +80,7 @@ export class Lyric extends MediaItem {
 					properties[`artist_${prop}`] = artist[prop];
 				}
 			}
+			properties.artist_id = artistItem.get('id') || '';
 		}
 
 		if (lyric) {
@@ -86,26 +92,21 @@ export class Lyric extends MediaItem {
 		return this;
 	}
 
-	imageProperties(): string[] {
-		return [
-			'image_url',
-			'artist_image_url',
-			'track_song_art_image_url'
-		];
-	}
-
 	public toIndexingFormat(): IndexableObject {
+
 		let data: LyricIndexableObject = _.extend({
 			title: this.track_name || '',
 			author: this.artist_name || '',
 			description: this.text || '',
 			text: this.text || '',
 			images: this.images,
+			artist_id: this.get('artist_id') || '',
+			track_id: this.get('track_id') || '',
 			artist_name: this.get('artist_name') || '',
 			track_title: this.get('track_title') || '',
 			artist_image_url: this.get('artist_image_url') || ''
 		}, super.toIndexingFormat());
-		
+
 		return data;
 	}
 }

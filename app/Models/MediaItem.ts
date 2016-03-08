@@ -4,8 +4,6 @@ import MediaItemSource from './MediaItemSource';
 import { generate as generateId } from 'shortid';
 import { Indexable, IndexableObject } from '../Interfaces/Indexable';
 import IDSpace from './IDSpace';
-import Firebase = require('firebase');
-import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 
 export interface MediaItemAttributes {
@@ -19,7 +17,6 @@ export interface MediaItemAttributes {
  * Base model for media items. Includes all the metadata to query object from backend database
  */
 export class MediaItem extends BaseModel implements Indexable {
-	imageQueue: Firebase;
 	/**
 	 * Designated constructor
 	 *
@@ -35,7 +32,6 @@ export class MediaItem extends BaseModel implements Indexable {
 			attributes.score = 0.0;
 		}
 		this.autoSync = true;
-		this.imageQueue = new Firebase(`${FirebaseConfig.BaseURL}/queues/image_resizing/tasks`);
 
 		super(attributes, options);
 	}
@@ -73,14 +69,9 @@ export class MediaItem extends BaseModel implements Indexable {
 		return ['image_url'];
 	}
 
-	public resizeImages() {
-		let imageFields = _.intersection(Object.keys(this.attributes), this.imageProperties());
-		this.imageQueue.push({
-			option: 'mediaitem',
-			id: this.id,
-			type: this.type,
-			imageFields: imageFields
-		});
+
+	public getImageFields () {
+		return _.intersection(Object.keys(this.attributes), this.imageProperties());
 	}
 
 	/**
@@ -133,7 +124,8 @@ export class MediaItem extends BaseModel implements Indexable {
 			title: this.get('title') || '',
 			type: (this.type || '').toString(),
 			description: this.get('description') || '',
-			author: this.get('author') || ''
+			author: this.get('author') || '',
+			images: this.get('images') || {}
 		};
 
 		return data;

@@ -12,6 +12,7 @@ import * as _ from 'underscore';
 import 'backbonefire';
 import { IndexableObject } from '../../Interfaces/Indexable';
 import Query from '../../Models/Query';
+import TrackId from '../../Workers/IngestionWorker';
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -125,6 +126,33 @@ class GeniusService extends ServiceBase {
 		});
 	}
 
+
+	/**
+	 * Converts an array of track Ids into indexable objects
+	 *
+	 * @param trackIds
+	 * @returns {Promise<IndexableObject[]>}
+	 */
+	public trackIdsToGeniusServiceResults (trackIds: TrackId[]): Promise<GeniusServiceResult[]> {
+		return new Promise<IndexableObject[]>( (resolve, reject) => {
+			let results: IndexableObject[] = [];
+			var promises = [];
+
+			for (var trackId of trackIds) {
+				// Add all songs to songs list
+				promises.push(this.getData(trackId));
+			}
+
+			Promise.all(promises).then( (categorizedData: GeniusServiceResult[]) => {
+				resolve(categorizedData);
+
+			}).catch(err => {
+				console.log('Rejecting...');
+				reject(err);
+			});
+		});
+	}
+
 	/**
 	 * Gets all metadata for given track ID including artist, album, and lyrics data
 	 *
@@ -168,7 +196,7 @@ class GeniusService extends ServiceBase {
 						data.lyrics = res.data;
 
 						for (let lyric of res.models) {
-							lyric.setGeniusData(data);
+							lyric.setGeniusData(artist, track, data);
 						}
 						done({artist, track, lyrics: res.models});
 					});
@@ -389,7 +417,6 @@ class GeniusService extends ServiceBase {
 					genius_id: result.id,
 					title: result.title,
 					external_url: result.url,
-					header_image_url: result.header_image_url,
 					song_art_image_url: result.song_art_image_url,
 					hot: result.stats.hot
 				};
@@ -459,7 +486,7 @@ class GeniusService extends ServiceBase {
 						filteredElements = _.uniq(filteredElements, a => a.text);
 						resolve(filteredElements);
 					} catch (err: Error) {
-						console.error("Error pasring lyric page ", err.stack);
+						console.error(`Error parsing lyric page ${err.stack} for url ${url} and trackId ${trackId}`);
 						throw err;
 					}
 				}

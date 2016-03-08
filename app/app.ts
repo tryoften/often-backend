@@ -42,18 +42,6 @@ if (_.contains(argv._, 'ingestion')) {
 	new IngestionWorker().start();
 }
 
-if (_.contains(argv._, 'preingestion')) {
-	let PreIngestionWorker = require('./Workers/PreIngestionWorker').default;
-	console.log('starting preingestion-worker');
-	new PreIngestionWorker().start();
-}
-
-if (_.contains(argv._, 'bulk-ingest')) {
-	let BulkDataIngestor = require('./Workers/BulkDataIngestor').default;
-	console.log('starting bulk ingestion-worker');
-	new BulkDataIngestor().start();
-}
-
 if (_.contains(argv._, 'track-task-scheduler')) {
 	let TrackTaskScheduler = require('./Schedulers/TrackTaskScheduler').default;
 	console.log('starting track-task-scheduler');
