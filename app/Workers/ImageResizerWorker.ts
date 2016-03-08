@@ -321,7 +321,7 @@ class ImageResizerWorker extends Worker {
 	private uploadImageToCloud (originType: OriginType, sourceId: string, resourceId: string, resizedImages: ImageInfo[]): TransformedImage {
 		var responseObj = {};
 		for (let resizedImg of resizedImages) {
-			var path = this.generatePath(originType, sourceId, resourceId, resizedImg.transformation, resizedImg.meta.format);
+			var path = this.generatePath(originType, resourceId, resizedImg.transformation, resizedImg.meta.format);
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			let onError = (err) => {
 				console.error(err);
@@ -351,13 +351,13 @@ class ImageResizerWorker extends Worker {
 	 * @param {GeneralRequest} data - Url to an image that is to be downloaded
 	 * @return {Path} - Returns a string describing the path where resized image will be stored
 	 */
-	private generatePath (originType: OriginType, sourceId: string, resourceId: string, transformation: TransformationType, extension: Extension) {
+	private generatePath (originType: OriginType, resourceId: string, transformation: TransformationType, extension: Extension) {
 		if (originType === OriginType.rss) {
 			let pathComponents = resourceId.split('/');
 			resourceId = pathComponents[pathComponents.length - 1];
 		}
 
-		return `${originType}/${sourceId}/${resourceId}-${transformation}.${extension}`;
+		return `${originType}/${resourceId}-${transformation}.${extension}`;
 	}
 
 	/**
