@@ -69,7 +69,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 		var doneImageResizing = getTracksPromise.then( (trackIds: TrackId[]) => {
 			logger.info('Fetched the following track ids for processing: ', JSON.stringify(trackIds));
-			return this.genius.trackIdsToGeniusServiceResults(<string[]>trackIds);
+			return this.genius.trackIdsToGeniusServiceResults(trackIds);
 		}).then( (geniusServiceResults: GeniusServiceResult[]) => {
 
 			/* This section is reserved for image resizing */

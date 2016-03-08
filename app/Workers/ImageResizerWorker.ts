@@ -267,13 +267,13 @@ class ImageResizerWorker extends Worker {
 	 * Gets all resized images for a passed in propertyName as one object
 	 *
 	 * @param {MediaItem} item - Media item for which the images are to be resized
-	 * @param {string} propertyName - Name of image property
+	 * @param {string} propertyName - represents the name of the property for which the image is resized
 	 * @param {Url} imageUrl - Url of an image that is to be resized
 	 * @returns {Promise<Object>} - Returns an object containing all resized images for a given property
 	 */
 	private getResizedImage (item: MediaItem, propertyName: string, imageUrl: Url): Promise<Object> {
 		return new Promise((resolve, reject) => {
-			this.ingest(item.source, item.type, item.id, imageUrl)
+			this.ingest(item.source, item.id, propertyName, imageUrl)
 				.then(images => {
 					var returnObj = {};
 					returnObj[propertyName] = images;
@@ -289,12 +289,12 @@ class ImageResizerWorker extends Worker {
 	 * Downloads an image from the web, and uploads it to the clud
 	 *
 	 * @param {OriginType} originType - string indicating the source of where the image came ( ex. Genius or RSS)
-	 * @param {string} sourceId - represents the type of an image ( ex. artist, track, lyric)
 	 * @param {string} resourceId - represents the id of an image
+	 * @param {string} propertyName - represents the name of the property for which the image is resized
 	 * @param {Url} url - url from which to download the image
 	 * @returns {Promise<TransformedImage>} - Returns a promise that resolves to a transformed image
 	 */
-	public ingest (originType: OriginType, sourceId: string, resourceId: string, url: Url): Promise<TransformedImage> {
+	public ingest (originType: OriginType, resourceId: string, propertyName: string, url: Url): Promise<TransformedImage> {
 		return new Promise((resolve, reject) => {
 			if (_.isUndefined(url) || _.isNull(url)) {
 				reject('Bad Url: ' + url);
@@ -304,7 +304,7 @@ class ImageResizerWorker extends Worker {
 			this.download(url).then( data => {
 				return this.resizer.bulkResize(data, this.default_transformations);
 			}).then((resizedImages: ImageInfo[]) => {
-				var response = this.uploadImageToCloud(originType, sourceId, resourceId, resizedImages);
+				var response = this.uploadImageToCloud(originType, resourceId, propertyName, resizedImages);
 				resolve(response);
 			}).catch((err) => {
 				reject(err);
@@ -313,15 +313,18 @@ class ImageResizerWorker extends Worker {
 	}
 
 	/**
-	 * Generates a path describing the location where an image will be stored on Google Cloud Storage
+	 * Uploads all resized images belonging to a single property to Google Cloud
 	 *
-	 * @param {GeneralRequest} data - Url to an image that is to be downloaded
-	 * @return {Promise<Buffer>} - Returns a promise that resolves to a buffer containing image data
+	 * @param {OriginType} originType - string indicating the source of where the image came ( ex. Genius or RSS)
+	 * @param {string} resourceId - represents the id of an image
+	 * @param {string} propertyName - represents the name of the property for which the image is resized
+	 * @param {ImageInfo[]} resizedImages - Contains image information about all transformations of an image
+	 * @returns {TransformedImage} - Returns a transformed image
 	 */
-	private uploadImageToCloud (originType: OriginType, sourceId: string, resourceId: string, resizedImages: ImageInfo[]): TransformedImage {
+	private uploadImageToCloud (originType: OriginType, resourceId: string, propertyName: string, resizedImages: ImageInfo[]): TransformedImage {
 		var responseObj = {};
 		for (let resizedImg of resizedImages) {
-			var path = this.generatePath(originType, resourceId, resizedImg.transformation, resizedImg.meta.format);
+			var path = this.generatePath(originType, resourceId, propertyName, resizedImg.transformation, resizedImg.meta.format);
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			let onError = (err) => {
 				console.error(err);
@@ -348,16 +351,20 @@ class ImageResizerWorker extends Worker {
 	/**
 	 * Generates a path describing the location where an image will be stored on Google Cloud Storage
 	 *
-	 * @param {GeneralRequest} data - Url to an image that is to be downloaded
+	 * @param {OriginType} originType - Describes the origin of an image (ex. genius, spotify, etc.)
+	 * @param {string} resourceId - Describes the property for which the image is to be resized (ex. image_url)
+	 * @param {TransformationType} transformation - Describes the transformation of a resized image (ex. square)
+	 * @param {Extension} extension - Describes the file extension of an image (ex. jpeg)
+	 *
 	 * @return {Path} - Returns a string describing the path where resized image will be stored
 	 */
-	private generatePath (originType: OriginType, resourceId: string, transformation: TransformationType, extension: Extension) {
+	private generatePath (originType: OriginType, resourceId: string, propertyName: string, transformation: TransformationType, extension: Extension) {
 		if (originType === OriginType.rss) {
 			let pathComponents = resourceId.split('/');
 			resourceId = pathComponents[pathComponents.length - 1];
 		}
 
-		return `${originType}/${resourceId}-${transformation}.${extension}`;
+		return `${originType}/${resourceId}-${propertyName}-${transformation}.${extension}`;
 	}
 
 	/**
@@ -367,6 +374,7 @@ class ImageResizerWorker extends Worker {
 	 * @return {Promise<Buffer>} - Returns a promise that resolves to a buffer containing image data
 	 */
 	private download (url: Url): Promise<Buffer> {
+		logger.info('Downloading image from ' + url);
 		return new Promise((resolve, reject) => {
 			var protocol = (url.indexOf('https') === 0) ? https : http;
 			protocol.get(url, (response: any) => {
