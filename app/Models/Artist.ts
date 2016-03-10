@@ -71,16 +71,15 @@ class Artist extends MediaItem {
 		}
 		properties.time_modified = Date.now();
 
-		var tracks = this.get('tracks') || {};
-
-		tracks[trackData.id] = _.pick(trackData,
+		var updObj = {};
+		updObj = _.pick(trackData,
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',
 			'external_url', 'song_art_image_url', 'score', 'type');
-		tracks[trackData.id].type = 'track';
-		tracks[trackData.id].artist_id = this.get('id') || '';
+		updObj.type = 'track';
+		updObj.artist_id = this.get('id') || '';
 
 		new Firebase(this.url()).update(properties);
-		new Firebase(`${this.url()}/tracks`).update(tracks);
+		new Firebase(`${this.url()}/tracks/${trackData.id}`).update(updObj);
 
 		return this;
 	}

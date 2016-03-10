@@ -7,7 +7,7 @@ var testTask = {
 	type: 'artist',
 	format: 'url',
 	data: {
-		url: 'http://genius.com/artists/Kanye-west',
+		url: 'http://genius.com/artists/Lukas-graham',
 		popularTracksOnly: true
 	}
 	//ingestionOption: 'trending'
