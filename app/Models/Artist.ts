@@ -32,7 +32,6 @@ class Artist extends MediaItem {
 	}
 
 	set(obj: any, options?: Backbone.ModelSetOptions): Backbone.Model {
-		console.log(obj);
 		return super.set(obj, options);
 	}
 
@@ -73,7 +72,6 @@ class Artist extends MediaItem {
 		properties.time_modified = Date.now();
 
 		var tracks = this.get('tracks') || {};
-		logger.info('track to be added to artist ', artistData.name, trackData.id);
 
 		tracks[trackData.id] = _.pick(trackData,
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',

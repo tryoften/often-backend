@@ -5,13 +5,12 @@ var testTask = {
 	destinations: 'firebase',
 	service: 'genius',
 	type: 'artist',
-	format: 'index',
-	//data: {
-	//	index: 'a',
-	//	popularArtistsOnly: true,
-	//	popularTracksOnly: false
-	//}
-	ingestionOption: 'trending'
+	format: 'url',
+	data: {
+		url: 'http://genius.com/artists/Kanye-west',
+		popularTracksOnly: true
+	}
+	//ingestionOption: 'trending'
 };
 
 iw.process(testTask, null, null, null);
