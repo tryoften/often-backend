@@ -38,7 +38,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			baseURL: this.geniusRoot
 		});
 		this.imageResizerWorker = new ImageResizerWorker();
-		this.genius = new GeniusService({provider_id: 'genius'});
+		this.genius = new GeniusService();
 		this.trendingIngestor = new TrendingIngestor();
 	}
 
@@ -107,9 +107,9 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			return Promise.all(updateMediaItemPromises);
 		}).then((updateMediaItems: MediaItem[]) => {
 			return new Promise( (res, rej) => {
-				let delayTime = 20000;
+				let delayTime = 60000;
 				logger.info(`Delaying by ${delayTime} ms`);
-				setTimeout(() => { logger.info('Delay interval over.'); res(updateMediaItems); }, 20000);
+				setTimeout(() => { logger.info('Delay interval over.'); res(updateMediaItems); }, delayTime);
 			});
 		});
 
@@ -126,18 +126,20 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 		}).then( () => {
 
+			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
+				logger.warn('NOT persisting to ElasticSearch. Add ElasticSearch to destinations field for persistence');
+				return Promise.resolve(mediaItems);
+			}
+
 			/* This portion of the promise chain is reserved for updating ElasticSearch results */
 			var indexableMediaItems: IndexableObject[] = [];
 
 			for (var item of mediaItems) {
 				indexableMediaItems.push(item.toIndexingFormat());
 			}
-			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
-				logger.warn('NOT persisting to ElasticSearch. Add ElasticSearch to destinations field for persistence');
-				return Promise.resolve(mediaItems);
-			}
 
-			return this.search.index(mediaItems);
+			logger.warn('Persisting to ElasticSearch.');
+			return this.search.index(indexableMediaItems);
 
 		}).then( indexed => {
 
