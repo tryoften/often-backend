@@ -38,7 +38,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			baseURL: this.geniusRoot
 		});
 		this.imageResizerWorker = new ImageResizerWorker();
-		this.genius = new GeniusService({provider_id: 'genius'});
+		this.genius = new GeniusService();
 		this.trendingIngestor = new TrendingIngestor();
 	}
 
@@ -95,7 +95,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 
 		});
 
-		doneImageResizing.then( () => {
+		var doneResyncing = doneImageResizing.then( () => {
 
 			/* Resync all media items with Firebase to ensure that the backbone models have updated images */
 			logger.info('About to re-sync all media items with Firebase...');
@@ -103,33 +103,42 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			for (let mi of mediaItems) {
 				updateMediaItemPromises.push(mi.syncData());
 			}
-
+			logger.info('Done re-syncing media items');
 			return Promise.all(updateMediaItemPromises);
-		}).then((updatedMediaItems: MediaItem[]) => {
+		}).then((updateMediaItems: MediaItem[]) => {
+			return new Promise( (res, rej) => {
+				let delayTime = 60000;
+				logger.info(`Delaying by ${delayTime} ms`);
+				setTimeout(() => { logger.info('Delay interval over.'); res(updateMediaItems); }, delayTime);
+			});
+		});
 
+		doneResyncing.then(() => {
 			/* This portion of the promise chain is reserved for trending updates */
 			if (task.ingestionOption === IngestionOption.Trending) {
 				logger.info('About to update trending collection in Firebase...');
-				return this.trendingIngestor.updateTrendingWithMediaItems(updatedMediaItems);
+				return this.trendingIngestor.updateTrendingWithMediaItems(mediaItems);
 
 			} else {
 				logger.info('Processed media items are NOT trending. Resolving mediat items...');
-				return Promise.resolve(updatedMediaItems);
+				return Promise.resolve(mediaItems);
 			}
 
-		}).then( (updatedMediaItems: MediaItem[]) => {
+		}).then( () => {
+
+			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
+				logger.warn('NOT persisting to ElasticSearch. Add ElasticSearch to destinations field for persistence');
+				return Promise.resolve(mediaItems);
+			}
 
 			/* This portion of the promise chain is reserved for updating ElasticSearch results */
 			var indexableMediaItems: IndexableObject[] = [];
 
-			for (var item of updatedMediaItems) {
+			for (var item of mediaItems) {
 				indexableMediaItems.push(item.toIndexingFormat());
 			}
-			if (!_.contains(destinations, DestinationType.ElasticSearch)) {
-				logger.warn('NOT persisting to ElasticSearch. Add ElasticSearch to destinations field for persistence');
-				return Promise.resolve(updatedMediaItems);
-			}
 
+			logger.warn('Persisting to ElasticSearch.');
 			return this.search.index(indexableMediaItems);
 
 		}).then( indexed => {

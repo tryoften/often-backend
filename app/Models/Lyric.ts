@@ -22,6 +22,16 @@ export interface LyricIndexableObject extends IndexableObject {
 export class Lyric extends MediaItem {
 
 	// TODO(jakub): create an interface for lyric that guarantees 'common' indexed fields
+	set artist_id(value: string) {
+		this.set('artist_id', value);
+	}
+
+	get artist_id(): string {
+		return this.get('artist_id');
+	}
+
+
+
 	get text(): string {
 		return this.get('text');
 	}
@@ -80,7 +90,6 @@ export class Lyric extends MediaItem {
 					properties[`artist_${prop}`] = artist[prop];
 				}
 			}
-			properties.artist_id = artistItem.get('id') || '';
 		}
 
 		if (lyric) {

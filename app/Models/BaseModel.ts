@@ -13,7 +13,6 @@ class BaseModel extends Firebase.Model {
 			this.once('sync', model => {
 				resolve(model);
 			});
-
 			this.fetch({
 				error: (err) => {
 					reject(err);

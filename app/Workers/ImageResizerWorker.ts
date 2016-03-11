@@ -56,6 +56,7 @@ class ImageResizerWorker extends Worker {
 	private bucket: any;
 	private resizer: ImageResizer;
 	private search: Search;
+	private ref: Firebase;
 
 	constructor (opts = {}) {
 
@@ -82,7 +83,7 @@ class ImageResizerWorker extends Worker {
 		this.resizer = new ImageResizer();
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.image_bucket);
 		this.search = new Search();
-
+		this.ref = new Firebase(FirebaseConfig.BaseURL);
 	}
 
 	/**
@@ -129,6 +130,12 @@ class ImageResizerWorker extends Worker {
 				}
 			}
 
+			if (promises.length === 0) {
+				//Nothing to resize
+				console.log('nothing to resize');
+				resolve(mediaItem);
+			}
+
 			Promise.all(promises).then(resizedImages => {
 				var updObj = {};
 				var imagesObj = {};
@@ -157,11 +164,9 @@ class ImageResizerWorker extends Worker {
 					}
 				}
 
-
-
-				new Firebase(FirebaseConfig.BaseURL).update(updObj, (error) => {
-					if (error) {
-						reject(error);
+				this.ref.update(updObj, (err) => {
+					if (err) {
+						reject(err);
 					} else {
 						resolve(mediaItem);
 					}

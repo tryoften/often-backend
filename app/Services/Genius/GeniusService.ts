@@ -175,6 +175,7 @@ class GeniusService extends ServiceBase {
 					var artist = <Artist> promises[1], track = <Track> promises[2];
 
 					function done(resultData: GeniusServiceResult) {
+
 						// Update backend DB with latest genius data
 						artist.set(data.artist);
 						track.set(data.track);

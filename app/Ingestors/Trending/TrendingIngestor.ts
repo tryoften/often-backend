@@ -3,7 +3,6 @@ import * as _ from 'underscore';
 import GeniusService from '../../Services/Genius/GeniusService';
 import Lyric from '../../Models/Lyric';
 import { get } from 'restler';
-import { GeniusServiceResult } from '../../Services/Genius/GeniusDataTypes';
 import Search from '../../Search/Search';
 import Trending from '../../Models/Trending';
 import { TrackId } from '../../Workers/IngestionWorker';
@@ -19,9 +18,7 @@ class TrendingIngestor {
 	private trending: Trending;
 
 	constructor () {
-		this.genius = new GeniusService({
-			provider_id: 'genius'
-		});
+		this.genius = new GeniusService();
 		this.search = new Search();
 		this.trending = new Trending();
 	}
@@ -39,6 +36,40 @@ class TrendingIngestor {
 		});
 	}
 
+	/**
+	 * Orders trending lyrics by score and limited to a certain artist frequency
+	 *
+	 * @param lyrics {Lyric[]} - An unorderered array of tredning Lyric objects
+	 * @returns {Lyric[]} - Returns trending lyrics sorted by score and limited to a certain artist frequency
+	 */
+	public getTrendingLyrics (lyrics: Lyric[]): Lyric[] {
+
+		let sortedLyricItems: Lyric[] = lyrics.sort((a, b) => {
+			return b.score - a.score;
+		});
+
+		var artistPresentMap = {};
+		var trendingLyrics = [];
+		var leftToProcess = 10;
+		for (var lyric of sortedLyricItems) {
+
+			if (leftToProcess === 0) {
+				break;
+			}
+
+			var artistId = lyric.artist_id;
+			if (artistPresentMap[artistId] == null) {
+				artistPresentMap[artistId] = lyric;
+				trendingLyrics.push(lyric);
+				leftToProcess--;
+			}
+
+		}
+
+
+		return trendingLyrics;
+	}
+
 	public updateTrendingWithMediaItems (mediaItems: MediaItem[]) {
 		return new Promise( (resolve, reject) => {
 			// Spread array on type and in indexing format
@@ -54,6 +85,7 @@ class TrendingIngestor {
 				if (item.type === MediaItemType.track) {
 					trackResults.push(item);
 				}
+
 				if (item.type === MediaItemType.lyric) {
 					lyricResults.push(item);
 				}
@@ -68,11 +100,7 @@ class TrendingIngestor {
 
 			let topTracks = _.map(trackResults, result => result.toIndexingFormat()).slice(0, 10);
 
-			let sortedLyricItems = lyricResults.sort((a, b) => {
-				return b.score - a.score;
-			});
-			var trendingLyrics = _.map(sortedLyricItems, result => result.toIndexingFormat()).slice(0, 10);
-
+			var trendingLyrics = _.map(this.getTrendingLyrics(lyricResults), result => result.toIndexingFormat());
 
 			var response = [
 				{

@@ -5,7 +5,6 @@ export var Settings = {
 	access_tokens: [
 		'q6ZBnt3jxWYutT10TJyR8z_nJF-Xi2nv_wvGll2WMikR6b0wMX6et-uywoFKpeHG',
 		'8p-ZhjeWHp5Jo4AGDtD3cx4Hwix4_BHlSgMLtOGvBydF7K5dDXb1fP9YWSZhW3BK',
-		'ZhDnteVD_aPjoGrWad2zrb3THRW7mkVS0znttvZ7HgoA5gj2lTo2BwvoWAtuA',
 		'SO3u5b1S7Z1SHTW7wb3K0q2oHcZeulvVLlU7r-ThvYiR9QVihA8qVA-H96kH4N2S',
 		'8Ok8jFm5gvU2YfHvrcyM9YbXvlbCun53KxZg-e9AE3XSjfwtrYIKvj9Uf6gaLDLf',
 		'Ab27cR1GPyXVT7tkLczNX_iwJ-hnCTnPrvVh4df4qHCem52jaWtbl7cDW0kVMMqr',
@@ -41,7 +40,6 @@ export var Settings = {
 		'Rb2LWZbafcpg8T5nuZ4q5NmogrvBpdbYoUQ-WtZKc08jHIuKy_W_e9KpjQ1gqfvt',
 		'eGtIIx32SgilzSQB6nbkwYU0GZuqDF55RABtwMVTPVfC5Fbxj-GGQ1RtNP0TgBPY',
 		'wHkvUTlzW3sacyTJzKBO7swHydCIRHieA35_q8osIFMTTcDrQQfmeTBLvj_6ZD9V',
-		'WnMkb9a5xESZYpmGaTiCusqXt3zNJZztoZoZ5DpSM0oIRmlEBrItwBnP7eX07aBJ',
 		'GtSmqoowf8gubhv8qIaNe7Z4NrPDqW2lKphWbsZCJjLSe1YQXKLPMGGGwwFTdyGZ',
 		'bIBbuPkkBSVGe-BeqKP3GEE3Fh7TQZZQGNjeoA0898p_t4UCW0hhoo2AemS9FrxX'
 		],
