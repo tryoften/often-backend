@@ -6,7 +6,7 @@
 	"cloudStorageBucket": "acoustic-rider-104419",
 	"gcloud": {
 		"projectId": "acoustic-rider-104419",
-		"bucket_name": "resized_images",
+		"image_bucket": "resized_images",
 		"key": "AIzaSyDBCtKaA-7DZeMXfSkIG_C5gDCeQyucc-E"
 	},
 	"elasticsearch": {
