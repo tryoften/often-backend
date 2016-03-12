@@ -7,7 +7,9 @@ import Track from './Track';
 import Category from './Category';
 import * as _ from 'underscore';
 
-export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
+export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {
+	index: number;
+}
 
 export interface LyricIndexableObject extends IndexableObject {
 	images?: any;
@@ -17,6 +19,7 @@ export interface LyricIndexableObject extends IndexableObject {
 	track_id: string;
 	artist_id: string;
 	artist_image_url: string;
+	index: number;
 }
 
 export class Lyric extends MediaItem {
@@ -104,7 +107,8 @@ export class Lyric extends MediaItem {
 			track_id: this.get('track_id') || '',
 			artist_name: this.get('artist_name') || '',
 			track_title: this.get('track_title') || '',
-			artist_image_url: this.get('artist_image_url') || ''
+			artist_image_url: this.get('artist_image_url') || '',
+			index: this.get('index') || 0
 		}, super.toIndexingFormat());
 
 		return data;

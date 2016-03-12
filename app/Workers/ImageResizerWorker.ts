@@ -47,7 +47,6 @@ type Path = string;
 type Id = string;
 type TransformedImage = Object;
 
-
 class ImageResizerWorker extends Worker {
 
 	private default_transformations: TransformationType[];

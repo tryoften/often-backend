@@ -6,7 +6,6 @@ import GeniusServiceIngestionAdapter from '../Adapters/Ingestion/GeniusServiceIn
 import IngestionAdapter from '../Adapters/Ingestion/IngestionAdapter';
 import MediaItemType from '../Models/MediaItemType';
 
-
 export class DestinationType extends String {
 	static Firebase: DestinationType = 'firebase';
 	static ElasticSearch: DestinationType = 'elasticsearch';
@@ -54,12 +53,12 @@ export interface IngestionTask extends Task {
 	data: (ArtistUrl[] | ArtistUrl) | (ArtistIndex[] | ArtistIndex) | (TrackId[] | TrackId);
 }
 
-
 class IngestionWorker extends Worker {
 	searchQueueRef: Firebase;
 	serviceDispatcher: ServiceDispatcher;
 	ingestionAdapters: any;
-	constructor (opts: IngestionWorkerOptions = {}) {
+
+	constructor (opts: IngestionWorkerOptions) {
 
 		super(opts);
 

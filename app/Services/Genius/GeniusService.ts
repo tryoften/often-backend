@@ -12,7 +12,7 @@ import * as _ from 'underscore';
 import 'backbonefire';
 import { IndexableObject } from '../../Interfaces/Indexable';
 import Query from '../../Models/Query';
-import TrackId from '../../Workers/IngestionWorker';
+import { TrackId } from '../../Workers/IngestionWorker';
 
 /** 
  * This class is responsible for fetching data from the Genius API
@@ -134,8 +134,7 @@ class GeniusService extends ServiceBase {
 	 * @returns {Promise<IndexableObject[]>}
 	 */
 	public trackIdsToGeniusServiceResults (trackIds: TrackId[]): Promise<GeniusServiceResult[]> {
-		return new Promise<IndexableObject[]>( (resolve, reject) => {
-			let results: IndexableObject[] = [];
+		return new Promise<GeniusServiceResult[]>( (resolve, reject) => {
 			var promises = [];
 
 			for (var trackId of trackIds) {

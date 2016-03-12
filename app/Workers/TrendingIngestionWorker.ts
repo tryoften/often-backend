@@ -1,4 +1,4 @@
-import { Worker } from './Worker';
+import Worker from './Worker';
 import schedule = require('node-schedule');
 import TrendingIngestor from '../Ingestors/Trending/TrendingIngestor';
 

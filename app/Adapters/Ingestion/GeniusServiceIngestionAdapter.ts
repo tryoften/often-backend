@@ -8,8 +8,8 @@ import logger from '../../logger';
 import { IngestionTask, DestinationType, ArtistUrl, ArtistIndex, ArtistId, TrackId, InputFormat } from '../../Workers/IngestionWorker';
 import { Service as RestService } from 'restler';
 import * as cheerio from 'cheerio';
-import {GeniusServiceResult} from '../../Services/Genius/GeniusDataTypes';
-import {IndexableObject} from '../../Interfaces/Indexable';
+import { GeniusServiceResult } from '../../Services/Genius/GeniusDataTypes';
+import { IndexableObject } from '../../Interfaces/Indexable';
 import ImageResizerWorker from '../../Workers/ImageResizerWorker';
 import MediaItem from '../../Models/MediaItem';
 import { IngestionOption } from '../../Workers/IngestionWorker';
@@ -38,7 +38,7 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 			baseURL: this.geniusRoot
 		});
 		this.imageResizerWorker = new ImageResizerWorker();
-		this.genius = new GeniusService({provider_id: 'genius'});
+		this.genius = new GeniusService();
 		this.trendingIngestor = new TrendingIngestor();
 	}
 

@@ -73,7 +73,6 @@ class TrendingIngestor {
 			});
 			var trendingLyrics = _.map(sortedLyricItems, result => result.toIndexingFormat()).slice(0, 10);
 
-
 			var response = [
 				{
 					id: 'trendingLyrics',

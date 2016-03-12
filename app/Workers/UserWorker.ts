@@ -20,7 +20,7 @@ interface UserWorkerTask extends Task {
 	// id of user on whose behalf a given task is to be processed
 	user: string;
 	// specifies the operation to be performed
-	type: UserWorkerTaskType;
+	task: UserWorkerTaskType;
 	result?: Object;
 	category?: Object;
 	data?: any;
@@ -54,7 +54,7 @@ class UserWorker extends Worker {
 	 *	}
 	 */
 	process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
-		switch (task.type) {
+		switch (task.task) {
 			case UserWorkerTaskType.AddFavorite:
 				this.addFavorite(task, resolve, reject);
 				break;
