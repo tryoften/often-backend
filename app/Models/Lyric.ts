@@ -90,6 +90,7 @@ export class Lyric extends MediaItem {
 					properties[`artist_${prop}`] = artist[prop];
 				}
 			}
+			properties.artist_id = artistItem.get('id') || '';
 		}
 
 		if (lyric) {
