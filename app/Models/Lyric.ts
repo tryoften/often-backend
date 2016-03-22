@@ -30,8 +30,6 @@ export class Lyric extends MediaItem {
 		return this.get('artist_id');
 	}
 
-
-
 	get text(): string {
 		return this.get('text');
 	}

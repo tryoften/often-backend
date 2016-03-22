@@ -10,6 +10,8 @@
 /// <reference path="serve-static/serve-static.d.ts" />
 /// <reference path="minimist/minimist.d.ts" />
 /// <reference path="cheerio/cheerio.d.ts" />
+/// <reference path="lodash/lodash.d.ts" />
+/// <reference path="react/react.d.ts" />
 
 declare module "firebase-queue" {
 
