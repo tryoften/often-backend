@@ -39,15 +39,6 @@
 					"type": "service_account"
 				},
 				"gcloud_endpoint" : "https://www.googleapis.com/auth/logging.write"
-			},
-			{
-				"type": "Firebase",
-				"details": {
-					"rootRef": "https://often-prod.firebaseio.com/events",
-					"secretKey": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY",
-					"UID": "logger",
-					"admin": true
-				}
 			}
 		]
 	}
