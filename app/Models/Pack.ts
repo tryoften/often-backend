@@ -9,7 +9,7 @@ interface PackAttributes {
 	id: string;
 	name: string;
 	subscribers?: UserId[];
-	image?: string;
+	image?: Object;
 	meta?: PackMeta;
 	items?: MediaItem[];
 
