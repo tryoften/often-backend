@@ -12,21 +12,19 @@ export interface SearchBarState {
 export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 	constructor(props: SearchBarProps) {
 		super(props);
-		this.state = this.getInitialState();
+		this.state = {
+			query: ""
+		};
 	}
 
 	handleSubmit(e: Event) {
 		e.preventDefault();
 	}
 
-	getInitialState(): SearchBarState {
-		return {
-			query: ""
-		};
-	}
-
-	handleTextInputChange(e: Event) {
-		e.preventDefault();
+	handleTextInputChange(e: any) {
+		e.preventDefault()
+		this.setState({query: e.target.value});
+		this.props.onChange(this.state);
 	}
 
 	render(): Element {
@@ -36,7 +34,7 @@ export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 					type="text"
 					placeholder="Search..."
 					value={this.state.query}
-					onChange={this.handleTextInputChange}
+					onChange={this.handleTextInputChange.bind(this)}
 				/>
 				<input type="submit" value="Post" />
 			</form>

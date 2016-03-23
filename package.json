@@ -72,7 +72,8 @@
     "load-grunt-tasks": "^3.1.0",
     "mocha": "^2.3.3",
     "require-reload": "^0.2.2",
-    "time-grunt": "^1.1.0"
+    "time-grunt": "^1.1.0",
+    "tsify": "^0.14.1"
   },
   "scripts": {
     "test": "mocha --compilers js:babel/register",
