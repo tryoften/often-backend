@@ -15,9 +15,7 @@ export default class CommandType extends String {
 	static get classMapping(): any {
 		if (!CommandType.mapping) {
 			CommandType.mapping = {
-				listFilters: require('./ListFilters').default,
-				topSearches: require('./TopSearches').default,
-				filteredSearch: require('./FilteredSearch').default
+				topSearches: require('./TopSearches').default
 			};
 		}
 		return CommandType.mapping;
