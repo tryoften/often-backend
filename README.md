@@ -21,6 +21,9 @@ Run the following commands
 * `npm install -g serve`
 * `cd client && serve .`
 
+In order to keep the compiled `app.js` file updated with all the latest code run the following command during development
+* `grunt watch:typescript`
+
 ## License
 
 Copyright &copy; 2015 - &infin;, Project Surf, Inc. All rights reserved.
