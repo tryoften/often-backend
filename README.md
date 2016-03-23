@@ -18,8 +18,8 @@ Tested on node v0.12.7. Steps:
 ## Running the dashboard
 
 Run the following commands
-`npm install -g serve`
-`cd client && serve .`
+* `npm install -g serve`
+* `cd client && serve .`
 
 ## License
 
