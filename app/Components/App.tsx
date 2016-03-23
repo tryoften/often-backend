@@ -10,7 +10,8 @@ interface AppProps {
 
 export default class App extends React.Component<AppProps, {}> {
 	onSearchBarChange(state: SearchBarState) {
-		var request = new Firebase(`${FirebaseConfig.BaseURL}/queues/search/tasks`);
+		var request = new Firebase(`https://often-dev.firebaseio.com/queues/search/tasks`);
+		console.log(request);
 	}
 
 	render() {
