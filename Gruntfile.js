@@ -1,95 +1,108 @@
 'use strict';
+
 module.exports = function (grunt) {
-  // Show elapsed time at the end
-  require('time-grunt')(grunt);
-  // Load all grunt tasks
-  require('load-grunt-tasks')(grunt);
+	// Show elapsed time at the end
+	require('time-grunt')(grunt);
 
-  grunt.initConfig({
-    jshint: {
-      options: {
-        reporter: require('jshint-stylish'),
-        node: true,
-        esnext: true,
-        debug: true
-      },
-      gruntfile: {
-        src: ['Gruntfile.js']
-      },
-      js: {
-        src: ['app/**/*.js']
-      }
-    },
-    babel: {
-      options: {
-        sourceMap: true
-      },
-      dist: {
-        files: [{
-            "expand": true,
-            "cwd": "app/",
-            "src": ["**/*.js"],
-            "dest": "build/",
-            "ext": ".js"
-        }]
-      }
-    },
-    mochacli: {
-      options: {
-        reporter: 'nyan',
-        bail: true
-      },
-      all: ['test/*.js']
-    },
+	// Load all grunt tasks
+	require('load-grunt-tasks')(grunt);
 
-    browserify: {
-      client: {
-        options: {
-          transform: [["babelify", { "stage": 0 }]],
-          browserifyOptions: {
-            debug: true
-          }
-        },
-        src: ['app/**/*.js'],
-        dest: 'public/app.js'
-      },
-      watch: {
-        options: {
-          transform: [["babelify", { "stage": 0 }]],
-          browserifyOptions: {
-            debug: true,
-            watch: true
-          }
-        },
-        src: ['app/**/*.js'],
-        dest: 'public/app.js'
-      }
-    },
+	grunt.initConfig({
+		jshint: {
+			options: {
+				reporter: require('jshint-stylish'),
+				node: true,
+				esnext: true,
+				debug: true
+			},
+			gruntfile: {
+				src: ['Gruntfile.js']
+			},
+			js: {
+				src: ['app/**/*.js']
+			}
+		},
+		babel: {
+			options: {
+				sourceMap: true
+			},
+			dist: {
+				files: [{
+					"expand": true,
+					"cwd": "app/",
+					"src": ["**/*.js"],
+					"dest": "build/",
+					"ext": ".js"
+				}]
+			}
+		},
+		mochacli: {
+			options: {
+				reporter: 'nyan',
+				bail: true
+			},
+			all: ['test/*.js']
+		},
 
-    serve: {
-      options: {
-        port: 8888
-      },
-      path: 'public/'
-    },
+		browserify: {
+			client: {
+				options: {
+					browserifyOptions: {
+						plugin: [
+							['tsify', {target: 'ES5'}]
+						],
+						debug: true,
+						sourceType: 'module'
+					},
+					exclude: ['coffee-script', 'iced-coffee-script', 'yaml']
+				},
+				src: ['typings/tsd.d.ts', 'app/Components/App.tsx'],
+				dest: 'client/app.js'
+			}
+		},
 
-    watch: {
-      gruntfile: {
-        files: '<%= jshint.gruntfile.src %>',
-        tasks: ['jshint:gruntfile']
-      },
-      js: {
-        files: '<%= jshint.js.src %>',
-        tasks: ['jshint:js']//, 'browserify:client']
-      },
-      babel: {
-        files: 'app/**/*.js',
-        tasks: ['jshint:js', 'babel:dist']
-      }
-    }
-  });
+		serve: {
+			options: {
+				port: 8888
+			},
+			path: 'public/'
+		},
 
-  grunt.registerTask('default', ['babel:dist']);
-  grunt.registerTask('client', ['browserify', 'serve']);
+		typescript: {
+			web: {
+				src: ['app/**/*.ts'],
+				dest: 'client/app.js',
+				options: {
+					module: 'amd',
+					noImplicitAny: false,
+					remoceComments: true,
+					preserveConstEnums: true,
+					jsx: "React",
+					moduleResolution: "node",
+					target: "es5",
+					references: [
+						"typings/**/*.d.ts"
+					]
+				}
+			}
+		},
 
+		watch: {
+			gruntfile: {
+				files: '<%= jshint.gruntfile.src %>',
+				tasks: ['jshint:gruntfile']
+			},
+			js: {
+				files: '<%= jshint.js.src %>',
+				tasks: ['jshint:js']
+			},
+			typescript: {
+				files: ['app/**/*.ts', 'app/**/*.tsx'],
+				tasks: ['browserify:client']
+			}
+		}
+	});
+
+	grunt.registerTask('default', ['babel:dist']);
+	grunt.registerTask('client', ['browserify', 'serve']);
 };

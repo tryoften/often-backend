@@ -3,6 +3,8 @@ import Query from './Query';
 import RequestType from './RequestType';
 import MediaItemSource from './MediaItemSource';
 import * as _ from 'underscore';
+import { firebase as FirebaseConfig } from '../config';
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for requests.
  */
@@ -53,7 +55,6 @@ class Request implements Requestable {
 		this._providers = [];
 
 	}
-
 
 	get providers () {
 		return this._providers;

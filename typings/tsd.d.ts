@@ -1,6 +1,7 @@
 /// <reference path="backbone/backbone-global.d.ts" />
 /// <reference path="backbone/backbone.d.ts" />
 /// <reference path="jquery/jquery.d.ts" />
+/// <reference path="firebase/firebase.d.ts" />
 /// <reference path="underscore/underscore.d.ts" />
 /// <reference path="backbonefire/backbonefire.d.ts" />
 /// <reference path="node/node.d.ts" />
@@ -10,8 +11,8 @@
 /// <reference path="serve-static/serve-static.d.ts" />
 /// <reference path="minimist/minimist.d.ts" />
 /// <reference path="cheerio/cheerio.d.ts" />
-/// <reference path="lodash/lodash.d.ts" />
 /// <reference path="react/react.d.ts" />
+/// <reference path="react/react-dom.d.ts" />
 
 declare module "firebase-queue" {
 
