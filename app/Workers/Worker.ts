@@ -34,7 +34,9 @@ export default class Worker {
 	 * @return {void}
 	 */
 	constructor (opts) {
-		opts.url = FirebaseConfig.BaseURL + opts.url;
+		if (opts.url.substring(0, 1) === '/')  {
+			opts.url = FirebaseConfig.BaseURL + opts.url;
+		}
 		FirebaseConfig.queues.default.url = FirebaseConfig.BaseURL + FirebaseConfig.queues.default.url;
 		this.options = _.defaults(opts, FirebaseConfig.queues.default);
 	}

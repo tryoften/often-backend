@@ -49,14 +49,14 @@ module.exports = function (grunt) {
 				options: {
 					browserifyOptions: {
 						plugin: [
-							['tsify', {target: 'ES5'}]
+							['tsify', {target: 'ES5', noImplicitAny: true}]
 						],
 						debug: true,
 						sourceType: 'module'
 					},
 					exclude: ['coffee-script', 'iced-coffee-script', 'yaml']
 				},
-				src: ['typings/tsd.d.ts', 'app/Components/App.tsx'],
+				src: ['typings/tsd.d.ts', 'app/Views/Components/AppView.tsx'],
 				dest: 'client/app.js'
 			}
 		},

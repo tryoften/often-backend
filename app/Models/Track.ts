@@ -98,18 +98,17 @@ class Track extends MediaItem {
 	}
 
 	public toIndexingFormat(): IndexableObject {
-		let data: TrackIndexedObject = super.toIndexingFormat();
-		data.title = this.title || '';
-		data.author = this.artist_name || '';
-		data.description = '';
-		data.artist_id = this.artist_id || '';
-		data.artist_name = this.artist_name || '';
-		data.album_name = this.album_name || '';
-		data.song_art_image_url = this.get('song_art_image_url') || '';
-		data.album_cover_art_url = this.get('album_cover_art_url') ||  this.get('song_art_image_url') || '';
-		data.artist_image_url = this.get('artist_image_url') || '';
-
-		return data;
+		return _.extend({
+			title: this.title || '',
+			author: this.artist_name || '',
+			description: '',
+			artist_id: this.artist_id || '',
+			artist_name: this.artist_name || '',
+			album_name: this.album_name || '',
+			song_art_image_url: this.get('song_art_image_url') || '',
+			album_cover_art_url: this.get('album_cover_art_url') || this.get('song_art_image_url') || '',
+			artist_image_url: this.get('artist_image_url') || ''
+		}, super.toIndexingFormat())
 	}
 }
 

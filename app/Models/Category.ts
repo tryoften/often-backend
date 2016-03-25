@@ -1,10 +1,10 @@
 import BaseModel from './BaseModel';
 import { firebase as FirebaseConfig } from '../config';
-import LyricIndexableObject from './Lyric';
 import IDSpace from '../Models/IDSpace';
 import MediaItemSource from '../Models/MediaItemSource';
 import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
+import LyricAttributes from "./Lyric";
 
 /**
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
@@ -26,9 +26,8 @@ class Category extends BaseModel {
 	/**
 	 * Adds a lyric to the category in question and updates all the appropriate models
 	 * @param lyric
-	 * @returns {Promise<Firebase.Model>}
      */
-	addLyric(lyric: LyricIndexableObject): Promise<any> {
+	addLyric(lyric: LyricAttributes): any {
 		let lyricRef = new Firebase(`${this.url}/lyrics/${lyric.id}`);
 		lyricRef.set(true);
 
@@ -37,7 +36,6 @@ class Category extends BaseModel {
 		return lyricModel.syncData(() => {
 			return IDSpace.instance.getOftenIdFrom(MediaItemSource.Genius, MediaItemType.track, lyricModel.get('track_genius_id'))
 				.then(trackOftenId => {
-
 					let updateObject: any = {};
 					let category = {
 						id: this.id,

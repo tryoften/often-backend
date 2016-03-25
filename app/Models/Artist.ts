@@ -18,8 +18,10 @@ interface ArtistIndexableObject extends IndexableObject {
 class Artist extends MediaItem {
 
 	constructor(attributes?: any, options?: any) {
-		this.urlRoot = `${FirebaseConfig.BaseURL}/artists`;
-		this.autoSync = true;
+		options = _.defaults(options, {
+			urlRoot: `${FirebaseConfig.BaseURL}/artists`,
+			autoSync: true
+		});
 		super(attributes, options);
 	}
 
@@ -71,7 +73,7 @@ class Artist extends MediaItem {
 		}
 		properties.time_modified = Date.now();
 
-		var updObj = {};
+		var updObj: any = {};
 		updObj = _.pick(trackData,
 			'id', '_id', 'album_cover_art_url', 'title', 'album_name',
 			'external_url', 'song_art_image_url', 'score', 'type');

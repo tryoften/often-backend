@@ -27,7 +27,7 @@ export interface GeniusArtistData extends GeniusObject {
 }
 
 export interface GeniusLyricData extends GeniusObject {
-	index: Number;
+	index?: Number;
 	text: string;
 	score?: number;
 	annotation_id?: string;
