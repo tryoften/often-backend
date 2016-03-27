@@ -133,7 +133,7 @@ class GeniusService extends ServiceBase {
 	 * @param trackIds
 	 * @returns {Promise<IndexableObject[]>}
 	 */
-	public trackIdsToGeniusServiceResults (trackIds: TrackId[]): Promise<GeniusServiceResult[]> {
+	public trackIdsToGeniusServiceResults (trackIds: TrackId[]): Promise<IndexableObject[]> {
 		return new Promise<IndexableObject[]>( (resolve, reject) => {
 			let results: IndexableObject[] = [];
 			var promises = [];

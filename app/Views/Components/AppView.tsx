@@ -39,6 +39,7 @@ export default class AppView extends React.Component<AppProps, AppState> {
 			},
 			type: RequestType.search
 		});
+
 		this.searchQueue.child(id).set(request.toJSON());
 		console.log(request.toJSON());
 
@@ -62,7 +63,7 @@ export default class AppView extends React.Component<AppProps, AppState> {
 	}
 }
 
-ReactDOM.render(
-	<AppView />,
-	document.getElementById('container')
-);
+//ReactDOM.render(
+//	<AppView />,
+//	document.getElementById('container')
+//);

@@ -32,8 +32,7 @@ class Category extends BaseModel {
 		lyricRef.set(true);
 
 		let lyricModel = new Lyric(lyric);
-
-		return lyricModel.syncData(() => {
+		return lyricModel.syncData().then(() => {
 			return IDSpace.instance.getOftenIdFrom(MediaItemSource.Genius, MediaItemType.track, lyricModel.get('track_genius_id'))
 				.then(trackOftenId => {
 					let updateObject: any = {};
