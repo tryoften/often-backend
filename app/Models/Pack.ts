@@ -21,7 +21,7 @@ interface MediaItemInfo {
 type UserId = string;
 type PackMeta = Object;
 
-export class Pack extends BaseModel {
+export default class Pack extends BaseModel {
 
 	/**
 	 * Designated constructor
