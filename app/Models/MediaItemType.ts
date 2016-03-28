@@ -4,11 +4,13 @@ export default class MediaItemType extends String {
 	static artist: MediaItemType = 'artist';
 	static track: MediaItemType = 'track';
 	static lyric: MediaItemType = 'lyric';
+	static pack: MediaItemType = 'pack';
 
 	static allTypes: MediaItemType[] = [
 		MediaItemType.artist,
 		MediaItemType.track,
-		MediaItemType.lyric
+		MediaItemType.lyric,
+		MediaItemType.pack
 	];
 
 	private static mapping: any;
@@ -17,7 +19,8 @@ export default class MediaItemType extends String {
 			MediaItemType.mapping = {
 				artist: require('./Artist').default,
 				track: require('./Track').default,
-				lyric: require('./Lyric').default
+				lyric: require('./Lyric').default,
+				pack: require('./Pack').default
 			};
 		}
 		return MediaItemType.mapping;

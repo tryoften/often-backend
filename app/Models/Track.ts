@@ -18,6 +18,14 @@ interface TrackIndexedObject extends IndexableObject {
  */
 class Track extends MediaItem {
 
+	constructor(attributes?: any, options?: any) {
+		super(attributes, options);
+	}
+
+	get url(): Firebase {
+		return new Firebase(`${FirebaseConfig.BaseURL}/tracks/${this.id}`)
+	}
+
 	// TODO(jakub): create an interface for track that guarantees 'common' indexed fields
 	get title(): string {
 		return this.get('title');
@@ -41,17 +49,6 @@ class Track extends MediaItem {
 
 	set lyrics(value: GeniusLyricData[]) {
 		this.set('lyrics', value);
-	}
-
-	/**
-	 * Initializes the elastic search config model.
-	 *
-	 * @return {void}
-	 */
-	public initialize () {
-		this.urlRoot = `${FirebaseConfig.BaseURL}/tracks`;
-		this.autoSync = true;
-		this.idAttribute = 'id';
 	}
 
 	public setGeniusData (artist: Artist, lyrics: Lyric[]) {
