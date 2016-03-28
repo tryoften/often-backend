@@ -34,7 +34,6 @@ export default class Packs extends React.Component<PacksProps, PacksState> {
 
 					<ButtonToolbar className="pull-right">
 						<Button bsStyle="primary" bsSize="small" active>Add Pack</Button>
-						<Button bsSize="small" active>Search</Button>
 					</ButtonToolbar>
 				</header>
 
