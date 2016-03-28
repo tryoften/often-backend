@@ -2,8 +2,7 @@ import BaseModel from './BaseModel';
 import { firebase as FirebaseConfig } from '../config';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
-import {IndexableObject} from '../Interfaces/Indexable';
-
+import { IndexableObject } from '../Interfaces/Indexable';
 
 interface PackAttributes {
 	id: string;
@@ -12,7 +11,6 @@ interface PackAttributes {
 	image?: Object;
 	meta?: PackMeta;
 	items?: MediaItem[];
-
 }
 
 interface MediaItemInfo {
@@ -24,6 +22,7 @@ type UserId = string;
 type PackMeta = Object;
 
 export class Pack extends BaseModel {
+
 	/**
 	 * Designated constructor
 	 *
@@ -31,19 +30,43 @@ export class Pack extends BaseModel {
 	 * @param options
 	 */
 	constructor(attributes: PackAttributes, options?: any) {
+		super(attributes, {
+			urlRoot: `${FirebaseConfig.BaseURL}/packs`,
+			autoSync: true
+		});
 
 		if (!attributes.id) {
 			throw new Error('Must specify pack id!');
 		}
 
-		this.urlRoot = `${FirebaseConfig.BaseURL}/packs`;
-		this.autoSync = true;
-
 		if (!attributes.items) {
 			attributes.items = [];
 		}
+	}
 
-		super(attributes, options);
+	get name(): string {
+		return this.get('name');
+	}
+
+	set name(value: string) {
+		this.set('name', value);
+	}
+
+	get items(): IndexableObject[] {
+		return this.get('items');
+	}
+
+	/**
+	 * Adds an individual media item to the pack
+	 * @param item
+     */
+	addItem(item: MediaItem) {
+		var itemObj = item.toJSON();
+
+		var items = this.items;
+		items.push(itemObj);
+
+		this.save({items});
 	}
 
 
@@ -80,7 +103,6 @@ export class Pack extends BaseModel {
 		return indexables;
 	}
 
-
 	/**
 	 * Deserializes an array of MediaItemInfo items in order
 	 *
@@ -108,6 +130,5 @@ export class Pack extends BaseModel {
 		var MediaItemClass = MediaItemType.toClass(item.type);
 		return new MediaItemClass({id: item.id}).syncData();
 	}
-
 
 }

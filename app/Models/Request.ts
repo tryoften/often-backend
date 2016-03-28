@@ -80,9 +80,19 @@ class Request implements Requestable {
 		}
 	}
 
+	toJSON(): Object {
+		var data: Requestable = {
+			id: this.id,
+			query: this.query,
+			type: this.type
+		};
 
+		if (this.userId) {
+			data.userId = this.userId;
+		}
 
-
+		return data;
+	}
 }
 
 export default Request;

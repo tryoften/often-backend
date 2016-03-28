@@ -4,17 +4,18 @@ import BaseModel from './BaseModel';
 import {Requestable} from '../Interfaces/Requestable';
 import {Queryable} from '../Interfaces/Queryable';
 import RequestType from '../Models/RequestType';
+import MediaItemGroup from "./MediaItemGroup";
 
 
-export interface ResponseAttributes extends Requestable {
+export interface ResponseAttributes {
 	id: string;
-	userId: string;
-	time_created: number;
-	time_modified: number;
+	userId?: string;
+	time_created?: number;
+	time_modified?: number;
 	time_completed?: number;
-	query: Queryable;
-	type: RequestType;
-	doneUpdating: boolean;
+	query?: Queryable;
+	type?: RequestType;
+	doneUpdating?: boolean;
 }
 
 /**
@@ -34,11 +35,17 @@ export default class Response extends BaseModel {
 			throw new Error('Id must be defined and supplied to the Response constructor.');
 		}
 
-		this.urlRoot = `${config.firebase.BaseURL}/responses`;
-		this.autoSync = true;
+		super(attributes, {
+			autoSync: true
+		});
+	}
 
+	get url(): Firebase {
+		return new Firebase(`https://often-dev.firebaseio.com/responses/${this.id}`);
+	}
 
-		super(attributes, options);
+	get results(): MediaItemGroup[] {
+		return this.get('results') || [];
 	}
 
 	public static fromRequest(request: Requestable): Response {

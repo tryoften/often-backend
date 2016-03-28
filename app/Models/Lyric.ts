@@ -63,8 +63,9 @@ export class Lyric extends MediaItem {
 	}
 
 	constructor (attributes: LyricAttributes, options?: any) {
-		this.urlRoot = `${FirebaseConfig.BaseURL}/lyrics`;
-		super(attributes, options);
+		super(attributes, {
+			urlRoot: `${FirebaseConfig.BaseURL}/lyrics`
+		});
 	}
 
 	public setGeniusData (artistItem: Artist, trackItem: Track, data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {

@@ -1,6 +1,6 @@
+import * as _ from 'underscore';
 let minimist = require('minimist');
 let config = require('./config');
-let _ = require('underscore');
 
 let argv = minimist(process.argv.slice(2));
 console.dir(argv);

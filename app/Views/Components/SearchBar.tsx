@@ -22,7 +22,7 @@ export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 	}
 
 	handleTextInputChange(e: any) {
-		e.preventDefault()
+		e.preventDefault();
 		this.setState({query: e.target.value});
 		this.props.onChange(this.state);
 	}

@@ -113,8 +113,8 @@ class TrackTaskScheduler {
 			logger.log('Tracks length ', this.tracks.length);
 			this.setListeners();
 			this.pushNTasks(this.taskCap);
-		}, (err) => {
-			throw new Error('Error when fetching more tracks', err);
+		}, (err: Error) => {
+			throw err;
 		});
 	}
 

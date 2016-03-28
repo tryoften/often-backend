@@ -10,7 +10,7 @@
 		"Secret": "kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2"
 	},
 	"elasticsearch": {
-		"BaseURL": "http://search1-elasticsearch-dev-1-vm:9200"
+		"BaseURL": "http://localhost:9200"
 	},
 	"winston": {
 		"transports": [

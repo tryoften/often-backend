@@ -6,6 +6,8 @@ export interface CommonIndexedFields {
 	title: string;
 	author: string;
 	description: string;
+	text?: string;
+	name?: string;
 }
 
 export interface IndexableObject extends CommonIndexedFields {

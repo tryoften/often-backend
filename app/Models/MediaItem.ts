@@ -31,7 +31,6 @@ export class MediaItem extends BaseModel implements Indexable {
 		if (!attributes.score) {
 			attributes.score = 0.0;
 		}
-		this.autoSync = true;
 
 		super(attributes, options);
 	}
