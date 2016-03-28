@@ -15,6 +15,15 @@ Tested on node v0.12.7. Steps:
 1. Install libvips: [General Instructions](https://github.com/jcupitt/libvips), [Mac OS X Instructions](http://www.vips.ecs.soton.ac.uk/index.php?title=Build\_on\_OS\_X)
 2. `npm install`
 
+## Running the dashboard
+
+Run the following commands
+* `npm install -g serve`
+* `cd client && serve .`
+
+In order to keep the compiled `app.js` file updated with all the latest code run the following command during development
+* `grunt watch:typescript`
+
 ## License
 
 Copyright &copy; 2015 - &infin;, Project Surf, Inc. All rights reserved.
