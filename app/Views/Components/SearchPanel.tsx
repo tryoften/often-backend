@@ -15,7 +15,7 @@ interface AppState {
 	response: Response;
 }
 
-export default class AppView extends React.Component<AppProps, AppState> {
+export default class SearchPanel extends React.Component<AppProps, AppState> {
 	searchQueue: Firebase;
 
 	constructor(props: AppProps) {
@@ -62,8 +62,3 @@ export default class AppView extends React.Component<AppProps, AppState> {
 		);
 	}
 }
-
-//ReactDOM.render(
-//	<AppView />,
-//	document.getElementById('container')
-//);

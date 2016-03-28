@@ -11,6 +11,9 @@
   "keywords": [
     "often-backend"
   ],
+	"browser": {
+		"config": "./client/config.js"
+	},
   "dependencies": {
     "airbrake": "^0.3.8",
     "backbone": "^1.1.2",

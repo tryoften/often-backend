@@ -8,34 +8,6 @@ module.exports = function (grunt) {
 	require('load-grunt-tasks')(grunt);
 
 	grunt.initConfig({
-		jshint: {
-			options: {
-				reporter: require('jshint-stylish'),
-				node: true,
-				esnext: true,
-				debug: true
-			},
-			gruntfile: {
-				src: ['Gruntfile.js']
-			},
-			js: {
-				src: ['app/**/*.js']
-			}
-		},
-		babel: {
-			options: {
-				sourceMap: true
-			},
-			dist: {
-				files: [{
-					"expand": true,
-					"cwd": "app/",
-					"src": ["**/*.js"],
-					"dest": "build/",
-					"ext": ".js"
-				}]
-			}
-		},
 		mochacli: {
 			options: {
 				reporter: 'nyan',
@@ -54,7 +26,11 @@ module.exports = function (grunt) {
 						debug: true,
 						sourceType: 'module'
 					},
-					exclude: ['coffee-script', 'iced-coffee-script', 'yaml']
+					exclude: ['coffee-script', 'iced-coffee-script',
+						'yaml', 'js-yaml', 'toml', 'cson',
+						'hjson', 'properties', 'vows'],
+					watch: true,
+					keepAlive: true
 				},
 				src: ['typings/tsd.d.ts', 'app/Views/main.tsx'],
 				dest: 'client/app.js'
@@ -68,34 +44,7 @@ module.exports = function (grunt) {
 			path: 'public/'
 		},
 
-		typescript: {
-			web: {
-				src: ['app/**/*.ts'],
-				dest: 'client/app.js',
-				options: {
-					module: 'amd',
-					noImplicitAny: false,
-					remoceComments: true,
-					preserveConstEnums: true,
-					jsx: "React",
-					moduleResolution: "node",
-					target: "es5",
-					references: [
-						"typings/**/*.d.ts"
-					]
-				}
-			}
-		},
-
 		watch: {
-			gruntfile: {
-				files: '<%= jshint.gruntfile.src %>',
-				tasks: ['jshint:gruntfile']
-			},
-			js: {
-				files: '<%= jshint.js.src %>',
-				tasks: ['jshint:js']
-			},
 			typescript: {
 				files: ['app/**/*.ts', 'app/**/*.tsx'],
 				tasks: ['browserify:client']
@@ -104,5 +53,5 @@ module.exports = function (grunt) {
 	});
 
 	grunt.registerTask('default', ['babel:dist']);
-	grunt.registerTask('client', ['browserify', 'serve']);
+	grunt.registerTask('client', ['browserify:client', 'serve']);
 };

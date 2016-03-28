@@ -3,6 +3,8 @@ import classNames = require('classnames');;
 import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import MediaItem from "../../Models/MediaItem";
 import PackView from '../Components/PackView';
+import config from '../../config';
+import Pack from '../../Models/Pack';
 
 interface PacksProps extends React.Props<Packs> {
 	open?: boolean
