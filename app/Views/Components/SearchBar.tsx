@@ -10,7 +10,7 @@ export interface SearchBarState {
 	query: string;
 }
 
-export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
+export default class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 	constructor(props: SearchBarProps) {
 		super(props);
 		this.state = {

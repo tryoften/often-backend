@@ -4,8 +4,9 @@ import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
 import { IndexableObject } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
+import { MediaItemAttributes } from './MediaItem';
 
-interface PackAttributes {
+interface PackAttributes extends MediaItemAttributes {
 	id: string;
 	name?: string;
 	subscribers?: UserId[];
@@ -22,7 +23,7 @@ interface MediaItemInfo {
 type UserId = string;
 type PackMeta = Object;
 
-export default class Pack extends BaseModel {
+class Pack extends MediaItem {
 
 	/**
 	 * Designated constructor
@@ -31,21 +32,15 @@ export default class Pack extends BaseModel {
 	 * @param options
 	 */
 	constructor(attributes: PackAttributes, options?: any) {
-		super(attributes, {
-			autoSync: true
-		});
-
-		if (!attributes.id) {
-			throw new Error('Must specify pack id!');
-		}
-
 		if (!attributes.items) {
 			attributes.items = [];
 		}
+
+		super(attributes, options);
 	}
 
 	get url(): Firebase {
-		return new Firebase(`${FirebaseConfig.BaseURL}/packs/${this.id}`);
+		return new Firebase(`${FirebaseConfig.BaseURL}/packs/${this.id}`)
 	}
 
 	get name(): string {
@@ -135,3 +130,5 @@ export default class Pack extends BaseModel {
 	}
 
 }
+
+export default Pack;

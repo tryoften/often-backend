@@ -18,11 +18,11 @@ export interface ArtistIndexableObject extends IndexableObject {
 class Artist extends MediaItem {
 
 	constructor(attributes?: any, options?: any) {
-		options = _.defaults(options, {
-			urlRoot: `${FirebaseConfig.BaseURL}/artists`,
-			autoSync: true
-		});
 		super(attributes, options);
+	}
+
+	get url(): Firebase {
+		return new Firebase(`${FirebaseConfig.BaseURL}/artists/${this.id}`)
 	}
 
 	public trackExists (songId: string) {
