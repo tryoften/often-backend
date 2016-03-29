@@ -80,8 +80,8 @@ class Artist extends MediaItem {
 		updObj.type = 'track';
 		updObj.artist_id = this.get('id') || '';
 
-		new Firebase(this.url()).update(properties);
-		new Firebase(`${this.url()}/tracks/${trackData.id}`).update(updObj);
+		this.url.update(properties);
+		this.url.child(`tracks/${trackData.id}`).update(updObj);
 
 		return this;
 	}

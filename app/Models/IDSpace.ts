@@ -2,7 +2,7 @@ import config from '../config';
 import MediaItemSource from './MediaItemSource';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
-import Firebase =  require('firebase');
+import * as Firebase from 'firebase';
 
 class IDSpace {
 	public static instance = new IDSpace();

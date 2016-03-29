@@ -17,9 +17,6 @@
     "backbone/backbone-global.d.ts": {
       "commit": "e5a27ea95e47b95333784f1f0d590127b4e39a89"
     },
-    "es6-shim/es6-shim.d.ts": {
-      "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
-    },
     "express/express.d.ts": {
       "commit": "dc9dabe74a5be62613b17a3605309783a12ff28a"
     },
@@ -61,6 +58,12 @@
     },
     "react-router-bootstrap/react-router-bootstrap.d.ts": {
       "commit": "299b5caa22876ef27dc8e9a5b7fd7bf93457b6f4"
+    },
+    "es6-shim/es6-shim.d.ts": {
+      "commit": "ee9c524295333250ddbc7364f27c8b2ccd84b18a"
+    },
+    "node-schedule/node-schedule.d.ts": {
+      "commit": "ee9c524295333250ddbc7364f27c8b2ccd84b18a"
     }
   }
 }

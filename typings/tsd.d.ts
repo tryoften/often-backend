@@ -5,7 +5,6 @@
 /// <reference path="underscore/underscore.d.ts" />
 /// <reference path="backbonefire/backbonefire.d.ts" />
 /// <reference path="node/node.d.ts" />
-/// <reference path="es6-shim/es6-shim.d.ts" />
 /// <reference path="express/express.d.ts" />
 /// <reference path="mime/mime.d.ts" />
 /// <reference path="serve-static/serve-static.d.ts" />
@@ -18,6 +17,8 @@
 /// <reference path="react-bootstrap/react-bootstrap.d.ts" />
 /// <reference path="classnames/classnames.d.ts" />
 /// <reference path="react-router-bootstrap/react-router-bootstrap.d.ts" />
+/// <reference path="node-schedule/node-schedule.d.ts" />
+/// <reference path="es6-shim/es6-shim.d.ts" />
 
 declare module "firebase-queue" {
 	class Queue {

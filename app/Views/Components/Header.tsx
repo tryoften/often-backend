@@ -1,8 +1,7 @@
 import * as React from 'react';
 import * as _ from 'underscore';
 import classNames = require('classnames');
-import { Nav, NavItem, Row, Col, Grid } from 'react-bootstrap';
-import { SidebarBtn } from '../Mixins/SidebarMixin';
+import { Row, Col, Grid } from 'react-bootstrap';
 
 var HeaderNavigation = React.createClass({
 	render() {

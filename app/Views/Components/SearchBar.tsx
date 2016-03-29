@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Input, Button } from 'react-bootstrap';
+import { Input } from 'react-bootstrap';
 import Element = JSX.Element;
 
 export interface SearchBarProps {

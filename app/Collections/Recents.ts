@@ -21,7 +21,6 @@ class Recents extends Firebase.Collection<Recent> {
 		if (typeof userId === 'undefined') {
 			throw new Error('userId needs to be set');
 		}
-		this.userId = userId;
 
 		let opts = {
 			idAttribute: 'id',
@@ -29,6 +28,7 @@ class Recents extends Firebase.Collection<Recent> {
 			autoSync: true
 		};
 		super([], opts);
+		this.userId = userId;
 	}
 
 	/**

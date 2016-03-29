@@ -1,6 +1,8 @@
-import * as React from 'react';
+/// <reference path="../../typings/tsd.d.ts" />
+
 import { Route, Router, hashHistory } from 'react-router';
 import { render } from 'react-dom';
+import * as React from 'react';
 
 import Home from './Routes/Home';
 import Packs from './Routes/PacksRoute';
