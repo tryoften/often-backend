@@ -13,6 +13,21 @@ export default class SidebarComponent extends React.Component<{}, {}> {
 				<div id='brand'>
 					<div id='logo'>Often</div>
 				</div>
+
+				<div id='sidebar-container'>
+					<Nav stacked onSelect={this.onNavChange}>
+						<LinkContainer to="/">
+							<NavItem eventKey="home">Home</NavItem>
+						</LinkContainer>
+						<LinkContainer to="/packs">
+							<NavItem eventKey="packs">Packs</NavItem>
+						</LinkContainer>
+						<LinkContainer to="/categories">
+							<NavItem eventKey="categories">Categories</NavItem>
+						</LinkContainer>
+					</Nav>
+				</div>
+
 				<div id='avatar'>
 					<Grid>
 						<Row className='fg-white'>
@@ -27,19 +42,6 @@ export default class SidebarComponent extends React.Component<{}, {}> {
 							</Col>
 						</Row>
 					</Grid>
-				</div>
-				<div id='sidebar-container'>
-					<Nav stacked onSelect={this.onNavChange}>
-						<LinkContainer to="/">
-							<NavItem eventKey="home">Home</NavItem>
-						</LinkContainer>
-						<LinkContainer to="/packs">
-							<NavItem eventKey="packs">Packs</NavItem>
-						</LinkContainer>
-						<LinkContainer to="/categories">
-							<NavItem eventKey="categories">Categories</NavItem>
-						</LinkContainer>
-					</Nav>
 				</div>
 			</div>
 		);

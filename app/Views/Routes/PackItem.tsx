@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail } from 'react-bootstrap';
 import Pack from "../../Models/Pack";
 import MediaItemView from "../Components/MediaItemView";
 
@@ -43,12 +43,21 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 					<h2>{this.state.model.name}</h2>
 				</header>
 
-				<Grid>
+				<Grid fluid={true}>
 					<Row>
 						<Col xs={6}>
 							<form>
-								<Input type="text" label="Name" bsSize="medium" placeholder="Name" value={this.state.model.name} />
-								<Input type="textarea" label="Description" placeholder="Description" value={this.state.model.get('description')} />
+								<Row>
+									<Col xs={4}>
+										<div class="image-upload">
+											<Thumbnail src={this.state.model.get('image_url')} />
+										</div>
+									</Col>
+									<Col xs={8}>
+										<Input type="text" label="Name" bsSize="medium" placeholder="Name" value={this.state.model.name} />
+										<Input type="textarea" label="Description" placeholder="Description" value={this.state.model.get('description')} />
+									</Col>
+								</Row>
 							</form>
 
 

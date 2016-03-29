@@ -33,7 +33,9 @@ export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 			<form className="searchBox" onSubmit={this.handleSubmit}>
 				<Input
 					type="text"
-					placeholder="Search..."
+					label="Search"
+					bsSize="large"
+					placeholder="Search for lyrics, songs, artists or packs..."
 					value={this.state.query}
 					onChange={this.handleTextInputChange.bind(this)}
 				/>
