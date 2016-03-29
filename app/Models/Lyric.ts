@@ -19,7 +19,15 @@ export interface LyricIndexableObject extends IndexableObject {
 	artist_image_url: string;
 }
 
-export class Lyric extends MediaItem {
+class Lyric extends MediaItem {
+
+	constructor(attributes?: any, options?: any) {
+		super(attributes, options);
+	}
+
+	get url(): Firebase {
+		return new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${this.id}`)
+	}
 
 	// TODO(jakub): create an interface for lyric that guarantees 'common' indexed fields
 	set artist_id(value: string) {
@@ -60,12 +68,6 @@ export class Lyric extends MediaItem {
 
 	set category(value: Category) {
 		this.set('category', value.toJSON());
-	}
-
-	constructor (attributes: LyricAttributes, options?: any) {
-		super(attributes, {
-			urlRoot: `${FirebaseConfig.BaseURL}/lyrics`
-		});
 	}
 
 	public setGeniusData (artistItem: Artist, trackItem: Track, data: {artist?: GeniusArtistData, track?: GeniusTrackData, lyric?: GeniusLyricData}): Lyric {

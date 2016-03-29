@@ -10,6 +10,7 @@ export default class MediaItemSource extends String {
 	static HotNewHipHop: MediaItemSource = 'hnhh';
 	static Hypebeast: MediaItemSource = 'hypebeast';
 	static MTV: MediaItemSource = 'mtv-news';
+	static Often: MediaItemSource = 'often';
 	static Paper: MediaItemSource = 'paper';
 	static PigeonsAndPlanes: MediaItemSource = 'pigeonsandplanes';
 	static Spotify: MediaItemSource = 'spotify';
