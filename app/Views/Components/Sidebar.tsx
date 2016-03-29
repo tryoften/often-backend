@@ -1,8 +1,3 @@
-import {
-	Sidebar, SidebarNav, SidebarNavItem,
-	SidebarControls, SidebarControlBtn
-} from '../Mixins/SidebarMixin';
-
 import { Row, Col, Grid, ProgressBar, Nav, NavItem } from 'react-bootstrap';
 import * as React from 'react';
 import { Link } from 'react-router';
@@ -40,9 +35,6 @@ export default class SidebarComponent extends React.Component<{}, {}> {
 						</LinkContainer>
 						<LinkContainer to="/packs">
 							<NavItem eventKey="packs">Packs</NavItem>
-						</LinkContainer>
-						<LinkContainer to="/artists">
-							<NavItem eventKey="artists">Artists</NavItem>
 						</LinkContainer>
 						<LinkContainer to="/categories">
 							<NavItem eventKey="categories">Categories</NavItem>

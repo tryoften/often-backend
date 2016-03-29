@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Input, Button } from 'react-bootstrap';
 import Element = JSX.Element;
 
 export interface SearchBarProps {
@@ -30,13 +31,12 @@ export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 	render(): Element {
 		return (
 			<form className="searchBox" onSubmit={this.handleSubmit}>
-				<input
+				<Input
 					type="text"
 					placeholder="Search..."
 					value={this.state.query}
 					onChange={this.handleTextInputChange.bind(this)}
 				/>
-				<input type="submit" value="Post" />
 			</form>
 		);
 	}

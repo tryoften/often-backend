@@ -29,8 +29,7 @@ module.exports = function (grunt) {
 					exclude: ['coffee-script', 'iced-coffee-script',
 						'yaml', 'js-yaml', 'toml', 'cson',
 						'hjson', 'properties', 'vows'],
-					watch: true,
-					keepAlive: true
+					watch: true
 				},
 				src: ['typings/tsd.d.ts', 'app/Views/main.tsx'],
 				dest: 'client/app.js'

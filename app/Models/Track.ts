@@ -6,11 +6,12 @@ import Artist from './Artist';
 import Lyric from './Lyric';
 import * as _ from 'underscore';
 
-interface TrackIndexedObject extends IndexableObject {
+export interface TrackIndexableObject extends IndexableObject {
 	images?: any;
 	artist_id: string;
 	artist_name: string;
 	album_name: string;
+	song_art_image_url: string;
 }
 
 /**

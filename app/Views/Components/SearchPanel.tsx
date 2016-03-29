@@ -55,7 +55,7 @@ export default class SearchPanel extends React.Component<AppProps, AppState> {
 
 	render() {
 		return (
-			<div>
+			<div className="search-panel">
 				<SearchBar onChange={this.onSearchBarChange.bind(this)}/>
 				<SearchResultsTable response={this.state.response} />
 			</div>

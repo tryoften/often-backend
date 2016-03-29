@@ -1,6 +1,6 @@
 import * as React from 'react';
 import classNames = require('classnames');;
-import { Row, Col, Grid } from 'react-bootstrap';
+import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import SearchPanel from '../Components/SearchPanel';
 
 interface CategoriesProps extends React.Props<Categories> {
@@ -10,9 +10,25 @@ interface CategoriesProps extends React.Props<Categories> {
 export default class Categories extends React.Component<CategoriesProps, {}> {
 	render() {
 		return (
-			<div>
-				<h2>Categories</h2>
-				<SearchPanel />
+			<div className="section">
+				<header className="section-header">
+					<h2>Categories</h2>
+
+					<ButtonToolbar className="pull-right">
+						<Button bsStyle="primary" bsSize="small" active>Add Category</Button>
+					</ButtonToolbar>
+				</header>
+
+				<Grid fluid={true}>
+					<Row>
+						<Col sm={12}>
+							<div className="content">
+								<SearchPanel />
+							</div>
+						</Col>
+					</Row>
+				</Grid>
+
 			</div>
 		);
 	}
