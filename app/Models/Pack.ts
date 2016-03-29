@@ -3,11 +3,12 @@ import { firebase as FirebaseConfig } from '../config';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
 import { IndexableObject } from '../Interfaces/Indexable';
-import MediaItemAttributes from './MediaItem';
+import * as Firebase from 'firebase';
+import { MediaItemAttributes } from './MediaItem';
 
 interface PackAttributes extends MediaItemAttributes {
 	id: string;
-	name: string;
+	name?: string;
 	subscribers?: UserId[];
 	image?: Object;
 	meta?: PackMeta;
@@ -31,7 +32,6 @@ class Pack extends MediaItem {
 	 * @param options
 	 */
 	constructor(attributes: PackAttributes, options?: any) {
-
 		if (!attributes.items) {
 			attributes.items = [];
 		}
@@ -42,7 +42,6 @@ class Pack extends MediaItem {
 	get url(): Firebase {
 		return new Firebase(`${FirebaseConfig.BaseURL}/packs/${this.id}`)
 	}
-
 
 	get name(): string {
 		return this.get('name');
@@ -68,7 +67,6 @@ class Pack extends MediaItem {
 
 		this.save({items});
 	}
-
 
 	/**
 	 * Deserializes media items from an array of MediaItemInfo objects and sets them as items on the pack

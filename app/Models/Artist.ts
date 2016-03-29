@@ -7,7 +7,7 @@ import * as Firebase from 'firebase';
 import * as Backbone from 'backbone';
 import logger from '../logger';
 
-interface ArtistIndexableObject extends IndexableObject {
+export interface ArtistIndexableObject extends IndexableObject {
 	image_url: string;
 	name: string;
 	lyrics_count: number;

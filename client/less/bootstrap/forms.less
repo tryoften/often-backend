@@ -33,7 +33,11 @@ label {
   display: inline-block;
   max-width: 100%; // Force IE8 to wrap long content (see https://github.com/twbs/bootstrap/issues/13141)
   margin-bottom: 5px;
-  font-weight: bold;
+  font-family: OpenSans-Semibold;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: @gray;
+  text-transform: uppercase;
 }
 
 
@@ -127,7 +131,7 @@ output {
   .transition(~"border-color ease-in-out .15s, box-shadow ease-in-out .15s");
 
   // Customize the `:focus` state to imitate native WebKit styles.
-  .form-control-focus();
+  .form-control-focus(@brand-primary);
 
   // Placeholder
   .placeholder();

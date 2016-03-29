@@ -1,0 +1,101 @@
+.media-item-group {
+  h3 {
+    text-transform: uppercase;
+    font-family: OpenSans-Semibold;
+    font-size: 10px;
+    line-height: 2.7;
+    letter-spacing: 1.5px;
+    color: @gray;
+  }
+
+  padding: 0 10px;
+}
+
+.media-item {
+  background-color: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.19);
+  margin: 10px;
+
+  &.lyric {
+    height: 100px;
+    width: 320px;
+    padding: 10px;
+    text-align: center;
+    display: table;
+
+    .content {
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+
+  &.track {
+    height: 100px;
+    width: 300px;
+
+    .image {
+      display: inline-block;
+      height: 100px;
+      width: 100px;
+      overflow: hidden;
+
+      img {
+        height: inherit;
+      }
+    }
+    .meta {
+      display: inline-block;
+      padding: 10px;
+      vertical-align: top;
+
+    }
+  }
+
+  &.pack, &.artist {
+    width: 135px;
+    height: 210px;
+    display: inline-block;
+    vertical-align: top;
+
+    .image-container {
+      height: 120px;
+      width: inherit;
+      position: relative;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-image: url(http://placehold.it/200x200);
+      overflow: hidden;
+
+      img {
+        height: inherit;
+        width: inherit;
+      }
+
+      .mask {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+      }
+    }
+
+    .meta {
+      padding: 12px;
+    }
+
+    .title {
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: #202020;
+    }
+
+    .description {
+      display: none;
+    }
+  }
+}

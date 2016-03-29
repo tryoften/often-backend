@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Input, Button } from 'react-bootstrap';
 import Element = JSX.Element;
 
 export interface SearchBarProps {
@@ -9,7 +10,7 @@ export interface SearchBarState {
 	query: string;
 }
 
-export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
+export default class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 	constructor(props: SearchBarProps) {
 		super(props);
 		this.state = {
@@ -30,13 +31,14 @@ export class SearchBar extends React.Component<SearchBarProps, SearchBarState> {
 	render(): Element {
 		return (
 			<form className="searchBox" onSubmit={this.handleSubmit}>
-				<input
+				<Input
 					type="text"
-					placeholder="Search..."
+					label="Search"
+					bsSize="large"
+					placeholder="Search for lyrics, songs, artists or packs..."
 					value={this.state.query}
 					onChange={this.handleTextInputChange.bind(this)}
 				/>
-				<input type="submit" value="Post" />
 			</form>
 		);
 	}
