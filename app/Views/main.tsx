@@ -5,7 +5,7 @@ import { render } from 'react-dom';
 import Home from './Routes/Home';
 import Packs from './Routes/PacksRoute';
 import Artists from './Routes/Artists';
-import Categories from './Routes/Categories';
+import Categories from './Routes/CategoriesRoute';
 import PackItem from './Routes/PackItem';
 
 render((

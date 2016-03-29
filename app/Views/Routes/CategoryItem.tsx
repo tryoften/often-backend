@@ -1,19 +1,19 @@
 import * as React from 'react';
 import { Grid, Row, Col, Input, Thumbnail } from 'react-bootstrap';
-import Pack from '../../Models/Pack';
+import Category from '../../Models/Category';
 import MediaItemView from '../Components/MediaItemView';
 import MediaItemType from '../../Models/MediaItemType';
 import MediaItemSource from '../../Models/MediaItemSource';
 
 
-interface PackItemProps extends React.Props<PackItem> {
+interface CategoryItemProps extends React.Props<CategoryItem> {
 	params: {
-		packId: string;
+		cateogryId: string;
 	}
 }
 
-interface PackItemState extends React.Props<PackItem> {
-	model: Pack;
+interface CategoryItemState extends React.Props<CategoryItem> {
+	model: Category;
 }
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
@@ -21,28 +21,23 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	constructor(props: PackItemProps) {
 		super(props);
 
-		let pack = new Pack({
-			id: props.params.packId,
-			source: MediaItemSource.Often,
-			type: MediaItemType.pack
+		let pack = new Category({
+			id: props.params.categoryId
 		});
 
 		this.state = {
-			model: pack
+			model: category
 		};
 
-		pack.on('update', () => {
+		category.on('update', () => {
 			this.setState({
-				model: pack
+				model: category
 			})
 		});
 	}
 
 
 	render() {
-		var itemsComponents = this.state.model.items.map(item => {
-			return <MediaItemView key={item._id} item={item}/>
-		});
 
 		return (
 			<div className="section">
@@ -57,24 +52,14 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<Row>
 									<Col xs={4}>
 										<div class="image-upload">
-											<Thumbnail src={this.state.model.get('image_url')} />
+											<Thumbnail src={this.state.model.get('image')} />
 										</div>
 									</Col>
 									<Col xs={8}>
 										<Input type="text" label="Name" bsSize="medium" placeholder="Name" value={this.state.model.name} />
-										<Input type="textarea" label="Description" placeholder="Description" value={this.state.model.get('description')} />
 									</Col>
 								</Row>
 							</form>
-
-
-							<div className="media-item-group">
-								<h3>Items</h3>
-								<div className="items">
-									{itemsComponents}
-								</div>
-							</div>
-
 						</Col>
 					</Row>
 				</Grid>
