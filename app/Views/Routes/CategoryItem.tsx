@@ -1,14 +1,11 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, ButtonInput } from 'react-bootstrap';
 import Category from '../../Models/Category';
-import MediaItemView from '../Components/MediaItemView';
-import MediaItemType from '../../Models/MediaItemType';
-import MediaItemSource from '../../Models/MediaItemSource';
 
 
 interface CategoryItemProps extends React.Props<CategoryItem> {
 	params: {
-		cateogryId: string;
+		categoryId: string;
 	}
 }
 
@@ -16,14 +13,16 @@ interface CategoryItemState extends React.Props<CategoryItem> {
 	model: Category;
 }
 
-export default class PackItem extends React.Component<PackItemProps, PackItemState> {
+export default class CategoryItem extends React.Component<CategoryItemProps, CategoryItemState> {
 
-	constructor(props: PackItemProps) {
+	constructor(props: CategoryItemProps) {
 		super(props);
 
-		let pack = new Category({
+		let category = new Category({
 			id: props.params.categoryId
 		});
+
+		category.fetch();
 
 		this.state = {
 			model: category
@@ -34,7 +33,27 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				model: category
 			})
 		});
+
+		this.handleUpdate = this.handleUpdate.bind(this);
+		this.handleNameChange = this.handleNameChange.bind(this);
 	}
+
+	handleUpdate(e) {
+		e.preventDefault();
+		var model = this.state.model;
+
+		//Propagate model to Firebase
+		model.save();
+		this.setState({model: model});
+	}
+
+	handleNameChange(e) {
+		// TODO(jakub): figure out why doesn't get called
+		var model = this.state.model;
+		model.set('name', e.target.value);
+		this.setState({model: model});
+	}
+
 
 
 	render() {
@@ -48,7 +67,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				<Grid fluid={true}>
 					<Row>
 						<Col xs={6}>
-							<form>
+							<form className="updateForm" onSubmit={this.handleUpdate}>
 								<Row>
 									<Col xs={4}>
 										<div class="image-upload">
@@ -56,7 +75,17 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										</div>
 									</Col>
 									<Col xs={8}>
-										<Input type="text" label="Name" bsSize="medium" placeholder="Name" value={this.state.model.name} />
+										<Input
+											type="text"
+											label="Name"
+											bsSize="medium"
+											placeholder={this.state.model.get('name')}
+											value={this.state.model.get('name')}
+											onChange={this.handleNameChange}
+										/>
+									</Col>
+									<Col xs={8}>
+										<ButtonInput type="submit" value="Update" />
 									</Col>
 								</Row>
 							</form>

@@ -7,6 +7,7 @@ import Packs from './Routes/PacksRoute';
 import Artists from './Routes/Artists';
 import Categories from './Routes/CategoriesRoute';
 import PackItem from './Routes/PackItem';
+import CategoryItem from './Routes/CategoryItem';
 
 render((
 	<Router history={hashHistory}>
@@ -15,6 +16,7 @@ render((
 			<Route path="/pack/:packId" component={PackItem} />
 			<Route path="/artists" component={Artists} />
 			<Route path="/categories" component={Categories} />
+			<Route path="/category/:categoryId" component={CategoryItem} />
 		</Route>
 	</Router>
 ), document.getElementById('app-container'));
