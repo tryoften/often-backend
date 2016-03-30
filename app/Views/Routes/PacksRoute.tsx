@@ -1,14 +1,11 @@
 import * as React from 'react';
-import classNames = require('classnames');;
 import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import { Link } from 'react-router';
-import MediaItem from "../../Models/MediaItem";
 import PackView from '../Components/PackView';
 import Packs from '../../Collections/Packs';
-import Pack from "../../Models/Pack";
 
 interface PacksProps extends React.Props<PacksRoute> {
-	open?: boolean
+	open?: boolean;
 }
 
 interface PacksState extends React.Props<PacksRoute> {
@@ -24,12 +21,12 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 		this.packs = new Packs();
 		this.state = {
 			packs: this.packs
-		}
+		};
 
 		this.packs.on('update', () => {
 			this.setState({
 				packs: this.packs
-			})
+			});
 		});
 	}
 

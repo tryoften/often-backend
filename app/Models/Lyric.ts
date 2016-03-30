@@ -26,7 +26,7 @@ class Lyric extends MediaItem {
 	}
 
 	get url(): Firebase {
-		return new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${this.id}`)
+		return new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${this.id}`);
 	}
 
 	// TODO(jakub): create an interface for lyric that guarantees 'common' indexed fields

@@ -5,6 +5,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 
 export default class SidebarComponent extends React.Component<{}, {}> {
 	onNavChange(selectedKey) {
+		console.log(selectedKey);
 	}
 
 	render() {

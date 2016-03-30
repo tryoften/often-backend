@@ -1,5 +1,4 @@
 import * as React from 'react';
-import MediaItem from "../../Models/MediaItem";
 import Pack from "../../Models/Pack";
 import ImageBrandMask from '../Components/ImageBrandMask';
 
@@ -28,6 +27,6 @@ export default class PackView extends React.Component<PackViewProps, {}> {
 					<div className="description">{this.props.model.get('description')}</div>
 				</div>
 			</div>
-		)
+		);
 	}
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import Element = JSX.Element;
 import Response from '../../Models/Response';
 import MediaItemView from './MediaItemView';
-import classNames = require('classnames');
+import * as classNames from 'classnames';
 
 interface SearchResultsTableProps {
 	response: Response;

@@ -1,9 +1,10 @@
-import { Worker } from './Worker';
-import schedule = require('node-schedule');
+import Worker from './Worker';
+import * as schedule from 'node-schedule';
 import TrendingIngestor from '../Ingestors/Trending/TrendingIngestor';
 
 class TrendingIngestionWorker extends Worker {
 	ingestor: TrendingIngestor;
+	job: schedule.Job;
 
 	constructor(opts = {}) {
 

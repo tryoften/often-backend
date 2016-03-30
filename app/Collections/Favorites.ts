@@ -21,13 +21,13 @@ class Favorites extends Firebase.Collection<Favorite> {
 		if (typeof userId === 'undefined') {
 			throw new Error('userId needs to be set');
 		}
-		this.userId = userId;
 
 		let opts = {
 			model: Favorite,
 			autoSync: true
 		};
 		super([], opts);
+		this.userId = userId;
 	}
 
 	/**

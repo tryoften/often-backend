@@ -1,3 +1,5 @@
+/// <reference path="../typings/tsd.d.ts" />
+
 import * as _ from 'underscore';
 let minimist = require('minimist');
 let config = require('./config');
