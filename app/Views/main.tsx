@@ -19,6 +19,7 @@ render((
 			<Route path="/artists" component={Artists} />
 			<Route path="/categories" component={Categories} />
 			<Route path="/category/:categoryId" component={CategoryItem} />
+			<Route path="/category" component={CategoryItem} />
 		</Route>
 	</Router>
 ), document.getElementById('app-container'));

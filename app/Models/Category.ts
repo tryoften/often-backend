@@ -5,17 +5,25 @@ import MediaItemSource from '../Models/MediaItemSource';
 import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
+import { generate as generateId } from 'shortid';
+
+
+export interface CategoryAttributes {
+	id?: string;
+	name?: string;
+	image?: any;
+}
 
 /**
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
  */
 class Category extends BaseModel {
-	id: string;
-	name: string;
-	image: string;
 
-	constructor(attributes?: any, opts: any = {}) {
+	constructor(attributes?: CategoryAttributes, opts: any = {}) {
 		opts.autoSync = false;
+		if (!attributes.id) {
+			attributes.id = generateId();
+		}
 		super(attributes, opts);
 	}
 
