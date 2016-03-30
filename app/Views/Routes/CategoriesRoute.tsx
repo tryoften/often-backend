@@ -36,7 +36,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 	render() {
 		let categoryComponents = this.state.categories.map(category => {
 			return (
-				<Link to={`/category/${category.id}`}>
+				<Link key={category.id} to={`/category/${category.id}`}>
 					<CategoryView key={category.id} model={category}></CategoryView>
 				</Link>
 			);
