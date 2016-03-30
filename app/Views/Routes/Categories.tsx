@@ -1,10 +1,9 @@
 import * as React from 'react';
-import classNames = require('classnames');;
 import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import SearchPanel from '../Components/SearchPanel';
 
 interface CategoriesProps extends React.Props<Categories> {
-	open?: boolean
+	open?: boolean;
 }
 
 export default class Categories extends React.Component<CategoriesProps, {}> {
@@ -28,7 +27,6 @@ export default class Categories extends React.Component<CategoriesProps, {}> {
 						</Col>
 					</Row>
 				</Grid>
-
 			</div>
 		);
 	}

@@ -2,11 +2,13 @@ import * as React from 'react';
 import { Grid, Row, Col, Input, Thumbnail } from 'react-bootstrap';
 import Pack from "../../Models/Pack";
 import MediaItemView from "../Components/MediaItemView";
+import MediaItemType from "../../Models/MediaItemType";
+import MediaItemSource from "../../Models/MediaItemSource";
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
 		packId: string;
-	}
+	};
 }
 
 interface PackItemState extends React.Props<PackItem> {
@@ -18,23 +20,23 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	constructor(props: PackItemProps) {
 		super(props);
 
-		let pack = new Pack({id: props.params.packId});
+		let pack = new Pack({source: MediaItemSource.Often, type: MediaItemType.pack, id: props.params.packId});
 
 		this.state = {
 			model: pack
-		}
+		};
 
 		pack.on('update', () => {
 			this.setState({
 				model: pack
-			})
+			});
 		});
 	}
 
 
 	render() {
 		var itemsComponents = this.state.model.items.map(item => {
-			return <MediaItemView key={item._id} item={item}/>
+			return <MediaItemView key={item._id} item={item}/>;
 		});
 
 		return (
