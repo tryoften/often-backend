@@ -12,6 +12,7 @@ var devConfigExtension = {
 			// We are using next two entries for hot-reload
 			'webpack-dev-server/client?http://localhost:3333',
 			'webpack/hot/only-dev-server',
+			'./client/less/style.less'
 		].concat(mainConfig.entry.app)
 	},
 
@@ -26,19 +27,20 @@ var devConfigExtension = {
 
 	// more options here: http://webpack.github.io/docs/configuration.html#devtool
 	devtool: 'eval-source-map',
+
 	watch: true,
+	debug: true,
 
 	module: {
 		loaders: [
 			{
 				test: /\.ts(x?)$/,
-				//loaders: ['react-hot', 'babel?presets[]=es2015-loose', 'ts-loader?configFileName=tsconfig.webpack.json'],
 				loaders: ['react-hot', 'ts-loader?configFileName=tsconfig.webpack.json'],
 				include: path.resolve(__dirname, "app")
 			},
 			{ test: /\.css$/, exclude: /\.import\.css$/,  loader: "style!css", include: path.resolve(__dirname, "client") },
 			{ test: /\.import\.css$/,  loader: "style!css", include: path.resolve(__dirname, "client") },
-			{ test: /\.less$/, exclude: /\.module\.less$/, loader: "style!css!less", include: path.resolve(__dirname, "client") },
+			{ test: /\.less$/, exclude: /\.woff2$/, loader: "style!css!less", include: path.resolve(__dirname, "client") },
 			{ test: /\.module\.less$/, loader: "style!css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!less", include: path.resolve(__dirname, "client") },
 			{ test: /\.(jpg|png|jpg|png|woff|eot|ttf|svg|gif)$/, loader: "file-loader?name=[name].[ext]" }
 		]

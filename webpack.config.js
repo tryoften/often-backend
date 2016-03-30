@@ -46,16 +46,13 @@ var config = {
 
 	module: {
 		preLoaders: [
-			{ test: /\.ts(x?)$/, loader: "tslint", include: path.resolve(__dirname, "app") },
+			{ test: /\.ts(x?)$/, loader: "tslint", include: path.resolve(__dirname, "app") }
 		],
 		noParse: [],
 		loaders: [
-			// TODO remove crazy require when https://github.com/babel/babel-loader/issues/166 is fixed.
 			{
 				test: /\.ts(x?)$/,
-				loaders: ['babel?cacheDirectory,plugins[]=' + require.resolve(path.join(nodeModulesPath, 'babel-plugin-external-helpers-2')) +
-					',presets[]=' + require.resolve(path.join(nodeModulesPath, 'babel-preset-es2015-loose')),
-				'ts-loader?configFileName=tsconfig.webpack.json'],
+				loaders: ['ts-loader?configFileName=tsconfig.webpack.json'],
 				include: path.resolve(__dirname, "app")
 			},
 			{ test: /\.css$/,  loader: ExtractTextPlugin.extract("style-loader", "css-loader?minimize"), include: path.resolve(__dirname, "client") },
