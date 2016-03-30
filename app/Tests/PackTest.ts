@@ -1,33 +1,9 @@
-import { Pack } from '../Models/Pack';
-
-var pack = new Pack({
-	id: 'test_pack',
-	name: 'Pack_name'
-});
-
-var items = [
-
-	{
-		type: 'artist',
-		id: '4ytWaTc2l'
-	},
-	{
-		type: 'lyric',
-		id: '41_-aTqhe'
-	},
-	{
-		type: 'lyric',
-		id: '41Ie3Zap53x'
-	},
-	{
-		type: 'lyric',
-		id: '4JNQnZapq2e'
-	}
-];
+import  Pack  from '../Models/Pack';
+import MediaItemSource from "../Models/MediaItemSource";
+import MediaItemType from "../Models/MediaItemType";
 
 
-
-
-
-
-pack.setMediaItems(items);
+var pacman = Pack.fromType(MediaItemSource.Often, MediaItemType.pack, '321');
+var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.artist, '321');
+var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.track, '321');
+var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.lyric, '321');
