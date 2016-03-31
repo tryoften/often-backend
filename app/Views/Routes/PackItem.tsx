@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon } from 'react-bootstrap';
 import Pack from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import MediaItemType from '../../Models/MediaItemType';
 import MediaItemSource from '../../Models/MediaItemSource';
+import SearchPanel from '../Components/SearchPanel';
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
