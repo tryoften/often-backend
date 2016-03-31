@@ -25,7 +25,6 @@ export default class Header extends React.Component<{}, {}> {
 							<div className="container fluid">
 								<Row>
 									<Col xs={3} visible='xs'>
-										<SidebarBtn />
 									</Col>
 									<Col xs={6} sm={4}>
 										<h1>Often</h1>

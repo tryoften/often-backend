@@ -4,7 +4,7 @@ import Pack from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import MediaItemType from '../../Models/MediaItemType';
 import MediaItemSource from '../../Models/MediaItemSource';
-import SearchPanel from '../Components/SearchPanel';
+import AddItemToPackModal from '../Components/AddItemToPackModal';
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -32,11 +32,23 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			shouldShowSearchPanel: false
 		};
 
-		pack.on('update', () => {
-			this.setState({
-				model: pack
-			});
+		pack.on('update', this.updateStateWithPack.bind(this));
+	}
+
+	componentDidMount() {
+		this.state.model.fetch({
+			success: this.updateStateWithPack.bind(this)
 		});
+	}
+
+	updateStateWithPack(pack: Pack) {
+		this.setState({
+			model: pack
+		});
+	}
+
+	componentWillReceiveProps() {
+		console.log('componentWillReceiveProps');
 	}
 
 	onClickAddItem(e: Event) {
@@ -89,7 +101,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 						</Col>
 						<Col xs={6}>
-							<SearchPanel show={this.state.shouldShowSearchPanel} />
+							<AddItemToPackModal show={this.state.shouldShowSearchPanel} />
 						</Col>
 					</Row>
 				</Grid>

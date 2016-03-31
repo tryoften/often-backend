@@ -3,6 +3,7 @@ import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import { Link } from 'react-router';
 import PackView from '../Components/PackView';
 import Packs from '../../Collections/Packs';
+import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 interface PacksProps extends React.Props<PacksRoute> {
 	open?: boolean;
@@ -54,7 +55,9 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 					<Row>
 						<Col sm={12}>
 							<div className="content">
-								{packComponents}
+								<ReactCSSTransitionGroup transitionName="pack" transitionEnterTimeout={300} transitionLeaveTimeout={300}>
+									{packComponents}
+								</ReactCSSTransitionGroup>
 							</div>
 						</Col>
 					</Row>

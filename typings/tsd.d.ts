@@ -19,6 +19,8 @@
 /// <reference path="react-router-bootstrap/react-router-bootstrap.d.ts" />
 /// <reference path="node-schedule/node-schedule.d.ts" />
 /// <reference path="es6-shim/es6-shim.d.ts" />
+/// <reference path="react/react-addons-css-transition-group.d.ts" />
+/// <reference path="react/react-addons-transition-group.d.ts" />
 
 declare module "firebase-queue" {
 	class Queue {

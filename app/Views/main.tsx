@@ -2,7 +2,7 @@
 
 import { Route, Router, hashHistory } from 'react-router';
 import { render } from 'react-dom';
-import * as React from 'react';
+import * as React from 'react'; // Don't remove, components need it
 
 import Home from './Routes/Home';
 import Packs from './Routes/PacksRoute';

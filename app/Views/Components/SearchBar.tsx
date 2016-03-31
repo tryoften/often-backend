@@ -34,7 +34,7 @@ export default class SearchBar extends React.Component<SearchBarProps, SearchBar
 				<Input
 					type="text"
 					label="Search"
-					bsSize="large"
+					bsSize="normal"
 					placeholder="Search for lyrics, songs, artists or packs..."
 					value={this.state.query}
 					onChange={this.handleTextInputChange.bind(this)}
