@@ -6,7 +6,7 @@ import Category, {CategoryAttributes} from '../../Models/Category';
 interface CategoryItemProps extends React.Props<CategoryItem> {
 	params: {
 		categoryId: string;
-	}
+	};
 }
 
 interface CategoryItemState extends React.Props<CategoryItem> {
@@ -23,7 +23,7 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 
 		var attr: CategoryAttributes = {};
 		if (props.params.categoryId) {
-			//instantiate new model and fetch from server
+			// instantiate new model and fetch from server
 			attr.id = props.params.categoryId;
 		} else {
 			/* If the id of the category hasn't been passed then it most likely doesn't exist on the server. */
@@ -53,7 +53,7 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 		category.on('update', () => {
 			this.setState({
 				model: category
-			})
+			});
 		});
 
 		this.handleUpdate = this.handleUpdate.bind(this);
@@ -91,8 +91,6 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 		model.set('name', e.target.value);
 		this.setState({model: model});
 	}
-
-
 
 	render() {
 

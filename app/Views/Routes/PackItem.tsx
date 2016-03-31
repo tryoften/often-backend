@@ -5,6 +5,7 @@ import MediaItemView from '../Components/MediaItemView';
 import MediaItemType from '../../Models/MediaItemType';
 import MediaItemSource from '../../Models/MediaItemSource';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
+import * as classNames from 'classnames';
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -15,6 +16,7 @@ interface PackItemProps extends React.Props<PackItem> {
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
+	display?: boolean;
 }
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
@@ -29,7 +31,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		this.state = {
 			model: pack,
-			shouldShowSearchPanel: false
+			shouldShowSearchPanel: false,
+			display: false
 		};
 
 		pack.on('update', this.updateStateWithPack.bind(this));
@@ -43,7 +46,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 	updateStateWithPack(pack: Pack) {
 		this.setState({
-			model: pack
+			model: pack,
+			display: true
 		});
 	}
 
@@ -64,8 +68,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			return <MediaItemView key={item._id} item={item} />;
 		});
 
+		let classes = classNames("section pack-item", {hidden: !this.state.display});
+
 		return (
-			<div className="section pack-item">
+			<div className={classes}>
 				<header className="section-header">
 					<h2>{this.state.model.name}</h2>
 				</header>
