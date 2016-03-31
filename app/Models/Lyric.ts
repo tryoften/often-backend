@@ -1,7 +1,7 @@
 import { GeniusArtistData, GeniusTrackData, GeniusLyricData } from '../Services/Genius/GeniusDataTypes';
 import { MediaItem, MediaItemAttributes } from './MediaItem';
 import { firebase as FirebaseConfig } from '../config';
-import {IndexableObject} from '../Interfaces/Indexable';
+import { IndexableObject } from '../Interfaces/Indexable';
 import Artist from './Artist';
 import Track from './Track';
 import Category from './Category';

@@ -5,12 +5,14 @@ export default class MediaItemType extends String {
 	static track: MediaItemType = 'track';
 	static lyric: MediaItemType = 'lyric';
 	static pack: MediaItemType = 'pack';
+	static quote: MediaItemType = 'quote';
 
 	static allTypes: MediaItemType[] = [
 		MediaItemType.artist,
 		MediaItemType.track,
 		MediaItemType.lyric,
-		MediaItemType.pack
+		MediaItemType.pack,
+		MediaItemType.quote
 	];
 
 	private static mapping: any;
@@ -20,7 +22,8 @@ export default class MediaItemType extends String {
 				artist: require('./Artist').default,
 				track: require('./Track').default,
 				lyric: require('./Lyric').default,
-				pack: require('./Pack').default
+				pack: require('./Pack').default,
+				quote: require('./Quote').default
 			};
 		}
 		return MediaItemType.mapping;

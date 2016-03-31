@@ -1,26 +1,33 @@
 import * as React from 'react';
+import { Modal } from 'react-bootstrap';
 import SearchBar, { SearchBarState } from './SearchBar';
 import SearchResultsTable from './SearchResultsTable';
 import * as Firebase from 'firebase';
 import Request from '../../Models/Request';
 import RequestType from "../../Models/RequestType";
 import Response from "../../Models/Response";
+import * as classNames from 'classnames';
+import { firebase as FirebaseConfig } from '../../config';
 
-interface AppProps {
+interface SearchPanelProps extends React.Props<SearchPanel> {
+	show: boolean;
 }
 
 interface AppState {
-	response: Response;
+	showModal?: boolean;
+	response?: Response;
 }
 
-export default class SearchPanel extends React.Component<AppProps, AppState> {
+export default class SearchPanel extends React.Component<SearchPanelProps, AppState> {
 	searchQueue: Firebase;
 
-	constructor(props: AppProps) {
+	constructor(props: SearchPanelProps) {
 		super(props);
-		this.searchQueue = new Firebase(`https://often-dev.firebaseio.com/queues/search/tasks`);
+
+		this.searchQueue = new Firebase(`${FirebaseConfig.BaseURL}/queues/search/tasks`);
 		this.state = {
-			response: new Response({id: "top"})
+			response: new Response({id: "top"}),
+			showModal: this.props.show
 		};
 	}
 
@@ -51,12 +58,30 @@ export default class SearchPanel extends React.Component<AppProps, AppState> {
 		});
 	}
 
+	componentWillReceiveProps(nextProps: SearchPanelProps) {
+		this.setState({
+			showModal: nextProps.show
+		});
+	}
+
+	close() {
+		this.setState({showModal: false});
+	}
+
 	render() {
+		let classes = classNames("search-panel", {hidden: !this.props.show});
 		return (
-			<div className="search-panel">
-				<SearchBar onChange={this.onSearchBarChange.bind(this)}/>
-				<SearchResultsTable response={this.state.response} />
-			</div>
+			<Modal show={this.state.showModal} onHide={this.close.bind(this)} bsSize="large">
+				<Modal.Header closeButton>
+					<Modal.Title>Search</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<div className={classes}>
+						<SearchBar onChange={this.onSearchBarChange.bind(this)} />
+						<SearchResultsTable response={this.state.response} />
+					</div>
+				</Modal.Body>
+			</Modal>
 		);
 	}
 }

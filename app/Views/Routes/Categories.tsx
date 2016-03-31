@@ -22,7 +22,7 @@ export default class Categories extends React.Component<CategoriesProps, {}> {
 					<Row>
 						<Col sm={12}>
 							<div className="content">
-								<SearchPanel />
+								<SearchPanel show={true} />
 							</div>
 						</Col>
 					</Row>

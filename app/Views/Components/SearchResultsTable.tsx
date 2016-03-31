@@ -3,6 +3,7 @@ import Element = JSX.Element;
 import Response from '../../Models/Response';
 import MediaItemView from './MediaItemView';
 import * as classNames from 'classnames';
+import { PanelGroup, Panel } from 'react-bootstrap';
 
 interface SearchResultsTableProps {
 	response: Response;
@@ -10,25 +11,26 @@ interface SearchResultsTableProps {
 
 export default class SearchResultsTable extends React.Component<SearchResultsTableProps, any> {
 	render(): Element {
-		var resultNodes = this.props.response.results.map(group => {
+		var resultNodes = this.props.response.results.map((group, i) => {
 			var rows = group.results.map(item => {
-				return <MediaItemView item={item} />;
+				return <MediaItemView key={item._id} item={item} />;
 			});
 
 			return (
-				<div className={classNames("media-item-group clearfix", group.type as string)}>
-					<h3>{group.type}s</h3>
-					<div class="items">
-						{rows}
+				<Panel header={group.type} eventKey={i} key={i}>
+					<div className={classNames("media-item-group clearfix", group.type as string)}>
+						<div className="items">
+							{rows}
+						</div>
 					</div>
-				</div>
+				</Panel>
 			);
 		});
 
 		return (
-			<div className="search-results">
+			<PanelGroup className="search-results" accordion>
 				{resultNodes}
-			</div>
+			</PanelGroup>
 		);
 	}
 }
