@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Modal } from 'react-bootstrap';
 import SearchBar, { SearchBarState } from './SearchBar';
+import { firebase as FirebaseConfig } from '../../config';
 import SearchResultsTable from './SearchResultsTable';
 import * as Firebase from 'firebase';
 import Request from '../../Models/Request';
