@@ -28,7 +28,7 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 							<img src={(this.props.item as TrackIndexableObject).song_art_image_url}/>
 						</div>
 						<div className="meta">
-							<div class="title">
+							<div className="title">
 								{this.props.item.title}
 							</div>
 							<div className="artist">

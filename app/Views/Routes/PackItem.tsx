@@ -5,7 +5,6 @@ import MediaItemView from '../Components/MediaItemView';
 import MediaItemType from '../../Models/MediaItemType';
 import MediaItemSource from '../../Models/MediaItemSource';
 
-
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
 		packId: string;
@@ -13,11 +12,11 @@ interface PackItemProps extends React.Props<PackItem> {
 }
 
 interface PackItemState extends React.Props<PackItem> {
-	model: Pack;
+	model?: Pack;
+	shouldShowSearchPanel?: boolean;
 }
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
-
 	constructor(props: PackItemProps) {
 		super(props);
 
@@ -28,7 +27,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 
 		this.state = {
-			model: pack
+			model: pack,
+			shouldShowSearchPanel: false
 		};
 
 		pack.on('update', () => {
@@ -38,14 +38,21 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
+	onClickAddItem(e: Event) {
+		e.preventDefault();
+
+		this.setState({
+			shouldShowSearchPanel: true
+		});
+	}
 
 	render() {
 		var itemsComponents = this.state.model.items.map(item => {
-			return <MediaItemView key={item._id} item={item}/>;
+			return <MediaItemView key={item._id} item={item} />;
 		});
 
 		return (
-			<div className="section">
+			<div className="section pack-item">
 				<header className="section-header">
 					<h2>{this.state.model.name}</h2>
 				</header>
@@ -56,7 +63,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<form>
 								<Row>
 									<Col xs={4}>
-										<div class="image-upload">
+										<div className="image-upload">
 											<Thumbnail src={this.state.model.get('image_url')} />
 										</div>
 									</Col>
@@ -72,9 +79,16 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<h3>Items</h3>
 								<div className="items">
 									{itemsComponents}
+
+									<div className="add-item pull-left" onClick={this.onClickAddItem.bind(this)}>
+										<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
+									</div>
 								</div>
 							</div>
 
+						</Col>
+						<Col xs={6}>
+							<SearchPanel show={this.state.shouldShowSearchPanel} />
 						</Col>
 					</Row>
 				</Grid>
