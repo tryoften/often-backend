@@ -29,12 +29,8 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 			/* If the id of the category hasn't been passed then it most likely doesn't exist on the server. */
 			/* Create placeholder images */
 			attr.image = {
-				small: {
-					url: 'http://placehold.it/200x200'
-				},
-				large: {
-					url: 'http://placehold.it/400x400'
-				}
+				small_url: 'http://placehold.it/200x200',
+				large_url: 'http://placehold.it/400x400'
 			};
 			/* Set name to an empty string */
 			attr.name = '';
@@ -93,7 +89,6 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 	}
 
 	render() {
-
 		return (
 			<div className="section">
 				<header className="section-header">
@@ -119,7 +114,7 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 								<Row>
 									<Col xs={4}>
 										<div class="image-upload">
-											<Thumbnail src={this.state.model.get('image').small.url} />
+											<Thumbnail src={this.state.model.get('image').small_url} />
 										</div>
 									</Col>
 									<Col xs={8}>
@@ -127,25 +122,16 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 											type="text"
 											label="Small Image"
 											bsSize="medium"
-											placeholder={this.state.model.get('image').small.url}
-											value={this.state.model.get('image').small.url}
+											placeholder={this.state.model.get('image').small_url}
+											value={this.state.model.get('image').small_url}
 											onChange={this.handleSmallImageChange}
 										/>
-									</Col>
-								</Row>
-								<Row>
-									<Col xs={4}>
-										<div class="image-upload">
-											<Thumbnail src={this.state.model.get('image').large.url} />
-										</div>
-									</Col>
-									<Col xs={8}>
 										<Input
 											type="text"
 											label="Large Image"
 											bsSize="medium"
-											placeholder={this.state.model.get('image').large.url}
-											value={this.state.model.get('image').large.url}
+											placeholder={this.state.model.get('image').large_url}
+											value={this.state.model.get('image').large_url}
 											onChange={this.handleLargeImageChange}
 										/>
 									</Col>

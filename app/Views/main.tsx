@@ -11,6 +11,7 @@ import Categories from './Routes/CategoriesRoute';
 import PackItem from './Routes/PackItem';
 import CategoryItem from './Routes/CategoryItem';
 import Owners from './Routes/OwnersRoute';
+import OwnerItem from './Routes/OwnerItem';
 
 render((
 	<Router history={hashHistory}>
@@ -22,6 +23,7 @@ render((
 			<Route path="/category/:categoryId" component={CategoryItem} />
 			<Route path="/category" component={CategoryItem} />
 			<Route path="/owners" component={Owners} />
+			<Route path="/owner/:ownerId" component={OwnerItem} />
 		</Route>
 	</Router>
 ), document.getElementById('app-container'));
