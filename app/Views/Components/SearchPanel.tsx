@@ -8,18 +8,17 @@ import Request from '../../Models/Request';
 import RequestType from "../../Models/RequestType";
 import Response from "../../Models/Response";
 import * as classNames from 'classnames';
-import { firebase as FirebaseConfig } from '../../config';
 
 interface SearchPanelProps extends React.Props<SearchPanel> {
 	show: boolean;
 }
 
-interface AppState {
+interface SearchPanelState {
 	showModal?: boolean;
 	response?: Response;
 }
 
-export default class SearchPanel extends React.Component<SearchPanelProps, AppState> {
+export default class SearchPanel extends React.Component<SearchPanelProps, SearchPanelState> {
 	searchQueue: Firebase;
 
 	constructor(props: SearchPanelProps) {
