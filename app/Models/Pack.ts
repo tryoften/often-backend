@@ -6,6 +6,7 @@ import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
+import Category from './Category';
 
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
@@ -58,7 +59,11 @@ class Pack extends MediaItem {
 	}
 
 	get items(): IndexableObject[] {
-		return this.get('items');
+		return this.get('items') || [];
+	}
+
+	get categories(): any {
+		return this.get('categories') || {};
 	}
 
 	/**
@@ -73,6 +78,49 @@ class Pack extends MediaItem {
 
 		this.save({items});
 	}
+
+	assignCategoryToItem (itemId: string, category: Category) {
+		/* Find item in items array */
+
+		var targetItem;
+		for (var item of this.items) {
+			if (itemId == item._id){
+				targetItem = item;
+				break;
+			}
+		}
+
+		if (!targetItem) {
+			throw new Error('Invalid item id selected for category change');
+		}
+
+		/* Assign category on item */
+		var oldCategoryId;
+		if (targetItem.category_id) {
+			oldCategoryId = targetItem.category_id;
+		}
+		targetItem.category_name = category.name;
+		targetItem.category_id = category.id;
+
+		//var newCategories = {};
+		//for (var item of this.items) {
+		//	var item = <any>item;
+		//	if (item.category_id) {
+		//		/* If a category_id is set on an item, then add it */
+		//		newCategories[item.category_id] = this.categories[item.category_id];
+		//	}
+		//}
+        //
+		///* Finally set category that was just set */
+		//newCategories[category.id] = category.toIndexingFormat();
+		//this.set('categories', newCategories);
+
+		this.save();
+
+
+
+	}
+
 
 	/**
 	 * Deserializes media items from an array of MediaItemInfo objects and sets them as items on the pack

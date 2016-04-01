@@ -11,7 +11,7 @@ export default class Categories extends React.Component<CategoriesProps, {}> {
 		return (
 			<div className="section">
 				<header className="section-header">
-					<h2>Categories!</h2>
+					<h2>Categories</h2>
 
 					<ButtonToolbar className="pull-right">
 						<Button bsStyle="primary" bsSize="small" active href="#/category/">Add Category</Button>

@@ -6,6 +6,7 @@ import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
 import { generate as generateId } from 'shortid';
+import {IndexableObject} from "../Interfaces/Indexable";
 
 
 export interface CategoryAttributes {
@@ -29,6 +30,14 @@ class Category extends BaseModel {
 
 	get url(): string {
 		return `${FirebaseConfig.BaseURL}/categories/${this.id}`;
+	}
+
+	get name(): string {
+		return this.get('name');
+	}
+
+	get image(): any {
+		return this.get('image') || {};
 	}
 
 	/**
@@ -55,6 +64,14 @@ class Category extends BaseModel {
 					return category;
 				});
 		});
+	}
+
+	toIndexingFormat(): any {
+		return {
+			id: this.id,
+			image: this.image,
+			name: this.name
+		}
 	}
 }
 

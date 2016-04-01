@@ -1,10 +1,13 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon, MenuItem, DropdownButton } from 'react-bootstrap';
 import Pack from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import MediaItemType from '../../Models/MediaItemType';
 import MediaItemSource from '../../Models/MediaItemSource';
 import SearchPanel from '../Components/SearchPanel';
+import Categories from '../../Collections/Categories';
+import Category from '../../Models/Category';
+
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -15,6 +18,7 @@ interface PackItemProps extends React.Props<PackItem> {
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
+	categories?: any;
 }
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
@@ -27,8 +31,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			id: props.params.packId
 		});
 
+		var categories = new Categories();
+
 		this.state = {
 			model: pack,
+			categories: categories,
 			shouldShowSearchPanel: false
 		};
 
@@ -37,6 +44,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				model: pack
 			});
 		});
+
+		//this.onSelectCategory = this.onSelectCategory.bind(this);
 	}
 
 	onClickAddItem(e: Event) {
@@ -47,9 +56,37 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
+	onClickCategory(itemId: string, category: Category) {
+		var model = this.state.model;
+		model.assignCategoryToItem(itemId, category);
+
+		this.setState({model: model});
+	}
+
 	render() {
-		var itemsComponents = this.state.model.items.map(item => {
-			return <MediaItemView key={item._id} item={item} />;
+
+		var categoryMenu = (item) => {
+			return this.state.categories.map(category => {
+				return <MenuItem eventKey={category.id} onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}</MenuItem>
+			});
+		};
+
+
+
+		var itemsComponents = this.state.model.items.map((item: any) => {
+			return (
+				<Row>
+					<MediaItemView key={item._id} item={item} />
+					<DropdownButton
+						bsStyle="default"
+						title={item.category_name || "Unassigned"}
+						id={item._id}
+					>
+						{categoryMenu(item)}
+					</DropdownButton>
+				</Row>
+			);
+
 		});
 
 		return (
@@ -80,7 +117,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<h3>Items</h3>
 								<div className="items">
 									{itemsComponents}
-
 									<div className="add-item pull-left" onClick={this.onClickAddItem.bind(this)}>
 										<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
 									</div>
