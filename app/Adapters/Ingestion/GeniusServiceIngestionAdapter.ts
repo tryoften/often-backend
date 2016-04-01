@@ -247,7 +247,6 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 					default:
 						throw new Error('Invalid format type for artist ingestion request. Permitted values are Url, Index, Id');
 				}
-				break;
 			case MediaItemType.track:
 				switch (task.format) {
 					case InputFormat.Id:
@@ -258,7 +257,6 @@ class GeniusServiceIngestionAdapter extends IngestionAdapter {
 					default:
 						throw new Error('Invalid format type for track ingestion request. Permitted values are Id');
 				}
-				break;
 			default:
 				throw new Error('Invalid task supplied.');
 		}

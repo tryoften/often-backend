@@ -8,8 +8,8 @@ import * as _ from 'underscore';
 
 export interface MediaItemAttributes {
 	id?: string;
-	source: MediaItemSource;
-	type: MediaItemType;
+	source?: MediaItemSource;
+	type?: MediaItemType;
 	score?: number;
 }
 
@@ -23,7 +23,7 @@ export class MediaItem extends BaseModel implements Indexable {
 	 * @param attributes
 	 * @param options
      */
-	constructor(attributes: MediaItemAttributes, options?: any) {
+	constructor(attributes: MediaItemAttributes = {}, options?: any) {
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}

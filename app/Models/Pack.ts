@@ -10,8 +10,12 @@ import MediaItemSource from "./MediaItemSource";
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
+	description?: string;
 	subscribers?: UserId[];
-	image?: Object;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
 	meta?: PackMeta;
 	items?: MediaItem[];
 }
@@ -32,7 +36,7 @@ class Pack extends MediaItem {
 	 * @param attributes {PackAttributes
 	 * @param options
 	 */
-	constructor(attributes: PackAttributes, options?: any) {
+	constructor(attributes: PackAttributes = {}, options?: any) {
 		attributes = _.defaults(attributes, {
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often
@@ -45,12 +49,30 @@ class Pack extends MediaItem {
 		super(attributes, options);
 	}
 
+	defaults(): Backbone.ObjectHash {
+		return {
+			name: '',
+			description: '',
+			type: MediaItemType.pack,
+			source: MediaItemSource.Often,
+			image: {
+				small_url: 'http://placehold.it/200x200',
+				large_url: 'http://placehold.it/400x400'
+			},
+			items: []
+		};
+	}
+
 	get url(): Firebase {
 		return new Firebase(`${FirebaseConfig.BaseURL}/packs/${this.id}`);
 	}
 
 	get name(): string {
 		return this.get('name');
+	}
+
+	get description(): string {
+		return this.get('description');
 	}
 
 	set name(value: string) {

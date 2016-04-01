@@ -22,7 +22,7 @@ class Artist extends MediaItem {
 	}
 
 	get url(): Firebase {
-		return new Firebase(`${FirebaseConfig.BaseURL}/artists/${this.id}`)
+		return new Firebase(`${FirebaseConfig.BaseURL}/artists/${this.id}`);
 	}
 
 	public trackExists (songId: string) {
@@ -31,10 +31,6 @@ class Artist extends MediaItem {
 
 	get name(): string {
 		return this.get('name');
-	}
-
-	set(obj: any, options?: Backbone.ModelSetOptions): Backbone.Model {
-		return super.set(obj, options);
 	}
 
 	/**

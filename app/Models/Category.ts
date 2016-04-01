@@ -7,24 +7,34 @@ import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
 import { generate as generateId } from 'shortid';
 
-
 export interface CategoryAttributes {
 	id?: string;
 	name?: string;
-	image?: any;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
 }
 
 /**
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
  */
 class Category extends BaseModel {
-
-	constructor(attributes?: CategoryAttributes, opts: any = {}) {
-		opts.autoSync = false;
+	constructor(attributes: CategoryAttributes = {}, opts: any = {}) {
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
 		super(attributes, opts);
+	}
+
+	defaults(): Backbone.ObjectHash {
+		return {
+			name: '',
+			image: {
+				small_url: 'http://placehold.it/200x200',
+				large_url: 'http://placehold.it/400x400'
+			}
+		};
 	}
 
 	get url(): string {

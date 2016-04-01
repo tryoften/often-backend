@@ -7,7 +7,6 @@ import MediaItemSource from "./MediaItemSource";
 import * as _ from 'underscore';
 
 export default class Quote extends MediaItem {
-
 	constructor(attributes?: any, options?: any) {
 		super(attributes, options);
 	}

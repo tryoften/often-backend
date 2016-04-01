@@ -1,14 +1,11 @@
 import * as React from 'react';
-import classNames = require('classnames');;
 import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import { Link } from 'react-router';
-import MediaItem from "../../Models/MediaItem";
 import CategoryView from '../Components/CategoryView';
 import Categories from '../../Collections/Categories';
-import Category from '../../Models/Category';
 
 interface CategoriesProps extends React.Props<CategoriesRoute> {
-	open?: boolean
+	open?: boolean;
 }
 
 interface CategoriesState extends React.Props<CategoriesRoute> {
@@ -29,7 +26,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 		this.categories.on('update', () => {
 			this.setState({
 				categories: this.categories
-			})
+			});
 		});
 	}
 
@@ -41,7 +38,6 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 				</Link>
 			);
 		});
-
 
 		return (
 			<div className="section">

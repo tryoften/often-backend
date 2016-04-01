@@ -10,7 +10,8 @@ import Response from "../../Models/Response";
 import * as classNames from 'classnames';
 
 interface SearchPanelProps extends React.Props<SearchPanel> {
-	show: boolean;
+	presentInModal?: boolean;
+	show?: boolean;
 }
 
 interface SearchPanelState {
@@ -69,19 +70,26 @@ export default class SearchPanel extends React.Component<SearchPanelProps, Searc
 	}
 
 	render() {
-		let classes = classNames("search-panel", {hidden: !this.props.show});
-		return (
+		let classes = classNames("search-panel", {
+			hidden: this.props.presentInModal && !this.props.show
+		});
+
+		let content = (
+			<div className={classes}>
+				<SearchBar onChange={this.onSearchBarChange.bind(this)} />
+				<SearchResultsTable response={this.state.response} />
+			</div>
+		);
+
+		return this.props.presentInModal ? (
 			<Modal show={this.state.showModal} onHide={this.close.bind(this)} bsSize="large">
 				<Modal.Header closeButton>
 					<Modal.Title>Search</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<div className={classes}>
-						<SearchBar onChange={this.onSearchBarChange.bind(this)} />
-						<SearchResultsTable response={this.state.response} />
-					</div>
+					{content}
 				</Modal.Body>
 			</Modal>
-		);
+		) : content;
 	}
 }
