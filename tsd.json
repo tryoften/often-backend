@@ -70,6 +70,9 @@
     },
     "react/react-addons-transition-group.d.ts": {
       "commit": "bf4ecf5b68887ed5a065e3922885c34d0f5739df"
+    },
+    "object-path/object-path.d.ts": {
+      "commit": "e8f8e7471b8ca92ca417f8c878f64ae4d1067972"
     }
   }
 }

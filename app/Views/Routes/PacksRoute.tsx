@@ -47,7 +47,9 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 					<h2>Packs</h2>
 
 					<ButtonToolbar className="pull-right">
-						<Button bsStyle="primary" bsSize="small" active>Add Pack</Button>
+						<Link to="/pack">
+							<Button bsStyle="primary" bsSize="small" active>Add Pack</Button>
+						</Link>
 					</ButtonToolbar>
 				</header>
 

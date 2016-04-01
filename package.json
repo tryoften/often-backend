@@ -23,6 +23,7 @@
     "config": "^1.19.0",
     "cycle": "^1.0.3",
     "dateformat": "^1.0.12",
+    "dot-object": "^1.4.1",
     "elasticsearch": "^10.0.0",
     "express": "^4.13.3",
     "feedparser": "^1.1.3",

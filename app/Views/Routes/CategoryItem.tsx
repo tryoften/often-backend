@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Grid, Row, Col, Input, Thumbnail, ButtonInput } from 'react-bootstrap';
-import Category, {CategoryAttributes} from '../../Models/Category';
-
+import Category, { CategoryAttributes } from '../../Models/Category';
+import * as objectPath from 'object-path';
 
 interface CategoryItemProps extends React.Props<CategoryItem> {
 	params: {
@@ -12,6 +12,7 @@ interface CategoryItemProps extends React.Props<CategoryItem> {
 interface CategoryItemState extends React.Props<CategoryItem> {
 	isNew?: boolean;
 	model?: Category;
+	form?: CategoryAttributes;
 }
 
 export default class CategoryItem extends React.Component<CategoryItemProps, CategoryItemState> {
@@ -19,80 +20,54 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 	constructor(props: CategoryItemProps) {
 		super(props);
 
-		let isNew = false;
-
-		var attr: CategoryAttributes = {};
-		if (props.params.categoryId) {
-			// instantiate new model and fetch from server
-			attr.id = props.params.categoryId;
-		} else {
-			/* If the id of the category hasn't been passed then it most likely doesn't exist on the server. */
-			/* Create placeholder images */
-			attr.image = {
-				small_url: 'http://placehold.it/200x200',
-				large_url: 'http://placehold.it/400x400'
-			};
-			/* Set name to an empty string */
-			attr.name = '';
-
-			isNew = true;
-		}
-
-		let category = new Category(attr);
-		category.fetch();
+		let isNew = !props.params.categoryId;
+		let category = isNew ? new Category() : new Category({id: props.params.categoryId});
 
 		this.state = {
 			model: category,
-			isNew: isNew
+			isNew: isNew,
+			form: category.toJSON()
 		};
 
-		category.on('update', () => {
-			this.setState({
-				model: category
-			});
-		});
-
+		category.on('update', this.updateStateWithModel.bind(this));
 		this.handleUpdate = this.handleUpdate.bind(this);
-		this.handleNameChange = this.handleNameChange.bind(this);
-		this.handleSmallImageChange = this.handleSmallImageChange.bind(this);
-		this.handleLargeImageChange = this.handleLargeImageChange.bind(this);
-
+		this.handlePropChange = this.handlePropChange.bind(this);
 	}
 
-	handleSmallImageChange(e) {
-		var model = this.state.model;
-		var imgObj = model.get('image');
-		imgObj.small.url = e.target.value;
-		model.set('image', imgObj);
-		this.setState({model: model});
+	componentDidMount() {
+		this.state.model.fetch({
+			success: this.updateStateWithModel.bind(this)
+		});
 	}
 
-	handleLargeImageChange(e) {
-		var model = this.state.model;
-		var imgObj = model.get('image');
-		imgObj.large.url = e.target.value;
-		model.set('image', imgObj);
-		this.setState({model: model});
+	updateStateWithModel(model: Category) {
+		this.setState({
+			model,
+			form: model.toJSON()
+		});
+	}
+
+	handlePropChange(e: any) {
+		let id = e.target.id;
+		let form = this.state.form;
+		objectPath.set(form, id, e.target.value);
+		this.setState({form});
 	}
 
 	handleUpdate(e) {
 		e.preventDefault();
-		var model = this.state.model;
-		model.save();
+
+		let model = this.state.model;
+		model.save(this.state.form);
 		this.setState({model: model, isNew: false});
 	}
 
-	handleNameChange(e) {
-		var model = this.state.model;
-		model.set('name', e.target.value);
-		this.setState({model: model});
-	}
 
 	render() {
 		return (
 			<div className="section">
 				<header className="section-header">
-					<h2>{this.state.model.get('name')}</h2>
+					<h2>{this.state.form.name}</h2>
 				</header>
 
 				<Grid fluid={true}>
@@ -102,43 +77,46 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 								<Row>
 									<Col xs={8}>
 										<Input
+											id="name"
 											type="text"
 											label="Name"
 											bsSize="medium"
-											placeholder={this.state.model.get('name')}
-											value={this.state.model.get('name')}
-											onChange={this.handleNameChange}
+											placeholder={this.state.form.name}
+											value={this.state.form.name}
+											onChange={this.handlePropChange}
 										/>
 									</Col>
 								</Row>
 								<Row>
 									<Col xs={4}>
 										<div class="image-upload">
-											<Thumbnail src={this.state.model.get('image').small_url} />
+											<Thumbnail src={this.state.form.image.small_url} />
 										</div>
 									</Col>
 									<Col xs={8}>
 										<Input
+											id="image.small_url"
 											type="text"
 											label="Small Image"
 											bsSize="medium"
-											placeholder={this.state.model.get('image').small_url}
-											value={this.state.model.get('image').small_url}
-											onChange={this.handleSmallImageChange}
+											placeholder={this.state.form.image.small_url}
+											value={this.state.form.image.small_url}
+											onChange={this.handlePropChange}
 										/>
 										<Input
+											id="image.large_url"
 											type="text"
 											label="Large Image"
 											bsSize="medium"
-											placeholder={this.state.model.get('image').large_url}
-											value={this.state.model.get('image').large_url}
-											onChange={this.handleLargeImageChange}
+											placeholder={this.state.form.image.large_url}
+											value={this.state.form.image.large_url}
+											onChange={this.handlePropChange}
 										/>
 									</Col>
 								</Row>
 								<Row>
 									<Col xs={8}>
-										<ButtonInput type="submit" value={this.state.isNew ? 'Create':'Update'} />
+										<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Save'} />
 									</Col>
 								</Row>
 							</form>
