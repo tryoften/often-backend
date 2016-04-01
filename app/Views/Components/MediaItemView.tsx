@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {IndexableObject} from "../../Interfaces/Indexable";
-import MediaItemType from "../../Models/MediaItemType";
+import * as classNames from 'classnames';
+import { IndexableObject } from "../../Interfaces/Indexable";
 import { TrackIndexableObject } from "../../Models/Track";
 import { ArtistIndexableObject } from "../../Models/Artist";
+import MediaItemType from "../../Models/MediaItemType";
 import ImageBrandMask from '../Components/ImageBrandMask';
 
 interface SearchResultItemViewProps {
@@ -12,9 +13,11 @@ interface SearchResultItemViewProps {
 export default class MediaItemView extends React.Component<SearchResultItemViewProps, {}> {
 	render() {
 		switch (this.props.item._type) {
+			case MediaItemType.quote:
 			case MediaItemType.lyric:
+				let classes = classNames("media-item pull-left", this.props.item._type);
 				return (
-					<div className="media-item lyric pull-left">
+					<div className={classes}>
 						<div className="content">
 							{this.props.item.text}
 						</div>

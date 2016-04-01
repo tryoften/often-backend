@@ -1,5 +1,6 @@
 import MediaItem from "./MediaItem";
 import { firebase as FirebaseConfig } from '../config';
+import {IndexableObject} from "../Interfaces/Indexable";
 
 export default class Owner extends MediaItem {
 
@@ -9,8 +10,13 @@ export default class Owner extends MediaItem {
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
-			}
+			},
+			quotes: {}
 		};
+	}
+
+	get quotes(): { [key: string]: IndexableObject } {
+		return this.get('quotes');
 	}
 
 	get name(): string {

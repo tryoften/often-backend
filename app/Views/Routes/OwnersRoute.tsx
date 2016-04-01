@@ -46,7 +46,7 @@ export default class OwnersRoute extends React.Component<OwnersProps, OwnersStat
 					<h2>Owners</h2>
 
 					<ButtonToolbar className="pull-right">
-						<Button bsStyle="primary" bsSize="small" active href="#/owner">Add Category</Button>
+						<Button bsStyle="primary" bsSize="small" active href="#/owner">Add Owner</Button>
 					</ButtonToolbar>
 				</header>
 

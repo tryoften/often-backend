@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Quote from '../../Models/Quote';
 import { Input } from 'react-bootstrap';
-import Element = JSX.Element;
 
 interface QuoteFormProps extends React.Props<QuoteForm> {
 	quoteId?: string;

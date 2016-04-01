@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, ButtonInput } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Glyphicon } from 'react-bootstrap';
 import Owner from '../../Models/Owner';
 import * as _ from 'underscore';
+import MediaItemView from '../Components/MediaItemView';
 
 interface OwnerItemProps extends React.Props<OwnerItem> {
 	params: {
@@ -80,7 +81,16 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		this.setState({model: model});
 	}
 
+	onClickAddItem(e: Event) {
+		e.preventDefault();
+	}
+
 	render() {
+		var itemsComponents = Object.keys(this.state.model.quotes).map(key => {
+			let item = this.state.model.quotes[key];
+			return <MediaItemView key={item._id} item={item} />;
+		});
+
 		return (
 			<div className="section">
 				<header className="section-header">
@@ -127,6 +137,18 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 											onChange={this.handleLargeImageChange}
 										/>
 									</Col>
+								</Row>
+								<Row>
+									<div className="media-item-group">
+										<h3>Items</h3>
+										<div className="items">
+											{itemsComponents}
+
+											<div className="add-item pull-left" onClick={this.onClickAddItem.bind(this)}>
+												<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
+											</div>
+										</div>
+									</div>
 								</Row>
 								<Row>
 									<Col xs={8}>
