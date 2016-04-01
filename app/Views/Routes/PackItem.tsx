@@ -5,6 +5,7 @@ import MediaItemView from '../Components/MediaItemView';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
+import { IndexableObject } from "../../Interfaces/Indexable";
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -53,6 +54,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	updateStateWithPack(pack: Pack) {
 		this.setState({
 			model: pack,
+			form: pack.toJSON(),
 			display: true
 		});
 	}
@@ -66,6 +68,19 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		this.setState({
 			shouldShowSearchPanel: true
+		});
+	}
+
+	onSelectItem(item: IndexableObject) {
+		let items = this.state.model.get('items');
+		items.push(item);
+
+		this.state.model.save({items});
+
+		this.setState({
+			model: this.state.model,
+			form: this.state.model.toJSON(),
+			shouldShowSearchPanel: false
 		});
 	}
 
@@ -162,7 +177,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								</Row>
 							</Col>
 							<Col xs={6}>
-								<AddItemToPackModal show={this.state.shouldShowSearchPanel} />
+								<AddItemToPackModal show={this.state.shouldShowSearchPanel} onSelectItem={this.onSelectItem.bind(this)} />
 							</Col>
 						</Row>
 						<Row>

@@ -81,6 +81,10 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		this.setState({model: model});
 	}
 
+	onClickQuote(e) {
+
+	}
+
 	onClickAddItem(e: Event) {
 		e.preventDefault();
 	}
@@ -142,11 +146,11 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 									<div className="media-item-group">
 										<h3>Items</h3>
 										<div className="items">
-											{itemsComponents}
-
 											<div className="add-item pull-left" onClick={this.onClickAddItem.bind(this)}>
 												<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
 											</div>
+
+											{itemsComponents}
 										</div>
 									</div>
 								</Row>

@@ -18,8 +18,7 @@ export default class Home extends React.Component<HomeProps, {}> {
 						transitionEnterTimeout={200}
 						transitionLeaveTimeout={200}>
 						{React.cloneElement(this.props.children || <div></div>, {
-							key: this.props.location.pathname
-							})}
+							key: this.props.location.pathname})}
 					</ReactCSSTransitionGroup>
 				</div>
 			</div>

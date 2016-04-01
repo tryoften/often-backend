@@ -23,6 +23,14 @@ export default class Owner extends MediaItem {
 		return this.get('name');
 	}
 
+	set quotes(value: { [key: string]: IndexableObject }) {
+		this.set('quotes', value);
+	}
+
+	set name(value: string) {
+		this.set('name', value);
+	}
+
 	get url(): Firebase {
 		return new Firebase(`${FirebaseConfig.BaseURL}/owners/${this.id}`);
 	}
