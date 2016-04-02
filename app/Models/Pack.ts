@@ -101,37 +101,50 @@ class Pack extends MediaItem {
 		this.save({items});
 	}
 
+	/**
+	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
+	 *
+	 * @param {string} itemId - Id of an item to be categorized.
+	 * @param {Category} category - Category that is to be assigned to an item.
+	 * @returns {void}
+	 */
 	assignCategoryToItem (itemId: string, category: Category) {
-		/* Find item in items array */
 
 		var targetItem;
+		var itemIndex = 0;
 		for (var item of this.items) {
 			if (itemId == item._id){
 				targetItem = item;
 				break;
 			}
+			itemIndex++;
 		}
 
 		if (!targetItem) {
 			throw new Error('Invalid item id selected for category change');
 		}
 
+
+		var newCategories = {};
+		for (var item of this.items) {
+			if (item.category_id && item._id !== itemId) {
+				/* If a category_id is set on an item, then add it */
+				newCategories[item.category_id] = this.get('categories')[item.category_id];
+			}
+		}
+
 		/* Assign category on item */
 		targetItem.category_name = category.name;
 		targetItem.category_id = category.id;
 
-		var newCategories = {};
-		for (var item of this.items) {
-			if (item.category_id) {
-				/* If a category_id is set on an item, then add it */
-				newCategories[item.category_id] = this.categories[item.category_id];
-			}
-		}
-
-		/* Finally set category that was just set */
+		/* Finally update the categories collection on the pack */
 		newCategories[category.id] = category.toIndexingFormat();
-		this.set('categories', 'test');
+		this.url.child(`items/${itemIndex}`).update({
+			category_name: category.name,
+			category_id: category.id
+		});
 
+		this.set('categories', newCategories);
 		this.save();
 
 

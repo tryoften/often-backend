@@ -49,9 +49,13 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		pack.on('update', this.updateStateWithPack);
+		this.state.categories.on('update', this.updateStateWithCategories);
 	}
 
 	componentDidMount() {
+		this.state.categories.fetch({
+			success:this.updateStateWithCategories
+		});
 		this.state.model.fetch({
 			success: this.updateStateWithPack
 		});
@@ -63,8 +67,12 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			form: pack.toJSON(),
 			display: true
 		});
+	}
 
-		//this.onSelectCategory = this.onSelectCategory.bind(this);
+	updateStateWithCategories(categories: Categories) {
+		this.setState({
+			categories: categories
+		});
 	}
 
 	componentWillReceiveProps() {
