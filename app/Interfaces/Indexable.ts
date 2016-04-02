@@ -15,6 +15,9 @@ export interface IndexableObject extends CommonIndexedFields {
 	_type: string;
 	_index: string;
 	_score: number;
+}
+
+export interface IndexablePackItem extends IndexableObject {
 	category_id?: string;
 	category_name?: string;
 }

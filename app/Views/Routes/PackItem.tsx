@@ -5,7 +5,7 @@ import MediaItemView from '../Components/MediaItemView';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
-import { IndexableObject } from "../../Interfaces/Indexable";
+import { IndexablePackItem } from "../../Interfaces/Indexable";
 import Categories from '../../Collections/Categories';
 import Category from '../../Models/Category';
 
@@ -45,16 +45,17 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		};
 
 		this.updateStateWithPack = this.updateStateWithPack.bind(this);
+		this.updateStateWithCategories = this.updateStateWithCategories.bind(this);
 		this.handlePropChange = this.handlePropChange.bind(this);
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		pack.on('update', this.updateStateWithPack);
-		this.state.categories.on('update', this.updateStateWithCategories);
+		categories.on('update', this.updateStateWithCategories);
 	}
 
 	componentDidMount() {
 		this.state.categories.fetch({
-			success:this.updateStateWithCategories
+			success: this.updateStateWithCategories
 		});
 		this.state.model.fetch({
 			success: this.updateStateWithPack
@@ -94,7 +95,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.setState({model: model});
 	}
 
-	onSelectItem(item: IndexableObject) {
+	onSelectItem(item: IndexablePackItem) {
 		let items = this.state.model.get('items');
 		items.push(item);
 
@@ -124,16 +125,13 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	render() {
-
 		var categoryMenu = (item) => {
 			return this.state.categories.map(category => {
-				return <MenuItem eventKey={category.id} onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}</MenuItem>
+				return <MenuItem key={category.id} eventKey={category.id} onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}</MenuItem>
 			});
 		};
 
-
-
-		var itemsComponents = this.state.model.items.map((item: any) => {
+		var itemsComponents = this.state.model.items.map((item: IndexablePackItem) => {
 			return (
 				<Row>
 					<MediaItemView key={item._id} item={item} />

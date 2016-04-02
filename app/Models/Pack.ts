@@ -1,7 +1,7 @@
 import { firebase as FirebaseConfig } from '../config';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
-import { IndexableObject } from '../Interfaces/Indexable';
+import { IndexablePackItem } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
@@ -80,7 +80,7 @@ class Pack extends MediaItem {
 		this.set('name', value);
 	}
 
-	get items(): IndexableObject[] {
+	get items(): IndexablePackItem[] {
 		return this.get('items') || [];
 	}
 
@@ -158,7 +158,7 @@ class Pack extends MediaItem {
 	 * @param {MediaItemInfo[]}  mediaItemInfos - An array of MediaItemInfo items to be used for deserialization of corresponding media items
 	 * @returns {Promise<IndexableObject[]>} - Promise resolving to an array of indexable objects derived from deserialized media items
 	 */
-	public setMediaItems (mediaItemInfos: MediaItemInfo[]): Promise<IndexableObject[]> {
+	public setMediaItems (mediaItemInfos: MediaItemInfo[]): Promise<IndexablePackItem[]> {
 		this.save();
 		return new Promise((resolve, reject) => {
 
