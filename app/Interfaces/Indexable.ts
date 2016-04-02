@@ -15,4 +15,6 @@ export interface IndexableObject extends CommonIndexedFields {
 	_type: string;
 	_index: string;
 	_score: number;
+	category_id?: string;
+	category_name?: string;
 }

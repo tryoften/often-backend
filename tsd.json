@@ -35,11 +35,8 @@
     "cheerio/cheerio.d.ts": {
       "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
     },
-    "lodash/lodash.d.ts": {
-      "commit": "984a41af67d76b5134e0d4991a30f813dfb8561f"
-    },
     "react/react.d.ts": {
-      "commit": "299b5caa22876ef27dc8e9a5b7fd7bf93457b6f4"
+      "commit": "bf4ecf5b68887ed5a065e3922885c34d0f5739df"
     },
     "react/react-dom.d.ts": {
       "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
@@ -64,6 +61,15 @@
     },
     "node-schedule/node-schedule.d.ts": {
       "commit": "ee9c524295333250ddbc7364f27c8b2ccd84b18a"
+    },
+    "react/react-addons-css-transition-group.d.ts": {
+      "commit": "bf4ecf5b68887ed5a065e3922885c34d0f5739df"
+    },
+    "react/react-addons-transition-group.d.ts": {
+      "commit": "bf4ecf5b68887ed5a065e3922885c34d0f5739df"
+    },
+    "object-path/object-path.d.ts": {
+      "commit": "e8f8e7471b8ca92ca417f8c878f64ae4d1067972"
     }
   }
 }
