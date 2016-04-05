@@ -41,7 +41,7 @@ export type ArtistId = string;
 export type TrackId = string;
 
 interface IngestionWorkerOptions {
-	searchQueueRef: Firebase;
+	searchQueueRef?: Firebase;
 	ingestionAdapters: IngestionAdapter[];
 }
 
@@ -59,7 +59,7 @@ class IngestionWorker extends Worker {
 	searchQueueRef: Firebase;
 	serviceDispatcher: ServiceDispatcher;
 	ingestionAdapters: any;
-	constructor (opts: IngestionWorkerOptions = {}) {
+	constructor (opts: IngestionWorkerOptions) {
 
 		super(opts);
 

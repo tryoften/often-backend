@@ -1,16 +1,23 @@
-import { Firebase } from 'backbone';
-import config from '../config';
+import * as Firebase from 'firebase';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
+import { firebase as FirebaseConfig } from '../config';
+import BaseModel from '../Models/BaseModel';
+import PackSubscription, { PackSubscriptionAttributes } from '../Models/PackSubscription';
+import Pack from '../Models/Pack';
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
  */
-class User extends Firebase.Model {
+class User extends BaseModel {
 
-	initialize (data: any, options: any) {
-		this.url = UserTokenGenerator.getAdminReference(`${config.firebase.BaseURL}/users/${data.user}`);
-		this.autoSync = true;
-		this.idAttribute = 'id';
+
+
+	constructor(attributes: any = {}, options?: any) {
+		super(attributes, options);
+	}
+
+	get url(): Firebase {
+		return new Firebase(`${FirebaseConfig.BaseURL}/users/${this.id}`);
 	}
 
 	/**
@@ -21,6 +28,34 @@ class User extends Firebase.Model {
 	 */
 	setToken (token: string) {
 		this.set('auth_token', token);
+	}
+
+	get packs() {
+		return this.get('packs') || {};
+	}
+
+	addPack (ups: PackSubscriptionAttributes): Promise<any> {
+
+		return new Promise<any>((resolve, reject) => {
+			var packId = ups.packId;
+			var pack = new Pack({id: packId});
+			if (this.packs[packId]) {
+				console.log('User already subscribed to a pack');
+				return;
+			}
+			var p = this.packs;
+			p[packId] = pack.toIndexingFormat();
+			this.set('packs', p);
+			this.save();
+			var packSubscription = new PackSubscription(ups);
+			resolve(true);
+		});
+
+
+	}
+
+	removePack (ups: PackSubscriptionAttributes) {
+
 	}
 
 }

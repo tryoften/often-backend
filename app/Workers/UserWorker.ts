@@ -7,6 +7,7 @@ import User from '../Models/User';
 import Worker, { Task } from './Worker';
 import Category from '../Models/Category';
 import LyricIndexableObject from '../Models/Lyric';
+import { PackSubscriptionAttributes } from '../Models/PackSubscription';
 
 class UserWorkerTaskType extends String {
 	static AddFavorite: UserWorkerTaskType = 'addFavorite';
@@ -14,7 +15,10 @@ class UserWorkerTaskType extends String {
 	static AddRecent: UserWorkerTaskType = 'addRecent';
 	static CreateToken: UserWorkerTaskType = 'createToken';
 	static AssignCategory: UserWorkerTaskType = 'assignCategory';
+	static AddPack: UserWorkerTaskType = 'addPack';
+	static RemovePack: UserWorkerTaskType = 'removePack';
 }
+
 
 interface UserWorkerTask extends Task {
 	// id of user on whose behalf a given task is to be processed
@@ -23,8 +27,11 @@ interface UserWorkerTask extends Task {
 	type: UserWorkerTaskType;
 	result?: Object;
 	category?: Object;
-	data?: any;
+	data?: (any | PackSubscriptionAttributes);
 }
+
+
+
 
 class UserWorker extends Worker {
 
@@ -70,7 +77,27 @@ class UserWorker extends Worker {
 			case UserWorkerTaskType.AssignCategory:
 				this.assignCategory(task, resolve, reject);
 				break;
+			case UserWorkerTaskType.AddPack:
+				this.addPack(task, resolve, reject);
+				break;
+			case UserWorkerTaskType.RemovePack:
+				this.removePack(task, resolve, reject);
+				break;
 		}
+	}
+
+	addPack(task: UserWorkerTask, resolve: Function, reject: Function) {
+		let user = new User(task.user);
+		user.addPack(task.data.packId).then(() => {
+			resolve(true);
+		}).catch(() => {
+			reject(false);
+		});
+	}
+
+	removePack(task: UserWorkerTask, resolve: Function, reject: Function) {
+		let user = new User(task.user);
+		user.removePack(task.data.packId);
 	}
 
 	addFavorite(data: UserWorkerTask, resolve: Function, reject: Function) {
@@ -124,6 +151,7 @@ class UserWorker extends Worker {
 			reject(JSON.stringify(error));
 		});
 	}
+
 }
 
 export default UserWorker;
