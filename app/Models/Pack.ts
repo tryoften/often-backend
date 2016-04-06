@@ -18,7 +18,12 @@ export interface PackAttributes extends MediaItemAttributes {
 	};
 	meta?: PackMeta;
 	items?: MediaItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
 }
+
+interface PackIndexableObject extends IndexableObject, PackAttributes {};
 
 interface MediaItemInfo {
 	type: MediaItemType;
@@ -82,6 +87,23 @@ class Pack extends MediaItem {
 	get items(): IndexableObject[] {
 		return this.get('items');
 	}
+
+	get items_count(): number {
+		return this.get('items').length || -1;
+	}
+
+	get price(): number {
+		return this.get('price') || 0.00;
+	}
+
+	get image(): any {
+		return this.get('image') || {};
+	}
+
+	get premium(): boolean {
+		return this.get('premium');
+	}
+
 
 	/**
 	 * Adds an individual media item to the pack
@@ -155,6 +177,23 @@ class Pack extends MediaItem {
 	private fetchMediaItemFromInfo (item: MediaItemInfo): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(item.type);
 		return new MediaItemClass({id: item.id}).syncData();
+	}
+
+	public toIndexingFormat(): IndexableObject {
+
+
+		let data: PackIndexableObject = _.extend({
+			title: this.name || '',
+			author: '',
+			description: this.description || '',
+			premium: this.premium || false,
+			price: this.price || 0,
+			image: this.image || {},
+			items: this.items || [],
+			items_count: this.items_count || -1
+		}, super.toIndexingFormat());
+
+		return data;
 	}
 
 }

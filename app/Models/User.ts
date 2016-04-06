@@ -114,7 +114,8 @@ class User extends BaseModel {
 					this.setSubscription(packSubscription);
 				}
 
-				let pack = new Pack({id: packSubAttrs.itemId});
+				return new Pack({id: packSubAttrs.itemId}).syncData();
+			}).then((pack: Pack) => {
 				this.setPack(pack);
 				resolve(`PackId ${pack.id} added to user ${this.id}`);
 			}).catch((err: Error) => {
