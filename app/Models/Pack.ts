@@ -11,7 +11,6 @@ export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
 	description?: string;
-	subscribers?: UserId[];
 	image?: {
 		small_url?: string;
 		large_url?: string;
@@ -23,7 +22,19 @@ export interface PackAttributes extends MediaItemAttributes {
 	premium?: boolean;
 }
 
-interface PackIndexableObject extends IndexableObject, PackAttributes {};
+interface PackIndexableObject extends IndexableObject {
+	id?: string;
+	name?: string;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
+	meta?: PackMeta;
+	items?: MediaItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
+}
 
 interface MediaItemInfo {
 	type: MediaItemType;
@@ -183,6 +194,7 @@ class Pack extends MediaItem {
 
 
 		let data: PackIndexableObject = _.extend({
+			name: this.name || '',
 			title: this.name || '',
 			author: '',
 			description: this.description || '',
