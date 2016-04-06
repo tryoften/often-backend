@@ -40,7 +40,7 @@ class Subscription extends BaseModel implements Indexable {
 			throw new Error('MediaItemType must be defined on subscription attributes.');
 		}
 
-		attributes.id = `${attributes.itemId}_${attributes.userId}`;
+		attributes.id = `${attributes.itemId}:${attributes.userId}`;
 
 		attributes.timeLastUpdated = Date.now();
 
@@ -78,9 +78,8 @@ class Subscription extends BaseModel implements Indexable {
 	}
 
 	get url(): Firebase {
-		return new Firebase(`${FirebaseConfig.BaseURL}/subscriptions/${this.mediaItemType}/${this.itemId}/${this.userId}/${this.itemId}_${this.userId}`);
+		return new Firebase(`${FirebaseConfig.BaseURL}/subscriptions/${this.mediaItemType}/${this.itemId}/${this.userId}/${this.id}`);
 	}
-
 
 	/**
 	 * Populates the subscription object with subscription information
