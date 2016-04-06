@@ -7,7 +7,7 @@ import User from '../Models/User';
 import Worker, { Task } from './Worker';
 import Category from '../Models/Category';
 import LyricIndexableObject from '../Models/Lyric';
-import { PackSubscriptionAttributes } from '../Models/PackSubscription';
+import { SubscriptionAttributes } from '../Models/Subscription';
 
 class UserWorkerTaskType extends String {
 	static AddFavorite: UserWorkerTaskType = 'addFavorite';
@@ -27,7 +27,7 @@ interface UserWorkerTask extends Task {
 	type: UserWorkerTaskType;
 	result?: Object;
 	category?: Object;
-	data?: (any | PackSubscriptionAttributes);
+	data?: (any | SubscriptionAttributes);
 }
 
 
@@ -88,16 +88,24 @@ class UserWorker extends Worker {
 
 	addPack(task: UserWorkerTask, resolve: Function, reject: Function) {
 		let user = new User(task.user);
-		user.addPack(task.data.packId).then(() => {
-			resolve(true);
-		}).catch(() => {
-			reject(false);
+		user.syncData().then(() => {
+			return user.addPack(task.data);
+		}).then( results => {
+			resolve(results);
+		}).catch( err => {
+			reject(err);
 		});
 	}
 
 	removePack(task: UserWorkerTask, resolve: Function, reject: Function) {
 		let user = new User(task.user);
-		user.removePack(task.data.packId);
+		user.syncData().then(() => {
+			return user.removePack(task.data);
+		}).then( results => {
+			resolve(results);
+		}).catch( err => {
+			reject(err);
+		});
 	}
 
 	addFavorite(data: UserWorkerTask, resolve: Function, reject: Function) {
