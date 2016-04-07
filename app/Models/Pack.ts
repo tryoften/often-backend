@@ -12,13 +12,29 @@ export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
 	description?: string;
-	subscribers?: UserId[];
 	image?: {
 		small_url?: string;
 		large_url?: string;
 	};
 	meta?: PackMeta;
 	items?: MediaItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
+}
+
+interface PackIndexableObject extends IndexableObject {
+	id?: string;
+	name?: string;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
+	meta?: PackMeta;
+	items?: MediaItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
 }
 
 interface MediaItemInfo {
@@ -88,6 +104,23 @@ class Pack extends MediaItem {
 		return this.get('categories') || {};
 	}
 
+	get items_count(): number {
+		return this.get('items').length || -1;
+	}
+
+	get price(): number {
+		return this.get('price') || 0.00;
+	}
+
+	get image(): any {
+		return this.get('image') || {};
+	}
+
+	get premium(): boolean {
+		return this.get('premium');
+	}
+
+
 	/**
 	 * Adds an individual media item to the pack
 	 * @param item
@@ -144,10 +177,7 @@ class Pack extends MediaItem {
 			category_id: category.id
 		});
 
-		this.set('categories', newCategories);
-		this.save();
-
-
+		this.save({ categories: newCategories});
 
 	}
 
@@ -164,8 +194,7 @@ class Pack extends MediaItem {
 
 			this.deserializeMediaItems(mediaItemInfos).then( (mediaItems: MediaItem[]) => {
 				var indexableMediaItems = this.getIndexableItems(mediaItems);
-				this.set('items', indexableMediaItems);
-				this.save();
+				this.save({items: indexableMediaItems});
 				resolve(indexableMediaItems);
 			});
 		});
@@ -211,6 +240,24 @@ class Pack extends MediaItem {
 	private fetchMediaItemFromInfo (item: MediaItemInfo): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(item.type);
 		return new MediaItemClass({id: item.id}).syncData();
+	}
+
+	public toIndexingFormat(): IndexableObject {
+
+
+		let data: PackIndexableObject = _.extend({
+			name: this.name || '',
+			title: this.name || '',
+			author: '',
+			description: this.description || '',
+			premium: this.premium || false,
+			price: this.price || 0,
+			image: this.image || {},
+			items: this.items || [],
+			items_count: this.items_count || -1
+		}, super.toIndexingFormat());
+
+		return data;
 	}
 
 }

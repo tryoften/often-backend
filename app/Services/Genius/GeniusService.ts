@@ -4,7 +4,7 @@ import { Service as RestService } from 'restler';
 import ServiceBase from '../ServiceBase';
 import Artist from '../../Models/Artist';
 import Track from '../../Models/Track';
-import { Lyric } from '../../Models/Lyric';
+import Lyric from '../../Models/Lyric';
 import MediaItemSource from '../../Models/MediaItemSource';
 import MediaItemType from '../../Models/MediaItemType';
 import * as cheerio from 'cheerio';
@@ -12,7 +12,7 @@ import * as _ from 'underscore';
 import 'backbonefire';
 import { IndexableObject } from '../../Interfaces/Indexable';
 import Query from '../../Models/Query';
-import TrackId from '../../Workers/IngestionWorker';
+import { TrackId } from '../../Workers/IngestionWorker';
 
 /** 
  * This class is responsible for fetching data from the Genius API
