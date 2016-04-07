@@ -141,28 +141,6 @@ class Pack extends MediaItem {
 	}
 
 	/**
-	 * Sets an image url on a small image property
-	 *
-	 * @param url {string} - Url of a small image
-	 */
-	setSmallImage (url: string) {
-		var image = this.image;
-		image.small_url = url;
-		this.save({image: image});
-	}
-
-	/**
-	 * Sets an image url on a large image property
-	 *
-	 * @param url {string} - Url of a large image
-	 */
-	setLargeImage (url: string) {
-		var image = this.image;
-		image.large_url = url;
-		this.save({image: image});
-	}
-
-	/**
 	 * Adds an individual media item to the pack
 	 * @param item
      */
