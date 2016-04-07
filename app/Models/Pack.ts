@@ -7,6 +7,8 @@ import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category from './Category';
+import PackMap from './PackMap';
+import {IndexableObject} from "../Interfaces/Indexable";
 
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
@@ -31,7 +33,7 @@ interface PackIndexableObject extends IndexableObject {
 		large_url?: string;
 	};
 	meta?: PackMeta;
-	items?: MediaItem[];
+	items?: IndexableObject[];
 	price?: number;
 	items_count?: number;
 	premium?: boolean;
@@ -46,6 +48,8 @@ type UserId = string;
 type PackMeta = Object;
 
 class Pack extends MediaItem {
+
+	private packMap: PackMap;
 
 	/**
 	 * Designated constructor
@@ -64,6 +68,13 @@ class Pack extends MediaItem {
 		}
 
 		super(attributes, options);
+		this.packMap = new PackMap({ pack: this });
+
+	}
+
+
+	syncData () {
+		return Promise.all([super.syncData(), this.packMap.syncData()]);
 	}
 
 	defaults(): Backbone.ObjectHash {
@@ -120,18 +131,64 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
+	/**
+	 * Sets an image url on a small image property
+	 *
+	 * @param url {string} - Url of a small image
+	 */
+	setSmallImage (url: string) {
+		var image = this.image;
+		image.small_url = url;
+		this.save({image: image});
+	}
+
+	/**
+	 * Sets an image url on a large image property
+	 *
+	 * @param url {string} - Url of a large image
+	 */
+	setLargeImage (url: string) {
+		var image = this.image;
+		image.large_url = url;
+		this.save({image: image});
+	}
 
 	/**
 	 * Adds an individual media item to the pack
 	 * @param item
      */
-	addItem(item: MediaItem) {
+	addItem (item: MediaItem) {
 		var itemObj = item.toJSON();
 
 		var items = this.items;
 		items.push(itemObj);
 
 		this.save({items});
+	}
+
+	/**
+	 * Propagates model changes to mapped user models and firebase
+	 */
+	save () {
+		this.packMap.propagateChangesToUsers();
+		super.save();
+	}
+
+	/**
+	 * Adds a user to the packMap
+	 * @param {string} userId - Id of a user to be added to the pack map
+	 */
+	mapUser (userId: string) {
+		this.packMap.addUser(userId);
+	}
+
+
+	/**
+	 * Removes a user from the packMap
+	 * @param {string} userId - Id of a user to be removed from pack map
+	 */
+	unmapUser (userId: string) {
+		this.packMap.removeUser(userId);
 	}
 
 	/**
@@ -146,7 +203,7 @@ class Pack extends MediaItem {
 		var targetItem;
 		var itemIndex = 0;
 		for (var item of this.items) {
-			if (itemId == item._id){
+			if (itemId === item._id) {
 				targetItem = item;
 				break;
 			}
@@ -159,7 +216,7 @@ class Pack extends MediaItem {
 
 
 		var newCategories = {};
-		for (var item of this.items) {
+		for (let item of this.items) {
 			if (item.category_id && item._id !== itemId) {
 				/* If a category_id is set on an item, then add it */
 				newCategories[item.category_id] = this.get('categories')[item.category_id];
@@ -215,6 +272,29 @@ class Pack extends MediaItem {
 	}
 
 	/**
+	 * Overwrite for base class's toIndexingFormat method
+	 *
+	 * @returns {IndexableObject}
+	 */
+	public toIndexingFormat(): IndexableObject {
+
+		let data: PackIndexableObject = _.extend({
+			name: this.name || '',
+			title: this.name || '',
+			author: '',
+			description: this.description || '',
+			premium: this.premium || false,
+			price: this.price || 0,
+			image: this.image || {},
+			items: this.items || [],
+			items_count: this.items_count || -1
+		}, super.toIndexingFormat());
+
+		return data;
+	}
+
+
+	/**
 	 * Deserializes an array of MediaItemInfo items in order
 	 *
 	 * @param {MediaItemInfo[]} items - Objects representing media items
@@ -242,23 +322,6 @@ class Pack extends MediaItem {
 		return new MediaItemClass({id: item.id}).syncData();
 	}
 
-	public toIndexingFormat(): IndexableObject {
-
-
-		let data: PackIndexableObject = _.extend({
-			name: this.name || '',
-			title: this.name || '',
-			author: '',
-			description: this.description || '',
-			premium: this.premium || false,
-			price: this.price || 0,
-			image: this.image || {},
-			items: this.items || [],
-			items_count: this.items_count || -1
-		}, super.toIndexingFormat());
-
-		return data;
-	}
 
 }
 
