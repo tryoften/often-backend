@@ -10,6 +10,8 @@ import MediaItemSource from "./MediaItemSource";
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
+	price?: number;
+	premium?: boolean;
 	description?: string;
 	subscribers?: UserId[];
 	image?: {
@@ -33,7 +35,7 @@ class Pack extends MediaItem {
 	/**
 	 * Designated constructor
 	 *
-	 * @param attributes {PackAttributes
+	 * @param attributes {PackAttributes}
 	 * @param options
 	 */
 	constructor(attributes: PackAttributes = {}, options?: any) {

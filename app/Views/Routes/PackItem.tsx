@@ -135,6 +135,13 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											value={this.state.form.description}
 											onChange={this.handlePropChange}
 										/>
+										<Input
+											id="price"
+											type="number"
+											label="Price"
+											addonBefore="$"
+											value={this.state.form.price}
+										/>
 									</Col>
 								</Row>
 								<Row>
