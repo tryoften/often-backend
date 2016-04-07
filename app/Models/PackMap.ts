@@ -1,7 +1,8 @@
 import MediaItemType from './MediaItemType';
-import ObjectMap from './MediaItemMap';
+import ObjectMap from './ObjectMap';
 import { firebase as FirebaseConfig } from '../config';
 import * as Firebase from 'firebase';
+import Pack from './Pack';
 
 export interface PackMapAttributes {
 	pack: Pack;
@@ -48,6 +49,7 @@ class PackMap extends ObjectMap {
 			for (let userId of userIds) {
 				updateObject[`users/${userId}/packs/${this.pack.id}`] = indexablePack;
 			}
+
 			this.rootRef.update(updateObject, (error) => {
 				if (error) {
 					reject(error);

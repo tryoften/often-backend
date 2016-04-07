@@ -80,7 +80,7 @@ class Pack extends MediaItem {
 	}
 
 
-	syncData () {
+	syncData (): Promise<any> {
 		return Promise.all([super.syncData(), this.packMap.syncData()]);
 	}
 
@@ -185,9 +185,9 @@ class Pack extends MediaItem {
 	/**
 	 * Propagates model changes to mapped user models and firebase
 	 */
-	save () {
+	save (obj?: any) {
+		(obj) ? super.save(obj) : super.save();
 		this.packMap.propagateChangesToUsers();
-		super.save();
 	}
 
 	/**

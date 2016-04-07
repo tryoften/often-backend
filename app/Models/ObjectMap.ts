@@ -9,7 +9,7 @@ export interface ObjectMapAttributes {
 }
 
 class ObjectMap extends BaseModel {
-	private rootRef: Firebase;
+	protected rootRef: Firebase;
 	constructor(attributes: ObjectMapAttributes, options?: any) {
 
 		if (!attributes.type) {
