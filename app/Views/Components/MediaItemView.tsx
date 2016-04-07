@@ -62,6 +62,8 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 						</div>
 					</div>
 				);
+			default:
+				return <div></div>;
 		}
 	}
 }

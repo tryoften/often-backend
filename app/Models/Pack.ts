@@ -1,43 +1,58 @@
 import { firebase as FirebaseConfig } from '../config';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
-import { IndexablePackItem } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category from './Category';
+<<<<<<< HEAD
 import PackMap from './PackMap';
 import {IndexableObject} from "../Interfaces/Indexable";
+=======
+import { IndexableObject } from "../Interfaces/Indexable";
+>>>>>>> master
+
+export interface IndexablePackItem extends IndexableObject {
+	id?: string;
+	category_id?: string;
+	category_name?: string;
+}
+
+export interface PackIndexableObject extends IndexableObject {
+	id?: string;
+	name?: string;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
+	meta?: PackMeta;
+	items?: IndexablePackItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
+}
 
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
+	price?: number;
+	premium?: boolean;
 	description?: string;
 	image?: {
 		small_url?: string;
 		large_url?: string;
 	};
 	meta?: PackMeta;
-	items?: MediaItem[];
-	price?: number;
-	items_count?: number;
-	premium?: boolean;
-}
-
-interface PackIndexableObject extends IndexableObject {
-	id?: string;
-	name?: string;
-	image?: {
-		small_url?: string;
-		large_url?: string;
-	};
-	meta?: PackMeta;
+<<<<<<< HEAD
 	items?: IndexableObject[];
 	price?: number;
+=======
+	items?: IndexablePackItem[];
+>>>>>>> master
 	items_count?: number;
-	premium?: boolean;
 }
+
 
 interface MediaItemInfo {
 	type: MediaItemType;
@@ -54,7 +69,7 @@ class Pack extends MediaItem {
 	/**
 	 * Designated constructor
 	 *
-	 * @param attributes {PackAttributes
+	 * @param attributes {PackAttributes}
 	 * @param options
 	 */
 	constructor(attributes: PackAttributes = {}, options?: any) {
@@ -83,6 +98,8 @@ class Pack extends MediaItem {
 			description: '',
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
+			premium: false,
+			price: 0.0,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
@@ -166,6 +183,13 @@ class Pack extends MediaItem {
 		this.save({items});
 	}
 
+	removeItem(item: PackIndexableObject) {
+		var items = this.items;
+		items = _.filter(items, a => a.id !== item.id);
+
+		this.save({items});
+	}
+
 	/**
 	 * Propagates model changes to mapped user models and firebase
 	 */
@@ -202,7 +226,9 @@ class Pack extends MediaItem {
 
 		var targetItem;
 		var itemIndex = 0;
-		for (var item of this.items) {
+
+		for (let item of this.items) {
+
 			if (itemId === item._id) {
 				targetItem = item;
 				break;
@@ -272,12 +298,19 @@ class Pack extends MediaItem {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Overwrite for base class's toIndexingFormat method
 	 *
 	 * @returns {IndexableObject}
 	 */
 	public toIndexingFormat(): IndexableObject {
 
+=======
+	 *
+	 * @returns {PackIndexableObject}
+     */
+	public toIndexingFormat(): IndexableObject {
+>>>>>>> master
 		let data: PackIndexableObject = _.extend({
 			name: this.name || '',
 			title: this.name || '',
@@ -293,7 +326,10 @@ class Pack extends MediaItem {
 		return data;
 	}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 	/**
 	 * Deserializes an array of MediaItemInfo items in order
 	 *
@@ -322,7 +358,10 @@ class Pack extends MediaItem {
 		return new MediaItemClass({id: item.id}).syncData();
 	}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 }
 
 export default Pack;
