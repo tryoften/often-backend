@@ -50,8 +50,7 @@ class User extends BaseModel {
 		let currentPackSubscriptions = this.packSubscriptions;
 		if (!currentPackSubscriptions[sub.id]) {
 			currentPackSubscriptions[sub.id] = sub.toIndexingFormat();
-			this.set('pack_subscriptions', currentPackSubscriptions);
-			this.save();
+			this.save({ pack_subscriptions: currentPackSubscriptions });
 		}
 	}
 
@@ -63,8 +62,7 @@ class User extends BaseModel {
 		let currentPacks = this.packs;
 		if (!currentPacks[pack.id]) {
 			currentPacks[pack.id] = pack.toIndexingFormat();
-			this.set('packs', currentPacks);
-			this.save();
+			this.save({ packs: currentPacks });
 		}
 	}
 
@@ -76,8 +74,7 @@ class User extends BaseModel {
 		let currentPacks = this.packs;
 		if (currentPacks[packId]) {
 			currentPacks[packId] = null;
-			this.set('packs', currentPacks);
-			this.save();
+			this.save({ packs: currentPacks });
 		}
 	}
 
