@@ -43,7 +43,7 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 
 		this.state = {
 			model: quote,
-			form: quote.toIndexingFormat(),
+			form: quote.toJSON(),
 			isNew: isNew,
 			showModal: props.show
 		};
