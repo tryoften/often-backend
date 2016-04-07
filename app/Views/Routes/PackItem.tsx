@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonInput } from 'react-bootstrap';
-import Pack, { PackAttributes } from '../../Models/Pack';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonInput, MenuItem, DropdownButton } from 'react-bootstrap';
+import Pack, {PackAttributes} from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
-import { IndexableObject } from "../../Interfaces/Indexable";
+import { IndexablePackItem } from "../../Interfaces/Indexable";
+import Categories from '../../Collections/Categories';
+import Category from '../../Models/Category';
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -16,6 +18,7 @@ interface PackItemProps extends React.Props<PackItem> {
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
+	categories?: any;
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
@@ -30,8 +33,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			id: props.params.packId
 		});
 
+		var categories = new Categories();
+
 		this.state = {
 			model: pack,
+			categories: categories,
 			form: pack.toJSON(),
 			shouldShowSearchPanel: false,
 			display: false,
@@ -39,13 +45,18 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		};
 
 		this.updateStateWithPack = this.updateStateWithPack.bind(this);
+		this.updateStateWithCategories = this.updateStateWithCategories.bind(this);
 		this.handlePropChange = this.handlePropChange.bind(this);
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		pack.on('update', this.updateStateWithPack);
+		categories.on('update', this.updateStateWithCategories);
 	}
 
 	componentDidMount() {
+		this.state.categories.fetch({
+			success: this.updateStateWithCategories
+		});
 		this.state.model.fetch({
 			success: this.updateStateWithPack
 		});
@@ -56,6 +67,12 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			model: pack,
 			form: pack.toJSON(),
 			display: true
+		});
+	}
+
+	updateStateWithCategories(categories: Categories) {
+		this.setState({
+			categories: categories
 		});
 	}
 
@@ -71,7 +88,14 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	onSelectItem(item: IndexableObject) {
+	onClickCategory(itemId: string, category: Category) {
+		var model = this.state.model;
+		model.assignCategoryToItem(itemId, category);
+
+		this.setState({model: model});
+	}
+
+	onSelectItem(item: IndexablePackItem) {
 		let items = this.state.model.get('items');
 		items.push(item);
 
@@ -97,11 +121,30 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		let model = this.state.model;
 		model.save(this.state.form);
 		this.setState({model: model, isNew: false});
+
 	}
 
 	render() {
-		var itemsComponents = this.state.model.items.map(item => {
-			return <MediaItemView key={item._id} item={item} />;
+		var categoryMenu = (item) => {
+			return this.state.categories.map(category => {
+				return <MenuItem key={category.id} eventKey={category.id} onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}</MenuItem>
+			});
+		};
+
+		var itemsComponents = this.state.model.items.map((item: IndexablePackItem) => {
+			return (
+				<Row>
+					<MediaItemView key={item._id} item={item} />
+					<DropdownButton
+						bsStyle="default"
+						title={item.category_name || "Unassigned"}
+						id={item._id}
+					>
+						{categoryMenu(item)}
+					</DropdownButton>
+				</Row>
+			);
+
 		});
 
 		let classes = classNames("section pack-item", {hidden: !this.state.display});

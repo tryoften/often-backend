@@ -35,9 +35,6 @@
     "cheerio/cheerio.d.ts": {
       "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
     },
-    "lodash/lodash.d.ts": {
-      "commit": "984a41af67d76b5134e0d4991a30f813dfb8561f"
-    },
     "react/react.d.ts": {
       "commit": "bf4ecf5b68887ed5a065e3922885c34d0f5739df"
     },

@@ -1,11 +1,12 @@
 import { firebase as FirebaseConfig } from '../config';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
-import { IndexableObject } from '../Interfaces/Indexable';
+import { IndexablePackItem } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
+import Category from './Category';
 
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
@@ -13,13 +14,29 @@ export interface PackAttributes extends MediaItemAttributes {
 	price?: number;
 	premium?: boolean;
 	description?: string;
-	subscribers?: UserId[];
 	image?: {
 		small_url?: string;
 		large_url?: string;
 	};
 	meta?: PackMeta;
 	items?: MediaItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
+}
+
+interface PackIndexableObject extends IndexableObject {
+	id?: string;
+	name?: string;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
+	meta?: PackMeta;
+	items?: MediaItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
 }
 
 interface MediaItemInfo {
@@ -81,9 +98,30 @@ class Pack extends MediaItem {
 		this.set('name', value);
 	}
 
-	get items(): IndexableObject[] {
-		return this.get('items');
+	get items(): IndexablePackItem[] {
+		return this.get('items') || [];
 	}
+
+	get categories(): any {
+		return this.get('categories') || {};
+	}
+
+	get items_count(): number {
+		return this.get('items').length || -1;
+	}
+
+	get price(): number {
+		return this.get('price') || 0.00;
+	}
+
+	get image(): any {
+		return this.get('image') || {};
+	}
+
+	get premium(): boolean {
+		return this.get('premium');
+	}
+
 
 	/**
 	 * Adds an individual media item to the pack
@@ -99,19 +137,66 @@ class Pack extends MediaItem {
 	}
 
 	/**
+	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
+	 *
+	 * @param {string} itemId - Id of an item to be categorized.
+	 * @param {Category} category - Category that is to be assigned to an item.
+	 * @returns {void}
+	 */
+	assignCategoryToItem (itemId: string, category: Category) {
+
+		var targetItem;
+		var itemIndex = 0;
+		for (var item of this.items) {
+			if (itemId == item._id){
+				targetItem = item;
+				break;
+			}
+			itemIndex++;
+		}
+
+		if (!targetItem) {
+			throw new Error('Invalid item id selected for category change');
+		}
+
+
+		var newCategories = {};
+		for (var item of this.items) {
+			if (item.category_id && item._id !== itemId) {
+				/* If a category_id is set on an item, then add it */
+				newCategories[item.category_id] = this.get('categories')[item.category_id];
+			}
+		}
+
+		/* Assign category on item */
+		targetItem.category_name = category.name;
+		targetItem.category_id = category.id;
+
+		/* Finally update the categories collection on the pack */
+		newCategories[category.id] = category.toIndexingFormat();
+		this.url.child(`items/${itemIndex}`).update({
+			category_name: category.name,
+			category_id: category.id
+		});
+
+		this.save({ categories: newCategories});
+
+	}
+
+
+	/**
 	 * Deserializes media items from an array of MediaItemInfo objects and sets them as items on the pack
 	 *
 	 * @param {MediaItemInfo[]}  mediaItemInfos - An array of MediaItemInfo items to be used for deserialization of corresponding media items
 	 * @returns {Promise<IndexableObject[]>} - Promise resolving to an array of indexable objects derived from deserialized media items
 	 */
-	public setMediaItems (mediaItemInfos: MediaItemInfo[]): Promise<IndexableObject[]> {
+	public setMediaItems (mediaItemInfos: MediaItemInfo[]): Promise<IndexablePackItem[]> {
 		this.save();
 		return new Promise((resolve, reject) => {
 
 			this.deserializeMediaItems(mediaItemInfos).then( (mediaItems: MediaItem[]) => {
 				var indexableMediaItems = this.getIndexableItems(mediaItems);
-				this.set('items', indexableMediaItems);
-				this.save();
+				this.save({items: indexableMediaItems});
 				resolve(indexableMediaItems);
 			});
 		});
@@ -157,6 +242,24 @@ class Pack extends MediaItem {
 	private fetchMediaItemFromInfo (item: MediaItemInfo): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(item.type);
 		return new MediaItemClass({id: item.id}).syncData();
+	}
+
+	public toIndexingFormat(): IndexableObject {
+
+
+		let data: PackIndexableObject = _.extend({
+			name: this.name || '',
+			title: this.name || '',
+			author: '',
+			description: this.description || '',
+			premium: this.premium || false,
+			price: this.price || 0,
+			image: this.image || {},
+			items: this.items || [],
+			items_count: this.items_count || -1
+		}, super.toIndexingFormat());
+
+		return data;
 	}
 
 }

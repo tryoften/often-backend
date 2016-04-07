@@ -6,6 +6,7 @@ import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
 import { generate as generateId } from 'shortid';
+import {IndexableObject} from "../Interfaces/Indexable";
 
 export interface CategoryAttributes {
 	id?: string;
@@ -41,6 +42,14 @@ class Category extends BaseModel {
 		return `${FirebaseConfig.BaseURL}/categories/${this.id}`;
 	}
 
+	get name(): string {
+		return this.get('name');
+	}
+
+	get image(): any {
+		return this.get('image') || {};
+	}
+
 	/**
 	 * Adds a lyric to the category in question and updates all the appropriate models
 	 * @param lyric
@@ -65,6 +74,14 @@ class Category extends BaseModel {
 					return category;
 				});
 		});
+	}
+
+	toIndexingFormat(): any {
+		return {
+			id: this.id,
+			image: this.image,
+			name: this.name
+		}
 	}
 }
 
