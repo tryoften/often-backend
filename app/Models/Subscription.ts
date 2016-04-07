@@ -86,19 +86,21 @@ class Subscription extends BaseModel implements Indexable {
 	 * @param {SubscriptionAttributes} subAttrs - Object containing subscription information
 	 */
 	subscribe (subAttrs: SubscriptionAttributes) {
-		this.set('timeSubscribed', subAttrs.timeSubscribed || Date.now());
-		this.set('subscriptionType', subAttrs.subscriptionType || SubscriptionType.free);
-		this.set('timeLastUpdated', Date.now());
-		this.save();
+		this.save({
+			timeSubscribed: subAttrs.timeSubscribed || Date.now(),
+			subscriptionType: subAttrs.subscriptionType || SubscriptionType.free,
+			timeLastUpdated: Date.now()
+		});
 	}
 
 	/**
 	 * Udates the time at which the subscription information has been restored by the user.
 	 */
 	updateTimeLastRestored() {
-		this.set('timeLastRestored', Date.now());
-		this.set('timeLastUpdated', Date.now());
-		this.save();
+		this.save({
+			timeLastRestored: Date.now(),
+			timeLastUpdated: Date.now()
+		});
 	}
 
 
