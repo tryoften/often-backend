@@ -6,12 +6,9 @@ import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category from './Category';
-<<<<<<< HEAD
 import PackMap from './PackMap';
-import {IndexableObject} from "../Interfaces/Indexable";
-=======
-import { IndexableObject } from "../Interfaces/Indexable";
->>>>>>> master
+import {IndexableObject} from '../Interfaces/Indexable';
+
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
@@ -44,12 +41,7 @@ export interface PackAttributes extends MediaItemAttributes {
 		large_url?: string;
 	};
 	meta?: PackMeta;
-<<<<<<< HEAD
-	items?: IndexableObject[];
-	price?: number;
-=======
 	items?: IndexablePackItem[];
->>>>>>> master
 	items_count?: number;
 }
 
@@ -298,19 +290,12 @@ class Pack extends MediaItem {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Overwrite for base class's toIndexingFormat method
 	 *
 	 * @returns {IndexableObject}
 	 */
 	public toIndexingFormat(): IndexableObject {
 
-=======
-	 *
-	 * @returns {PackIndexableObject}
-     */
-	public toIndexingFormat(): IndexableObject {
->>>>>>> master
 		let data: PackIndexableObject = _.extend({
 			name: this.name || '',
 			title: this.name || '',
@@ -326,10 +311,6 @@ class Pack extends MediaItem {
 		return data;
 	}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 	/**
 	 * Deserializes an array of MediaItemInfo items in order
 	 *
@@ -358,10 +339,7 @@ class Pack extends MediaItem {
 		return new MediaItemClass({id: item.id}).syncData();
 	}
 
-<<<<<<< HEAD
 
-=======
->>>>>>> master
 }
 
 export default Pack;
