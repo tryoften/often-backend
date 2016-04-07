@@ -1,12 +1,32 @@
 import { firebase as FirebaseConfig } from '../config';
 import MediaItemType from './MediaItemType';
 import MediaItem from './MediaItem';
-import { IndexablePackItem } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category from './Category';
+import { IndexableObject } from "../Interfaces/Indexable";
+
+export interface IndexablePackItem extends IndexableObject {
+	id?: string;
+	category_id?: string;
+	category_name?: string;
+}
+
+export interface PackIndexableObject extends IndexableObject {
+	id?: string;
+	name?: string;
+	image?: {
+		small_url?: string;
+		large_url?: string;
+	};
+	meta?: PackMeta;
+	items?: IndexablePackItem[];
+	price?: number;
+	items_count?: number;
+	premium?: boolean;
+}
 
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
@@ -19,25 +39,10 @@ export interface PackAttributes extends MediaItemAttributes {
 		large_url?: string;
 	};
 	meta?: PackMeta;
-	items?: MediaItem[];
-	price?: number;
+	items?: IndexablePackItem[];
 	items_count?: number;
-	premium?: boolean;
 }
 
-interface PackIndexableObject extends IndexableObject {
-	id?: string;
-	name?: string;
-	image?: {
-		small_url?: string;
-		large_url?: string;
-	};
-	meta?: PackMeta;
-	items?: MediaItem[];
-	price?: number;
-	items_count?: number;
-	premium?: boolean;
-}
 
 interface MediaItemInfo {
 	type: MediaItemType;
@@ -74,6 +79,8 @@ class Pack extends MediaItem {
 			description: '',
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
+			premium: false,
+			price: 0.0,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
@@ -136,6 +143,13 @@ class Pack extends MediaItem {
 		this.save({items});
 	}
 
+	removeItem(item: PackIndexableObject) {
+		var items = this.items;
+		items = _.filter(items, a => a.id !== item.id);
+
+		this.save({items});
+	}
+
 	/**
 	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
 	 *
@@ -147,8 +161,8 @@ class Pack extends MediaItem {
 
 		var targetItem;
 		var itemIndex = 0;
-		for (var item of this.items) {
-			if (itemId == item._id){
+		for (let item of this.items) {
+			if (itemId === item._id) {
 				targetItem = item;
 				break;
 			}
@@ -161,7 +175,7 @@ class Pack extends MediaItem {
 
 
 		var newCategories = {};
-		for (var item of this.items) {
+		for (let item of this.items) {
 			if (item.category_id && item._id !== itemId) {
 				/* If a category_id is set on an item, then add it */
 				newCategories[item.category_id] = this.get('categories')[item.category_id];
@@ -217,6 +231,26 @@ class Pack extends MediaItem {
 	}
 
 	/**
+	 *
+	 * @returns {PackIndexableObject}
+     */
+	public toIndexingFormat(): IndexableObject {
+		let data: PackIndexableObject = _.extend({
+			name: this.name || '',
+			title: this.name || '',
+			author: '',
+			description: this.description || '',
+			premium: this.premium || false,
+			price: this.price || 0,
+			image: this.image || {},
+			items: this.items || [],
+			items_count: this.items_count || -1
+		}, super.toIndexingFormat());
+
+		return data;
+	}
+
+	/**
 	 * Deserializes an array of MediaItemInfo items in order
 	 *
 	 * @param {MediaItemInfo[]} items - Objects representing media items
@@ -242,24 +276,6 @@ class Pack extends MediaItem {
 	private fetchMediaItemFromInfo (item: MediaItemInfo): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(item.type);
 		return new MediaItemClass({id: item.id}).syncData();
-	}
-
-	public toIndexingFormat(): IndexableObject {
-
-
-		let data: PackIndexableObject = _.extend({
-			name: this.name || '',
-			title: this.name || '',
-			author: '',
-			description: this.description || '',
-			premium: this.premium || false,
-			price: this.price || 0,
-			image: this.image || {},
-			items: this.items || [],
-			items_count: this.items_count || -1
-		}, super.toIndexingFormat());
-
-		return data;
 	}
 
 }

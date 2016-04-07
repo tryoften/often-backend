@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonInput, MenuItem, DropdownButton } from 'react-bootstrap';
-import Pack, {PackAttributes} from '../../Models/Pack';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup,
+	ButtonInput, Button, MenuItem, DropdownButton } from 'react-bootstrap';
+import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
-import { IndexablePackItem } from "../../Interfaces/Indexable";
 import Categories from '../../Collections/Categories';
 import Category from '../../Models/Category';
 
@@ -88,11 +88,25 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	onClickCategory(itemId: string, category: Category) {
+	onClickCategory(itemId: string, category: Category, e: Event) {
+		e.preventDefault();
+
 		var model = this.state.model;
 		model.assignCategoryToItem(itemId, category);
 
 		this.setState({model: model});
+	}
+
+	onClickRemoveItem(item: IndexablePackItem, e: Event) {
+		console.log(item);
+
+		let pack = this.state.model;
+		pack.removeItem(item);
+
+		this.setState({
+			model: pack,
+			form: pack.toJSON()
+		});
 	}
 
 	onSelectItem(item: IndexablePackItem) {
@@ -109,9 +123,23 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	handlePropChange(e: any) {
-		let id = e.target.id;
+		let target = e.target;
+		let id = target.id;
 		let form = this.state.form;
-		objectPath.set(form, id, e.target.value);
+		let value = target.value;
+
+		switch (target.type) {
+			case 'number':
+				value = parseFloat(value);
+				break;
+			case 'checkbox':
+				value = target.checked;
+				break;
+			default:
+				break;
+		}
+
+		objectPath.set(form, id, value);
 		this.setState({form});
 	}
 
@@ -127,22 +155,32 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	render() {
 		var categoryMenu = (item) => {
 			return this.state.categories.map(category => {
-				return <MenuItem key={category.id} eventKey={category.id} onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}</MenuItem>
+				return <MenuItem
+					key={category.id}
+					eventKey={category.id}
+					onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}
+				</MenuItem>;
 			});
 		};
 
 		var itemsComponents = this.state.model.items.map((item: IndexablePackItem) => {
 			return (
-				<Row>
+				<div className="clearfix well">
 					<MediaItemView key={item._id} item={item} />
-					<DropdownButton
-						bsStyle="default"
-						title={item.category_name || "Unassigned"}
-						id={item._id}
-					>
-						{categoryMenu(item)}
-					</DropdownButton>
-				</Row>
+					<div className="media-item-buttons">
+						<ButtonGroup>
+							<DropdownButton
+								bsStyle="default"
+								className="category-picker"
+								title={item.category_name || "Unassigned"}
+								id={item._id}
+								block>
+								{categoryMenu(item)}
+							</DropdownButton>
+							<Button onClick={this.onClickRemoveItem.bind(this, item)}>Remove</Button>
+						</ButtonGroup>
+					</div>
+				</div>
 			);
 
 		});
@@ -158,9 +196,9 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				<Grid fluid={true}>
 					<form className="packForm" onSubmit={this.handleUpdate}>
 						<Row>
-							<Col xs={6}>
+							<Col xs={12} md={8}>
 								<Row>
-									<Col xs={8}>
+									<Col xs={12} md={8}>
 										<Input
 											id="name"
 											type="text"
@@ -178,12 +216,31 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											value={this.state.form.description}
 											onChange={this.handlePropChange}
 										/>
+
+									</Col>
+								</Row>
+								<Row>
+									<Col xs={9} md={6}>
 										<Input
 											id="price"
 											type="number"
+											step="any"
+											min="0"
 											label="Price"
 											addonBefore="$"
 											value={this.state.form.price}
+											onChange={this.handlePropChange}
+											disabled={!this.state.form.premium}
+										/>
+									</Col>
+									<Col xs={3} md={2}>
+										<Input
+											id="premium"
+											type="checkbox"
+											bsSize="large"
+											label="Premium"
+											checked={this.state.form.premium}
+											onChange={this.handlePropChange}
 										/>
 									</Col>
 								</Row>
@@ -215,6 +272,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 									</Col>
 								</Row>
 								<Row>
+									<Col xs={8}>
+										<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Save'} />
+									</Col>
+								</Row>
+								<Row>
 									<div className="media-item-group">
 										<h3>Items</h3>
 										<div className="items">
@@ -228,11 +290,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							</Col>
 							<Col xs={6}>
 								<AddItemToPackModal show={this.state.shouldShowSearchPanel} onSelectItem={this.onSelectItem.bind(this)} />
-							</Col>
-						</Row>
-						<Row>
-							<Col xs={8}>
-								<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Save'} />
 							</Col>
 						</Row>
 					</form>

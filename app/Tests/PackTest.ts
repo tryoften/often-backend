@@ -9,12 +9,7 @@ var categories = new Categories();
 
 pack.assignCategoryToItem('41_-aTqhe', categories[0]);
 
-
-<<<<<<< HEAD
 var pacman = Pack.fromType(MediaItemSource.Often, MediaItemType.pack, '321');
 var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.artist, '321');
 var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.track, '321');
 var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.lyric, '321');
-=======
-
->>>>>>> master

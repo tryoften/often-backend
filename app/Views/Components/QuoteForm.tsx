@@ -23,16 +23,21 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 	constructor(props: QuoteFormProps) {
 		super(props);
 
+		this.setupModel(props);
+
+		this.updateStateWithQuote = this.updateStateWithQuote.bind(this);
+		this.handlePropChange = this.handlePropChange.bind(this);
+		this.handleUpdate = this.handleUpdate.bind(this);
+	}
+
+	setupModel(props: QuoteFormProps) {
 		let isNew = !props.quoteId;
 
 		let attributes: any = {
 			owner_name: props.owner.name,
-			owner_id: props.owner.id
+			owner_id: props.owner.id,
+			id: props.quoteId
 		};
-
-		if (isNew) {
-			attributes.id = props.quoteId;
-		}
 
 		let quote = new Quote(attributes);
 
@@ -42,10 +47,6 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 			isNew: isNew,
 			showModal: props.show
 		};
-
-		this.updateStateWithQuote = this.updateStateWithQuote.bind(this);
-		this.handlePropChange = this.handlePropChange.bind(this);
-		this.handleUpdate = this.handleUpdate.bind(this);
 
 		quote.on('update', this.updateStateWithQuote);
 	}
@@ -64,6 +65,9 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 	}
 
 	componentWillReceiveProps(nextProps: QuoteFormProps) {
+		this.state.model.off('update', this.updateStateWithQuote);
+		this.setupModel(nextProps);
+
 		this.setState({
 			showModal: nextProps.show
 		});
@@ -92,7 +96,7 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 
 	render() {
 		return (
-			<Modal show={this.props.show} onHide={this.close.bind(this)} bsSize="large">
+			<Modal show={this.state.showModal} onHide={this.close.bind(this)} bsSize="large">
 				<Modal.Body>
 					<div className="quote-form">
 						<Input

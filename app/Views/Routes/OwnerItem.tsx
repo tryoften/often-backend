@@ -4,6 +4,7 @@ import Owner from '../../Models/Owner';
 import QuoteForm from '../Components/QuoteForm';
 import * as _ from 'underscore';
 import MediaItemView from '../Components/MediaItemView';
+import {IndexableObject} from "../../Interfaces/Indexable";
 
 interface OwnerItemProps extends React.Props<OwnerItem> {
 	params: {
@@ -15,6 +16,7 @@ interface OwnerItemState extends React.Props<OwnerItem> {
 	isNew?: boolean;
 	model?: Owner;
 	shouldShowQuoteForm?: boolean;
+	currentQuoteId?: string;
 }
 
 export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItemState> {
@@ -38,7 +40,7 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		};
 
 		_.bindAll(this, 'updateState', 'handleSmallImageChange', 'handleLargeImageChange',
-			'handleUpdate', 'handleNameChange');
+			'handleUpdate', 'handleNameChange', 'onClickQuote');
 		owner.on('update', this.updateState.bind(this));
 	}
 
@@ -83,8 +85,11 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		this.setState({model: model});
 	}
 
-	onClickQuote(e) {
-		console.log('');
+	onClickQuote(item: IndexableObject) {
+		this.setState({
+			currentQuoteId: item._id,
+			shouldShowQuoteForm: true
+		});
 	}
 
 	onClickAddItem(e: Event) {
@@ -99,13 +104,14 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 	render() {
 		var itemsComponents = Object.keys(this.state.model.quotes).map(key => {
 			let item = this.state.model.quotes[key];
-			return <MediaItemView key={key} item={item} />;
+			return <MediaItemView key={key} item={item} onSelect={this.onClickQuote.bind(this)} />;
 		});
 
 		var quoteForm = this.state.shouldShowQuoteForm ?
 			(<QuoteForm owner={this.state.model}
-			   show={this.state.shouldShowQuoteForm}
-			   onSaveChanges={this.close.bind(this)} />) : "";
+						quoteId={this.state.currentQuoteId}
+			   			show={this.state.shouldShowQuoteForm}
+			   			onSaveChanges={this.close.bind(this)} />) : "";
 
 		return (
 			<div className="section">
