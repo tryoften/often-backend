@@ -81,7 +81,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes')).map(key => {
 			let quote = this.state.selectedOwner.get('quotes')[key];
-			return <MediaItemView key={quote._id} item={quote} onSelect={this.onSelectItem.bind(this)} />;
+			return <MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />;
 		}) : "";
 
 		return (

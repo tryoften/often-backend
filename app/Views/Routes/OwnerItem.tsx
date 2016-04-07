@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Glyphicon } from 'react-bootstrap';
 import Owner from '../../Models/Owner';
+import QuoteForm from '../Components/QuoteForm';
 import * as _ from 'underscore';
 import MediaItemView from '../Components/MediaItemView';
+import {IndexableObject} from "../../Interfaces/Indexable";
 
 interface OwnerItemProps extends React.Props<OwnerItem> {
 	params: {
@@ -13,6 +15,8 @@ interface OwnerItemProps extends React.Props<OwnerItem> {
 interface OwnerItemState extends React.Props<OwnerItem> {
 	isNew?: boolean;
 	model?: Owner;
+	shouldShowQuoteForm?: boolean;
+	currentQuoteId?: string;
 }
 
 export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItemState> {
@@ -36,7 +40,7 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		};
 
 		_.bindAll(this, 'updateState', 'handleSmallImageChange', 'handleLargeImageChange',
-			'handleUpdate', 'handleNameChange');
+			'handleUpdate', 'handleNameChange', 'onClickQuote');
 		owner.on('update', this.updateState.bind(this));
 	}
 
@@ -81,25 +85,41 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		this.setState({model: model});
 	}
 
-	onClickQuote(e) {
-
+	onClickQuote(item: IndexableObject) {
+		this.setState({
+			currentQuoteId: item._id,
+			shouldShowQuoteForm: true
+		});
 	}
 
 	onClickAddItem(e: Event) {
 		e.preventDefault();
+		this.setState({shouldShowQuoteForm: true});
+	}
+
+	close() {
+		this.setState({shouldShowQuoteForm: false});
 	}
 
 	render() {
 		var itemsComponents = Object.keys(this.state.model.quotes).map(key => {
 			let item = this.state.model.quotes[key];
-			return <MediaItemView key={item._id} item={item} />;
+			return <MediaItemView key={key} item={item} onSelect={this.onClickQuote.bind(this)} />;
 		});
+
+		var quoteForm = this.state.shouldShowQuoteForm ?
+			(<QuoteForm owner={this.state.model}
+						quoteId={this.state.currentQuoteId}
+			   			show={this.state.shouldShowQuoteForm}
+			   			onSaveChanges={this.close.bind(this)} />) : "";
 
 		return (
 			<div className="section">
 				<header className="section-header">
 					<h2>{this.state.model.get('name')}</h2>
 				</header>
+
+				{quoteForm}
 
 				<Grid fluid={true}>
 					<Row>
