@@ -140,7 +140,7 @@ class Pack extends MediaItem {
 		var items = this.items;
 		items.push(itemObj);
 
-		this.save({items});
+		this.save({items, items_count: items.length});
 	}
 
 	removeItem(item: PackIndexableObject) {
@@ -244,8 +244,8 @@ class Pack extends MediaItem {
 			price: this.price || 0,
 			image: this.image || {},
 			items: this.items || [],
-			items_count: this.items_count || -1
-		}, super.toIndexingFormat());
+			items_count: this.items_count || this.items.length
+		}, super.toIndexingFormat(), super.toJSON());
 
 		return data;
 	}

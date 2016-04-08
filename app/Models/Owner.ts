@@ -1,6 +1,15 @@
-import MediaItem from "./MediaItem";
+import MediaItem, { MediaItemAttributes } from "./MediaItem";
 import { firebase as FirebaseConfig } from '../config';
 import {IndexableObject} from "../Interfaces/Indexable";
+
+export interface OwnerAttributes extends MediaItemAttributes {
+	name: string;
+	image: {
+		small_url: string;
+		large_url: string;
+	};
+	quotes: { [key: string]: IndexableObject };
+}
 
 export default class Owner extends MediaItem {
 

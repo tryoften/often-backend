@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Glyphicon } from 'react-bootstrap';
-import Owner from '../../Models/Owner';
+import Owner, { OwnerAttributes } from '../../Models/Owner';
 import QuoteForm from '../Components/QuoteForm';
-import * as _ from 'underscore';
 import MediaItemView from '../Components/MediaItemView';
-import {IndexableObject} from "../../Interfaces/Indexable";
+import { IndexableObject } from "../../Interfaces/Indexable";
+import * as _ from 'underscore';
+import * as objectPath from 'object-path';
 
 interface OwnerItemProps extends React.Props<OwnerItem> {
 	params: {
@@ -17,6 +18,7 @@ interface OwnerItemState extends React.Props<OwnerItem> {
 	model?: Owner;
 	shouldShowQuoteForm?: boolean;
 	currentQuoteId?: string;
+	form?: OwnerAttributes;
 }
 
 export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItemState> {
@@ -36,11 +38,12 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 
 		this.state = {
 			model: owner,
-			isNew: isNew
+			isNew: isNew,
+			form: owner.toJSON(),
+			shouldShowQuoteForm: false
 		};
 
-		_.bindAll(this, 'updateState', 'handleSmallImageChange', 'handleLargeImageChange',
-			'handleUpdate', 'handleNameChange', 'onClickQuote');
+		_.bindAll(this, 'updateState', 'handlePropChange', 'handleUpdate', 'onClickQuote');
 		owner.on('update', this.updateState.bind(this));
 	}
 
@@ -56,34 +59,22 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		});
 	}
 
-	handleSmallImageChange(e) {
-		var model = this.state.model;
-		var imgObj = model.get('image');
-		imgObj.small.url = e.target.value;
-		model.set('image', imgObj);
-		this.setState({model: model});
-	}
-
-	handleLargeImageChange(e) {
-		var model = this.state.model;
-		var imgObj = model.get('image');
-		imgObj.large.url = e.target.value;
-		model.set('image', imgObj);
-		this.setState({model: model});
+	handlePropChange(e: any) {
+		let id = e.target.id;
+		let form = this.state.form;
+		objectPath.set(form, id, e.target.value);
+		this.setState({form});
 	}
 
 	handleUpdate(e) {
 		e.preventDefault();
-		var model = this.state.model;
-		model.save();
-		this.setState({model: model, isNew: false});
+
+		let model = this.state.model;
+		let form = _.extend({}, this.state.model.toIndexingFormat(), this.state.form);
+		model.save(form);
+		this.setState({model: model, isNew: false, form});
 	}
 
-	handleNameChange(e) {
-		var model = this.state.model;
-		model.set('name', e.target.value);
-		this.setState({model: model});
-	}
 
 	onClickQuote(item: IndexableObject) {
 		this.setState({
@@ -102,7 +93,7 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 	}
 
 	render() {
-		var itemsComponents = Object.keys(this.state.model.quotes).map(key => {
+		var itemsComponents = Object.keys(this.state.model.quotes || []).map(key => {
 			let item = this.state.model.quotes[key];
 			return <MediaItemView key={key} item={item} onSelect={this.onClickQuote.bind(this)} />;
 		});
@@ -128,37 +119,38 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 								<Row>
 									<Col xs={8}>
 										<Input
+											id="name"
 											type="text"
 											label="Name"
 											bsSize="medium"
 											placeholder={this.state.model.get('name')}
-											value={this.state.model.get('name')}
-											onChange={this.handleNameChange}
+											value={this.state.form.name}
+											onChange={this.handlePropChange}
 										/>
 									</Col>
 								</Row>
 								<Row>
 									<Col xs={4}>
 										<div className="image-upload">
-											<Thumbnail src={this.state.model.get('image').small_url} />
+											<Thumbnail src={this.state.form.image.small_url} />
 										</div>
 									</Col>
 									<Col xs={8}>
 										<Input
+											id="image.small_url"
 											type="text"
 											label="Small Image"
 											bsSize="medium"
-											placeholder={this.state.model.get('image').small_url}
-											value={this.state.model.get('image').small_url}
-											onChange={this.handleSmallImageChange}
+											value={this.state.form.image.small_url}
+											onChange={this.handlePropChange}
 										/>
 										<Input
+											id="image.large_url"
 											type="text"
 											label="Large Image"
 											bsSize="medium"
-											placeholder={this.state.model.get('image').large_url}
-											value={this.state.model.get('image').large_url}
-											onChange={this.handleLargeImageChange}
+											value={this.state.form.image.large_url}
+											onChange={this.handlePropChange}
 										/>
 									</Col>
 								</Row>
