@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts" />
 
-import { Route, Router, hashHistory } from 'react-router';
+import { Route, Router, browserHistory } from 'react-router';
 import { render } from 'react-dom';
 import * as React from 'react'; // Don't remove, components need it
 
@@ -13,7 +13,7 @@ import Owners from './Routes/OwnersRoute';
 import OwnerItem from './Routes/OwnerItem';
 
 render((
-	<Router history={hashHistory}>
+	<Router history={browserHistory}>
 		<Route path='/' component={Home}>
 			<Route path='/packs' component={Packs} />
 			<Route path="/pack(/:packId)" component={PackItem} />
