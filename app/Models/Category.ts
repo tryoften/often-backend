@@ -6,7 +6,6 @@ import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
 import { generate as generateId } from 'shortid';
-import {IndexableObject} from "../Interfaces/Indexable";
 
 export interface CategoryAttributes {
 	id?: string;
@@ -81,7 +80,7 @@ class Category extends BaseModel {
 			id: this.id,
 			image: this.image,
 			name: this.name
-		}
+		};
 	}
 }
 
