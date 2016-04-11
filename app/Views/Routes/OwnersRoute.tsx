@@ -39,7 +39,7 @@ export default class OwnersRoute extends React.Component<OwnersProps, OwnersStat
 			);
 		});
 
-		return (
+		return this.props.children ? <div>{this.props.children}</div> : (
 			<div className="section">
 				<header className="section-header">
 					<h2>Owners</h2>
@@ -58,7 +58,6 @@ export default class OwnersRoute extends React.Component<OwnersProps, OwnersStat
 						</Col>
 					</Row>
 				</Grid>
-
 			</div>
 		);
 	}

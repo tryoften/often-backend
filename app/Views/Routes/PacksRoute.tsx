@@ -40,32 +40,33 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 			);
 		});
 
-
-		return (
+		let content = this.props.children ? <div>{this.props.children}</div> : (
 			<div className="section">
 				<header className="section-header">
 					<h2>Packs</h2>
-
 					<ButtonToolbar className="pull-right">
 						<Link to="/pack">
 							<Button bsStyle="primary" bsSize="small" active>Add Pack</Button>
 						</Link>
 					</ButtonToolbar>
 				</header>
-
 				<Grid fluid={true}>
-					<Row>
-						<Col sm={12}>
-							<div className="content">
-								<ReactCSSTransitionGroup transitionName="pack" transitionEnterTimeout={300} transitionLeaveTimeout={300}>
-									{packComponents}
-								</ReactCSSTransitionGroup>
-							</div>
-						</Col>
-					</Row>
+				<Row>
+					<Col sm={12}>
+						<div className="content">
+							<ReactCSSTransitionGroup
+								transitionName="pack"
+								transitionEnterTimeout={300}
+								transitionLeaveTimeout={300}>
+								{packComponents}
+							</ReactCSSTransitionGroup>
+						</div>
+					</Col>
+				</Row>
 				</Grid>
-
 			</div>
 		);
+
+		return content;
 	}
 }

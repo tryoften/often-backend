@@ -39,7 +39,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 			);
 		});
 
-		return (
+		return this.props.children ? <div>{this.props.children}</div> : (
 			<div className="section">
 				<header className="section-header">
 					<h2>Categories</h2>
