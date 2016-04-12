@@ -55,7 +55,8 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 
 	updateState(owner: Owner) {
 		this.setState({
-			model: owner
+			model: owner,
+			form: owner.toJSON()
 		});
 	}
 
@@ -101,13 +102,13 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		var quoteForm = this.state.shouldShowQuoteForm ?
 			(<QuoteForm owner={this.state.model}
 						quoteId={this.state.currentQuoteId}
-			   			show={this.state.shouldShowQuoteForm}
-			   			onSaveChanges={this.close.bind(this)} />) : "";
+						show={this.state.shouldShowQuoteForm}
+						onSaveChanges={this.close.bind(this)}/>) : "";
 
 		return (
 			<div className="section">
 				<header className="section-header">
-					<h2>{this.state.model.get('name')}</h2>
+					<h2>{this.state.form.name}</h2>
 				</header>
 
 				{quoteForm}
@@ -123,7 +124,6 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 											type="text"
 											label="Name"
 											bsSize="medium"
-											placeholder={this.state.model.get('name')}
 											value={this.state.form.name}
 											onChange={this.handlePropChange}
 										/>
