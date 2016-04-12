@@ -6,9 +6,7 @@ import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category from './Category';
-import PackMap from './PackMap';
 import {IndexableObject} from '../Interfaces/Indexable';
-
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
@@ -56,8 +54,6 @@ type PackMeta = Object;
 
 class Pack extends MediaItem {
 
-	private packMap: PackMap;
-
 	/**
 	 * Designated constructor
 	 *
@@ -74,14 +70,10 @@ class Pack extends MediaItem {
 			attributes.items = [];
 		}
 
+		attributes.setObjectMap = true;
+
 		super(attributes, options);
-		this.packMap = new PackMap({ pack: this });
 
-	}
-
-
-	syncData (): Promise<any> {
-		return Promise.all([super.syncData(), this.packMap.syncData()]);
 	}
 
 	defaults(): Backbone.ObjectHash {
@@ -140,6 +132,21 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
+	getTargetObjectProperties(): any {
+		return {
+			id: this.id,
+			name: this.name,
+			image: this.image,
+			categories: this.categories,
+			desscription: this.description,
+			items: this.items,
+			premium: this.premium,
+			price: this.price,
+			source: this.source,
+			type: this.type
+		};
+	}
+
 	/**
 	 * Adds an individual media item to the pack
 	 * @param item
@@ -160,30 +167,8 @@ class Pack extends MediaItem {
 		this.save({items});
 	}
 
-	/**
-	 * Propagates model changes to mapped user models and firebase
-	 */
-	save (obj?: any) {
-		(obj) ? super.save(obj) : super.save();
-		this.packMap.propagateChangesToUsers();
-	}
-
-	/**
-	 * Adds a user to the packMap
-	 * @param {string} userId - Id of a user to be added to the pack map
-	 */
-	mapUser (userId: string) {
-		this.packMap.addUser(userId);
-	}
 
 
-	/**
-	 * Removes a user from the packMap
-	 * @param {string} userId - Id of a user to be removed from pack map
-	 */
-	unmapUser (userId: string) {
-		this.packMap.removeUser(userId);
-	}
 
 	/**
 	 * Assigns a category to an item on a pack and updates the catgories collection on the pack

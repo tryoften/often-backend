@@ -6,6 +6,8 @@ import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
 import { generate as generateId } from 'shortid';
+import ObjectMap from './ObjectMap';
+import { ObjectMappable } from '../Interfaces/ObjectMappable';
 
 export interface CategoryAttributes {
 	id?: string;
@@ -20,11 +22,14 @@ export interface CategoryAttributes {
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
  */
 class Category extends BaseModel {
-	constructor(attributes: CategoryAttributes = {}, opts: any = {}) {
+
+	constructor(attributes: any = {}, opts: any = {}) {
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
+		attributes.setObjectMap = true;
 		super(attributes, opts);
+
 	}
 
 	defaults(): Backbone.ObjectHash {
@@ -47,6 +52,14 @@ class Category extends BaseModel {
 
 	get image(): any {
 		return this.get('image') || {};
+	}
+
+	public getTargetObjectProperties(): any {
+		return {
+			id: this.id,
+			name: this.name,
+			image: this.image
+		};
 	}
 
 	/**

@@ -11,12 +11,14 @@ export interface MediaItemAttributes {
 	source?: MediaItemSource;
 	type?: MediaItemType;
 	score?: number;
+	setObjectMap?: boolean;
 }
 
 /**
  * Base model for media items. Includes all the metadata to query object from backend database
  */
 export class MediaItem extends BaseModel implements Indexable {
+
 	/**
 	 * Designated constructor
 	 *
@@ -33,8 +35,8 @@ export class MediaItem extends BaseModel implements Indexable {
 		}
 
 		super(attributes, options);
-	}
 
+	}
 
 	/**
 	 * Creates media item from a service provider id by specifying the source, type and provider id
@@ -43,7 +45,7 @@ export class MediaItem extends BaseModel implements Indexable {
 	 * @param type - type of the id (e.g. lyric, track, etc...)
 	 * @param providerId - service provider id (e.g. spotify:track:xxx)
 	 * @returns {Promise<MediaItem>} Resolves to a new or existing MediaItem model
-     */
+	 */
 	public static fromType(source: MediaItemSource, type: MediaItemType, providerId: string): Promise<MediaItem> {
 		var MediaItemClass = MediaItemType.toClass(type);
 		return new Promise<MediaItem>( (resolve, reject) => {
@@ -63,6 +65,7 @@ export class MediaItem extends BaseModel implements Indexable {
 
 		});
 	}
+
 
 	public imageProperties(): string[] {
 		return ['image_url'];
@@ -84,7 +87,7 @@ export class MediaItem extends BaseModel implements Indexable {
 	}
 
 	// Getters
-	get type(): MediaItemType {
+	get type(): string {
 		return this.get('type');
 	}
 
@@ -101,7 +104,7 @@ export class MediaItem extends BaseModel implements Indexable {
 	}
 
 	// Setters
-	set type(value: MediaItemType) {
+	set type(value: string) {
 		this.set('type', value);
 	}
 

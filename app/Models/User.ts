@@ -16,6 +16,10 @@ class User extends BaseModel {
 		super(attributes, options);
 	}
 
+	get path(): string {
+		return `users/${this.id}`;
+	}
+
 	/* Getters */
 	get url(): Firebase {
 		return new Firebase(`${FirebaseConfig.BaseURL}/users/${this.id}`);
@@ -78,7 +82,7 @@ class User extends BaseModel {
 				return pack.syncData();
 			}).then(() => {
 				this.setPack(pack);
-				pack.mapUser(this.id);
+				pack.setTarget(`/users/${this.id}/packs/${pack.id}`);
 				resolve(`PackId ${pack.id} added to user ${this.id}`);
 			}).catch((err: Error) => {
 				reject(err);
@@ -97,7 +101,7 @@ class User extends BaseModel {
 		return new Promise<any>((resolve, reject) => {
 			var pack = new Pack({id: packSubAttrs.itemId});
 			pack.syncData().then( () => {
-				pack.unmapUser(this.id);
+				pack.unsetTarget(this.id);
 				this.unsetPack(packSubAttrs.itemId);
 				resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
 			});
