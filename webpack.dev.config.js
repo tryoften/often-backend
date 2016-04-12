@@ -1,5 +1,4 @@
 // This config is extented from webpack.config.js. We use it for development with webpack-dev-server and autoreload/refresh
-var webpackShared = require("./webpack.shared");
 var webpack = require('webpack');
 var WebpackConfig = require('webpack-config');
 var path = require("path");
@@ -18,7 +17,7 @@ var devConfigExtension = {
 
 	output: {
 		filename: 'app.js',
-		publicPath: "http://localhost:3333/"
+		publicPath: "http://localhost:3333/js/"
 	},
 
 	resolve: {

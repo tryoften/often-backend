@@ -17,9 +17,6 @@ export default class SidebarComponent extends React.Component<{}, {}> {
 
 				<div id='sidebar-container'>
 					<Nav stacked onSelect={this.onNavChange}>
-						<LinkContainer to="/">
-							<NavItem eventKey="home">Home</NavItem>
-						</LinkContainer>
 						<LinkContainer to="/packs">
 							<NavItem eventKey="packs">Packs</NavItem>
 						</LinkContainer>

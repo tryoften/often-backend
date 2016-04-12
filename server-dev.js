@@ -9,6 +9,7 @@ var server = new WebpackDevServer(compiler, {
 	hot: true,
 	contentBase: './client/',
 	publicPath: config.output.publicPath,
+	historyApiFallback: true,
 	stats: {
 		// With console colors
 		colors: true,

@@ -16,7 +16,6 @@ interface CategoryItemState extends React.Props<CategoryItem> {
 }
 
 export default class CategoryItem extends React.Component<CategoryItemProps, CategoryItemState> {
-
 	constructor(props: CategoryItemProps) {
 		super(props);
 
@@ -61,7 +60,6 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 		model.save(this.state.form);
 		this.setState({model: model, isNew: false});
 	}
-
 
 	render() {
 		return (

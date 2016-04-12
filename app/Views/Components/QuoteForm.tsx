@@ -74,7 +74,9 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 	}
 
 	close() {
-		this.setState({showModal: false});
+		this.setState({
+			showModal: false
+		});
 	}
 
 	handlePropChange(e: any) {
@@ -88,7 +90,11 @@ export default class QuoteForm extends React.Component<QuoteFormProps, QuoteForm
 		e.preventDefault();
 
 		let model = this.state.model;
-		let form = _.extend({}, this.state.model.toIndexingFormat(), this.state.form);
+		let owner = {
+			owner_name: this.props.owner.name,
+			owner_id: this.props.owner.id,
+		};
+		let form = _.extend(this.state.model.toIndexingFormat(), this.state.form, owner);
 		model.save(form);
 		this.setState({model: model, isNew: false, showModal: false, form});
 		this.props.onSaveChanges(e);
