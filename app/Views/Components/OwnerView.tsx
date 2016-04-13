@@ -22,7 +22,7 @@ export default class OwnerView extends React.Component<OwnerViewProps, {}> {
 				</div>
 				<div className="meta">
 					<div className="title">{this.props.model.get('name')}</div>
-					<div className="subtitle">12 items</div>
+					<div className="subtitle">{this.props.model.quotes_count || 0} items</div>
 					<div className="description">{this.props.model.get('description')}</div>
 				</div>
 			</div>

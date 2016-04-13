@@ -2,6 +2,10 @@ import 'backbonefire';
 import { Firebase } from 'backbone';
 
 class BaseModel extends Firebase.Model {
+	constructor(attributes: any = {}, options: any = {autoSync: false}) {
+		super(attributes, options);
+	}
+
 	/**
 	 * Makes sure the model data is synced with the remote database before
 	 * accessing properties.

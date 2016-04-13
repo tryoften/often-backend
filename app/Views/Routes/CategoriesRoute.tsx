@@ -23,11 +23,18 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 			categories: this.categories
 		};
 
-		this.categories.on('update', () => {
-			this.setState({
-				categories: this.categories
-			});
+		this.updateCollection = this.updateCollection.bind(this);
+		this.categories.on('sync', this.updateCollection);
+	}
+
+	updateCollection(collection: Categories) {
+		this.setState({
+			categories: collection
 		});
+	}
+
+	componentWillUnmount() {
+		this.categories.off('sync', this.updateCollection);
 	}
 
 	render() {
@@ -45,7 +52,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 					<h2>Categories</h2>
 
 					<ButtonToolbar className="pull-right">
-						<Button bsStyle="primary" bsSize="small" active href="#/category">Add Category</Button>
+						<Button bsStyle="primary" bsSize="small" active href="/category">Add Category</Button>
 					</ButtonToolbar>
 				</header>
 

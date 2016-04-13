@@ -12,7 +12,6 @@ export interface OwnerAttributes extends MediaItemAttributes {
 }
 
 export default class Owner extends MediaItem {
-
 	defaults(): Backbone.ObjectHash {
 		return {
 			name: '',
@@ -24,8 +23,16 @@ export default class Owner extends MediaItem {
 		};
 	}
 
+	get gifs(): { [key: string]: IndexableObject } {
+		return this.get('gifs');
+	}
+
 	get quotes(): { [key: string]: IndexableObject } {
 		return this.get('quotes');
+	}
+
+	get quotes_count(): number {
+		return Object.keys(this.get('quotes')).length || 0;
 	}
 
 	get name(): string {

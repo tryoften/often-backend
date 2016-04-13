@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Glyphicon } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Button, ButtonToolbar } from 'react-bootstrap';
 import Owner, { OwnerAttributes } from '../../Models/Owner';
 import QuoteForm from '../Components/QuoteForm';
+import GIFForm from '../Components/GIFForm';
 import MediaItemView from '../Components/MediaItemView';
 import { IndexableObject } from "../../Interfaces/Indexable";
 import * as _ from 'underscore';
@@ -17,7 +18,9 @@ interface OwnerItemState extends React.Props<OwnerItem> {
 	isNew?: boolean;
 	model?: Owner;
 	shouldShowQuoteForm?: boolean;
+	shouldShowGIFForm?: boolean;
 	currentQuoteId?: string;
+	currentGIFId?: string;
 	form?: OwnerAttributes;
 }
 
@@ -40,11 +43,13 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 			model: owner,
 			isNew: isNew,
 			form: owner.toJSON(),
-			shouldShowQuoteForm: false
+			shouldShowQuoteForm: false,
+			shouldShowGIFForm: false
 		};
 
 		_.bindAll(this, 'updateState', 'handlePropChange', 'handleUpdate', 'onClickQuote');
 		owner.on('update', this.updateState.bind(this));
+		owner.syncData();
 	}
 
 	componentDidMount() {
@@ -84,13 +89,19 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		});
 	}
 
-	onClickAddItem(e: Event) {
+	onClickAddQuote(e: Event) {
 		e.preventDefault();
 		this.setState({shouldShowQuoteForm: true});
 	}
 
+	onClickAddGIF(e: Event) {
+		e.preventDefault();
+		this.setState({shouldShowGIFForm: true});
+	}
+
 	close() {
-		this.setState({shouldShowQuoteForm: false});
+		this.setState({shouldShowQuoteForm: false, shouldShowGIFForm: false});
+		this.state.model.syncData();
 	}
 
 	render() {
@@ -99,11 +110,22 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 			return <MediaItemView key={key} item={item} onSelect={this.onClickQuote.bind(this)} />;
 		});
 
+		var gifs = Object.keys(this.state.model.gifs || []).map(key => {
+			let item = this.state.model.gifs[key];
+			return <MediaItemView key={key} item={item} />
+		});
+
 		var quoteForm = this.state.shouldShowQuoteForm ?
 			(<QuoteForm owner={this.state.model}
 						quoteId={this.state.currentQuoteId}
 						show={this.state.shouldShowQuoteForm}
 						onSaveChanges={this.close.bind(this)}/>) : "";
+
+		var gifForm = this.state.shouldShowGIFForm ?
+			(<GIFForm owner={this.state.model}
+					  gifId={this.state.currentGIFId}
+					  show={this.state.shouldShowGIFForm}
+					  onSaveChanges={this.close.bind(this)} />) : "";
 
 		return (
 			<div className="section">
@@ -112,6 +134,7 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 				</header>
 
 				{quoteForm}
+				{gifForm}
 
 				<Grid fluid={true}>
 					<Row>
@@ -155,21 +178,23 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 									</Col>
 								</Row>
 								<Row>
+									<Col xs={8}>
+										<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Save'} />
+
+									</Col>
+								</Row>
+								<Row>
 									<div className="media-item-group">
 										<h3>Items</h3>
+										<ButtonToolbar className="pull-right">
+											<Button onClick={this.onClickAddQuote.bind(this)}>Add Quote</Button>
+											<Button onClick={this.onClickAddGIF.bind(this)}>Add GIF</Button>
+										</ButtonToolbar>
 										<div className="items">
-											<div className="add-item pull-left" onClick={this.onClickAddItem.bind(this)}>
-												<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
-											</div>
-
+											{gifs}
 											{itemsComponents}
 										</div>
 									</div>
-								</Row>
-								<Row>
-									<Col xs={8}>
-										<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Update'} />
-									</Col>
 								</Row>
 							</form>
 						</Col>

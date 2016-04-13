@@ -27,7 +27,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 		this.state = {
 			showModal: props.show,
-			owners: new Owners()
+			owners: this.owners
 		};
 
 		this.onSelectOwnerChange = this.onSelectOwnerChange.bind(this);
@@ -84,6 +84,11 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 			return <MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />;
 		}) : "";
 
+		let gifs =  this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('gifs') || []).map(key => {
+			let item = this.state.selectedOwner.get('gifs')[key];
+			return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
+		}) : "";
+
 		return (
 			<Modal show={this.state.showModal} onHide={this.close.bind(this)} bsSize="large">
 				<Modal.Body>
@@ -97,6 +102,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 									{ownersSelector}
 								</Input>
 								<div className="media-item-group">
+									<div className="items">{gifs}</div>
 									<div className="items">{ownerQuotes}</div>
 								</div>
 							</div>
