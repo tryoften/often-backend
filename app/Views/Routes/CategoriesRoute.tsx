@@ -17,7 +17,6 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 
 	constructor(props: CategoriesProps) {
 		super(props);
-		debugger;
 
 		this.categories = new Categories();
 		this.state = {
@@ -53,7 +52,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 					<h2>Categories</h2>
 
 					<ButtonToolbar className="pull-right">
-						<Button bsStyle="primary" bsSize="small" active href="#/category">Add Category</Button>
+						<Button bsStyle="primary" bsSize="small" active href="/category">Add Category</Button>
 					</ButtonToolbar>
 				</header>
 

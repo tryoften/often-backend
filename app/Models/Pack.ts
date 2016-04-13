@@ -269,7 +269,7 @@ class Pack extends MediaItem {
 	 * @returns {IndexableObject}
 	 */
 	public toIndexingFormat(): IndexableObject {
-		let data: PackIndexableObject = _.extend({
+		let data = _.extend({
 			name: this.name || '',
 			title: this.name || '',
 			author: '',
