@@ -6,7 +6,9 @@ import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category from './Category';
-import { IndexableObject } from "../Interfaces/Indexable";
+import PackMap from './PackMap';
+import {IndexableObject} from '../Interfaces/Indexable';
+
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
@@ -42,6 +44,8 @@ type PackMeta = Object;
 
 class Pack extends MediaItem {
 
+	private packMap: PackMap;
+
 	/**
 	 * Designated constructor
 	 *
@@ -59,6 +63,13 @@ class Pack extends MediaItem {
 		}
 
 		super(attributes, options);
+		this.packMap = new PackMap({ pack: this });
+
+	}
+
+
+	syncData (): Promise<any> {
+		return Promise.all([super.syncData(), this.packMap.syncData()]);
 	}
 
 	defaults(): Backbone.ObjectHash {
@@ -122,12 +133,11 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
-
 	/**
 	 * Adds an individual media item to the pack
 	 * @param item
      */
-	addItem(item: MediaItem) {
+	addItem (item: MediaItem) {
 		var itemObj = item.toJSON();
 
 		var items = this.items;
@@ -144,6 +154,31 @@ class Pack extends MediaItem {
 	}
 
 	/**
+	 * Propagates model changes to mapped user models and firebase
+	 */
+	save (obj?: any) {
+		(obj) ? super.save(obj) : super.save();
+		this.packMap.propagateChangesToUsers();
+	}
+
+	/**
+	 * Adds a user to the packMap
+	 * @param {string} userId - Id of a user to be added to the pack map
+	 */
+	mapUser (userId: string) {
+		this.packMap.addUser(userId);
+	}
+
+
+	/**
+	 * Removes a user from the packMap
+	 * @param {string} userId - Id of a user to be removed from pack map
+	 */
+	unmapUser (userId: string) {
+		this.packMap.removeUser(userId);
+	}
+
+	/**
 	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
 	 *
 	 * @param {string} itemId - Id of an item to be categorized.
@@ -154,7 +189,9 @@ class Pack extends MediaItem {
 
 		var targetItem;
 		var itemIndex = 0;
+
 		for (let item of this.items) {
+
 			if (itemId === item._id) {
 				targetItem = item;
 				break;
@@ -227,11 +264,12 @@ class Pack extends MediaItem {
 	}
 
 	/**
+	 * Overwrite for base class's toIndexingFormat method
 	 *
-	 * @returns {PackIndexableObject}
-     */
+	 * @returns {IndexableObject}
+	 */
 	public toIndexingFormat(): IndexableObject {
-		let data = _.extend({
+		let data: PackIndexableObject = _.extend({
 			name: this.name || '',
 			title: this.name || '',
 			author: '',
@@ -273,6 +311,7 @@ class Pack extends MediaItem {
 		var MediaItemClass = MediaItemType.toClass(item.type);
 		return new MediaItemClass({id: item.id}).syncData();
 	}
+
 
 }
 

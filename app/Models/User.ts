@@ -1,6 +1,4 @@
 import * as Firebase from 'firebase';
-import * as _ from 'underscore';
-import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import { firebase as FirebaseConfig } from '../config';
 import BaseModel from '../Models/BaseModel';
 import Subscription, { SubscriptionAttributes } from '../Models/Subscription';
@@ -42,6 +40,70 @@ class User extends BaseModel {
 		this.set('auth_token', token);
 	}
 
+
+	/**
+	 * Instantiates a pack and adds it to the user's pack collection
+	 * @param packSubAttrs {SubscriptionAttributes} - Object containing pack subscription information
+	 * @returns {Promise<string>} - Returns a promise that resolves to a success message or to an error when rejected
+	 */
+	public addPack (packSubAttrs: SubscriptionAttributes): Promise<string> {
+
+		if (!packSubAttrs.mediaItemType) {
+			packSubAttrs.mediaItemType = MediaItemType.pack;
+		}
+
+		var pack = new Pack({id: packSubAttrs.itemId});
+		return new Promise<any>((resolve, reject) => {
+
+			let packSubscription = new Subscription({
+				userId: this.id,
+				itemId: packSubAttrs.itemId,
+				mediaItemType: packSubAttrs.mediaItemType
+			});
+
+			packSubscription.syncData().then(() => {
+
+				/* If pack subscription doesn't have timeSubscribed defined, then subscribe the user */
+				if (!packSubscription.timeSubscribed) {
+					packSubscription.subscribe(packSubAttrs);
+					this.setSubscription(packSubscription);
+				}
+
+				/* If for whatever reason the pack is not set on user then restore then restore it */
+				if (!this.packSubscriptions[packSubscription.id]) {
+					packSubscription.updateTimeLastRestored();
+					this.setSubscription(packSubscription);
+				}
+
+				return pack.syncData();
+			}).then(() => {
+				this.setPack(pack);
+				pack.mapUser(this.id);
+				resolve(`PackId ${pack.id} added to user ${this.id}`);
+			}).catch((err: Error) => {
+				reject(err);
+			});
+		});
+
+
+	}
+
+	/**
+	 * Removes a pack from a user model
+	 * @param packSubAttrs {SubscriptionAttributes} - object containing subscription data
+	 * @returns {Promise<string>} - Returns a promise that resolves to a success message or to an error when rejected
+	 */
+	public removePack (packSubAttrs: SubscriptionAttributes): Promise<string> {
+		return new Promise<any>((resolve, reject) => {
+			var pack = new Pack({id: packSubAttrs.itemId});
+			pack.syncData().then( () => {
+				pack.unmapUser(this.id);
+				this.unsetPack(packSubAttrs.itemId);
+				resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
+			});
+		});
+	}
+
 	/**
 	 * Sets a subscription object on user's subscriptions if it hasn't been set yet
 	 * @param sub {Subscriptions} - Subscription object
@@ -78,62 +140,6 @@ class User extends BaseModel {
 		}
 	}
 
-	/**
-	 * Instantiates a pack and adds it to the user's pack collection
-	 * @param packSubAttrs {SubscriptionAttributes} - Object containing pack subscription information
-	 * @returns {Promise<string>} - Returns a promise that resolves to a success message or to an error when rejected
-	 */
-	public addPack (packSubAttrs: SubscriptionAttributes): Promise<string> {
-
-		if (!packSubAttrs.mediaItemType){
-			packSubAttrs.mediaItemType = MediaItemType.pack;
-		}
-
-		return new Promise<any>((resolve, reject) => {
-
-			let packSubscription = new Subscription({
-				userId: this.id,
-				itemId: packSubAttrs.itemId,
-				mediaItemType: packSubAttrs.mediaItemType
-			});
-
-			packSubscription.syncData().then(() => {
-
-				/* If pack subscription doesn't have timeSubscribed defined, then subscribe the user */
-				if( !packSubscription.timeSubscribed) {
-					packSubscription.subscribe(packSubAttrs);
-					this.setSubscription(packSubscription);
-				}
-
-				/* If for whatever reason the pack is not set on user then restore then restore it */
-				if( !this.packSubscriptions[packSubscription.id]) {
-					packSubscription.updateTimeLastRestored();
-					this.setSubscription(packSubscription);
-				}
-
-				return new Pack({id: packSubAttrs.itemId}).syncData();
-			}).then((pack: Pack) => {
-				this.setPack(pack);
-				resolve(`PackId ${pack.id} added to user ${this.id}`);
-			}).catch((err: Error) => {
-				reject(err);
-			});
-		});
-
-
-	}
-
-	/**
-	 * Removes a pack from a user model
-	 * @param packSubAttrs {SubscriptionAttributes} - object containing subscription data
-	 * @returns {Promise<string>} - Returns a promise that resolves to a success message or to an error when rejected
-	 */
-	public removePack (packSubAttrs: SubscriptionAttributes): Promise<string> {
-		return new Promise<any>((resolve, reject) => {
-			this.unsetPack(packSubAttrs.itemId);
-			resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
-		});
-	}
 
 }
 
