@@ -49,6 +49,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.handlePropChange = this.handlePropChange.bind(this);
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.onClickAddItem = this.onClickAddItem.bind(this);
+		this.togglePublish = this.togglePublish.bind(this);
+
 		pack.on('update', this.updateStateWithPack);
 		categories.on('update', this.updateStateWithCategories);
 	}
@@ -71,9 +73,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	updateStateWithCategories(categories: Categories) {
-		this.setState({
-			categories: categories
-		});
+		this.setState({categories});
 	}
 
 	componentWillReceiveProps() {
@@ -110,10 +110,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	onSelectItem(item: IndexablePackItem) {
-		let items = this.state.model.get('items');
+		let items: IndexablePackItem[] = this.state.model.get('items');
 		items.push(item);
 
-		this.state.model.save({items});
+		this.state.model.save({items, items_count: items.length});
 
 		this.setState({
 			model: this.state.model,
@@ -152,13 +152,20 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 	}
 
+	togglePublish(e) {
+		let form = this.state.form;
+		form.published = !form.published;
+		this.setState({form});
+	}
+
 	render() {
 		var categoryMenu = (item) => {
 			return this.state.categories.map(category => {
 				return <MenuItem
 					key={category.id}
 					eventKey={category.id}
-					onClick={this.onClickCategory.bind(this, item._id, category)}>{category.name}
+					onClick={this.onClickCategory.bind(this, item._id, category)}>
+						{category.name}
 				</MenuItem>;
 			});
 		};
@@ -274,6 +281,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<Row>
 									<Col xs={8}>
 										<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Save'} />
+										<Button bsStyle="primary" onClick={this.togglePublish}>{ this.state.form.published ? 'Unpublish' : 'Publish'}</Button>
 									</Col>
 								</Row>
 								<Row>

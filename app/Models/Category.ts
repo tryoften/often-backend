@@ -20,7 +20,7 @@ export interface CategoryAttributes {
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
  */
 class Category extends BaseModel {
-	constructor(attributes: CategoryAttributes = {}, opts: any = {}) {
+	constructor(attributes: CategoryAttributes = {}, opts: any = {autoSync: false}) {
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}

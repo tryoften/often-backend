@@ -17,17 +17,25 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 
 	constructor(props: CategoriesProps) {
 		super(props);
+		debugger;
 
 		this.categories = new Categories();
 		this.state = {
 			categories: this.categories
 		};
 
-		this.categories.on('update', () => {
-			this.setState({
-				categories: this.categories
-			});
+		this.updateCollection = this.updateCollection.bind(this);
+		this.categories.on('sync', this.updateCollection);
+	}
+
+	updateCollection(collection: Categories) {
+		this.setState({
+			categories: collection
 		});
+	}
+
+	componentWillUnmount() {
+		this.categories.off('sync', this.updateCollection);
 	}
 
 	render() {

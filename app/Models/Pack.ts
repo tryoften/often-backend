@@ -14,35 +14,23 @@ export interface IndexablePackItem extends IndexableObject {
 	category_name?: string;
 }
 
-export interface PackIndexableObject extends IndexableObject {
-	id?: string;
-	name?: string;
-	image?: {
-		small_url?: string;
-		large_url?: string;
-	};
-	meta?: PackMeta;
-	items?: IndexablePackItem[];
-	price?: number;
-	items_count?: number;
-	premium?: boolean;
-}
-
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
-	price?: number;
-	premium?: boolean;
-	description?: string;
 	image?: {
 		small_url?: string;
 		large_url?: string;
 	};
+	price?: number;
+	premium?: boolean;
+	published?: boolean;
+	description?: string;
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
 	items_count?: number;
 }
 
+export interface PackIndexableObject extends PackAttributes {}
 
 interface MediaItemInfo {
 	type: MediaItemType;
@@ -77,6 +65,7 @@ class Pack extends MediaItem {
 		return {
 			name: '',
 			description: '',
+			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
 			premium: false,
@@ -97,12 +86,16 @@ class Pack extends MediaItem {
 		return this.get('name');
 	}
 
+	set name(value: string) {
+		this.set('name', value);
+	}
+
 	get description(): string {
 		return this.get('description');
 	}
 
-	set name(value: string) {
-		this.set('name', value);
+	get published(): boolean {
+		return this.get('published');
 	}
 
 	get items(): IndexablePackItem[] {
@@ -114,7 +107,7 @@ class Pack extends MediaItem {
 	}
 
 	get items_count(): number {
-		return this.get('items').length || -1;
+		return this.get('items_count') || this.get('items').length;
 	}
 
 	get price(): number {
@@ -143,7 +136,7 @@ class Pack extends MediaItem {
 		this.save({items, items_count: items.length});
 	}
 
-	removeItem(item: PackIndexableObject) {
+	removeItem(item: IndexablePackItem) {
 		var items = this.items;
 		items = _.filter(items, a => a.id !== item.id);
 
@@ -178,7 +171,10 @@ class Pack extends MediaItem {
 		for (let item of this.items) {
 			if (item.category_id && item._id !== itemId) {
 				/* If a category_id is set on an item, then add it */
-				newCategories[item.category_id] = this.get('categories')[item.category_id];
+				let category = this.get('categories')[item.category_id];
+				if (category) {
+					newCategories[item.category_id] = category;
+				}
 			}
 		}
 
@@ -235,7 +231,7 @@ class Pack extends MediaItem {
 	 * @returns {PackIndexableObject}
      */
 	public toIndexingFormat(): IndexableObject {
-		let data: PackIndexableObject = _.extend({
+		let data = _.extend({
 			name: this.name || '',
 			title: this.name || '',
 			author: '',
