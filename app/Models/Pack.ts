@@ -207,12 +207,14 @@ class Pack extends MediaItem {
 				if (removeCategoryFromPack) {
 					oldCategory.unsetTarget(this, `/packs/${this.id}/categories/${oldCategory.id}`);
 					currentCategories[oldCategory.id] = null;
+					/* Save all changes */
+					this.save({ items: currentItems, categories: currentCategories });
 				}
 			});
+		} else {
+			/* Save all changes */
+			this.save({ items: currentItems, categories: currentCategories });
 		}
-
-		/* Save all changes */
-		this.save({ items: currentItems, categories: currentCategories });
 
 	}
 

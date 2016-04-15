@@ -51,6 +51,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		pack.on('update', this.updateStateWithPack);
 		categories.on('update', this.updateStateWithCategories);
+		pack.syncData();
 	}
 
 	componentDidMount() {

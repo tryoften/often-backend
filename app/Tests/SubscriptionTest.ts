@@ -2,7 +2,8 @@ import User from '../Models/User';
 import Pack from '../Models/Pack';
 import ObjectMap from '../Models/ObjectMap';
 import Category from '../Models/Category';
-//var user = new User({id: 'tester'})
+
+//var user = new User({id: 'tester'});
 //user.syncData().then(() => {
 //	user.addPack({ itemId : 'NksZj51kW'}).then(() => {
 //		console.log(true);
@@ -11,17 +12,25 @@ import Category from '../Models/Category';
 //	});
 //});
 
-//var pack = new Pack({id: 'NksZj51kW'});
-//pack.syncData().then((pm) => {
-//	//console.log('acqui');
-//	pack.setTarget('test', 'user', 'testing user stuff');
-//});
-
-
-var titansCategory = new Category({id: 'E1iBwVKCx'});
-titansCategory.syncData().then((sd) => {
-	titansCategory.save({name: "Sharingan"});
+var pack = new Pack({id: 'NksZj51kW'});
+pack.syncData().then((pm) => {
+	//console.log('acqui');
+	pack.save({
+		categories: {
+			test: {
+				id: 'myuid',
+				image: 'myimage',
+				name: 'myname'
+			}
+		}
+	});
 });
+
+//
+//var titansCategory = new Category({id: 'E1iBwVKCx'});
+//titansCategory.syncData().then((sd) => {
+//	titansCategory.save({name: "Sharingan"});
+//});
 
 
 //var pack = new Pack({id: 'NksZj51kW'});
