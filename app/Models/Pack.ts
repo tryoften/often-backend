@@ -5,12 +5,12 @@ import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
-import Category from './Category';
+import Category, {CategoryAttributes} from './Category';
 import {IndexableObject} from '../Interfaces/Indexable';
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
-	category?: any;
+	category?: CategoryAttributes;
 }
 
 export interface PackAttributes extends MediaItemAttributes {
@@ -70,6 +70,7 @@ class Pack extends MediaItem {
 			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
+			setObjectMap: true,
 			premium: false,
 			price: 0.0,
 			image: {

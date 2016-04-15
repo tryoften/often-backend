@@ -3,7 +3,8 @@ import { firebase as FirebaseConfig } from '../config';
 import BaseModel from '../Models/BaseModel';
 import Subscription, { SubscriptionAttributes } from '../Models/Subscription';
 import Pack from '../Models/Pack';
-import MediaItemType from "./MediaItemType";
+import MediaItemType from './MediaItemType';
+import BaseModelType from './BaseModelType';
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
@@ -13,8 +14,14 @@ class User extends BaseModel {
 
 
 	constructor(attributes: any = {}, options?: any) {
-		attributes.type = 'user';
+		attributes.type = BaseModelType.user;
 		super(attributes, options);
+	}
+
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: BaseModelType.user
+		};
 	}
 
 	/* Getters */
@@ -57,7 +64,6 @@ class User extends BaseModel {
 		return new Promise<any>((resolve, reject) => {
 
 			let packSubscription = new Subscription({
-				type: 'subscription',
 				userId: this.id,
 				itemId: packSubAttrs.itemId,
 				mediaItemType: packSubAttrs.mediaItemType

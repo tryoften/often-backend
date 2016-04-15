@@ -1,10 +1,10 @@
 import { firebase as FirebaseConfig } from '../config';
-import * as FirebaseApi from 'firebase';
+import * as Firebase from 'firebase';
 import 'backbonefire';
-import { Firebase } from 'backbone';
+import { Firebase as BackboneFire } from 'backbone';
 import BaseModelType from "./BaseModelType";
 import BaseModel from "./BaseModel";
-var ObjectHash = require('object-hash');
+import * as ObjectHash from 'object-hash';
 
 export interface ObjectMapAttributes {
 	type: BaseModelType;
@@ -12,8 +12,8 @@ export interface ObjectMapAttributes {
 	deepSync?: boolean;
 }
 
-class ObjectMap extends Firebase.Model {
-	protected rootRef: FirebaseApi;
+class ObjectMap extends BackboneFire.Model {
+	protected rootRef: Firebase;
 	protected deepSync: boolean;
 
 	constructor(attributes: ObjectMapAttributes, options: any = {autoSync: false, deepSync: false}) {
@@ -27,7 +27,7 @@ class ObjectMap extends Firebase.Model {
 		}
 
 		super(attributes, options);
-		this.rootRef = new FirebaseApi(FirebaseConfig.BaseURL);
+		this.rootRef = new Firebase(FirebaseConfig.BaseURL);
 		this.deepSync = options.deepSync;
 	}
 
@@ -35,8 +35,8 @@ class ObjectMap extends Firebase.Model {
 		return this.get('type');
 	}
 
-	public syncModel (): Promise<Firebase.Model> {
-		return new Promise<Firebase.Model>( (resolve, reject) => {
+	public syncModel (): Promise<BackboneFire.Model> {
+		return new Promise<BackboneFire.Model>( (resolve, reject) => {
 			this.once('sync', model => {
 				resolve(model);
 			});
@@ -49,7 +49,7 @@ class ObjectMap extends Firebase.Model {
 	}
 
 	get url(): Firebase {
-		return new FirebaseApi(`${FirebaseConfig.BaseURL}/object_map/${this.get('type')}/${this.id}`);
+		return new Firebase(`${FirebaseConfig.BaseURL}/object_map/${this.get('type')}/${this.id}`);
 	}
 
 	get targets() {

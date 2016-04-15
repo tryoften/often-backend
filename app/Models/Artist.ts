@@ -21,6 +21,11 @@ class Artist extends MediaItem {
 		attributes.type = MediaItemType.artist;
 		super(attributes, options);
 	}
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: MediaItemType.artist
+		};
+	}
 
 	get url(): Firebase {
 		return new Firebase(`${FirebaseConfig.BaseURL}/artists/${this.id}`);

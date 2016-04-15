@@ -48,6 +48,13 @@ class Subscription extends BaseModel implements Indexable {
 		this.save();
 	}
 
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: BaseModelType.subscription,
+			timeLastUpdated: Date.now()
+		};
+	}
+
 	/* Getters */
 	get userId() {
 		return this.get('userId');

@@ -22,6 +22,7 @@ export default class Owner extends MediaItem {
 	defaults(): Backbone.ObjectHash {
 		return {
 			name: '',
+			type: MediaItemType.owner,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'

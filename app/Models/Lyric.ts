@@ -26,6 +26,11 @@ class Lyric extends MediaItem {
 		attributes.type = MediaItemType.lyric;
 		super(attributes, options);
 	}
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: MediaItemType.lyric
+		};
+	}
 
 	get url(): Firebase {
 		return new Firebase(`${FirebaseConfig.BaseURL}/lyrics/${this.id}`);
