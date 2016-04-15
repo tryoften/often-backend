@@ -101,7 +101,9 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 
 	close() {
 		this.setState({shouldShowQuoteForm: false, shouldShowGIFForm: false});
-		this.state.model.syncData();
+		this.state.model.syncData().then((model) => {
+			this.setState({model: this.state.model});
+		});
 	}
 
 	render() {
