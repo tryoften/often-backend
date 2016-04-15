@@ -20,7 +20,7 @@ import Category from '../Models/Category';
 
 var titansCategory = new Category({id: 'E1iBwVKCx'});
 titansCategory.syncData().then((sd) => {
-	titansCategory.save({name: "Titan Civilization"});
+	titansCategory.save({name: "Sharingan"});
 });
 
 

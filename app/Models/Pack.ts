@@ -181,8 +181,8 @@ class Pack extends MediaItem {
 				oldCategoryInfo = currentItems[i].category;
 				currentItems[i].category = category.getTargetObjectProperties();
 				currentCategories[category.id] = category.getTargetObjectProperties();
-				category.setTarget(this.id, 'pack', `/packs/${this.id}/categories/${category.id}`);
-				category.setTarget(this.id, 'pack', `/packs/${this.id}/items/${oldIndex}/category`);
+				category.setTarget(this, `/packs/${this.id}/categories/${category.id}`);
+				category.setTarget(this, `/packs/${this.id}/items/${oldIndex}/category`);
 				break;
 			}
 		}
@@ -203,66 +203,16 @@ class Pack extends MediaItem {
 		if (oldCategoryInfo) {
 			var oldCategory = new Category({id: oldCategoryInfo.id});
 			oldCategory.syncData().then(() => {
-				oldCategory.unsetTarget(this.id, 'pack', `/packs/${this.id}/items/${oldIndex}/category`);
+				oldCategory.unsetTarget(this, `/packs/${this.id}/items/${oldIndex}/category`);
 				if (removeCategoryFromPack) {
-					oldCategory.unsetTarget(this.id, 'pack', `/packs/${this.id}/categories/${oldCategory.id}`);
+					oldCategory.unsetTarget(this, `/packs/${this.id}/categories/${oldCategory.id}`);
 					currentCategories[oldCategory.id] = null;
 				}
 			});
 		}
 
-		//Save all changes
+		/* Save all changes */
 		this.save({ items: currentItems, categories: currentCategories });
-
-	}
-
-	/**
-	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
-	 *
-	 * @param {string} itemId - Id of an item to be categorized.
-	 * @param {Category} category - Category that is to be assigned to an item.
-	 * @returns {void}
-	 */
-	oldAssignCategoryToItem (itemId: string, category: Category) {
-
-		/* When unsetting category, make sure that the item is the only one with that category */
-
-
-		var targetItem;
-		var itemIndex = 0;
-
-		for (let item of this.items) {
-
-			if (itemId === item._id) {
-				targetItem = item;
-				break;
-			}
-			itemIndex++;
-		}
-
-		if (!targetItem) {
-			throw new Error('Invalid item id selected for category change');
-		}
-
-
-		var newCategories = {};
-		for (let item of this.items) {
-			if (item.category.id && item._id !== itemId) {
-				/* If a category_id is set on an item, then add it */
-				newCategories[item.category.id] = this.get('categories')[item.category.id];
-			}
-		}
-
-		/* Assign category on item */
-		targetItem.category = category.getTargetObjectProperties();
-
-		/* Finally update the categories collection on the pack */
-		newCategories[category.id] = category.getTargetObjectProperties();
-		this.url.child(`items/${itemIndex}/category`).update(category.getTargetObjectProperties());
-
-		this.save({ categories: newCategories});
-
-		console.log('done');
 
 	}
 

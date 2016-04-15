@@ -80,7 +80,7 @@ class User extends BaseModel {
 				return pack.syncData();
 			}).then(() => {
 				this.setPack(pack);
-				pack.setTarget(this.id, 'user', `/users/${this.id}/packs/${pack.id}`);
+				pack.setTarget(this, `/users/${this.id}/packs/${pack.id}`);
 			}).catch((err: Error) => {
 				reject(err);
 			});
@@ -98,7 +98,7 @@ class User extends BaseModel {
 		return new Promise<any>((resolve, reject) => {
 			var pack = new Pack({id: packSubAttrs.itemId});
 			pack.syncData().then( () => {
-				pack.unsetTarget(this.id, 'user', `/users/${this.id}/packs/${pack.id}`);
+				pack.unsetTarget(this, `/users/${this.id}/packs/${pack.id}`);
 				this.unsetPack(packSubAttrs.itemId);
 				resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
 			});

@@ -3,16 +3,20 @@ import * as FirebaseApi from 'firebase';
 import 'backbonefire';
 import { Firebase } from 'backbone';
 import BaseModelType from "./BaseModelType";
+import BaseModel from "./BaseModel";
 var ObjectHash = require('object-hash');
 
 export interface ObjectMapAttributes {
-	type: string;
+	type: BaseModelType;
 	id: string;
+	deepSync?: boolean;
 }
 
 class ObjectMap extends Firebase.Model {
 	protected rootRef: FirebaseApi;
-	constructor(attributes: ObjectMapAttributes, options?: any) {
+	protected deepSync: boolean;
+
+	constructor(attributes: ObjectMapAttributes, options: any = {autoSync: false, deepSync: false}) {
 
 		if (!attributes.type) {
 			throw new Error('Type must be defined in object map attributes.');
@@ -24,6 +28,7 @@ class ObjectMap extends Firebase.Model {
 
 		super(attributes, options);
 		this.rootRef = new FirebaseApi(FirebaseConfig.BaseURL);
+		this.deepSync = options.deepSync;
 	}
 
 	get type(): string {
@@ -51,7 +56,9 @@ class ObjectMap extends Firebase.Model {
 		return this.get('targets') || {};
 	}
 
-	setTarget (id: string, type: string, targetPath: string) {
+	setTarget (model: BaseModel, targetPath: string) {
+		let id = model.id;
+		let type = model.type;
 		var currentTargets = this.targets;
 		var targetPathHash = ObjectHash(targetPath);
 
@@ -74,7 +81,8 @@ class ObjectMap extends Firebase.Model {
 		this.save({targets: currentTargets});
 	}
 
-	unsetTarget (id: string, type: string, targetPath: string) {
+	unsetTarget (model: BaseModel, targetPath: string) {
+		var id = model.id;
 		var currentTargets = this.targets;
 		var targetPathHash = ObjectHash(targetPath);
 
@@ -88,10 +96,6 @@ class ObjectMap extends Firebase.Model {
 
 	updateTargetsWithProperties (props: any): Promise<boolean> {
 
-		//instantiate each model defined in object_map based on type and id and call save
-
-		//First push changes to each
-		var deepSync = true;
 		var updatedTargets = new Promise((resolve, reject) => {
 			var targets = this.targets;
 
@@ -107,9 +111,6 @@ class ObjectMap extends Firebase.Model {
 				}
 			}
 
-			console.log(updateObject);
-
-
 			this.rootRef.update(updateObject, (error) => {
 				if (error) {
 					reject(error);
@@ -122,9 +123,8 @@ class ObjectMap extends Firebase.Model {
 
 		return new Promise((resolve, reject) => {
 			updatedTargets.then((targets: any[]) => {
-				if (deepSync) {
+				if (this.deepSync) {
 					/* Instantiate each target and then call save on each */
-					//assume all a pack now
 					var syncedPromises = [];
 					for (var targetId in targets) {
 						var target = targets[targetId];

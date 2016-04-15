@@ -3,9 +3,9 @@ import { Firebase } from 'backbone';
 import ObjectMap from './ObjectMap';
 import BaseModelType from "./BaseModelType";
 
-interface BaseModelAttributes {
-	id: string;
-	type: BaseModelType;
+export interface BaseModelAttributes {
+	id?: string;
+	type?: BaseModelType;
 	setObjectMap?: boolean;
 }
 
@@ -28,7 +28,7 @@ class BaseModel extends Firebase.Model {
 			this.objectMap = new ObjectMap({
 				id: attributes.id,
 				type: attributes.type
-			});
+			}, options);
 		}
 
 	}
@@ -68,15 +68,15 @@ class BaseModel extends Firebase.Model {
 		return this.syncModel();
 	}
 
-	public setTarget (id: string, type: string, targetPath: string) {
+	public setTarget (model: BaseModel, targetPath: string) {
 		if (this.objectMap) {
-			this.objectMap.setTarget(id, type, targetPath);
+			this.objectMap.setTarget(model, targetPath);
 		}
 	}
 
-	public unsetTarget (id: string, type: string, targetPath: string) {
+	public unsetTarget (model: BaseModel, targetPath: string) {
 		if (this.objectMap) {
-			this.objectMap.unsetTarget(id, type, targetPath);
+			this.objectMap.unsetTarget(model, targetPath);
 		}
 	}
 

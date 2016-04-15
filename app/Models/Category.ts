@@ -4,8 +4,10 @@ import IDSpace from '../Models/IDSpace';
 import MediaItemSource from '../Models/MediaItemSource';
 import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
-import LyricAttributes from "./Lyric";
+import LyricAttributes from './Lyric';
 import { generate as generateId } from 'shortid';
+import BaseModelType from './BaseModelType';
+import { BaseModelAttributes } from "./BaseModel";
 
 export interface CategoryAttributes {
 	id?: string;
@@ -21,13 +23,14 @@ export interface CategoryAttributes {
  */
 class Category extends BaseModel {
 
-	constructor(attributes: any = {}, opts?: any) {
+	constructor(attributes: BaseModelAttributes = {}, opts?: any) {
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
-		attributes.type = 'category';
+		attributes.type = BaseModelType.category;
 		attributes.setObjectMap = true;
-		super(attributes, opts);
+
+		super(attributes, { autoSync: true, deepSync: true });
 
 	}
 
