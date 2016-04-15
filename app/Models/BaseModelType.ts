@@ -1,36 +1,17 @@
 import * as _ from 'underscore';
-
+import MediaItemType from '../Models/MediaItemType';
 export default class BaseModelType extends String {
-	static artist: BaseModelType = 'artist';
-	static track: BaseModelType = 'track';
-	static lyric: BaseModelType = 'lyric';
-	static pack: BaseModelType = 'pack';
-	static quote: BaseModelType = 'quote';
-	static category: BaseModelType = 'category';
-	static user: BaseModelType = 'user';
 
-	static allTypes: BaseModelType[] = [
-		BaseModelType.artist,
-		BaseModelType.track,
-		BaseModelType.lyric,
-		BaseModelType.pack,
-		BaseModelType.quote,
-		BaseModelType.category,
-		BaseModelType.user
-	];
+	static category: BaseModelType = 'category';
+
+	static allTypes: BaseModelType[] = _.union(MediaItemType.allTypes, BaseModelType.category);
 
 	private static mapping: any;
 	static get classMapping(): any {
 		if (!BaseModelType.mapping) {
-			BaseModelType.mapping = {
-				artist: require('./Artist').default,
-				track: require('./Track').default,
-				lyric: require('./Lyric').default,
-				pack: require('./Pack').default,
-				quote: require('./Quote').default,
-				category: require('./Category').default,
-				user: require('./User').default
-			};
+			BaseModelType.mapping = _.extend(MediaItemType.classMapping, {
+				category: require('./Category').default
+			});
 		}
 		return BaseModelType.mapping;
 	};

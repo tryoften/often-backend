@@ -2,6 +2,12 @@ import User from '../Models/User';
 import Pack from '../Models/Pack';
 import ObjectMap from '../Models/ObjectMap';
 import Category from '../Models/Category';
+import BaseModelType from '../Models/BaseModelType';
+
+
+var bmt = BaseModelType.toClass('category');
+console.log('acqui');
+
 
 //var user = new User({id: 'tester'});
 //user.syncData().then(() => {
@@ -11,20 +17,20 @@ import Category from '../Models/Category';
 //		console.log(err);
 //	});
 //});
-
-var pack = new Pack({id: 'NksZj51kW'});
-pack.syncData().then((pm) => {
-	//console.log('acqui');
-	pack.save({
-		categories: {
-			test: {
-				id: 'myuid',
-				image: 'myimage',
-				name: 'myname'
-			}
-		}
-	});
-});
+//
+//var pack = new Pack({id: 'NksZj51kW'});
+//pack.syncData().then((pm) => {
+//	//console.log('acqui');
+//	pack.save({
+//		categories: {
+//			test: {
+//				id: 'myuid',
+//				image: 'myimage',
+//				name: 'myname'
+//			}
+//		}
+//	});
+//});
 
 //
 //var titansCategory = new Category({id: 'E1iBwVKCx'});
