@@ -21,7 +21,7 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 	}
 
 	render() {
-		let classes = classNames("media-item pull-left", this.props.item._type.toString());
+		let classes = classNames("media-item pull-left", (this.props.item._type || '').toString());
 		switch (this.props.item._type) {
 			case MediaItemType.quote:
 			case MediaItemType.lyric:
@@ -69,8 +69,8 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 				let gif = this.props.item as GIFAttributes;
 
 				return (
-					<div className={classes} onClick={this.onSelect.bind(this)}>
-						<Thumbnail src={gif.image.medium_url} />
+					<div className="gif media-item pull-left" onClick={this.onSelect.bind(this)}>
+						<img src={gif.image.medium_url} />
 					</div>
 				);
 			default:

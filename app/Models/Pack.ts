@@ -64,7 +64,6 @@ class Pack extends MediaItem {
 
 		super(attributes, options);
 		this.packMap = new PackMap({ pack: this });
-
 	}
 
 
@@ -226,10 +225,12 @@ class Pack extends MediaItem {
 			category_id: category.id
 		});
 
-		this.save({ categories: newCategories});
+		this.save({categories: newCategories});
 
+		setTimeout(() => {
+			this.url.child('categories').set(newCategories);
+		}, 500);
 	}
-
 
 	/**
 	 * Deserializes media items from an array of MediaItemInfo objects and sets them as items on the pack

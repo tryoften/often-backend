@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Button, ButtonToolbar } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, ButtonInput, Button, ButtonToolbar, Tabs, Tab } from 'react-bootstrap';
 import Owner, { OwnerAttributes } from '../../Models/Owner';
 import QuoteForm from '../Components/QuoteForm';
 import GIFForm from '../Components/GIFForm';
@@ -101,7 +101,9 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 
 	close() {
 		this.setState({shouldShowQuoteForm: false, shouldShowGIFForm: false});
-		this.state.model.syncData();
+		this.state.model.syncData().then((model) => {
+			this.setState({model: this.state.model});
+		});
 	}
 
 	render() {
@@ -112,7 +114,7 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 
 		var gifs = Object.keys(this.state.model.gifs || []).map(key => {
 			let item = this.state.model.gifs[key];
-			return <MediaItemView key={key} item={item} />
+			return <MediaItemView key={key} item={item} />;
 		});
 
 		var quoteForm = this.state.shouldShowQuoteForm ?
@@ -125,7 +127,7 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 			(<GIFForm owner={this.state.model}
 					  gifId={this.state.currentGIFId}
 					  show={this.state.shouldShowGIFForm}
-					  onSaveChanges={this.close.bind(this)} />) : "";
+					  onSaveChanges={this.close.bind(this)}/>) : "";
 
 		return (
 			<div className="section">
@@ -186,13 +188,18 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 								<Row>
 									<div className="media-item-group">
 										<h3>Items</h3>
-										<ButtonToolbar className="pull-right">
-											<Button onClick={this.onClickAddQuote.bind(this)}>Add Quote</Button>
-											<Button onClick={this.onClickAddGIF.bind(this)}>Add GIF</Button>
-										</ButtonToolbar>
-										<div className="items">
-											{gifs}
-											{itemsComponents}
+
+										<div className="items clearfix">
+											<Tabs defaultActiveKey={0}>
+												<Tab eventKey={0} title="GIFs">
+													<Button onClick={this.onClickAddGIF.bind(this)}>Add GIF</Button>
+													<div className="tab-body clearfix">{gifs}</div>
+												</Tab>
+												<Tab eventKey={1} title="Quotes">
+													<Button onClick={this.onClickAddQuote.bind(this)}>Add Quote</Button>
+													<div className="tab-body clearfix">{itemsComponents}</div>
+												</Tab>
+											</Tabs>
 										</div>
 									</div>
 								</Row>

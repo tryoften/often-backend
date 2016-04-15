@@ -76,7 +76,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	render() {
 		let ownersSelector = this.owners.models.map(model => {
-			return <option value={model.id}>{model.get('name')}</option>;
+			return <option key={model.id} value={model.id}>{model.get('name')}</option>;
 		});
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes')).map(key => {
