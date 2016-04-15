@@ -95,8 +95,7 @@
     "test": "mocha --compilers js:babel/register",
     "start": "node server.js",
     "start-dev": "node server-dev.js",
-    "build": "webpack",
-    "watch": "webpack -w"
+    "build": "webpack --config webpack.config.js  -p"
   },
   "jshintConfig": {
     "esnext": true

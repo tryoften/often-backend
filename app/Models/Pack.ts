@@ -13,35 +13,23 @@ export interface IndexablePackItem extends IndexableObject {
 	category?: any;
 }
 
-export interface PackIndexableObject extends IndexableObject {
-	id?: string;
-	name?: string;
-	image?: {
-		small_url?: string;
-		large_url?: string;
-	};
-	meta?: PackMeta;
-	items?: IndexablePackItem[];
-	price?: number;
-	items_count?: number;
-	premium?: boolean;
-}
-
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
-	price?: number;
-	premium?: boolean;
-	description?: string;
 	image?: {
 		small_url?: string;
 		large_url?: string;
 	};
+	price?: number;
+	premium?: boolean;
+	published?: boolean;
+	description?: string;
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
 	items_count?: number;
 }
 
+export interface PackIndexableObject extends PackAttributes {}
 
 interface MediaItemInfo {
 	type: MediaItemType;
@@ -79,6 +67,7 @@ class Pack extends MediaItem {
 		return {
 			name: '',
 			description: '',
+			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
 			premium: false,
@@ -99,12 +88,16 @@ class Pack extends MediaItem {
 		return this.get('name');
 	}
 
+	set name(value: string) {
+		this.set('name', value);
+	}
+
 	get description(): string {
 		return this.get('description');
 	}
 
-	set name(value: string) {
-		this.set('name', value);
+	get published(): boolean {
+		return this.get('published');
 	}
 
 	get items(): IndexablePackItem[] {
@@ -116,7 +109,7 @@ class Pack extends MediaItem {
 	}
 
 	get items_count(): number {
-		return this.get('items').length || -1;
+		return this.get('items_count') || this.get('items').length;
 	}
 
 	get price(): number {
@@ -159,7 +152,7 @@ class Pack extends MediaItem {
 		this.save({items, items_count: items.length});
 	}
 
-	removeItem(item: PackIndexableObject) {
+	removeItem(item: IndexablePackItem) {
 		var items = this.items;
 		items = _.filter(items, a => a.id !== item.id);
 
@@ -187,7 +180,6 @@ class Pack extends MediaItem {
 			}
 		}
 
-
 		/* Go through every category and check if the old category still exists, if it doesn't then unset it on the pack's category collection as well */
 		var removeCategoryFromPack = true;
 		for (let item of currentItems) {
@@ -195,6 +187,7 @@ class Pack extends MediaItem {
 				if (item.category.id === oldCategoryInfo.id) {
 					removeCategoryFromPack = false;
 					break;
+
 				}
 			}
 		}
@@ -217,7 +210,6 @@ class Pack extends MediaItem {
 		}
 
 	}
-
 
 	/**
 	 * Deserializes media items from an array of MediaItemInfo objects and sets them as items on the pack
@@ -257,8 +249,7 @@ class Pack extends MediaItem {
 	 * @returns {IndexableObject}
 	 */
 	public toIndexingFormat(): IndexableObject {
-
-		let data: PackIndexableObject = _.extend({
+		let data = _.extend({
 			name: this.name || '',
 			title: this.name || '',
 			author: '',

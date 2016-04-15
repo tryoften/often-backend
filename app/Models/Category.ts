@@ -23,14 +23,15 @@ export interface CategoryAttributes {
  */
 class Category extends BaseModel {
 
-	constructor(attributes: BaseModelAttributes = {}, opts?: any) {
+	constructor(attributes: BaseModelAttributes = {}, opts: any = {autoSync: false, deepSync: true}) {
+
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
 		attributes.type = BaseModelType.category;
 		attributes.setObjectMap = true;
 
-		super(attributes, { autoSync: true, deepSync: true });
+		super(attributes, opts);
 
 	}
 

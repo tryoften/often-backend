@@ -41,7 +41,6 @@ class BaseModel extends Firebase.Model {
 		throw new Error('Not implemented. Must be overridden in derived class');
 	}
 
-
 	/**
 	 * Makes sure the model data is synced with the remote database before
 	 * accessing properties.

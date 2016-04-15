@@ -4,8 +4,8 @@ import MediaItem from './MediaItem';
 import { GeniusServiceResult } from '../Services/Genius/GeniusDataTypes';
 import { IndexableObject } from '../Interfaces/Indexable';
 import * as Firebase from 'firebase';
-import * as Backbone from 'backbone';
 import logger from '../logger';
+import MediaItemType from './MediaItemType';
 
 export interface ArtistIndexableObject extends IndexableObject {
 	image_url: string;
@@ -18,6 +18,7 @@ export interface ArtistIndexableObject extends IndexableObject {
 class Artist extends MediaItem {
 
 	constructor(attributes?: any, options?: any) {
+		attributes.type = MediaItemType.artist;
 		super(attributes, options);
 	}
 

@@ -26,6 +26,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 		this.updateCollection = this.updateCollection.bind(this);
 		this.categories.on('sync', this.updateCollection);
 	}
+
 	updateCollection(collection: Categories) {
 		this.setState({
 			categories: collection
@@ -37,7 +38,7 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 	}
 
 	render() {
-		let categoryComponents = this.state.categories.map(category => {
+		let categoryComponents = (this.state.categories.models || []).map(category => {
 			return (
 				<Link key={category.id} to={`/category/${category.id}`}>
 					<CategoryView key={category.id} model={category}></CategoryView>

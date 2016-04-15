@@ -119,12 +119,13 @@ export class MediaItem extends BaseModel implements Indexable {
 	public toIndexingFormat(): IndexableObject {
 		var data =  {
 			_id: this.id,
-			_index: (this.source || '').toString(),
-			_score: this.score || 0,
-			_type: (this.type || '').toString(),
+			_index: (this.get('source') || '').toString(),
+			_score: this.get('score') || 0,
+			_type: (this.get('type') || '').toString(),
 			id: this.id,
 			title: this.get('title') || '',
-			type: (this.type || '').toString(),
+			type: (this.get('type') || '').toString(),
+			source: (this.get('source') || '').toString(),
 			description: this.get('description') || '',
 			author: this.get('author') || '',
 			images: this.get('images') || {}

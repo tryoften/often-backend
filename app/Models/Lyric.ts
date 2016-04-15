@@ -6,6 +6,7 @@ import Artist from './Artist';
 import Track from './Track';
 import Category from './Category';
 import * as _ from 'underscore';
+import MediaItemType from './MediaItemType';
 
 export interface LyricAttributes extends MediaItemAttributes, GeniusLyricData {}
 
@@ -22,6 +23,7 @@ export interface LyricIndexableObject extends IndexableObject {
 class Lyric extends MediaItem {
 
 	constructor(attributes?: any, options?: any) {
+		attributes.type = MediaItemType.lyric;
 		super(attributes, options);
 	}
 

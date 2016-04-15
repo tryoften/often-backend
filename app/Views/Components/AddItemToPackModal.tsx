@@ -27,7 +27,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 		this.state = {
 			showModal: props.show,
-			owners: new Owners()
+			owners: this.owners
 		};
 
 		this.onSelectOwnerChange = this.onSelectOwnerChange.bind(this);
@@ -76,12 +76,17 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	render() {
 		let ownersSelector = this.owners.models.map(model => {
-			return <option value={model.id}>{model.get('name')}</option>;
+			return <option key={model.id} value={model.id}>{model.get('name')}</option>;
 		});
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes')).map(key => {
 			let quote = this.state.selectedOwner.get('quotes')[key];
 			return <MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />;
+		}) : "";
+
+		let gifs =  this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('gifs') || []).map(key => {
+			let item = this.state.selectedOwner.get('gifs')[key];
+			return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
 		}) : "";
 
 		return (
@@ -97,6 +102,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 									{ownersSelector}
 								</Input>
 								<div className="media-item-group">
+									<div className="items">{gifs}</div>
 									<div className="items">{ownerQuotes}</div>
 								</div>
 							</div>

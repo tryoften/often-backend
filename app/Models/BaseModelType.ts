@@ -3,14 +3,16 @@ import MediaItemType from '../Models/MediaItemType';
 export default class BaseModelType extends String {
 
 	static category: BaseModelType = 'category';
+	static subscription: BaseModelType = 'subscription';
 
-	static allTypes: BaseModelType[] = _.union(MediaItemType.allTypes, BaseModelType.category);
+	static allTypes: BaseModelType[] = _.union(MediaItemType.allTypes, BaseModelType.category, BaseModelType.subscription);
 
 	private static mapping: any;
 	static get classMapping(): any {
 		if (!BaseModelType.mapping) {
 			BaseModelType.mapping = _.extend(MediaItemType.classMapping, {
-				category: require('./Category').default
+				category: require('./Category').default,
+				subscription: require('./Subscription').default
 			});
 		}
 		return BaseModelType.mapping;

@@ -5,6 +5,8 @@ import { TrackIndexableObject } from "../../Models/Track";
 import { ArtistIndexableObject } from "../../Models/Artist";
 import MediaItemType from "../../Models/MediaItemType";
 import ImageBrandMask from '../Components/ImageBrandMask';
+import { Thumbnail } from 'react-bootstrap';
+import { GIFAttributes } from "../../Models/GIF";
 
 interface SearchResultItemViewProps {
 	item: IndexableObject;
@@ -19,7 +21,7 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 	}
 
 	render() {
-		let classes = classNames("media-item pull-left", this.props.item._type);
+		let classes = classNames("media-item pull-left", (this.props.item._type || '').toString());
 		switch (this.props.item._type) {
 			case MediaItemType.quote:
 			case MediaItemType.lyric:
@@ -60,6 +62,15 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 							<div className="title">{artistItem.name}</div>
 							<div className="subtitle">{artistItem.tracks_count} items</div>
 						</div>
+					</div>
+				);
+
+			case MediaItemType.gif:
+				let gif = this.props.item as GIFAttributes;
+
+				return (
+					<div className="gif media-item pull-left" onClick={this.onSelect.bind(this)}>
+						<img src={gif.image.medium_url} />
 					</div>
 				);
 			default:
