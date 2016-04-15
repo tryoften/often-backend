@@ -30,7 +30,7 @@ class Category extends BaseModel {
 		attributes.type = BaseModelType.category;
 		attributes.setObjectMap = true;
 
-		super(attributes, { autoSync: true, deepSync: true });
+		super(attributes, { autoSync: false, deepSync: true });
 
 	}
 
