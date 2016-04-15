@@ -156,6 +156,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		let form = this.state.form;
 		form.published = !form.published;
 		this.setState({form});
+		this.handleUpdate(e);
 	}
 
 	render() {
@@ -172,7 +173,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		var itemsComponents = this.state.model.items.map((item: IndexablePackItem) => {
 			return (
-				<div className="clearfix well">
+				<div key={item._id} className="clearfix well">
 					<MediaItemView key={item._id} item={item} />
 					<div className="media-item-buttons">
 						<ButtonGroup>
@@ -201,106 +202,106 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				</header>
 
 				<Grid fluid={true}>
-					<form className="packForm" onSubmit={this.handleUpdate}>
-						<Row>
-							<Col xs={12} md={8}>
-								<Row>
-									<Col xs={12} md={8}>
-										<Input
-											id="name"
-											type="text"
-											label="Name"
-											bsSize="medium"
-											placeholder="Enter Name"
-											value={this.state.form.name}
-											onChange={this.handlePropChange}
-										/>
-										<Input
-											id="description"
-											type="textarea"
-											label="Description"
-											placeholder="Description"
-											value={this.state.form.description}
-											onChange={this.handlePropChange}
-										/>
+					<Row>
+						<Col xs={12} md={8}>
+							<Row>
+								<Col xs={12} md={8}>
+									<Input
+										id="name"
+										type="text"
+										label="Name"
+										bsSize="medium"
+										placeholder="Enter Name"
+										value={this.state.form.name}
+										onChange={this.handlePropChange}
+									/>
+									<Input
+										id="description"
+										type="textarea"
+										label="Description"
+										placeholder="Description"
+										value={this.state.form.description}
+										onChange={this.handlePropChange}
+									/>
 
-									</Col>
-								</Row>
-								<Row>
-									<Col xs={9} md={6}>
-										<Input
-											id="price"
-											type="number"
-											step="any"
-											min="0"
-											label="Price"
-											addonBefore="$"
-											value={this.state.form.price}
-											onChange={this.handlePropChange}
-											disabled={!this.state.form.premium}
-										/>
-									</Col>
-									<Col xs={3} md={2}>
-										<Input
-											id="premium"
-											type="checkbox"
-											bsSize="large"
-											label="Premium"
-											checked={this.state.form.premium}
-											onChange={this.handlePropChange}
-										/>
-									</Col>
-								</Row>
-								<Row>
-									<Col xs={8}>
-										<Input
-											id="image.small_url"
-											type="text"
-											label="Small Image"
-											bsSize="medium"
-											placeholder={this.state.form.image.small_url}
-											value={this.state.form.image.small_url}
-											onChange={this.handlePropChange}
-										/>
-										<Input
-											id="image.large_url"
-											type="text"
-											label="Large Image"
-											bsSize="medium"
-											placeholder={this.state.form.image.large_url}
-											value={this.state.form.image.large_url}
-											onChange={this.handlePropChange}
-										/>
-									</Col>
-									<Col xs={4}>
-										<div class="image-upload">
-											<Thumbnail src={this.state.form.image.small_url} />
-										</div>
-									</Col>
-								</Row>
-								<Row>
-									<Col xs={8}>
-										<ButtonInput type="submit" value={this.state.isNew ? 'Create' : 'Save'} />
+								</Col>
+							</Row>
+							<Row>
+								<Col xs={9} md={6}>
+									<Input
+										id="price"
+										type="number"
+										step="any"
+										min="0"
+										label="Price"
+										addonBefore="$"
+										value={this.state.form.price}
+										onChange={this.handlePropChange}
+										disabled={!this.state.form.premium}
+									/>
+								</Col>
+								<Col xs={3} md={2}>
+									<Input
+										id="premium"
+										type="checkbox"
+										bsSize="large"
+										label="Premium"
+										checked={this.state.form.premium}
+										onChange={this.handlePropChange}
+									/>
+								</Col>
+							</Row>
+							<Row>
+								<Col xs={8}>
+									<Input
+										id="image.small_url"
+										type="text"
+										label="Small Image"
+										bsSize="medium"
+										placeholder={this.state.form.image.small_url}
+										value={this.state.form.image.small_url}
+										onChange={this.handlePropChange}
+									/>
+									<Input
+										id="image.large_url"
+										type="text"
+										label="Large Image"
+										bsSize="medium"
+										placeholder={this.state.form.image.large_url}
+										value={this.state.form.image.large_url}
+										onChange={this.handlePropChange}
+									/>
+								</Col>
+								<Col xs={4}>
+									<div class="image-upload pack-thumbnail">
+										<Thumbnail src={this.state.form.image.small_url} />
+									</div>
+								</Col>
+							</Row>
+							<Row>
+								<Col xs={8}>
+									<ButtonGroup>
+										<Button onClick={this.handleUpdate}>{this.state.isNew ? 'Create' : 'Save'}</Button>
 										<Button bsStyle="primary" onClick={this.togglePublish}>{ this.state.form.published ? 'Unpublish' : 'Publish'}</Button>
-									</Col>
-								</Row>
-								<Row>
-									<div className="media-item-group">
-										<h3>Items</h3>
-										<div className="items">
-											{itemsComponents}
-											<div className="add-item pull-left" onClick={this.onClickAddItem}>
-												<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
-											</div>
+									</ButtonGroup>
+								</Col>
+							</Row>
+							<Row>
+								<div className="media-item-group">
+									<h3>Items</h3>
+									<div className="items">
+										{itemsComponents}
+										<div className="add-item pull-left" onClick={this.onClickAddItem}>
+											<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
 										</div>
 									</div>
-								</Row>
-							</Col>
-							<Col xs={6}>
-								<AddItemToPackModal show={this.state.shouldShowSearchPanel} onSelectItem={this.onSelectItem.bind(this)} />
-							</Col>
-						</Row>
-					</form>
+								</div>
+							</Row>
+						</Col>
+						<Col xs={6}>
+							<AddItemToPackModal show={this.state.shouldShowSearchPanel} onSelectItem={this.onSelectItem.bind(this)} />
+						</Col>
+					</Row>
 				</Grid>
 			</div>
 		);
