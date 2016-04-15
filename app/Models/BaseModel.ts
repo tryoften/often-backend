@@ -1,12 +1,19 @@
 import 'backbonefire';
 import { Firebase } from 'backbone';
 import ObjectMap from './ObjectMap';
+import BaseModelType from "./BaseModelType";
+
+interface BaseModelAttributes {
+	id: string;
+	type: BaseModelType;
+	setObjectMap?: boolean;
+}
 
 class BaseModel extends Firebase.Model {
 
 	objectMap: ObjectMap;
 
-	constructor (attributes?: any, options?: any) {
+	constructor (attributes?: BaseModelAttributes, options: any = {autoSync: false}) {
 		if (!attributes.type) {
 			throw new Error('Type must be defined in base model attributes.');
 		}
@@ -19,10 +26,11 @@ class BaseModel extends Firebase.Model {
 
 		if (attributes.setObjectMap) {
 			this.objectMap = new ObjectMap({
-				id: this.id,
-				type: this.type.toString()
+				id: attributes.id,
+				type: attributes.type
 			});
 		}
+
 	}
 
 	get type(): string {
@@ -55,20 +63,20 @@ class BaseModel extends Firebase.Model {
 
 	public syncData(): Promise<any> {
 		if (this.objectMap) {
-			return Promise.all([this.objectMap.syncModel(), this.syncModel()]);
+			return Promise.all([ this.syncModel(), this.objectMap.syncModel()]);
 		}
 		return this.syncModel();
 	}
 
-	public setTarget (targetPath: string) {
+	public setTarget (id: string, type: string, targetPath: string) {
 		if (this.objectMap) {
-			this.objectMap.setTarget(targetPath);
+			this.objectMap.setTarget(id, type, targetPath);
 		}
 	}
 
-	public unsetTarget (targetPath: string) {
+	public unsetTarget (id: string, type: string, targetPath: string) {
 		if (this.objectMap) {
-			this.objectMap.unsetTarget(targetPath);
+			this.objectMap.unsetTarget(id, type, targetPath);
 		}
 	}
 

@@ -6,8 +6,6 @@ import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
 import LyricAttributes from "./Lyric";
 import { generate as generateId } from 'shortid';
-import ObjectMap from './ObjectMap';
-import { ObjectMappable } from '../Interfaces/ObjectMappable';
 
 export interface CategoryAttributes {
 	id?: string;
@@ -23,10 +21,11 @@ export interface CategoryAttributes {
  */
 class Category extends BaseModel {
 
-	constructor(attributes: any = {}, opts: any = {}) {
+	constructor(attributes: any = {}, opts?: any) {
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
+		attributes.type = 'category';
 		attributes.setObjectMap = true;
 		super(attributes, opts);
 

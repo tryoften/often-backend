@@ -172,7 +172,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<DropdownButton
 								bsStyle="default"
 								className="category-picker"
-								title={item.category_name || "Unassigned"}
+								title={ (item.category) ? item.category.name : "Unassigned"}
 								id={item._id}
 								block>
 								{categoryMenu(item)}

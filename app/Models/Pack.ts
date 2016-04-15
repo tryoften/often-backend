@@ -10,8 +10,7 @@ import {IndexableObject} from '../Interfaces/Indexable';
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
-	category_id?: string;
-	category_name?: string;
+	category?: any;
 }
 
 export interface PackIndexableObject extends IndexableObject {
@@ -69,7 +68,7 @@ class Pack extends MediaItem {
 		if (!attributes.items) {
 			attributes.items = [];
 		}
-
+		attributes.type = MediaItemType.pack;
 		attributes.setObjectMap = true;
 
 		super(attributes, options);
@@ -168,7 +167,54 @@ class Pack extends MediaItem {
 	}
 
 
+	assignCategoryToItem (itemId: string, category: Category) {
 
+		/* First figure out which item to change */
+		var currentItems = this.items;
+		var currentCategories = this.categories;
+
+		var oldCategoryInfo, oldIndex;
+		for (let i = 0; i < currentItems.length; i++) {
+
+			if (currentItems[i].id === itemId) {
+				oldIndex = i;
+				oldCategoryInfo = currentItems[i].category;
+				currentItems[i].category = category.getTargetObjectProperties();
+				currentCategories[category.id] = category.getTargetObjectProperties();
+				category.setTarget(this.id, 'pack', `/packs/${this.id}/categories/${category.id}`);
+				category.setTarget(this.id, 'pack', `/packs/${this.id}/items/${oldIndex}/category`);
+				break;
+			}
+		}
+
+
+		/* Go through every category and check if the old category still exists, if it doesn't then unset it on the pack's category collection as well */
+		var removeCategoryFromPack = true;
+		for (let item of currentItems) {
+			if (item.category && oldCategoryInfo) {
+				if (item.category.id === oldCategoryInfo.id) {
+					removeCategoryFromPack = false;
+					break;
+				}
+			}
+		}
+
+		/* Remove category from pack's category collection */
+		if (oldCategoryInfo) {
+			var oldCategory = new Category({id: oldCategoryInfo.id});
+			oldCategory.syncData().then(() => {
+				oldCategory.unsetTarget(this.id, 'pack', `/packs/${this.id}/items/${oldIndex}/category`);
+				if (removeCategoryFromPack) {
+					oldCategory.unsetTarget(this.id, 'pack', `/packs/${this.id}/categories/${oldCategory.id}`);
+					currentCategories[oldCategory.id] = null;
+				}
+			});
+		}
+
+		//Save all changes
+		this.save({ items: currentItems, categories: currentCategories });
+
+	}
 
 	/**
 	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
@@ -177,7 +223,10 @@ class Pack extends MediaItem {
 	 * @param {Category} category - Category that is to be assigned to an item.
 	 * @returns {void}
 	 */
-	assignCategoryToItem (itemId: string, category: Category) {
+	oldAssignCategoryToItem (itemId: string, category: Category) {
+
+		/* When unsetting category, make sure that the item is the only one with that category */
+
 
 		var targetItem;
 		var itemIndex = 0;
@@ -198,24 +247,22 @@ class Pack extends MediaItem {
 
 		var newCategories = {};
 		for (let item of this.items) {
-			if (item.category_id && item._id !== itemId) {
+			if (item.category.id && item._id !== itemId) {
 				/* If a category_id is set on an item, then add it */
-				newCategories[item.category_id] = this.get('categories')[item.category_id];
+				newCategories[item.category.id] = this.get('categories')[item.category.id];
 			}
 		}
 
 		/* Assign category on item */
-		targetItem.category_name = category.name;
-		targetItem.category_id = category.id;
+		targetItem.category = category.getTargetObjectProperties();
 
 		/* Finally update the categories collection on the pack */
-		newCategories[category.id] = category.toIndexingFormat();
-		this.url.child(`items/${itemIndex}`).update({
-			category_name: category.name,
-			category_id: category.id
-		});
+		newCategories[category.id] = category.getTargetObjectProperties();
+		this.url.child(`items/${itemIndex}/category`).update(category.getTargetObjectProperties());
 
 		this.save({ categories: newCategories});
+
+		console.log('done');
 
 	}
 

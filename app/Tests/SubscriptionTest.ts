@@ -2,7 +2,7 @@ import User from '../Models/User';
 import Pack from '../Models/Pack';
 import ObjectMap from '../Models/ObjectMap';
 import Category from '../Models/Category';
-//var user = new User({id: 'tester'});
+//var user = new User({id: 'tester'})
 //user.syncData().then(() => {
 //	user.addPack({ itemId : 'NksZj51kW'}).then(() => {
 //		console.log(true);
@@ -11,27 +11,42 @@ import Category from '../Models/Category';
 //	});
 //});
 
-//
+//var pack = new Pack({id: 'NksZj51kW'});
+//pack.syncData().then((pm) => {
+//	//console.log('acqui');
+//	pack.setTarget('test', 'user', 'testing user stuff');
+//});
+
+
+var titansCategory = new Category({id: 'E1iBwVKCx'});
+titansCategory.syncData().then((sd) => {
+	titansCategory.save({name: "Titan Civilization"});
+});
+
+
 //var pack = new Pack({id: 'NksZj51kW'});
 //pack.syncData().then(() => {
-//	console.log('hi');
-//	pack.save({name: 'Jakubs new pack'});
+//	var titansCategory = new Category({id: 'E1iBwVKCx', type: 'category'});
+//	titansCategory.syncData().then(() => {
+//		pack.assignCategoryToItem('41TD9uDAg', titansCategory);
+//	});
+//
 //	//pack.setTarget('/users/tester/packs/NksZj51kW');
 //});
 //
-//var obi = new ObjectMap({id: 'NksZj51kW', type: 'pack'});
+//var obi = new ObjectMap({id: 'E1iBwVKCx', type: 'category'});
 //obi.syncModel().then((model) => {
+//	obi.setTarget('NksZj51kW', 'pack', 'great!');
 //	console.log('synced');
 //});
+//console.log('ok');
+//var titansCategory = new Category({id: 'E1iBwVKCx'});
+////var otherCategory = new Category({id: 'BJ8hQjK'});
+//titansCategory.syncData().then(() => {
+//	titansCategory.save({name: 'Titan Uprising'});
+//});
 
-
-var pack = new Pack({id: 'NksZj51kW'});
-pack.syncData().then(() => {
-	console.log('about to save');
-	pack.save({
-		name: 'Jakub paq'
-	});
-});
-
-var category = new Category({})
-
+//var pack = new Pack({id: 'NksZj51kW'});
+//pack.syncData().then(() => {
+//	pack.save();
+//});

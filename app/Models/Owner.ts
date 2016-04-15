@@ -13,6 +13,11 @@ export interface OwnerAttributes extends MediaItemAttributes {
 
 export default class Owner extends MediaItem {
 
+	constructor (attributes?: any, options?: any) {
+		attributes.type = 'owner';
+		super(attributes, options);
+	}
+
 	defaults(): Backbone.ObjectHash {
 		return {
 			name: '',

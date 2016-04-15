@@ -33,7 +33,6 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 		} else {
 			isNew = true;
 		}
-
 		let owner = new Owner(attr);
 
 		this.state = {

@@ -10,6 +10,7 @@ class SubscriptionType extends String {
 
 export interface SubscriptionAttributes {
 	id?: string;
+	type?: string;
 	mediaItemType?: MediaItemType;
 	itemId: string;
 	userId?: string;

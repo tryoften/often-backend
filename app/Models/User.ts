@@ -13,11 +13,8 @@ class User extends BaseModel {
 
 
 	constructor(attributes: any = {}, options?: any) {
+		attributes.type = 'user';
 		super(attributes, options);
-	}
-
-	get path(): string {
-		return `users/${this.id}`;
 	}
 
 	/* Getters */
@@ -60,6 +57,7 @@ class User extends BaseModel {
 		return new Promise<any>((resolve, reject) => {
 
 			let packSubscription = new Subscription({
+				type: 'subscription',
 				userId: this.id,
 				itemId: packSubAttrs.itemId,
 				mediaItemType: packSubAttrs.mediaItemType
@@ -82,8 +80,7 @@ class User extends BaseModel {
 				return pack.syncData();
 			}).then(() => {
 				this.setPack(pack);
-				pack.setTarget(`/users/${this.id}/packs/${pack.id}`);
-				resolve(`PackId ${pack.id} added to user ${this.id}`);
+				pack.setTarget(this.id, 'user', `/users/${this.id}/packs/${pack.id}`);
 			}).catch((err: Error) => {
 				reject(err);
 			});
@@ -101,7 +98,7 @@ class User extends BaseModel {
 		return new Promise<any>((resolve, reject) => {
 			var pack = new Pack({id: packSubAttrs.itemId});
 			pack.syncData().then( () => {
-				pack.unsetTarget(this.id);
+				pack.unsetTarget(this.id, 'user', `/users/${this.id}/packs/${pack.id}`);
 				this.unsetPack(packSubAttrs.itemId);
 				resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
 			});
