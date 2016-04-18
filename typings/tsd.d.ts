@@ -22,6 +22,7 @@
 /// <reference path="react/react-addons-css-transition-group.d.ts" />
 /// <reference path="react/react-addons-transition-group.d.ts" />
 /// <reference path="object-path/object-path.d.ts" />
+/// <reference path="object-hash/object-hash.d.ts" />
 
 declare module "firebase-queue" {
 	class Queue {
