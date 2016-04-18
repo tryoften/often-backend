@@ -53,6 +53,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		pack.on('update', this.updateStateWithPack);
 		categories.on('update', this.updateStateWithCategories);
+		pack.syncData();
 	}
 
 	componentDidMount() {
@@ -180,7 +181,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<DropdownButton
 								bsStyle="default"
 								className="category-picker"
-								title={item.category_name || "Unassigned"}
+								title={ (item.category) ? item.category.name : "Unassigned"}
 								id={item._id}
 								block>
 								{categoryMenu(item)}

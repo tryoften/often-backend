@@ -3,7 +3,8 @@ import { firebase as FirebaseConfig } from '../config';
 import BaseModel from '../Models/BaseModel';
 import Subscription, { SubscriptionAttributes } from '../Models/Subscription';
 import Pack from '../Models/Pack';
-import MediaItemType from "./MediaItemType";
+import MediaItemType from './MediaItemType';
+import BaseModelType from './BaseModelType';
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
@@ -13,7 +14,14 @@ class User extends BaseModel {
 
 
 	constructor(attributes: any = {}, options?: any) {
+		attributes.type = BaseModelType.user;
 		super(attributes, options);
+	}
+
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: BaseModelType.user
+		};
 	}
 
 	/* Getters */
@@ -78,8 +86,7 @@ class User extends BaseModel {
 				return pack.syncData();
 			}).then(() => {
 				this.setPack(pack);
-				pack.mapUser(this.id);
-				resolve(`PackId ${pack.id} added to user ${this.id}`);
+				pack.setTarget(this, `/users/${this.id}/packs/${pack.id}`);
 			}).catch((err: Error) => {
 				reject(err);
 			});
@@ -97,7 +104,7 @@ class User extends BaseModel {
 		return new Promise<any>((resolve, reject) => {
 			var pack = new Pack({id: packSubAttrs.itemId});
 			pack.syncData().then( () => {
-				pack.unmapUser(this.id);
+				pack.unsetTarget(this, `/users/${this.id}/packs/${pack.id}`);
 				this.unsetPack(packSubAttrs.itemId);
 				resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
 			});

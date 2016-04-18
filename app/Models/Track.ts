@@ -5,6 +5,7 @@ import MediaItem from './MediaItem';
 import Artist from './Artist';
 import Lyric from './Lyric';
 import * as _ from 'underscore';
+import MediaItemType from './MediaItemType';
 
 export interface TrackIndexableObject extends IndexableObject {
 	images?: any;
@@ -21,6 +22,12 @@ class Track extends MediaItem {
 
 	constructor(attributes?: any, options?: any) {
 		super(attributes, options);
+	}
+
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: MediaItemType.track
+		};
 	}
 
 	get url(): Firebase {

@@ -1,15 +1,15 @@
 import { firebase as FirebaseConfig } from '../config';
-import BaseModel from './BaseModel';
+import BaseModel, {BaseModelAttributes} from './BaseModel';
 import MediaItemType from './MediaItemType';
 import { IndexableObject, Indexable } from '../Interfaces/Indexable';
+import BaseModelType from './BaseModelType';
 
 class SubscriptionType extends String {
 	static free: SubscriptionType = 'free';
 	static premium: SubscriptionType = 'premium';
 }
 
-export interface SubscriptionAttributes {
-	id?: string;
+export interface SubscriptionAttributes extends BaseModelAttributes {
 	mediaItemType?: MediaItemType;
 	itemId: string;
 	userId?: string;
@@ -41,11 +41,18 @@ class Subscription extends BaseModel implements Indexable {
 		}
 
 		attributes.id = `${attributes.itemId}:${attributes.userId}`;
-
+		attributes.type = BaseModelType.subscription;
 		attributes.timeLastUpdated = Date.now();
 
 		super(attributes, options);
 		this.save();
+	}
+
+	defaults(): Backbone.ObjectHash {
+		return {
+			type: BaseModelType.subscription,
+			timeLastUpdated: Date.now()
+		};
 	}
 
 	/* Getters */

@@ -4,8 +4,10 @@ import IDSpace from '../Models/IDSpace';
 import MediaItemSource from '../Models/MediaItemSource';
 import MediaItemType from '../Models/MediaItemType';
 import Lyric from './Lyric';
-import LyricAttributes from "./Lyric";
+import LyricAttributes from './Lyric';
 import { generate as generateId } from 'shortid';
+import BaseModelType from './BaseModelType';
+import { BaseModelAttributes } from "./BaseModel";
 
 export interface CategoryAttributes {
 	id?: string;
@@ -20,16 +22,24 @@ export interface CategoryAttributes {
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
  */
 class Category extends BaseModel {
-	constructor(attributes: CategoryAttributes = {}, opts: any = {autoSync: false}) {
+
+	constructor(attributes: BaseModelAttributes = {}, opts: any = {autoSync: true, deepSync: true}) {
+
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
+		attributes.type = BaseModelType.category;
+		attributes.setObjectMap = true;
+
 		super(attributes, opts);
+
 	}
 
 	defaults(): Backbone.ObjectHash {
 		return {
 			name: '',
+			type: BaseModelType.category,
+			setObjectMap: true,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
@@ -47,6 +57,14 @@ class Category extends BaseModel {
 
 	get image(): any {
 		return this.get('image') || {};
+	}
+
+	public getTargetObjectProperties(): any {
+		return {
+			id: this.id,
+			name: this.name,
+			image: this.image
+		};
 	}
 
 	/**

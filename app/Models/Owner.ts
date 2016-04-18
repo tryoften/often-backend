@@ -1,6 +1,7 @@
 import MediaItem, { MediaItemAttributes } from "./MediaItem";
 import { firebase as FirebaseConfig } from '../config';
 import {IndexableObject} from "../Interfaces/Indexable";
+import MediaItemType from "./MediaItemType";
 
 export interface OwnerAttributes extends MediaItemAttributes {
 	name: string;
@@ -12,9 +13,16 @@ export interface OwnerAttributes extends MediaItemAttributes {
 }
 
 export default class Owner extends MediaItem {
+	constructor (attributes?: any, options?: any) {
+		attributes.type = MediaItemType.owner;
+		super(attributes, options);
+	}
+
+
 	defaults(): Backbone.ObjectHash {
 		return {
 			name: '',
+			type: MediaItemType.owner,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'

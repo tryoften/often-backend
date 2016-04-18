@@ -7,6 +7,7 @@ export default class MediaItemType extends String {
 	static pack: MediaItemType = 'pack';
 	static quote: MediaItemType = 'quote';
 	static gif: MediaItemType = 'gif';
+	static owner: MediaItemType = 'owner';
 
 	static allTypes: MediaItemType[] = [
 		MediaItemType.artist,

@@ -31,6 +31,7 @@ export default class CategoryItem extends React.Component<CategoryItemProps, Cat
 		category.on('update', this.updateStateWithModel.bind(this));
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.handlePropChange = this.handlePropChange.bind(this);
+		category.syncData();
 	}
 
 	componentDidMount() {

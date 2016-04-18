@@ -5,15 +5,12 @@ import * as Firebase from 'firebase';
 import { MediaItemAttributes } from './MediaItem';
 import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
-import Category from './Category';
-import PackMap from './PackMap';
+import Category, {CategoryAttributes} from './Category';
 import {IndexableObject} from '../Interfaces/Indexable';
-
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
-	category_id?: string;
-	category_name?: string;
+	category?: CategoryAttributes;
 }
 
 export interface PackAttributes extends MediaItemAttributes {
@@ -44,8 +41,6 @@ type PackMeta = Object;
 
 class Pack extends MediaItem {
 
-	private packMap: PackMap;
-
 	/**
 	 * Designated constructor
 	 *
@@ -61,14 +56,11 @@ class Pack extends MediaItem {
 		if (!attributes.items) {
 			attributes.items = [];
 		}
+		attributes.type = MediaItemType.pack;
+		attributes.setObjectMap = true;
 
 		super(attributes, options);
-		this.packMap = new PackMap({ pack: this });
-	}
 
-
-	syncData (): Promise<any> {
-		return Promise.all([super.syncData(), this.packMap.syncData()]);
 	}
 
 	defaults(): Backbone.ObjectHash {
@@ -78,6 +70,7 @@ class Pack extends MediaItem {
 			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
+			setObjectMap: true,
 			premium: false,
 			price: 0.0,
 			image: {
@@ -132,6 +125,21 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
+	getTargetObjectProperties(): any {
+		return {
+			id: this.id,
+			name: this.name,
+			image: this.image,
+			categories: this.categories,
+			desscription: this.description,
+			items: this.items,
+			premium: this.premium,
+			price: this.price,
+			source: this.source,
+			type: this.type
+		};
+	}
+
 	/**
 	 * Adds an individual media item to the pack
 	 * @param item
@@ -152,84 +160,56 @@ class Pack extends MediaItem {
 		this.save({items});
 	}
 
-	/**
-	 * Propagates model changes to mapped user models and firebase
-	 */
-	save (obj?: any) {
-		(obj) ? super.save(obj) : super.save();
-		this.packMap.propagateChangesToUsers();
-	}
 
-	/**
-	 * Adds a user to the packMap
-	 * @param {string} userId - Id of a user to be added to the pack map
-	 */
-	mapUser (userId: string) {
-		this.packMap.addUser(userId);
-	}
-
-
-	/**
-	 * Removes a user from the packMap
-	 * @param {string} userId - Id of a user to be removed from pack map
-	 */
-	unmapUser (userId: string) {
-		this.packMap.removeUser(userId);
-	}
-
-	/**
-	 * Assigns a category to an item on a pack and updates the catgories collection on the pack
-	 *
-	 * @param {string} itemId - Id of an item to be categorized.
-	 * @param {Category} category - Category that is to be assigned to an item.
-	 * @returns {void}
-	 */
 	assignCategoryToItem (itemId: string, category: Category) {
 
-		var targetItem;
-		var itemIndex = 0;
+		/* First figure out which item to change */
+		var currentItems = this.items;
+		var currentCategories = this.categories;
 
-		for (let item of this.items) {
+		var oldCategoryInfo, oldIndex;
+		for (let i = 0; i < currentItems.length; i++) {
 
-			if (itemId === item._id) {
-				targetItem = item;
+			if (currentItems[i].id === itemId) {
+				oldIndex = i;
+				oldCategoryInfo = currentItems[i].category;
+				currentItems[i].category = category.getTargetObjectProperties();
+				currentCategories[category.id] = category.getTargetObjectProperties();
+				category.setTarget(this, `/packs/${this.id}/categories/${category.id}`);
+				category.setTarget(this, `/packs/${this.id}/items/${oldIndex}/category`);
 				break;
 			}
-			itemIndex++;
 		}
 
-		if (!targetItem) {
-			throw new Error('Invalid item id selected for category change');
-		}
+		/* Go through every category and check if the old category still exists, if it doesn't then unset it on the pack's category collection as well */
+		var removeCategoryFromPack = true;
+		for (let item of currentItems) {
+			if (item.category && oldCategoryInfo) {
+				if (item.category.id === oldCategoryInfo.id) {
+					removeCategoryFromPack = false;
+					break;
 
-
-		var newCategories = {};
-		for (let item of this.items) {
-			if (item.category_id && item._id !== itemId) {
-				/* If a category_id is set on an item, then add it */
-				let category = this.get('categories')[item.category_id];
-				if (category) {
-					newCategories[item.category_id] = category;
 				}
 			}
 		}
 
-		/* Assign category on item */
-		targetItem.category_name = category.name;
-		targetItem.category_id = category.id;
+		/* Remove category from pack's category collection */
+		if (oldCategoryInfo) {
+			var oldCategory = new Category({id: oldCategoryInfo.id});
+			oldCategory.syncData().then(() => {
+				oldCategory.unsetTarget(this, `/packs/${this.id}/items/${oldIndex}/category`);
+				if (removeCategoryFromPack) {
+					oldCategory.unsetTarget(this, `/packs/${this.id}/categories/${oldCategory.id}`);
+					currentCategories[oldCategory.id] = null;
+					/* Save all changes */
+					this.save({ items: currentItems, categories: currentCategories });
+				}
+			});
+		} else {
+			/* Save all changes */
+			this.save({ items: currentItems, categories: currentCategories });
+		}
 
-		/* Finally update the categories collection on the pack */
-		newCategories[category.id] = category.toIndexingFormat();
-		this.url.child(`items/${itemIndex}`).update({
-			category_name: category.name,
-			category_id: category.id
-		});
-
-		this.save({categories: newCategories});
-
-		setTimeout(() => {
-			this.url.child('categories').set(newCategories);
-		}, 500);
 	}
 
 	/**

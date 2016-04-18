@@ -52,7 +52,9 @@ export default class CategoriesRoute extends React.Component<CategoriesProps, Ca
 					<h2>Categories</h2>
 
 					<ButtonToolbar className="pull-right">
-						<Button bsStyle="primary" bsSize="small" active href="/category">Add Category</Button>
+						<Link to="/category">
+							<Button bsStyle="primary" bsSize="small" active>Add Category</Button>
+						</Link>
 					</ButtonToolbar>
 				</header>
 

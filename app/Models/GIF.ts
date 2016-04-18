@@ -26,6 +26,7 @@ export class GIFSize extends String {
 
 export default class GIF extends MediaItem {
 	constructor(attributes?: GIFAttributes, options?: any) {
+		attributes.type = MediaItemType.gif;
 		super(attributes, options );
 	}
 
