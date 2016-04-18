@@ -102,7 +102,7 @@ class ObjectMap extends BackboneFire.Model {
 			var updateObject = {};
 			/* Loop through each target's path */
 			for (let targetId in targets) {
-				var paths = targets[targetId].paths
+				var paths = targets[targetId].paths;
 				if (paths) {
 					for (let pathHash in paths) {
 						var actualPath = paths[pathHash];
@@ -147,9 +147,6 @@ class ObjectMap extends BackboneFire.Model {
 		});
 
 	}
-
-
-
 }
 
 export default ObjectMap;

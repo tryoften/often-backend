@@ -23,23 +23,19 @@ export interface CategoryAttributes {
  */
 class Category extends BaseModel {
 
-	constructor(attributes: BaseModelAttributes = {}, opts: any = {autoSync: true, deepSync: true}) {
+	constructor(attributes: BaseModelAttributes = {}, opts: any = {autoSync: false, deepSync: true, setObjectMap: true}) {
 
 		if (!attributes.id) {
 			attributes.id = generateId();
 		}
 		attributes.type = BaseModelType.category;
-		attributes.setObjectMap = true;
-
 		super(attributes, opts);
-
 	}
 
 	defaults(): Backbone.ObjectHash {
 		return {
 			name: '',
 			type: BaseModelType.category,
-			setObjectMap: true,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'

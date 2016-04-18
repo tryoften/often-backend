@@ -13,7 +13,7 @@ class BaseModel extends Firebase.Model {
 
 	objectMap: ObjectMap;
 
-	constructor (attributes?: BaseModelAttributes, options: any = {autoSync: false}) {
+	constructor (attributes?: BaseModelAttributes, options: any = {autoSync: false, setObjectMap: false}) {
 		if (!attributes.type) {
 			throw new Error('Type must be defined in base model attributes.');
 		}
@@ -24,11 +24,11 @@ class BaseModel extends Firebase.Model {
 
 		super(attributes, options);
 
-		if (attributes.setObjectMap) {
+		if (options.setObjectMap) {
 			this.objectMap = new ObjectMap({
 				id: attributes.id,
 				type: attributes.type
-			}, options);
+			});
 		}
 
 	}
