@@ -17,7 +17,6 @@ class ObjectMap extends BackboneFire.Model {
 	protected deepSync: boolean;
 
 	constructor(attributes: ObjectMapAttributes, options: any = {autoSync: false, deepSync: false}) {
-
 		if (!attributes.type) {
 			throw new Error('Type must be defined in object map attributes.');
 		}
@@ -27,6 +26,7 @@ class ObjectMap extends BackboneFire.Model {
 		}
 
 		super(attributes, options);
+
 		this.rootRef = new Firebase(FirebaseConfig.BaseURL);
 		this.deepSync = options.deepSync;
 	}

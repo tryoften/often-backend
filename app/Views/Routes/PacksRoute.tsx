@@ -32,7 +32,7 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 	}
 
 	render() {
-		let packComponents = this.state.packs.map(pack => {
+		let packComponents = this.state.packs.filter(pack => !pack.favorite ).map(pack => {
 			return (
 				<Link key={pack.id} to={`/pack/${pack.id}`}>
 					<PackView key={pack.id} model={pack}></PackView>

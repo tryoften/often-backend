@@ -23,6 +23,7 @@ export interface PackAttributes extends MediaItemAttributes {
 	price?: number;
 	premium?: boolean;
 	published?: boolean;
+	publishedTime?: string;
 	description?: string;
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
@@ -47,7 +48,7 @@ class Pack extends MediaItem {
 	 * @param attributes {PackAttributes}
 	 * @param options
 	 */
-	constructor(attributes: PackAttributes = {}, options?: any) {
+	constructor(attributes: PackAttributes = {}, options = {setObjectMap: true}) {
 		attributes = _.defaults(attributes, {
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often
@@ -57,7 +58,6 @@ class Pack extends MediaItem {
 			attributes.items = [];
 		}
 		attributes.type = MediaItemType.pack;
-		attributes.setObjectMap = true;
 
 		super(attributes, options);
 
@@ -70,8 +70,8 @@ class Pack extends MediaItem {
 			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
-			setObjectMap: true,
 			premium: false,
+			deleted: false,
 			price: 0.0,
 			image: {
 				small_url: 'http://placehold.it/200x200',
@@ -110,7 +110,7 @@ class Pack extends MediaItem {
 	}
 
 	get items_count(): number {
-		return this.get('items_count') || this.get('items').length;
+		return this.get('items_count') || this.items.length;
 	}
 
 	get price(): number {
@@ -123,6 +123,10 @@ class Pack extends MediaItem {
 
 	get premium(): boolean {
 		return this.get('premium');
+	}
+
+	get favorite(): boolean {
+		return this.get('favorite');
 	}
 
 	getTargetObjectProperties(): any {
