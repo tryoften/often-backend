@@ -27,8 +27,8 @@ export interface PackAttributes extends MediaItemAttributes {
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
 	items_count?: number;
-	favorite?: boolean;
-	recent?: boolean;
+	isFavorites?: boolean;
+	isRecents?: boolean;
 }
 
 export interface PackIndexableObject extends PackAttributes {}
@@ -79,7 +79,8 @@ class Pack extends MediaItem {
 				large_url: 'http://placehold.it/400x400'
 			},
 			items: [],
-			favorite: false
+			isFavorites: false,
+			isRecents: false
 		};
 	}
 
@@ -127,12 +128,12 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
-	get favorite(): boolean {
-		return this.get('favorite');
+	get isFavorites(): boolean {
+		return this.get('isFavorites');
 	}
 
-	get recent(): boolean {
-		return this.get('recent');
+	get isRecents(): boolean {
+		return this.get('isRecents');
 	}
 
 	getTargetObjectProperties(): any {
@@ -146,7 +147,9 @@ class Pack extends MediaItem {
 			premium: this.premium,
 			price: this.price,
 			source: this.source,
-			type: this.type
+			type: this.type,
+			isFavorites: this.isFavorites,
+			isRecents: this.isRecents
 		};
 	}
 

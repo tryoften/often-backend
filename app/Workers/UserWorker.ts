@@ -105,42 +105,36 @@ class UserWorker extends Worker {
 		let packId;
 		switch (data.packType) {
 			case UserPackType.favorite:
-				packId = user.favorites_pack_id;
+				packId = user.favoritesPackId;
 				break;
 			case UserPackType.recent:
-				packId = user.recents_pack_id;
+				packId = user.recentsPackId;
 				break;
 			default:
 				throw new Error('Invalid pack type');
 		}
 
 		let pack = new Pack({id: packId});
-		return new Promise((resolve, reject) => {
-			pack.syncData().then(() => {
-				var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
-				var mediaItem = new MediaItemClass(data.mediaItem);
-				return mediaItem.syncModel();
+		return pack.syncData().then(() => {
+			var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
+			var mediaItem = new MediaItemClass(data.mediaItem);
+			return mediaItem.syncModel();
 
-			}).then((syncedMediaItem) => {
+		}).then((syncedMediaItem) => {
 
-				switch (data.operation) {
-					case UserPackOperation.add:
-						pack.addItem(syncedMediaItem);
-						resolve(`Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType} `);
-						break;
-					case UserPackOperation.remove:
-						pack.removeItem(syncedMediaItem);
-						resolve(`Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType} `);
-						break;
-					default:
-						throw new Error('Invalid pack type');
-				}
+			switch (data.operation) {
+				case UserPackOperation.add:
+					pack.addItem(syncedMediaItem);
+					return `Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`;
 
-			}).catch( (err: Error) => {
-				reject(err);
-			});
+				case UserPackOperation.remove:
+					pack.removeItem(syncedMediaItem);
+					return `Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`;
+
+				default:
+					throw new Error('Invalid pack type');
+			}
 		});
-
 	}
 
 	/**
@@ -173,15 +167,10 @@ class UserWorker extends Worker {
 			default:
 				throw new Error('Invalid operation.');
 		}
-
-		return new Promise<string>((resolve, reject) => {
-			packPromise.then(() => {
-				resolve(`Succesfully ${data.operation}ed new pack ${data.packId} to / from user.`);
-			}).catch((err) => {
-				reject(err);
-			});
-
+		return packPromise.then(() => {
+			return `Succesfully ${data.operation}ed new pack ${data.packId} to / from user.`;
 		});
+
 	}
 
 	/**
@@ -190,12 +179,8 @@ class UserWorker extends Worker {
 	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
 	 */
 	private initiatePacks (user: User): Promise<string> {
-		return new Promise((resolve, reject) => {
-			Promise.all([user.initFavoritesPack(), user.initDefaultPack(), user.initRecentsPack()]).then(() => {
-				resolve('Successfully initiated favorites, default and recents packs');
-			}).catch((err) => {
-				reject(err);
-			});
+		return Promise.all([user.initFavoritesPack(), user.initDefaultPack(), user.initRecentsPack()]).then(() => {
+			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}
 

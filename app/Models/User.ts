@@ -38,16 +38,16 @@ class User extends BaseModel {
 		return this.get('pack_subscriptions') || {};
 	}
 
-	get first_name() {
+	get firstName() {
 		return this.get('first_name');
 	}
 
-	get favorites_pack_id() {
-		return this.get('favorites_pack_id');
+	get favoritesPackId() {
+		return this.get('favoritesPackId');
 	}
 
-	get recents_pack_id() {
-		return this.get('recents_pack_id');
+	get recentsPackId() {
+		return this.get('recentsPackId');
 	}
 
 	/**
@@ -56,8 +56,8 @@ class User extends BaseModel {
 	 */
 	initFavoritesPack(): Promise<string> {
 		var favoritesPackAttributes: PackAttributes = {
-			name: this.first_name ? `${this.first_name}'s Favorites` : 'Your Favorites',
-			description: this.first_name ? `${this.first_name}'s favorite selections` : 'Your favorite selections',
+			name: this.firstName ? `${this.firstName}'s Favorites` : 'Your Favorites',
+			description: this.firstName ? `${this.firstName}'s favorite selections` : 'Your favorite selections',
 			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
@@ -69,19 +69,20 @@ class User extends BaseModel {
 				large_url: this.get('profile_pic_small') || this.get('profileImageSmall') || ''
 			},
 			items: [],
-			favorite: true
+			isFavorites: true,
+			isRecents: false
 		};
 
 		return new Promise((resolve, reject) => {
-			if (!this.favorites_pack_id) {
+			if (!this.favoritesPackId) {
 				this.addPack(favoritesPackAttributes).then((addedPack) => {
 					this.save({
-						favorites_pack_id: addedPack.id
+						favoritesPackId: addedPack.id
 					});
 					resolve(addedPack.id);
 				});
 			} else {
-				resolve(this.favorites_pack_id);
+				resolve(this.favoritesPackId);
 			}
 		});
 	}
@@ -92,8 +93,8 @@ class User extends BaseModel {
 	 */
 	initRecentsPack(): Promise<string> {
 		var recentsPackAttributes: PackAttributes = {
-			name: this.first_name ? `${this.first_name}'s Recents` : 'Your Recents',
-			description: this.first_name ? `${this.first_name}'s recents selections` : 'Your recents selections',
+			name: this.firstName ? `${this.firstName}'s Recents` : 'Your Recents',
+			description: this.firstName ? `${this.firstName}'s recents selections` : 'Your recents selections',
 			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
@@ -105,19 +106,20 @@ class User extends BaseModel {
 				large_url: this.get('profile_pic_small') || this.get('profileImageSmall') || ''
 			},
 			items: [],
-			favorite: true
+			isFavorites: false,
+			isRecents: true
 		};
 
 		return new Promise((resolve, reject) => {
-			if (!this.recents_pack_id) {
+			if (!this.recentsPackId) {
 				this.addPack(recentsPackAttributes).then((addedPack) => {
 					this.save({
-						recents_pack_id: addedPack.id
+						recentsPackId: addedPack.id
 					});
 					resolve(addedPack.id);
 				});
 			} else {
-				resolve(this.recents_pack_id);
+				resolve(this.recentsPackId);
 			}
 		});
 	}
@@ -131,14 +133,9 @@ class User extends BaseModel {
 			id: 'EJDW_ze1-' // DJ Khaled Pack for now
 		};
 
-		return new Promise((resolve, reject) => {
-			this.addPack(defaultPackAttributes).then( (addedPack) => {
-				resolve(addedPack.id);
-			}).catch((err) => {
-				reject(err);
-			});
+		return this.addPack(defaultPackAttributes).then( (addedPack) => {
+			return addedPack.id;
 		});
-
 	}
 
 	/**
