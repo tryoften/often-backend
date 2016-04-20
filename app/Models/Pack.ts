@@ -27,6 +27,8 @@ export interface PackAttributes extends MediaItemAttributes {
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
 	items_count?: number;
+	isFavorites?: boolean;
+	isRecents?: boolean;
 }
 
 export interface PackIndexableObject extends PackAttributes {}
@@ -47,7 +49,7 @@ class Pack extends MediaItem {
 	 * @param attributes {PackAttributes}
 	 * @param options
 	 */
-	constructor(attributes: PackAttributes = {}, options?: any) {
+	constructor(attributes: PackAttributes = {}, options: any = {autoSync: false, setObjectMap: true}) {
 		attributes = _.defaults(attributes, {
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often
@@ -57,7 +59,6 @@ class Pack extends MediaItem {
 			attributes.items = [];
 		}
 		attributes.type = MediaItemType.pack;
-		attributes.setObjectMap = true;
 
 		super(attributes, options);
 
@@ -77,7 +78,9 @@ class Pack extends MediaItem {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
 			},
-			items: []
+			items: [],
+			isFavorites: false,
+			isRecents: false
 		};
 	}
 
@@ -125,6 +128,14 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
+	get isFavorites(): boolean {
+		return this.get('isFavorites');
+	}
+
+	get isRecents(): boolean {
+		return this.get('isRecents');
+	}
+
 	getTargetObjectProperties(): any {
 		return {
 			id: this.id,
@@ -136,7 +147,9 @@ class Pack extends MediaItem {
 			premium: this.premium,
 			price: this.price,
 			source: this.source,
-			type: this.type
+			type: this.type,
+			isFavorites: this.isFavorites,
+			isRecents: this.isRecents
 		};
 	}
 
