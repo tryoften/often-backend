@@ -11,7 +11,7 @@ class SubscriptionType extends String {
 
 export interface SubscriptionAttributes extends BaseModelAttributes {
 	mediaItemType?: MediaItemType;
-	itemId: string;
+	itemId?: string;
 	userId?: string;
 	subscriptionType?: SubscriptionType;
 	timeLastUpdated?: number;
@@ -92,10 +92,10 @@ class Subscription extends BaseModel implements Indexable {
 	 * Populates the subscription object with subscription information
 	 * @param {SubscriptionAttributes} subAttrs - Object containing subscription information
 	 */
-	subscribe (subAttrs: SubscriptionAttributes) {
+	subscribe (subAttrs?: SubscriptionAttributes) {
 		this.save({
-			timeSubscribed: subAttrs.timeSubscribed || Date.now(),
-			subscriptionType: subAttrs.subscriptionType || SubscriptionType.free,
+			timeSubscribed: (subAttrs) ? subAttrs.timeSubscribed || Date.now() : Date.now(),
+			subscriptionType: (subAttrs) ? subAttrs.subscriptionType || SubscriptionType.free : SubscriptionType.free,
 			timeLastUpdated: Date.now()
 		});
 	}

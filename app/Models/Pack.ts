@@ -27,6 +27,8 @@ export interface PackAttributes extends MediaItemAttributes {
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
 	items_count?: number;
+	favorite?: boolean;
+	recent?: boolean;
 }
 
 export interface PackIndexableObject extends PackAttributes {}
@@ -47,7 +49,7 @@ class Pack extends MediaItem {
 	 * @param attributes {PackAttributes}
 	 * @param options
 	 */
-	constructor(attributes: PackAttributes = {}, options?: any) {
+	constructor(attributes: PackAttributes = {}, options: any = {autoSync: false, setObjectMap: true}) {
 		attributes = _.defaults(attributes, {
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often
@@ -57,7 +59,6 @@ class Pack extends MediaItem {
 			attributes.items = [];
 		}
 		attributes.type = MediaItemType.pack;
-		attributes.setObjectMap = true;
 
 		super(attributes, options);
 
@@ -77,7 +78,8 @@ class Pack extends MediaItem {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
 			},
-			items: []
+			items: [],
+			favorite: false
 		};
 	}
 
@@ -123,6 +125,14 @@ class Pack extends MediaItem {
 
 	get premium(): boolean {
 		return this.get('premium');
+	}
+
+	get favorite(): boolean {
+		return this.get('favorite');
+	}
+
+	get recent(): boolean {
+		return this.get('recent');
 	}
 
 	getTargetObjectProperties(): any {

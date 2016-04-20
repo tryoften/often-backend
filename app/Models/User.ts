@@ -2,9 +2,10 @@ import * as Firebase from 'firebase';
 import { firebase as FirebaseConfig } from '../config';
 import BaseModel from '../Models/BaseModel';
 import Subscription, { SubscriptionAttributes } from '../Models/Subscription';
-import Pack from '../Models/Pack';
+import Pack, { PackAttributes } from '../Models/Pack';
 import MediaItemType from './MediaItemType';
 import BaseModelType from './BaseModelType';
+import MediaItemSource from "./MediaItemSource";
 
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
@@ -37,6 +38,108 @@ class User extends BaseModel {
 		return this.get('pack_subscriptions') || {};
 	}
 
+	get first_name() {
+		return this.get('first_name');
+	}
+
+	get favorites_pack_id() {
+		return this.get('favorites_pack_id');
+	}
+
+	get recents_pack_id() {
+		return this.get('recents_pack_id');
+	}
+
+	/**
+	 * Initializes a favorites pack
+	 * @returns {Promise<string>} - Promise resolving to a pack id or an error.
+	 */
+	initFavoritesPack(): Promise<string> {
+		var favoritesPackAttributes: PackAttributes = {
+			name: this.first_name ? `${this.first_name}'s Favorites` : 'Your Favorites',
+			description: this.first_name ? `${this.first_name}'s favorite selections` : 'Your favorite selections',
+			published: false,
+			type: MediaItemType.pack,
+			source: MediaItemSource.Often,
+			setObjectMap: true,
+			premium: false,
+			price: 0.0,
+			image: {
+				small_url: this.get('profile_pic_large') || this.get('profileImageLarge') || '',
+				large_url: this.get('profile_pic_small') || this.get('profileImageSmall') || ''
+			},
+			items: [],
+			favorite: true
+		};
+
+		return new Promise((resolve, reject) => {
+			if (!this.favorites_pack_id) {
+				this.addPack(favoritesPackAttributes).then((addedPack) => {
+					this.save({
+						favorites_pack_id: addedPack.id
+					});
+					resolve(addedPack.id);
+				});
+			} else {
+				resolve(this.favorites_pack_id);
+			}
+		});
+	}
+
+	/**
+	 * Initializes a recents pack for a user
+	 * @returns {Promise<string>} - Promise resolving to a pack id or an error.
+	 */
+	initRecentsPack(): Promise<string> {
+		var recentsPackAttributes: PackAttributes = {
+			name: this.first_name ? `${this.first_name}'s Recents` : 'Your Recents',
+			description: this.first_name ? `${this.first_name}'s recents selections` : 'Your recents selections',
+			published: false,
+			type: MediaItemType.pack,
+			source: MediaItemSource.Often,
+			setObjectMap: true,
+			premium: false,
+			price: 0.0,
+			image: {
+				small_url: this.get('profile_pic_large') || this.get('profileImageLarge') || '',
+				large_url: this.get('profile_pic_small') || this.get('profileImageSmall') || ''
+			},
+			items: [],
+			favorite: true
+		};
+
+		return new Promise((resolve, reject) => {
+			if (!this.recents_pack_id) {
+				this.addPack(recentsPackAttributes).then((addedPack) => {
+					this.save({
+						recents_pack_id: addedPack.id
+					});
+					resolve(addedPack.id);
+				});
+			} else {
+				resolve(this.recents_pack_id);
+			}
+		});
+	}
+
+	/**
+	 * Initializes a default pack
+	 * @returns {Promise<string>} - Promise resolving to a pack id or an error.
+	 */
+	initDefaultPack(): Promise<string> {
+		var defaultPackAttributes: PackAttributes = {
+			id: 'EJDW_ze1-' // DJ Khaled Pack for now
+		};
+
+		return new Promise((resolve, reject) => {
+			this.addPack(defaultPackAttributes).then( (addedPack) => {
+				resolve(addedPack.id);
+			}).catch((err) => {
+				reject(err);
+			});
+		});
+
+	}
 
 	/**
 	 * Sets the authentication token on a user
@@ -54,30 +157,26 @@ class User extends BaseModel {
 	 * @param packSubAttrs {SubscriptionAttributes} - Object containing pack subscription information
 	 * @returns {Promise<string>} - Returns a promise that resolves to a success message or to an error when rejected
 	 */
-	public addPack (packSubAttrs: SubscriptionAttributes): Promise<string> {
+	public addPack (packAttributes: PackAttributes, subscriptionAttributes: SubscriptionAttributes = {}): Promise<Pack> {
 
-		if (!packSubAttrs.mediaItemType) {
-			packSubAttrs.mediaItemType = MediaItemType.pack;
-		}
-
-		var pack = new Pack({id: packSubAttrs.itemId});
+		var pack = new Pack(packAttributes);
 		return new Promise<any>((resolve, reject) => {
 
-			let packSubscription = new Subscription({
-				userId: this.id,
-				itemId: packSubAttrs.itemId,
-				mediaItemType: packSubAttrs.mediaItemType
-			});
+			subscriptionAttributes.userId = this.id;
+			subscriptionAttributes.itemId = pack.id;
+			subscriptionAttributes.mediaItemType = MediaItemType.pack;
+
+			let packSubscription = new Subscription(subscriptionAttributes);
 
 			packSubscription.syncData().then(() => {
 
 				/* If pack subscription doesn't have timeSubscribed defined, then subscribe the user */
 				if (!packSubscription.timeSubscribed) {
-					packSubscription.subscribe(packSubAttrs);
+					packSubscription.subscribe();
 					this.setSubscription(packSubscription);
 				}
 
-				/* If for whatever reason the pack is not set on user then restore then restore it */
+				/* If for whatever reason the pack is not set on user then restore it */
 				if (!this.packSubscriptions[packSubscription.id]) {
 					packSubscription.updateTimeLastRestored();
 					this.setSubscription(packSubscription);
@@ -87,6 +186,8 @@ class User extends BaseModel {
 			}).then(() => {
 				this.setPack(pack);
 				pack.setTarget(this, `/users/${this.id}/packs/${pack.id}`);
+				pack.save();
+				resolve(pack);
 			}).catch((err: Error) => {
 				reject(err);
 			});
@@ -98,15 +199,15 @@ class User extends BaseModel {
 	/**
 	 * Removes a pack from a user model
 	 * @param packSubAttrs {SubscriptionAttributes} - object containing subscription data
-	 * @returns {Promise<string>} - Returns a promise that resolves to a success message or to an error when rejected
+	 * @returns {Promise<string>} - Returns a promise that resolves to packId that was removed or to an error when rejected
 	 */
-	public removePack (packSubAttrs: SubscriptionAttributes): Promise<string> {
+	public removePack (packId: string): Promise<string> {
 		return new Promise<any>((resolve, reject) => {
-			var pack = new Pack({id: packSubAttrs.itemId});
+			var pack = new Pack({id: packId});
 			pack.syncData().then( () => {
 				pack.unsetTarget(this, `/users/${this.id}/packs/${pack.id}`);
-				this.unsetPack(packSubAttrs.itemId);
-				resolve(`PackId ${packSubAttrs.itemId} removed on user ${this.id}`);
+				this.unsetPack(packId);
+				resolve(packId);
 			});
 		});
 	}

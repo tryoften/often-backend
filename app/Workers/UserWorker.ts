@@ -1,38 +1,52 @@
-import Recents from '../Collections/Recents';
-import Favorites from '../Collections/Favorites';
 import { firebase as FirebaseConfig } from '../config';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import User from '../Models/User';
 import Worker, { Task } from './Worker';
-import Category from '../Models/Category';
-import LyricIndexableObject from '../Models/Lyric';
 import { SubscriptionAttributes } from '../Models/Subscription';
+import MediaItemType from "../Models/MediaItemType";
+import { MediaItemAttributes } from "../Models/MediaItem";
+import Pack from "../Models/Pack";
+import User from '../Models/User';
 
 class UserWorkerTaskType extends String {
-	static AddFavorite: UserWorkerTaskType = 'addFavorite';
-	static RemoveFavorite: UserWorkerTaskType = 'removeFavorite';
-	static AddRecent: UserWorkerTaskType = 'addRecent';
+	static EditUserPackItems: UserWorkerTaskType = 'editUserPackItems';
+	static EditUserPackSubscription: UserWorkerTaskType = 'editPackSubscription';
+	static InitiatePacks: UserWorkerTaskType = 'initiatePacks';
 	static CreateToken: UserWorkerTaskType = 'createToken';
-	static AssignCategory: UserWorkerTaskType = 'assignCategory';
-	static AddPack: UserWorkerTaskType = 'addPack';
-	static RemovePack: UserWorkerTaskType = 'removePack';
 }
 
+class UserPackOperation extends String {
+	static add: UserPackOperation = 'add';
+	static remove: UserPackOperation = 'remove';
+}
+
+class UserPackType extends String {
+	static favorite: UserPackType = 'favorite';
+	static recent: UserPackType = 'recent';
+}
+
+interface EditUserPackItemsAttributes {
+	operation: UserPackOperation;
+	packType: UserPackType;
+	mediaItem: MediaItemAttributes;
+}
+
+interface EditUserPackSubscriptionAttributes {
+	packId: string;
+	operation: UserPackOperation;
+	subscriptionInfo?: SubscriptionAttributes;
+}
+
+interface CreateTokenAttributes {}
 
 interface UserWorkerTask extends Task {
-	// id of user on whose behalf a given task is to be processed
-	user: string;
-	// specifies the operation to be performed
+	userId: string;
 	type: UserWorkerTaskType;
-	result?: Object;
-	category?: Object;
-	data?: (any | SubscriptionAttributes);
+	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes);
 }
 
 
-
-
+/* Adding / Removing Items from favorites and recents  */
 class UserWorker extends Worker {
 
 	constructor (opts = {}) {
@@ -40,125 +54,166 @@ class UserWorker extends Worker {
 		super(options);
 	}
 
+
+	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
+		let user = new User({id: task.userId});
+		user.syncData().then(() => {
+			switch (task.type) {
+				case UserWorkerTaskType.EditUserPackItems:
+					return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
+
+				case UserWorkerTaskType.EditUserPackSubscription:
+					return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
+
+				case UserWorkerTaskType.InitiatePacks:
+					return this.initiatePacks(user);
+
+				case UserWorkerTaskType.CreateToken:
+					return this.createToken(user, <CreateTokenAttributes>task.data);
+
+				default:
+					throw new Error('Invalid task type.');
+
+			}
+		}).then( (results) => {
+			resolve(results);
+		}).catch( (err: Error) => {
+			reject(err);
+		});
+	}
+
 	/**
-	 * Processes the user related tasks
-	 * @param {object} task - task object from the user queue
-	 * @param {function} progress - callback function for reporting the state of an item
-	 * @param {function} resolve - callback marking the task as complete
-	 * @param {function} reject - callback marking the task as incomplete
-	 *
-	 * @return {void}
-	 *
-	 * @example
-	 *
-	 *  task : {
-	 *		user : 'myUser123',
-	 *		task : 'addFavorites',
-	 *		result : {
-	 *			_id : someGuid,
-	 *			//more stuff here
-	 *		}
-	 *	}
+	 * Method for adding / removing media items to and from favorites / recents packs
+	 * @param {User} user - object representing the user model
+	 * @param {EditUserPackItemsAttributes} data - Object containing auxiliary information for processing the request
+	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
 	 */
-	process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
-		switch (task.type) {
-			case UserWorkerTaskType.AddFavorite:
-				this.addFavorite(task, resolve, reject);
-				break;
-			case UserWorkerTaskType.RemoveFavorite:
-				this.removeFavorite(task, resolve, reject);
-				break;
-			case UserWorkerTaskType.AddRecent:
-				this.addRecent(task, resolve, reject);
-				break;
-			case UserWorkerTaskType.CreateToken:
-				this.createToken(task, resolve, reject);
-				break;
-			case UserWorkerTaskType.AssignCategory:
-				this.assignCategory(task, resolve, reject);
-				break;
-			case UserWorkerTaskType.AddPack:
-				this.addPack(task, resolve, reject);
-				break;
-			case UserWorkerTaskType.RemovePack:
-				this.removePack(task, resolve, reject);
-				break;
+	private editUserPackItems (user: User, data: EditUserPackItemsAttributes): Promise<string> {
+
+		if (!data.operation) {
+			throw new Error('Operation must be defined in data. Valid operations are: add / remove');
 		}
+
+		if (!data.packType) {
+			throw new Error('User pack type must be defined in data. Valid types are: favorite / recent');
+		}
+
+		if (!data.mediaItem) {
+			throw new Error('A valid media item must be defined in data.');
+		}
+
+		let packId;
+		switch (data.packType) {
+			case UserPackType.favorite:
+				packId = user.favorites_pack_id;
+				break;
+			case UserPackType.recent:
+				packId = user.recents_pack_id;
+				break;
+			default:
+				throw new Error('Invalid pack type');
+		}
+
+		let pack = new Pack({id: packId});
+		return new Promise((resolve, reject) => {
+			pack.syncData().then(() => {
+				var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
+				var mediaItem = new MediaItemClass(data.mediaItem);
+				return mediaItem.syncModel();
+
+			}).then((syncedMediaItem) => {
+
+				switch (data.operation) {
+					case UserPackOperation.add:
+						pack.addItem(syncedMediaItem);
+						resolve(`Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType} `);
+						break;
+					case UserPackOperation.remove:
+						pack.removeItem(syncedMediaItem);
+						resolve(`Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType} `);
+						break;
+					default:
+						throw new Error('Invalid pack type');
+				}
+
+			}).catch( (err: Error) => {
+				reject(err);
+			});
+		});
+
 	}
 
-	addPack(task: UserWorkerTask, resolve: Function, reject: Function) {
-		let user = new User(task.user);
-		user.syncData().then(() => {
-			return user.addPack(task.data);
-		}).then( results => {
-			resolve(results);
-		}).catch( err => {
-			reject(err);
+	/**
+	 * Method for adding / removing packs to users
+	 * @param {User} user - object representing the user model
+	 * @param {EditUserPackSubscriptionAttributes} data - Object containing auxiliary information for processing the request
+	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
+	 */
+	private editUserPackSubscription (user: User, data: EditUserPackSubscriptionAttributes): Promise<string> {
+
+		if (!data.packId) {
+			throw new Error('PackId must be defined in data.');
+		}
+
+		if (!data.operation) {
+			throw new Error('Operation must be defined in data. Valid operations are: add / remove');
+		}
+
+		var packPromise;
+		switch (data.operation) {
+
+			case UserPackOperation.add:
+				packPromise = user.addPack({id: data.packId}, data.subscriptionInfo);
+				break;
+
+			case UserPackOperation.remove:
+				packPromise = user.removePack(data.packId);
+				break;
+
+			default:
+				throw new Error('Invalid operation.');
+		}
+
+		return new Promise<string>((resolve, reject) => {
+			packPromise.then(() => {
+				resolve(`Succesfully ${data.operation}ed new pack ${data.packId} to / from user.`);
+			}).catch((err) => {
+				reject(err);
+			});
+
 		});
 	}
 
-	removePack(task: UserWorkerTask, resolve: Function, reject: Function) {
-		let user = new User(task.user);
-		user.syncData().then(() => {
-			return user.removePack(task.data);
-		}).then( results => {
-			resolve(results);
-		}).catch( err => {
-			reject(err);
+	/**
+	 * Wrapper for initiating user favorites, default and recents packs
+	 * @param {User} user - object representing the user model
+	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
+	 */
+	private initiatePacks (user: User): Promise<string> {
+		return new Promise((resolve, reject) => {
+			Promise.all([user.initFavoritesPack(), user.initDefaultPack(), user.initRecentsPack()]).then(() => {
+				resolve('Successfully initiated favorites, default and recents packs');
+			}).catch((err) => {
+				reject(err);
+			});
 		});
 	}
 
-	addFavorite(data: UserWorkerTask, resolve: Function, reject: Function) {
-		// Instantiate favorites collection for user
-		let favs = new Favorites(data.user);
 
-		// Resolves if both promises resolve, otherwise rejects
-		favs.favorite(data.result).then( (values) => {
-			resolve(values[0]);
-		}).catch( (err) => {
-			reject(err);
+	/**
+	 * Wrapper for creating and setting a token on a user
+	 * @param {User} user - object representing the user model
+	 * @param {CreateTokenAttributes} data - Auxiliary user token data
+	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
+	 */
+	private createToken (user: User, data: CreateTokenAttributes): Promise<string> {
+		return new Promise((resolve, reject) => {
+			var token = UserTokenGenerator.generateToken(user.id, data);
+			user.setToken(token);
+			resolve(`Successfully created a token for user ${user.id}`);
 		});
 	}
 
-	removeFavorite(data: UserWorkerTask, resolve: Function, reject: Function) {
-		// instantiate favorites collection for user
-		let favs = new Favorites(data.user);
-
-		// Resolves if both promises resolve, otherwise rejects
-		favs.unfavorite(data.result).then( (values) => {
-			resolve(values[0]);
-		}).catch( (err) => {
-			reject(err);
-		});
-	}
-
-	addRecent(data: UserWorkerTask, resolve: Function, reject: Function) {
-		// instantiate recents collection for user
-		let recs = new Recents(data.user);
-		recs.addRecent(data.result)
-			.then( (d) => {
-				resolve(d);
-			}).catch( (err) => {
-			reject(err);
-		});
-	}
-
-	createToken(data: UserWorkerTask, resolve: Function, reject: Function) {
-		var token = UserTokenGenerator.generateToken(data.user, data.data);
-		var user = new User(data);
-		user.setToken(token);
-		resolve(token);
-	}
-
-	assignCategory(data: UserWorkerTask, resolve: Function, reject: Function) {
-		let category = new Category(data.category);
-		let lyric: LyricIndexableObject = <LyricIndexableObject>data.result;
-		category.addLyric(lyric).then(() => {
-			resolve(true);
-		}).catch(error => {
-			reject(JSON.stringify(error));
-		});
-	}
 
 }
 
