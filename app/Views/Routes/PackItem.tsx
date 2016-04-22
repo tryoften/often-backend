@@ -306,6 +306,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										<Button {...form.published ? {bsStyle: 'primary'} :  {}} onClick={this.togglePublish}>{ form.published ? 'Unpublish' : 'Publish'}</Button>
 									</ButtonGroup>
 								</Col>
+								<Col xs={2}>
+									<div className="pull-right">
+										<Button><Glyphicon glyph="plus-sign" />Add Item</Button>
+									</div>
+								</Col>
 								<Col xs={4}>
 									<div className="pull-right">
 										<DeleteButton onConfirmation={this.onDelete} />

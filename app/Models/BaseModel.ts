@@ -37,6 +37,10 @@ class BaseModel extends Firebase.Model {
 		return this.get('type');
 	}
 
+	get deleted(): boolean {
+		return this.get('deleted') || false;
+	}
+
 	public getTargetObjectProperties(): any {
 		throw new Error('Not implemented. Must be overridden in derived class');
 	}

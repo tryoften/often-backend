@@ -125,8 +125,8 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
-	get favorite(): boolean {
-		return this.get('favorite');
+	get isFavorites(): boolean {
+		return this.get('isFavorites');
 	}
 
 	getTargetObjectProperties(): any {
