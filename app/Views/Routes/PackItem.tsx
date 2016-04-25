@@ -1,15 +1,12 @@
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon,
-	ButtonGroup, Button, MenuItem, DropdownButton } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button } from 'react-bootstrap';
 import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
-import MediaItemView from '../Components/MediaItemView';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
-import Categories from '../../Collections/Categories';
-import Category from '../../Models/Category';
 import DeleteButton from '../Components/DeleteButton';
+import CategoryAssignmentList from '../Components/CategoryAssignmentList';
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -20,11 +17,11 @@ interface PackItemProps extends React.Props<PackItem> {
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
-	categories?: any;
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
 }
+
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
 	static contextTypes: React.ValidationMap<any> = {
@@ -43,11 +40,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			id: props.params.packId
 		});
 
-		var categories = new Categories();
-
 		this.state = {
 			model: pack,
-			categories: categories,
 			form: pack.toJSON(),
 			shouldShowSearchPanel: false,
 			display: false,
@@ -55,7 +49,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		};
 
 		this.updateStateWithPack = this.updateStateWithPack.bind(this);
-		this.updateStateWithCategories = this.updateStateWithCategories.bind(this);
 		this.handlePropChange = this.handlePropChange.bind(this);
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.onClickAddItem = this.onClickAddItem.bind(this);
@@ -63,14 +56,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onDelete = this.onDelete.bind(this);
 
 		pack.on('update', this.updateStateWithPack);
-		categories.on('update', this.updateStateWithCategories);
 		pack.syncData();
 	}
 
 	componentDidMount() {
-		this.state.categories.fetch({
-			success: this.updateStateWithCategories
-		});
 		this.state.model.fetch({
 			success: this.updateStateWithPack
 		});
@@ -84,10 +73,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	updateStateWithCategories(categories: Categories) {
-		this.setState({categories});
-	}
-
 	componentWillReceiveProps() {
 		console.log('componentWillReceiveProps');
 	}
@@ -98,15 +83,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.setState({
 			shouldShowSearchPanel: true
 		});
-	}
-
-	onClickCategory(itemId: string, category: Category, e: Event) {
-		e.preventDefault();
-
-		var model = this.state.model;
-		model.assignCategoryToItem(itemId, category);
-
-		this.setState({model: model});
 	}
 
 	onClickRemoveItem(item: IndexablePackItem, e: Event) {
@@ -180,38 +156,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	render() {
-		var categoryMenu = (item) => {
-			return this.state.categories.map(category => {
-				return <MenuItem
-					key={category.id}
-					eventKey={category.id}
-					onClick={this.onClickCategory.bind(this, item._id, category)}>
-						{category.name}
-				</MenuItem>;
-			});
-		};
-
-		var itemsComponents = this.state.model.items.map((item: IndexablePackItem) => {
-			return (
-				<div key={item._id} className="clearfix well">
-					<MediaItemView key={item._id} item={item} />
-					<div className="media-item-buttons">
-						<ButtonGroup>
-							<DropdownButton
-								bsStyle="default"
-								className="category-picker"
-								title={ (item.category) ? item.category.name : "Unassigned"}
-								id={item._id}
-								block>
-								{categoryMenu(item)}
-							</DropdownButton>
-							<Button onClick={this.onClickRemoveItem.bind(this, item)}>Remove</Button>
-						</ButtonGroup>
-					</div>
-				</div>
-			);
-
-		});
 
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
@@ -261,7 +205,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										disabled={!form.premium}
 									/>
 								</Col>
-								<Col xs={3} md={2}>
+								<Col xs={2} md={2}>
 									<Input
 										id="premium"
 										type="checkbox"
@@ -271,6 +215,18 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										onChange={this.handlePropChange}
 									/>
 								</Col>
+								<Col xs={2} md={2}>
+									<Input
+										id="featured"
+										type="checkbox"
+										bsSize="large"
+										label="Featured"
+										checked={this.state.form.featured}
+										onChange={this.handlePropChange}
+									/>
+								</Col>
+
+
 							</Row>
 							<Row>
 								<Col xs={8}>
@@ -321,7 +277,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<div className="media-item-group">
 									<h3>Items</h3>
 									<div className="items">
-										{itemsComponents}
+										<CategoryAssignmentList pack={this.state.model}/>
 										<div className="add-item pull-left" onClick={this.onClickAddItem}>
 											<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
 										</div>
@@ -338,3 +294,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		);
 	}
 }
+
+
+

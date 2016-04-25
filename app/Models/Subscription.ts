@@ -11,12 +11,12 @@ class SubscriptionType extends String {
 
 export interface SubscriptionAttributes extends BaseModelAttributes {
 	mediaItemType?: MediaItemType;
-	itemId: string;
+	itemId?: string;
 	userId?: string;
 	subscriptionType?: SubscriptionType;
-	timeLastUpdated?: number;
-	timeLastRestored?: number;
-	timeSubscribed?: number;
+	timeLastUpdated?: string;
+	timeLastRestored?: string;
+	timeSubscribed?: string;
 }
 
 interface IndexableSubscription extends IndexableObject, SubscriptionAttributes {};
@@ -42,7 +42,7 @@ class Subscription extends BaseModel implements Indexable {
 
 		attributes.id = `${attributes.itemId}:${attributes.userId}`;
 		attributes.type = BaseModelType.subscription;
-		attributes.timeLastUpdated = Date.now();
+		attributes.timeLastUpdated = new Date().toISOString();
 
 		super(attributes, options);
 		this.save();
@@ -51,7 +51,7 @@ class Subscription extends BaseModel implements Indexable {
 	defaults(): Backbone.ObjectHash {
 		return {
 			type: BaseModelType.subscription,
-			timeLastUpdated: Date.now()
+			timeLastUpdated: new Date().toISOString()
 		};
 	}
 
@@ -92,11 +92,11 @@ class Subscription extends BaseModel implements Indexable {
 	 * Populates the subscription object with subscription information
 	 * @param {SubscriptionAttributes} subAttrs - Object containing subscription information
 	 */
-	subscribe (subAttrs: SubscriptionAttributes) {
+	subscribe (subAttrs?: SubscriptionAttributes) {
 		this.save({
-			timeSubscribed: subAttrs.timeSubscribed || Date.now(),
-			subscriptionType: subAttrs.subscriptionType || SubscriptionType.free,
-			timeLastUpdated: Date.now()
+			timeSubscribed: (subAttrs) ? subAttrs.timeSubscribed || new Date().toISOString() : new Date().toISOString(),
+			subscriptionType: (subAttrs) ? subAttrs.subscriptionType || SubscriptionType.free : SubscriptionType.free,
+			timeLastUpdated: new Date().toISOString()
 		});
 	}
 
@@ -105,8 +105,8 @@ class Subscription extends BaseModel implements Indexable {
 	 */
 	updateTimeLastRestored() {
 		this.save({
-			timeLastRestored: Date.now(),
-			timeLastUpdated: Date.now()
+			timeLastRestored: new Date().toISOString(),
+			timeLastUpdated: new Date().toISOString()
 		});
 	}
 

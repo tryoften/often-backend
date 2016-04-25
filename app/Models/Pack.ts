@@ -22,12 +22,15 @@ export interface PackAttributes extends MediaItemAttributes {
 	};
 	price?: number;
 	premium?: boolean;
+	featured?: boolean;
 	published?: boolean;
 	publishedTime?: string;
 	description?: string;
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
 	items_count?: number;
+	isFavorites?: boolean;
+	isRecents?: boolean;
 }
 
 export interface PackIndexableObject extends PackAttributes {}
@@ -48,7 +51,7 @@ class Pack extends MediaItem {
 	 * @param attributes {PackAttributes}
 	 * @param options
 	 */
-	constructor(attributes: PackAttributes = {}, options = {setObjectMap: true}) {
+	constructor(attributes: PackAttributes = {}, options: any = {autoSync: false, setObjectMap: true}) {
 		attributes = _.defaults(attributes, {
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often
@@ -72,12 +75,15 @@ class Pack extends MediaItem {
 			source: MediaItemSource.Often,
 			premium: false,
 			deleted: false,
+			featured: false,
 			price: 0.0,
 			image: {
 				small_url: 'http://placehold.it/200x200',
 				large_url: 'http://placehold.it/400x400'
 			},
-			items: []
+			items: [],
+			isFavorites: false,
+			isRecents: false
 		};
 	}
 
@@ -125,8 +131,16 @@ class Pack extends MediaItem {
 		return this.get('premium');
 	}
 
+	get featured(): boolean {
+		return this.get('featured');
+	}
+
 	get isFavorites(): boolean {
 		return this.get('isFavorites');
+	}
+
+	get isRecents(): boolean {
+		return this.get('isRecents');
 	}
 
 	getTargetObjectProperties(): any {
@@ -138,9 +152,12 @@ class Pack extends MediaItem {
 			desscription: this.description,
 			items: this.items,
 			premium: this.premium,
+			featured: this.featured,
 			price: this.price,
 			source: this.source,
-			type: this.type
+			type: this.type,
+			isFavorites: this.isFavorites,
+			isRecents: this.isRecents
 		};
 	}
 
@@ -259,6 +276,7 @@ class Pack extends MediaItem {
 			title: this.name || '',
 			author: '',
 			description: this.description || '',
+			featured: this.featured || false,
 			premium: this.premium || false,
 			price: this.price || 0,
 			image: this.image || {},
