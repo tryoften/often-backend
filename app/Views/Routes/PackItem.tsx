@@ -188,7 +188,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										disabled={!this.state.form.premium}
 									/>
 								</Col>
-								<Col xs={3} md={2}>
+								<Col xs={2} md={2}>
 									<Input
 										id="premium"
 										type="checkbox"
@@ -198,6 +198,18 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										onChange={this.handlePropChange}
 									/>
 								</Col>
+								<Col xs={2} md={2}>
+									<Input
+										id="featured"
+										type="checkbox"
+										bsSize="large"
+										label="Featured"
+										checked={this.state.form.featured}
+										onChange={this.handlePropChange}
+									/>
+								</Col>
+
+
 							</Row>
 							<Row>
 								<Col xs={8}>
