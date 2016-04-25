@@ -149,11 +149,11 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 }
 
 export default flow(
-	DragSource('CategoryPackItem', cardSource, (connect, monitor) => ({
+	DragSource('CategoryPackItemCard', cardSource, (connect, monitor) => ({
 		connectDragSource: connect.dragSource(),
 		isDragging: monitor.isDragging()
 	})),
-	DropTarget('CategoryPackItem', cardTarget, connect => ({
+	DropTarget('CategoryPackItemCard', cardTarget, connect => ({
 		connectDropTarget: connect.dropTarget()
 	}))
 )(CategoryAssignmentItem);
