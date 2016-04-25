@@ -5,7 +5,6 @@ import { TrackIndexableObject } from "../../Models/Track";
 import { ArtistIndexableObject } from "../../Models/Artist";
 import MediaItemType from "../../Models/MediaItemType";
 import ImageBrandMask from '../Components/ImageBrandMask';
-import { Thumbnail } from 'react-bootstrap';
 import { GIFAttributes } from "../../Models/GIF";
 
 interface SearchResultItemViewProps {
