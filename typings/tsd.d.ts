@@ -100,3 +100,22 @@ declare module "shortid" {
 	export function generate(): string;
 }
 
+declare module "shortid" {
+	export function generate(): string;
+}
+
+declare module "react/lib/update" {
+	var update: any;
+	export default update;
+}
+
+declare module "react-dnd-html5-backend" {
+	var HTML5Backend: any;
+	export default HTML5Backend;
+}
+
+declare module "react-dnd" {
+	export var DragDropContext: any;
+	export var DragSource: any;
+	export var DropTarget: any;
+}
