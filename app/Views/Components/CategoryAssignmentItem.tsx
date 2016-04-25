@@ -6,9 +6,9 @@ import MediaItemView from '../Components/MediaItemView';
 import Categories from "../../Collections/Categories";
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
+//TODO(jakub): Define proper typing for lodash flowgi. Make sure it doesn't screw with uderscore methods
 var flow = require('lodash/function/flow');
-console.log('here');
-//import PropTypes = __React.PropTypes;
+
 
 interface CategoryAssignmentItemProps extends React.Props<CategoryAssignmentItem> {
 	item: IndexablePackItem;
@@ -103,9 +103,9 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 		item: React.PropTypes.object.isRequired,
 		categories: React.PropTypes.object.isRequired,
 		onClickCategory: React.PropTypes.func.isRequired,
-		onClickRemoveItem: React.PropTypes.func,
-		connectDragSource: React.PropTypes.func,
-		connectDropTarget: React.PropTypes.func,
+		onClickRemoveItem: React.PropTypes.func.isRequired,
+		connectDragSource: React.PropTypes.func.isRequired,
+		connectDropTarget: React.PropTypes.func.isRequired,
 		index: React.PropTypes.number.isRequired,
 		isDragging: React.PropTypes.bool.isRequired,
 		id: React.PropTypes.any.isRequired,
@@ -149,11 +149,11 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 }
 
 export default flow(
-	DragSource('categoryitem', cardSource, (connect, monitor) => ({
+	DragSource('CategoryPackItem', cardSource, (connect, monitor) => ({
 		connectDragSource: connect.dragSource(),
 		isDragging: monitor.isDragging()
 	})),
-	DropTarget('categoryitem', cardTarget, connect => ({
+	DropTarget('CategoryPackItem', cardTarget, connect => ({
 		connectDropTarget: connect.dropTarget()
 	}))
 )(CategoryAssignmentItem);

@@ -5,9 +5,7 @@ import Categories from '../../Collections/Categories';
 import Category from '../../Models/Category';
 import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
 import { DragDropContext } from 'react-dnd';
-import update from 'react/lib/update';
 import HTML5Backend from 'react-dnd-html5-backend';
-//import MediaItem from "../../Models/MediaItem";
 
 
 interface CategoryAssignmentProps extends React.Props<CategoryAssignmentList> {
@@ -68,10 +66,8 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 		const items  = this.state.pack.items;
 
 		const dragCard = items[dragIndex];
-		console.log('before ' + JSON.stringify(items));
 		items.splice(dragIndex, 1);
 		items.splice(hoverIndex, 0, dragCard);
-		console.log('after ' + JSON.stringify(items));
 		pack.save({items : items});
 		this.setState({
 			pack: pack
