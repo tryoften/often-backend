@@ -100,4 +100,4 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 	}
 
 }
-export default DragDropContext(HTML5Backend)(CategoryAssignmentList);
+export default DragDropContext<CategoryAssignmentProps>(HTML5Backend)(CategoryAssignmentList);

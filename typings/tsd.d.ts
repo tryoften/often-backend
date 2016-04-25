@@ -23,6 +23,7 @@
 /// <reference path="react/react-addons-transition-group.d.ts" />
 /// <reference path="object-path/object-path.d.ts" />
 /// <reference path="object-hash/object-hash.d.ts" />
+/// <reference path="react-dnd/react-dnd.d.ts" />
 
 declare module "firebase-queue" {
 	class Queue {
@@ -114,8 +115,3 @@ declare module "react-dnd-html5-backend" {
 	export default HTML5Backend;
 }
 
-declare module "react-dnd" {
-	export var DragDropContext: any;
-	export var DragSource: any;
-	export var DropTarget: any;
-}

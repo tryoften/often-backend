@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup,
-	ButtonInput, Button, MenuItem, DropdownButton } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button } from 'react-bootstrap';
 import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
-import MediaItemView from '../Components/MediaItemView';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';

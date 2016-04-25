@@ -36,7 +36,7 @@
       "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
     },
     "react/react.d.ts": {
-      "commit": "bf4ecf5b68887ed5a065e3922885c34d0f5739df"
+      "commit": "310c247694d7f31bd2e3198f71c55221f7c3a3c7"
     },
     "react/react-dom.d.ts": {
       "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
@@ -73,6 +73,9 @@
     },
     "object-hash/object-hash.d.ts": {
       "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "react-dnd/react-dnd.d.ts": {
+      "commit": "310c247694d7f31bd2e3198f71c55221f7c3a3c7"
     }
   }
 }
