@@ -24,6 +24,7 @@ export interface PackAttributes extends MediaItemAttributes {
 	premium?: boolean;
 	featured?: boolean;
 	published?: boolean;
+	publishedTime?: string;
 	description?: string;
 	meta?: PackMeta;
 	items?: IndexablePackItem[];
@@ -72,8 +73,8 @@ class Pack extends MediaItem {
 			published: false,
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
-			setObjectMap: true,
 			premium: false,
+			deleted: false,
 			featured: false,
 			price: 0.0,
 			image: {
@@ -115,7 +116,7 @@ class Pack extends MediaItem {
 	}
 
 	get items_count(): number {
-		return this.get('items_count') || this.get('items').length;
+		return this.get('items_count') || this.items.length;
 	}
 
 	get price(): number {
@@ -141,7 +142,6 @@ class Pack extends MediaItem {
 	get isRecents(): boolean {
 		return this.get('isRecents');
 	}
-
 
 	getTargetObjectProperties(): any {
 		return {

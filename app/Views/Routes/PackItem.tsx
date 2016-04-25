@@ -1,10 +1,11 @@
 import * as React from 'react';
+import * as ReactRouter from 'react-router';
 import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button } from 'react-bootstrap';
 import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
-
+import DeleteButton from '../Components/DeleteButton';
 import CategoryAssignmentList from '../Components/CategoryAssignmentList';
 
 interface PackItemProps extends React.Props<PackItem> {
@@ -23,6 +24,14 @@ interface PackItemState extends React.Props<PackItem> {
 
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
+	static contextTypes: React.ValidationMap<any> = {
+		router: React.PropTypes.object
+	};
+
+	context: {
+		router: ReactRouter.RouterOnContext;
+	};
+
 	constructor(props: PackItemProps) {
 		super(props);
 
@@ -44,6 +53,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.handleUpdate = this.handleUpdate.bind(this);
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		this.togglePublish = this.togglePublish.bind(this);
+		this.onDelete = this.onDelete.bind(this);
 
 		pack.on('update', this.updateStateWithPack);
 		pack.syncData();
@@ -133,13 +143,22 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	togglePublish(e) {
 		let form = this.state.form;
 		form.published = !form.published;
+		form.publishedTime = new Date().toISOString();
 		this.setState({form});
 		this.handleUpdate(e);
+	}
+
+	onDelete(e) {
+		this.state.model.save({
+			deleted: true
+		});
+		this.context.router.push('/packs');
 	}
 
 	render() {
 
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
+		let form = this.state.form;
 
 		return (
 			<div className={classes}>
@@ -158,7 +177,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										label="Name"
 										bsSize="medium"
 										placeholder="Enter Name"
-										value={this.state.form.name}
+										value={form.name}
 										onChange={this.handlePropChange}
 									/>
 									<Input
@@ -166,7 +185,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										type="textarea"
 										label="Description"
 										placeholder="Description"
-										value={this.state.form.description}
+										value={form.description}
 										onChange={this.handlePropChange}
 									/>
 
@@ -183,7 +202,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										addonBefore="$"
 										value={this.state.form.price}
 										onChange={this.handlePropChange}
-										disabled={!this.state.form.premium}
+										disabled={!form.premium}
 									/>
 								</Col>
 								<Col xs={2} md={2}>
@@ -192,7 +211,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										type="checkbox"
 										bsSize="large"
 										label="Premium"
-										checked={this.state.form.premium}
+										checked={form.premium}
 										onChange={this.handlePropChange}
 									/>
 								</Col>
@@ -216,8 +235,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										type="text"
 										label="Small Image"
 										bsSize="medium"
-										placeholder={this.state.form.image.small_url}
-										value={this.state.form.image.small_url}
+										placeholder={form.image.small_url}
+										value={form.image.small_url}
 										onChange={this.handlePropChange}
 									/>
 									<Input
@@ -225,23 +244,33 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 										type="text"
 										label="Large Image"
 										bsSize="medium"
-										placeholder={this.state.form.image.large_url}
-										value={this.state.form.image.large_url}
+										placeholder={form.image.large_url}
+										value={form.image.large_url}
 										onChange={this.handlePropChange}
 									/>
 								</Col>
 								<Col xs={4}>
 									<div class="image-upload pack-thumbnail">
-										<Thumbnail src={this.state.form.image.small_url} />
+										<Thumbnail src={form.image.small_url} />
 									</div>
 								</Col>
 							</Row>
 							<Row>
-								<Col xs={8}>
+								<Col xs={4}>
 									<ButtonGroup>
 										<Button onClick={this.handleUpdate}>{this.state.isNew ? 'Create' : 'Save'}</Button>
-										<Button bsStyle="primary" onClick={this.togglePublish}>{ this.state.form.published ? 'Unpublish' : 'Publish'}</Button>
+										<Button {...form.published ? {bsStyle: 'primary'} :  {}} onClick={this.togglePublish}>{ form.published ? 'Unpublish' : 'Publish'}</Button>
 									</ButtonGroup>
+								</Col>
+								<Col xs={2}>
+									<div className="pull-right">
+										<Button><Glyphicon glyph="plus-sign" />Add Item</Button>
+									</div>
+								</Col>
+								<Col xs={4}>
+									<div className="pull-right">
+										<DeleteButton onConfirmation={this.onDelete} />
+									</div>
 								</Col>
 							</Row>
 							<Row>

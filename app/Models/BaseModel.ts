@@ -14,27 +14,31 @@ class BaseModel extends Firebase.Model {
 	objectMap: ObjectMap;
 
 	constructor (attributes?: BaseModelAttributes, options: any = {autoSync: false, setObjectMap: false}) {
-		if (!attributes.type) {
-			throw new Error('Type must be defined in base model attributes.');
-		}
-
-		if (!attributes.id) {
-			throw new Error('ItemId must be defined in base model attributes');
-		}
-
 		super(attributes, options);
 
 		if (options.setObjectMap) {
+
+			if (!attributes.type) {
+				throw new Error('Type must be defined in base model attributes.');
+			}
+
+			if (!attributes.id) {
+				throw new Error('ItemId must be defined in base model attributes');
+			}
+
 			this.objectMap = new ObjectMap({
 				id: attributes.id,
 				type: attributes.type
 			});
 		}
-
 	}
 
 	get type(): string {
 		return this.get('type');
+	}
+
+	get deleted(): boolean {
+		return this.get('deleted') || false;
 	}
 
 	public getTargetObjectProperties(): any {
