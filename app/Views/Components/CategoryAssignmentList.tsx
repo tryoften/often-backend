@@ -17,10 +17,6 @@ interface CategoryAssignmentState extends React.Props<CategoryAssignmentList> {
 	pack?: Pack;
 }
 
-const style = {
-	width: 400
-};
-
 class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, CategoryAssignmentState> {
 
 	constructor (props: CategoryAssignmentProps) {
@@ -79,7 +75,7 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 	render () {
 
 		return (
-			<div style={style}>
+			<div>
 				{this.props.pack.items.map((item: IndexablePackItem, i) => {
 					return (
 						<CategoryAssignmentItem
