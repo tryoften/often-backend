@@ -20,6 +20,7 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 		super(props);
 
 		this.packs = new Packs();
+
 		this.state = {
 			packs: this.packs
 		};
@@ -54,20 +55,21 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 					</ButtonToolbar>
 				</header>
 				<Grid fluid={true}>
-				<Row>
-					<Col sm={12}>
-						<div className="content">
-							<ReactCSSTransitionGroup
-								transitionName="pack"
-								transitionEnterTimeout={300}
-								transitionLeaveTimeout={300}>
-								{packComponents}
-							</ReactCSSTransitionGroup>
-						</div>
-					</Col>
-				</Row>
+					<Row>
+						<Col sm={12}>
+							<div className="content">
+								<ReactCSSTransitionGroup
+									transitionName="pack"
+									transitionEnterTimeout={300}
+									transitionLeaveTimeout={300}>
+									{packComponents}
+								</ReactCSSTransitionGroup>
+							</div>
+						</Col>
+					</Row>
 				</Grid>
 			</div>
+
 		);
 
 		return content;

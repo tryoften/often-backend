@@ -1,3 +1,4 @@
+import * as _ from 'underscore';
 import { firebase as FirebaseConfig } from '../config';
 import MediaItemAttributes from '../Models/MediaItem';
 import MediaItemType from '../Models/MediaItemType';
@@ -66,7 +67,7 @@ export default class Featured extends BaseModel {
 				currentItems[index] = null;
 			}
 		}
-		this.save({items: currentItems});
+		this.save({items: _.compact(currentItems)});
 	}
 
 }
