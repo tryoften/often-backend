@@ -7,6 +7,7 @@ import * as _ from 'underscore';
 import MediaItemSource from "./MediaItemSource";
 import Category, {CategoryAttributes} from './Category';
 import {IndexableObject} from '../Interfaces/Indexable';
+import Featured from './Featured';
 
 export interface IndexablePackItem extends IndexableObject {
 	id?: string;
@@ -179,6 +180,13 @@ class Pack extends MediaItem {
 		items = _.filter(items, a => a.id !== item.id);
 
 		this.save({items});
+	}
+
+	updateFeatured() {
+		let featuredPacks = new Featured({id: 'featuredPacks', type: MediaItemType.pack});
+		featuredPacks.syncData().then( (fp) => {
+			this.featured ? featuredPacks.addFeaturedItem(this) : featuredPacks.removeFeaturedItem(this.id);
+		});
 	}
 
 

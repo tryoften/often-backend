@@ -7,6 +7,7 @@ import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
 import DeleteButton from '../Components/DeleteButton';
 import CategoryAssignmentList from '../Components/CategoryAssignmentList';
+import MediaItemType from '../../Models/MediaItemType';
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -39,6 +40,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			id: props.params.packId
 		});
 
+
 		this.state = {
 			model: pack,
 			form: pack.toJSON(),
@@ -53,6 +55,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		this.togglePublish = this.togglePublish.bind(this);
 		this.onDelete = this.onDelete.bind(this);
+
+
 
 		pack.on('update', this.updateStateWithPack);
 		pack.syncData();
@@ -134,7 +138,14 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		e.preventDefault();
 
 		let model = this.state.model;
+		let form = this.state.form;
+
+		var diff = model.featured !== form.featured;
 		model.save(this.state.form);
+		/* Check if there's a discrepancy between featured flag on model and form */
+		if (diff) {
+			model.updateFeatured();
+		}
 		this.setState({model: model, isNew: false});
 
 	}

@@ -11,6 +11,7 @@ import PackItem from './Routes/PackItem';
 import CategoryItem from './Routes/CategoryItem';
 import Owners from './Routes/OwnersRoute';
 import OwnerItem from './Routes/OwnerItem';
+import Featured from './Routes/FeaturedRoute';
 
 render((
 	<Router history={browserHistory}>
@@ -25,6 +26,7 @@ render((
 			<Route path="/owners" component={Owners}>
 				<Route path="/owner(/:ownerId)" component={OwnerItem} />
 			</Route>
+			<Route path="/featured" component={Featured} />
 		</Route>
 	</Router>
 ), document.getElementById('app-container'));

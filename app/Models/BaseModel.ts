@@ -33,7 +33,7 @@ class BaseModel extends Firebase.Model {
 		}
 	}
 
-	get type(): string {
+	get type(): BaseModelType {
 		return this.get('type');
 	}
 
