@@ -7,7 +7,6 @@ import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
 import DeleteButton from '../Components/DeleteButton';
 import CategoryAssignmentList from '../Components/CategoryAssignmentList';
-import Featured from '../../Models/Featured';
 import MediaItemType from '../../Models/MediaItemType';
 
 interface PackItemProps extends React.Props<PackItem> {
@@ -146,12 +145,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		model.save(this.state.form);
 		/* Check if there's a discrepancy between featured flag on model and form */
 		if (diff) {
-
-			let featuredPacks = new Featured({id: 'featuredPacks', type: MediaItemType.pack});
-			featuredPacks.syncData().then( (fp) => {
-				form.featured ? featuredPacks.addFeaturedItem(model) : featuredPacks.removeFeaturedItem(model.id);
-			});
-
+			model.updateFeatured();
 		}
 		this.setState({model: model, isNew: false});
 

@@ -40,8 +40,6 @@ export default class Featured extends BaseModel {
 
 	defaults(): Backbone.ObjectHash {
 		return {
-			id: '',
-			type: '',
 			items: []
 		};
 	}

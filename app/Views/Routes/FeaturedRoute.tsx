@@ -22,22 +22,26 @@ export default class FeaturedPacksRoute extends React.Component<FeaturedPacksPro
 	constructor(props: FeaturedPacksProps) {
 		super(props);
 
-		let featuredPacks = new Featured({id: 'featuredPacks', type: MediaItemType.pack});
+		this.featuredPacks = new Featured({id: 'featuredPacks', type: MediaItemType.pack});
 
 		this.state = {
-			featuredPacks: featuredPacks,
+			featuredPacks: this.featuredPacks,
 			packs: []
 		};
 
 		this.updateStateWithFeaturedPacks =  this.updateStateWithFeaturedPacks.bind(this);
-		featuredPacks.on('update', this.updateStateWithFeaturedPacks);
-		featuredPacks.syncData();
+		this.featuredPacks.on('update', this.updateStateWithFeaturedPacks);
+		this.featuredPacks.syncData();
 	}
 
 	componentDidMount() {
 		this.state.featuredPacks.fetch({
 			success: this.updateStateWithFeaturedPacks
 		});
+	}
+
+	componentWillUnmount() {
+		this.featuredPacks.off('update');
 	}
 
 	updateStateWithFeaturedPacks(featured: Featured) {
