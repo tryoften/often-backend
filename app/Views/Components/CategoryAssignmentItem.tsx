@@ -127,7 +127,8 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 
 		const opacity = this.props.isDragging ? 0 : 1;
 		return this.props.connectDragSource(this.props.connectDropTarget(
-			<div key={this.props.item._id} className="clearfix well" style={{style, opacity}}>
+			<div key={this.props.item._id} className="clearfix well pack-item" style={{style, opacity}}>
+				<div className="index-display">{this.props.index + 1}</div>
 				<MediaItemView key={this.props.item._id} item={this.props.item} />
 				<div className="media-item-buttons">
 					<ButtonGroup>

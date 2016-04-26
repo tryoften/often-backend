@@ -22,7 +22,6 @@ interface PackItemState extends React.Props<PackItem> {
 	form?: PackAttributes;
 }
 
-
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
 	static contextTypes: React.ValidationMap<any> = {
 		router: React.PropTypes.object
@@ -264,7 +263,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								</Col>
 								<Col xs={2}>
 									<div className="pull-right">
-										<Button><Glyphicon glyph="plus-sign" />Add Item</Button>
+										<Button onClick={this.onClickAddItem}><Glyphicon glyph="plus-sign" />Add Item</Button>
 									</div>
 								</Col>
 								<Col xs={4}>
