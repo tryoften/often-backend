@@ -69,7 +69,7 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 
 				return (
 					<div className="gif media-item pull-left" onClick={this.onSelect.bind(this)}>
-						<img src={gif.image.medium_url} />
+						<img src={gif.image.small_url} />
 					</div>
 				);
 			default:

@@ -287,10 +287,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<div className="media-item-group">
 									<h3>Items</h3>
 									<div className="items">
-										<CategoryAssignmentList pack={this.state.model}/>
-										<div className="add-item pull-left" onClick={this.onClickAddItem}>
-											<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
-										</div>
+										<CategoryAssignmentList pack={this.state.model} />
 									</div>
 								</div>
 							</Row>

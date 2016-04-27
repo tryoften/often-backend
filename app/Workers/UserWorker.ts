@@ -179,7 +179,7 @@ class UserWorker extends Worker {
 	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
 	 */
 	private initiatePacks (user: User): Promise<string> {
-		return Promise.all([user.initFavoritesPack(), user.initDefaultPack(), user.initRecentsPack()]).then(() => {
+		return Promise.all([user.initDefaultPack(), user.initRecentsPack()]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}

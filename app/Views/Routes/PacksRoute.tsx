@@ -35,6 +35,7 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 	render() {
 		let packComponents = this.state.packs
 			.filter(pack => !pack.isFavorites)
+			.filter(pack => !pack.isRecents)
 			.filter(pack => !pack.deleted)
 			.map(pack => {
 				return (
