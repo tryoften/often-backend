@@ -1,19 +1,32 @@
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button } from 'react-bootstrap';
+import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
 import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
 import DeleteButton from '../Components/DeleteButton';
 import CategoryAssignmentList from '../Components/CategoryAssignmentList';
-import MediaItemType from '../../Models/MediaItemType';
-
+var ReactPaginate = require('react-paginate');
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
 		packId: string;
 	};
 }
+
+interface Pagination {
+	numItemsPerPage?: number;
+	numPages?: number;
+	activePage?: number;
+	indexRange?: IndexRange;
+	perPageDefaults?: LabelValuePair[];
+}
+
+export interface IndexRange {
+	start: number;
+	end: number;
+}
+
 
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
@@ -21,7 +34,15 @@ interface PackItemState extends React.Props<PackItem> {
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
+	pagination?: Pagination;
 }
+
+interface LabelValuePair {
+	label: string;
+	value: number;
+}
+
+const perPageDefaults = [10, 50, 100, 1000];
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
 	static contextTypes: React.ValidationMap<any> = {
@@ -40,13 +61,21 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			id: props.params.packId
 		});
 
-
 		this.state = {
 			model: pack,
 			form: pack.toJSON(),
 			shouldShowSearchPanel: false,
 			display: false,
-			isNew: isNew
+			isNew: isNew,
+			pagination: {
+				numItemsPerPage: 10,
+				numPages: 1,
+				activePage: 0,
+				indexRange: {
+					start: 0,
+					end: -1
+				}
+			}
 		};
 
 		this.updateStateWithPack = this.updateStateWithPack.bind(this);
@@ -55,7 +84,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		this.togglePublish = this.togglePublish.bind(this);
 		this.onDelete = this.onDelete.bind(this);
-
+		this.calculateNumberOfPages = this.calculateNumberOfPages.bind(this);
+		this.getIndexRange = this.getIndexRange.bind(this);
+		this.handlePageClick = this.handlePageClick.bind(this);
+		this.getIndexRange = this.getIndexRange.bind(this);
+		this.onDropDownSelect = this.onDropDownSelect.bind(this);
 
 
 		pack.on('update', this.updateStateWithPack);
@@ -68,11 +101,25 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
+	calculateNumberOfPages(numItems: number, numItemsPerPage: number) {
+		var pageNum = Math.floor(numItems / numItemsPerPage);
+		return (numItems % numItemsPerPage) ? pageNum + 1 : pageNum;
+	}
+
 	updateStateWithPack(pack: Pack) {
+
+		let currentPagination = this.state.pagination;
+
 		this.setState({
 			model: pack,
 			form: pack.toJSON(),
-			display: true
+			display: true,
+			pagination: {
+				numItemsPerPage: currentPagination.numItemsPerPage,
+				numPages: this.calculateNumberOfPages(pack.items.length, currentPagination.numItemsPerPage),
+				activePage: currentPagination.activePage,
+				indexRange: this.getIndexRange(currentPagination.activePage, currentPagination.numItemsPerPage)
+			}
 		});
 	}
 
@@ -165,10 +212,59 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.context.router.push('/packs');
 	}
 
+	getIndexRange(pageIndex: number, numItemsPerPage: number) {
+		let start = (pageIndex) * numItemsPerPage;
+		return {
+			start: start,
+			end: start + numItemsPerPage - 1
+		};
+	}
+	handlePageClick(e) {
+		let currentPagination = this.state.pagination;
+		this.setState({
+			pagination: {
+				numItemsPerPage: currentPagination.numItemsPerPage,
+				numPages: currentPagination.numPages,
+				activePage: e.selected,
+				indexRange: this.getIndexRange(e.selected, currentPagination.numItemsPerPage)
+			}
+		});
+	}
+
+	onDropDownSelect(e: Event, eventKey: number) {
+		let currentPagination = this.state.pagination;
+		this.setState({
+			pagination: {
+				numItemsPerPage: eventKey,
+				numPages: this.calculateNumberOfPages(this.state.model.items.length, eventKey),
+				activePage: currentPagination.activePage,
+				indexRange: this.getIndexRange(currentPagination.activePage, eventKey)
+			}
+		});
+	}
+
 	render() {
 
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
+		let menuItems = perPageDefaults.map((pageDefault) => {
+			return (<MenuItem eventKey={pageDefault} key={pageDefault}>{pageDefault}</MenuItem>);
+		});
+
+		let numItemsPerPageToggle = (
+			<div>
+				Results Per Page:
+				<ButtonToolbar>
+					<DropdownButton
+						title={this.state.pagination.numItemsPerPage}
+						id="dropdown-size-medium"
+						onSelect={this.onDropDownSelect}
+					>
+						{menuItems}
+					</DropdownButton>
+				</ButtonToolbar>
+			</div>
+		);
 
 		return (
 			<div className={classes}>
@@ -286,8 +382,23 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<Row>
 								<div className="media-item-group">
 									<h3>Items</h3>
+									<ReactPaginate
+										pageNum={this.state.pagination.numPages}
+										pageRangeDisplayed={5}
+										marginPagesDisplayed={1}
+										containerClassName={"pagination"}
+										subContainerClassName={"pages pagination"}
+										activeClassName={"active"}
+										previousLabel={"previous"}
+										nextLabel={"next"}
+										clickCallback={this.handlePageClick}
+									/>
+									{numItemsPerPageToggle}
 									<div className="items">
-										<CategoryAssignmentList pack={this.state.model}/>
+										<CategoryAssignmentList
+											pack={this.state.model}
+											indexRange={this.state.pagination.indexRange}
+										/>
 										<div className="add-item pull-left" onClick={this.onClickAddItem}>
 											<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
 										</div>

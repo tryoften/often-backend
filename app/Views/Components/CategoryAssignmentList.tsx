@@ -6,10 +6,11 @@ import Category from '../../Models/Category';
 import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-
+import { IndexRange } from "../Routes/PackItem";
 
 interface CategoryAssignmentProps extends React.Props<CategoryAssignmentList> {
 	pack: Pack;
+	indexRange?: IndexRange;
 }
 
 interface CategoryAssignmentState extends React.Props<CategoryAssignmentList> {
@@ -25,8 +26,8 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 		var categories = new Categories();
 
 		this.state = {
-			pack: props.pack,
-			categories: categories
+			categories: categories,
+			pack: props.pack
 		};
 
 		_.bindAll(this, 'updateStateWithCategories', 'onClickCategory', 'onClickRemoveItem', 'moveCard');
@@ -74,26 +75,33 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 
 	render () {
 
+		var currentIndex = (this.props.indexRange) ? this.props.indexRange.start : 0;
+		var endIndex = (this.props.indexRange) ? Math.min(this.props.indexRange.end, this.props.pack.items.length - 1) : this.props.pack.items.length - 1;
+		let components = [];
+		for (; currentIndex <= endIndex; currentIndex++) {
+			let item = this.props.pack.items[currentIndex];
+			components.push(
+				<CategoryAssignmentItem
+					item={item}
+					id = {item.id}
+					categories={this.state.categories}
+					onClickCategory={this.onClickCategory}
+					onClickRemoveItem={this.onClickRemoveItem}
+					moveCard={this.moveCard}
+					index={currentIndex}
+					key={currentIndex}
+				/>
+		);
+
+		}
+
 		return (
 			<div>
-				{this.props.pack.items.map((item: IndexablePackItem, i) => {
-					return (
-						<CategoryAssignmentItem
-							item={item}
-							id = {item.id}
-							categories={this.state.categories}
-							onClickCategory={this.onClickCategory}
-							onClickRemoveItem={this.onClickRemoveItem}
-							moveCard={this.moveCard}
-							index={i}
-							key={i}
-						/>
-
-					);
-				})}
+				{components}
 			</div>
 		);
 	}
 
 }
 export default DragDropContext<CategoryAssignmentProps>(HTML5Backend)(CategoryAssignmentList);
+

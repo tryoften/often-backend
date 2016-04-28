@@ -115,3 +115,8 @@ declare module "react-dnd-html5-backend" {
 	export default HTML5Backend;
 }
 
+declare module "react-paginate" {
+	var ReactPaginate: any;
+	export default ReactPaginate;
+}
+
