@@ -1,3 +1,4 @@
+import * as _ from 'underscore';
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
 import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
@@ -19,7 +20,6 @@ interface Pagination {
 	numPages?: number;
 	activePage?: number;
 	indexRange?: IndexRange;
-	perPageDefaults?: LabelValuePair[];
 }
 
 export interface IndexRange {
@@ -35,11 +35,6 @@ interface PackItemState extends React.Props<PackItem> {
 	isNew?: boolean;
 	form?: PackAttributes;
 	pagination?: Pagination;
-}
-
-interface LabelValuePair {
-	label: string;
-	value: number;
 }
 
 const perPageDefaults = [10, 50, 100, 1000];
@@ -114,12 +109,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			model: pack,
 			form: pack.toJSON(),
 			display: true,
-			pagination: {
-				numItemsPerPage: currentPagination.numItemsPerPage,
+			pagination: _.extend(currentPagination, {
 				numPages: this.calculateNumberOfPages(pack.items.length, currentPagination.numItemsPerPage),
-				activePage: currentPagination.activePage,
 				indexRange: this.getIndexRange(currentPagination.activePage, currentPagination.numItemsPerPage)
-			}
+			})
 		});
 	}
 
@@ -222,24 +215,21 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	handlePageClick(e) {
 		let currentPagination = this.state.pagination;
 		this.setState({
-			pagination: {
-				numItemsPerPage: currentPagination.numItemsPerPage,
-				numPages: currentPagination.numPages,
+			pagination: _.extend(currentPagination, {
 				activePage: e.selected,
 				indexRange: this.getIndexRange(e.selected, currentPagination.numItemsPerPage)
-			}
+			})
 		});
 	}
 
 	onDropDownSelect(e: Event, eventKey: number) {
 		let currentPagination = this.state.pagination;
 		this.setState({
-			pagination: {
+			pagination: _.extend(currentPagination, {
 				numItemsPerPage: eventKey,
 				numPages: this.calculateNumberOfPages(this.state.model.items.length, eventKey),
-				activePage: currentPagination.activePage,
 				indexRange: this.getIndexRange(currentPagination.activePage, eventKey)
-			}
+			})
 		});
 	}
 
@@ -259,6 +249,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 						title={this.state.pagination.numItemsPerPage}
 						id="dropdown-size-medium"
 						onSelect={this.onDropDownSelect}
+						key="dropdown-size-medium"
 					>
 						{menuItems}
 					</DropdownButton>
