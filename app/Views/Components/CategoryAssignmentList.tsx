@@ -6,7 +6,7 @@ import Category from '../../Models/Category';
 import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import { IndexRange } from "../Routes/PackItem";
+import { IndexRange } from '../Routes/PackItem';
 
 interface CategoryAssignmentProps extends React.Props<CategoryAssignmentList> {
 	pack: Pack;
