@@ -7,16 +7,24 @@ import MediaItemType from './MediaItemType';
 import BaseModelType from './BaseModelType';
 import MediaItemSource from "./MediaItemSource";
 
+export interface UserAttributes {
+	firstName: string;
+	isAdmin: boolean;
+}
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
  */
 class User extends BaseModel {
 
-
-
 	constructor(attributes: any = {}, options?: any) {
 		attributes.type = BaseModelType.user;
 		super(attributes, options);
+	}
+
+	static fromString (userString: string): User {
+		let attributes = JSON.parse(userString);
+		return new User(attributes);
 	}
 
 	defaults(): Backbone.ObjectHash {
@@ -50,6 +58,9 @@ class User extends BaseModel {
 		return this.get('recentsPackId');
 	}
 
+	get isAdmin() {
+		return this.get('isAdmin');
+	}
 	/**
 	 * Initializes a favorites pack
 	 * @returns {Promise<string>} - Promise resolving to a pack id or an error.
@@ -85,6 +96,13 @@ class User extends BaseModel {
 				resolve(this.favoritesPackId);
 			}
 		});
+	}
+
+	getTargetObjectProperties(): UserAttributes {
+		return {
+			firstName: this.firstName || "",
+			isAdmin: !!this.isAdmin
+		};
 	}
 
 	/**
