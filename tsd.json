@@ -36,7 +36,7 @@
       "commit": "1469ae2d0c260c082517bfb971be8c14e2389fe5"
     },
     "react/react.d.ts": {
-      "commit": "310c247694d7f31bd2e3198f71c55221f7c3a3c7"
+      "commit": "73f7bb99692823f1811817f9753a02b57af5305e"
     },
     "react/react-dom.d.ts": {
       "commit": "a44529fcb1e1cdc0355e71c42a6048de99b57c34"
@@ -48,7 +48,7 @@
       "commit": "299b5caa22876ef27dc8e9a5b7fd7bf93457b6f4"
     },
     "react-bootstrap/react-bootstrap.d.ts": {
-      "commit": "dc6d1ebfaa554e85b91846574728930972ca9868"
+      "commit": "73f7bb99692823f1811817f9753a02b57af5305e"
     },
     "classnames/classnames.d.ts": {
       "commit": "dc6d1ebfaa554e85b91846574728930972ca9868"

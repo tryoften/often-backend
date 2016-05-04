@@ -9,22 +9,44 @@ interface AuthData {
 	userData: UserAttributes;
 }
 
+interface EmailPassword {
+	email: string;
+	password: string;
+}
+
 export default class Authenticator extends React.Component<{}, {}> {
 
 	static rootRef = new Firebase(FirebaseConfig.BaseURL);
 
-	static authWithProvider(provider: string) {
-		return new Promise((resolve, reject) => {
-			this.rootRef.authWithOAuthPopup(provider, (err, user) => {
+	static authWithProvider(provider: string): Promise<any> {
+		let authPromise = new Promise((resolve, reject) => {
+			this.rootRef.authWithOAuthPopup(provider, (err, authData) => {
 				if (err) {
 					reject(err);
 				}
 
-				if (user) {
-					resolve(user);
+				if (authData) {
+					resolve(authData);
 				}
 			});
 		});
+		return authPromise.then(() => { return this.getAndSetUserAuthData(); });
+	}
+
+	static authWithPassword(emailPassword: EmailPassword): Promise<any> {
+		let authPromise = new Promise((resolve, reject) => {
+			this.rootRef.authWithPassword(emailPassword, (err, authData) => {
+				if (err) {
+					reject(err);
+				}
+
+				if (authData) {
+					resolve(authData);
+				}
+			});
+		});
+
+		return authPromise.then(() => { return this.getAndSetUserAuthData(); });
 	}
 
 	static getAuthorizedUser() {
@@ -70,17 +92,8 @@ export default class Authenticator extends React.Component<{}, {}> {
 	}
 
 
-	static authenticateAndAuthorizeUser(provider?: string) {
-
-		let authenticationPromise;
-		if (provider) {
-			authenticationPromise = this.authWithProvider(provider);
-		}
-
-		return authenticationPromise
-			.then(() => {
-				return this.getUserAuthData();
-			})
+	static getAndSetUserAuthData() {
+		return this.getUserAuthData()
 			.then((userAuthData: AuthData) => {
 				this.setUserAuthData(userAuthData);
 			});
