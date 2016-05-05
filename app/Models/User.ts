@@ -22,11 +22,6 @@ class User extends BaseModel {
 		super(attributes, options);
 	}
 
-	static fromString (userString: string): User {
-		let attributes = JSON.parse(userString);
-		return new User(attributes);
-	}
-
 	defaults(): Backbone.ObjectHash {
 		return {
 			type: BaseModelType.user

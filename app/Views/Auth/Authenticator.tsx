@@ -16,9 +16,14 @@ interface EmailPassword {
 
 export default class Authenticator extends React.Component<{}, {}> {
 
-	static rootRef = new Firebase(FirebaseConfig.BaseURL);
+	private static rootRef = new Firebase(FirebaseConfig.BaseURL);
 
-	static authWithProvider(provider: string): Promise<any> {
+	/**
+	 * Checks user authentication with a provider and updates local cache with auth data
+	 * @param {string} provider - Name of a provider (i.e. facebook, twitter, etc.)
+	 * @returns {Promise<TResult>} - Promise that resolves to nothing, when auth process completes
+	 */
+	public static authWithProvider(provider: string): Promise<void> {
 		let authPromise = new Promise((resolve, reject) => {
 			this.rootRef.authWithOAuthPopup(provider, (err, authData) => {
 				if (err) {
@@ -33,7 +38,12 @@ export default class Authenticator extends React.Component<{}, {}> {
 		return authPromise.then(() => { return this.getAndSetUserAuthData(); });
 	}
 
-	static authWithPassword(emailPassword: EmailPassword): Promise<any> {
+	/**
+	 * Checks user authentication with email and password and updates local cache with auth data
+	 * @param {string} emailPassword - Object containing user email and password
+	 * @returns {Promise<TResult>} - Promise that resolves to nothing, when auth process completes
+	 */
+	public static authWithPassword(emailPassword: EmailPassword): Promise<void> {
 		let authPromise = new Promise((resolve, reject) => {
 			this.rootRef.authWithPassword(emailPassword, (err, authData) => {
 				if (err) {
@@ -49,21 +59,39 @@ export default class Authenticator extends React.Component<{}, {}> {
 		return authPromise.then(() => { return this.getAndSetUserAuthData(); });
 	}
 
-	static getAuthorizedUser() {
-		return User.fromString(localStorage.getItem('userData'));
+
+	/**
+	 * Factory method for instantiating an authenticated user instance with localStorage data
+	 * @returns {User} - Returns an authenticated user object
+	 */
+	public static getAuthorizedUser() {
+		let stringProps = localStorage.getItem('userData');
+		let userAttributes = JSON.parse(stringProps);
+		return new User(userAttributes);
 	}
 
-	static deauthorize() {
+	/**
+	 * Deauthenticates the user from firebase, and also clears local storage cache with user data.
+	 */
+	public static deauthorize() {
 		this.rootRef.unauth();
 		localStorage.removeItem('token');
 		localStorage.removeItem('userData');
 	}
 
-	static isAuthorized() {
+	/**
+	 * Checks whether the client is authenticated
+	 * @returns {boolean} - True for authenticated, false otherwise
+	 */
+	public static isAuthorized() {
 		return !!localStorage.getItem('token');
 	}
 
-	static getUserAuthData(): Promise<AuthData> {
+	/**
+	 * Retrieves user authentication data from firebase, checks for administration privileges and returns token and user data
+	 * @returns {Promise<AuthData>} - Returns authentication token and data pertaining to user.
+	 */
+	private static getUserAuthData(): Promise<AuthData> {
 		let user = this.rootRef.getAuth();
 
 		let userObj = new User({id: user.uid});
@@ -86,16 +114,23 @@ export default class Authenticator extends React.Component<{}, {}> {
 		});
 	}
 
-	static setUserAuthData(authData: AuthData): void {
+	/**
+	 * Sets the user and authentication data on localStorage
+	 * @param authData - Object containing authentication token and data pertaining to user.
+	 */
+	private static setUserAuthData(authData: AuthData): void {
 		localStorage.setItem('token', authData.token);
 		localStorage.setItem('userData', authData.userData.toString());
 	}
 
-
-	static getAndSetUserAuthData() {
+	/**
+	 * Helper method for chaining retrieval and setting of authentication data
+	 * @returns {Promise<void>} - Returns a promise that resolves to void.
+	 */
+	private static getAndSetUserAuthData(): Promise<void> {
 		return this.getUserAuthData()
 			.then((userAuthData: AuthData) => {
-				this.setUserAuthData(userAuthData);
+				return this.setUserAuthData(userAuthData);
 			});
 	}
 
