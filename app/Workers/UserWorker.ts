@@ -125,6 +125,12 @@ class UserWorker extends Worker {
 			switch (data.operation) {
 				case UserPackOperation.add:
 					pack.addItem(syncedMediaItem);
+
+					if (data.packType === UserPackType.recent) {
+						let count = user.shareCount + 1;
+						user.save({shareCount: count});
+					}
+
 					return `Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`;
 
 				case UserPackOperation.remove:

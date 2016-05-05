@@ -24,7 +24,8 @@ class User extends BaseModel {
 
 	defaults(): Backbone.ObjectHash {
 		return {
-			type: BaseModelType.user
+			type: BaseModelType.user,
+			shareCount: 0
 		};
 	}
 
@@ -56,6 +57,11 @@ class User extends BaseModel {
 	get isAdmin() {
 		return this.get('isAdmin');
 	}
+
+	get shareCount(): number {
+		return this.get('shareCount') || 0;
+	}
+
 	/**
 	 * Initializes a favorites pack
 	 * @returns {Promise<string>} - Promise resolving to a pack id or an error.
@@ -68,6 +74,7 @@ class User extends BaseModel {
 			type: MediaItemType.pack,
 			source: MediaItemSource.Often,
 			setObjectMap: true,
+			shareCount: 0,
 			premium: false,
 			price: 0.0,
 			image: {
