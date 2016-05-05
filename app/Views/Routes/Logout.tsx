@@ -12,9 +12,12 @@ export default class Logout extends React.Component<LogoutProps, LogoutState> {
 		super(props);
 
 		this.redirectToLogin =  this.redirectToLogin.bind(this);
+		this.state = {};
+	}
+
+	componentWillMount() {
 		Authenticator.deauthorize();
 		this.redirectToLogin();
-		this.state = {};
 	}
 
 	redirectToLogin() {
