@@ -32,6 +32,7 @@ export interface PackAttributes extends MediaItemAttributes {
 	items_count?: number;
 	isFavorites?: boolean;
 	isRecents?: boolean;
+	shareCount?: number;
 }
 
 export interface PackIndexableObject extends PackAttributes {}

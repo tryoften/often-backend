@@ -29,6 +29,9 @@ export default class SidebarComponent extends React.Component<{}, {}> {
 						<LinkContainer to="/featured">
 							<NavItem eventKey="featured">Featured</NavItem>
 						</LinkContainer>
+						<LinkContainer to="/logout">
+							<NavItem eventKey="logout">Logout</NavItem>
+						</LinkContainer>
 					</Nav>
 				</div>
 

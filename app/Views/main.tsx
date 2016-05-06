@@ -12,10 +12,23 @@ import CategoryItem from './Routes/CategoryItem';
 import Owners from './Routes/OwnersRoute';
 import OwnerItem from './Routes/OwnerItem';
 import Featured from './Routes/FeaturedRoute';
+import Login from './Routes/Login';
+import Logout from './Routes/Logout';
+import Authenticator from '../Models/Authenticator';
+
+function requireAuth(nextState, replace) {
+	if (!Authenticator.isAuthorized()) {
+		replace({
+			pathname: '/login',
+			state: { nextPathname: nextState.location.pathname }
+		});
+	}
+}
 
 render((
 	<Router history={browserHistory}>
-		<Route path='/' component={Home}>
+		<Route path="/login" component={Login} />
+		<Route path='/' component={Home} onEnter={requireAuth}>
 			<IndexRedirect to="/packs" />
 			<Route path='/packs' component={Packs}>
 				<Route path="/pack(/:packId)" component={PackItem} />
@@ -27,6 +40,7 @@ render((
 				<Route path="/owner(/:ownerId)" component={OwnerItem} />
 			</Route>
 			<Route path="/featured" component={Featured} />
+			<Route path="/logout" component={Logout} />
 		</Route>
 	</Router>
 ), document.getElementById('app-container'));

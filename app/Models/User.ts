@@ -7,6 +7,11 @@ import MediaItemType from './MediaItemType';
 import BaseModelType from './BaseModelType';
 import MediaItemSource from "./MediaItemSource";
 
+export interface UserAttributes {
+	firstName: string;
+	isAdmin: boolean;
+}
+
 /**
  * This class is responsible for providing granular functionalities (mostly accessors) for users.
  */
@@ -49,6 +54,10 @@ class User extends BaseModel {
 		return this.get('recentsPackId');
 	}
 
+	get isAdmin() {
+		return this.get('isAdmin');
+	}
+
 	get shareCount(): number {
 		return this.get('shareCount') || 0;
 	}
@@ -89,6 +98,13 @@ class User extends BaseModel {
 				resolve(this.favoritesPackId);
 			}
 		});
+	}
+
+	getTargetObjectProperties(): UserAttributes {
+		return {
+			firstName: this.firstName || "",
+			isAdmin: !!this.isAdmin
+		};
 	}
 
 	/**
