@@ -34,7 +34,7 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 
 	render() {
 		let packComponents = this.state.packs
-			.filter(pack => (pack.isFavorites || pack.isRecents) && !pack.deleted) //!pack.isFavorites && !pack.isRecents && !pack.deleted
+			.filter(pack => !pack.isFavorites && !pack.isRecents && !pack.deleted)
 			.map(pack => {
 				return (
 					<Link key={pack.id} to={`/pack/${pack.id}`}>
