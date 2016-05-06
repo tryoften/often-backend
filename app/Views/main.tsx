@@ -14,7 +14,7 @@ import OwnerItem from './Routes/OwnerItem';
 import Featured from './Routes/FeaturedRoute';
 import Login from './Routes/Login';
 import Logout from './Routes/Logout';
-import Authenticator from './Auth/Authenticator';
+import Authenticator from '../Models/Authenticator';
 
 function requireAuth(nextState, replace) {
 	if (!Authenticator.isAuthorized()) {

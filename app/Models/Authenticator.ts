@@ -1,7 +1,6 @@
-import * as React from 'react';
 import * as Firebase from 'firebase';
-import {firebase as FirebaseConfig } from '../../config';
-import User, {UserAttributes} from '../../Models/User';
+import {firebase as FirebaseConfig } from '../config';
+import User, {UserAttributes} from '../Models/User';
 
 
 interface AuthData {
@@ -14,7 +13,7 @@ interface EmailPassword {
 	password: string;
 }
 
-export default class Authenticator extends React.Component<{}, {}> {
+export default class Authenticator {
 
 	private static rootRef = new Firebase(FirebaseConfig.BaseURL);
 
@@ -134,13 +133,5 @@ export default class Authenticator extends React.Component<{}, {}> {
 			});
 	}
 
-
-	render() {
-		return (
-			<h1>
-				Authenticator
-			</h1>
-		);
-	}
 }
 

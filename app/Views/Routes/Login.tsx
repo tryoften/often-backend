@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { browserHistory } from 'react-router';
 import { Button, Alert, Col} from 'react-bootstrap';
-import Authenticator from '../Auth/Authenticator';
+import Authenticator from '../../Models/Authenticator';
 
 
 // TODO(jakub): Create proper typings for these
@@ -79,8 +79,8 @@ export default class Login extends React.Component<LoginProps, LoginState> {
 		e.preventDefault();
 		let provider = e.target.target;
 		Authenticator.authWithProvider(provider)
-			.then(() => { this.setAuthState(); })
-			.catch( err => { this.unsetAuthState(err.message); });
+			.then(() => this.setAuthState())
+			.catch( err => this.unsetAuthState(err.message));
 	}
 
 	onEmailFormSubmit (e: any) {
@@ -89,8 +89,8 @@ export default class Login extends React.Component<LoginProps, LoginState> {
 			email: this.state.email,
 			password: this.state.password
 		})
-			.then(() => { this.setAuthState(); })
-			.catch( err => { this.unsetAuthState(err.message); });
+			.then(() => this.setAuthState())
+			.catch( err => this.unsetAuthState(err.message));
 	}
 
 	handlePropChange(e: any) {
