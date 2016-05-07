@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { browserHistory } from 'react-router';
-import { Button, Alert, Col} from 'react-bootstrap';
+import { Button, Alert, Grid, Row, Col} from 'react-bootstrap';
 import Authenticator from '../../Models/Authenticator';
 
 
@@ -109,67 +109,88 @@ export default class Login extends React.Component<LoginProps, LoginState> {
 			}
 		};
 
-		let thirdPartyLogin = thirdPartyLogins.map(provider => {
-			return (
-				<Button
-					bsStyle={provider.style}
-					target={provider.key}
-					key={provider.key}
-					onClick={this.onThirdPartyProviderClick}
-				>
-					{provider.label}
-				</Button>
-			);
-		});
-
-		let emailLoginForm = (
-			<Form horizontal>
-				<FormGroup>
-					<Col componentClass={ControlLabel} sm={2}>
-						Email
-					</Col>
-					<Col sm={10}>
-						<FormControl
-							id="email"
-							type="email"
-							placeholder="E-mail"
-							onChange={this.handlePropChange}
-						/>
-					</Col>
-				</FormGroup>
-
-				<FormGroup>
-					<Col componentClass={ControlLabel} sm={2}>
-						Password
-					</Col>
-					<Col sm={10}>
-						<FormControl
-							id="password"
-							type="password"
-							placeholder="Password"
-							onChange={this.handlePropChange}
-						/>
-					</Col>
-				</FormGroup>
-
-				<FormGroup>
-					<Col smOffset={2} sm={10}>
+		let thirdPartyLogin = (
+			<Grid fluid>
+				<Row>
+					<Col md={6} className="column-left-tilt">
 						<Button
-							type="submit"
-							onClick={this.onEmailFormSubmit}
-						>
-							Log In
+							className="twitter-button"
+							bsStyle="primary"
+							target="twitter"
+							key="twitter"
+							onClick={this.onThirdPartyProviderClick}
+							block>
+							Twitter
 						</Button>
 					</Col>
+					<Col md={6} className="column-right-tilt">
+						<Button
+							className="facebook-button"
+							bsStyle="primary"
+							target="facebook"
+							key="facebook"
+							onClick={this.onThirdPartyProviderClick}
+							block>
+							Facebook
+						</Button>
+					</Col>
+				</Row>
+			</Grid>
+		);
+
+		let separator = (
+			<Grid fluid>
+				<Row className="separator-container">
+					<Col md={4} className="separator-rectangle" />
+					<Col md={4} className="separator-text">Or Login With</Col>
+					<Col md={4} className="separator-rectangle" />
+				</Row>
+			</Grid>
+		);
+
+
+		let emailLoginForm = (
+			<Form>
+				<FormGroup>
+					<ControlLabel>Email Address</ControlLabel>
+					<FormControl
+						type="email"
+						placeholder="E-mail"
+						onChange={this.handlePropChange}/>
 				</FormGroup>
+
+				<FormGroup>
+					<ControlLabel> Password</ControlLabel>
+					<FormControl
+						type="password"
+						placeholder="Password"
+						onChange={this.handlePropChange}/>
+				</FormGroup>
+
+				<Button
+					className="login-button"
+					type="submit"
+					onClick={this.onEmailFormSubmit}
+					block>
+						login
+				</Button>
 			</Form>
 		);
 
 		return(
-			<div>
-				{emailLoginForm}
-				{thirdPartyLogin}
-				{errorBox()}
+			<div className="login-panel">
+				<div className="panel-container">
+					<div className="panel-header">
+						<div className="icon"><img src="/img/fav.png"/></div>
+						<h2 className="title">Welcome back!</h2>
+					</div>
+					<div className="panel-content container-fluid">
+							{emailLoginForm}
+							{separator}
+							{thirdPartyLogin}
+							{errorBox()}
+					</div>
+				</div>
 			</div>
 		);
 
