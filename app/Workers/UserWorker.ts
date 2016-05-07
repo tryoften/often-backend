@@ -48,12 +48,10 @@ interface UserWorkerTask extends Task {
 
 /* Adding / Removing Items from favorites and recents  */
 class UserWorker extends Worker {
-
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.user);
 		super(options);
 	}
-
 
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
 		let user = new User({id: task.userId});
