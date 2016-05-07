@@ -185,10 +185,10 @@ export default class Login extends React.Component<LoginProps, LoginState> {
 						<h2 className="title">Welcome back!</h2>
 					</div>
 					<div className="panel-content container-fluid">
+							{errorBox()}
 							{emailLoginForm}
 							{separator}
 							{thirdPartyLogin}
-							{errorBox()}
 					</div>
 				</div>
 			</div>

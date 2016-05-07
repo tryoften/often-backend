@@ -1,9 +1,24 @@
 import { Row, Col, Grid, ProgressBar, Nav, NavItem } from 'react-bootstrap';
 import * as React from 'react';
 import { Link } from 'react-router';
+import Authenticator from '../../Models/Authenticator';
 import { LinkContainer } from 'react-router-bootstrap';
+import User from '../../Models/User';
 
-export default class SidebarComponent extends React.Component<{}, {}> {
+
+interface SidebarComponentState extends React.Props<SidebarComponent> {
+	user?: User;
+}
+
+export default class SidebarComponent extends React.Component<{}, SidebarComponentState> {
+	constructor() {
+		super();
+
+		this.state = {
+			user: Authenticator.getAuthorizedUser()
+		};
+	}
+
 	onNavChange(selectedKey) {
 		console.log(selectedKey);
 	}
@@ -29,26 +44,15 @@ export default class SidebarComponent extends React.Component<{}, {}> {
 						<LinkContainer to="/featured">
 							<NavItem eventKey="featured">Featured</NavItem>
 						</LinkContainer>
-						<LinkContainer to="/logout">
-							<NavItem eventKey="logout">Logout</NavItem>
-						</LinkContainer>
 					</Nav>
 				</div>
 
-				<div id='avatar'>
-					<Grid>
-						<Row className='fg-white'>
-							<Col xs={4} collapseRight>
-							</Col>
-							<Col xs={8} collapseLeft id='avatar-col'>
-								<div style={{top: 23, fontSize: 16, lineHeight: 1, position: 'relative'}}>Anna Sanchez</div>
-								<div>
-									<ProgressBar id='demo-progress' value={30} min={0} max={100} color='#ffffff'/>
-									<Link to='/app/lock'></Link>
-								</div>
-							</Col>
-						</Row>
-					</Grid>
+				<div className='avatar'>
+					<div className='profile-image' style={{backgroundImage: `url(${this.state.user.get('profileImageLarge')})`}}></div>
+					<div className='name'>{this.state.user.get('name')}</div>
+					<div className='logout'>
+						<Link to='/logout'>Logout</Link>
+					</div>
 				</div>
 			</div>
 		);
