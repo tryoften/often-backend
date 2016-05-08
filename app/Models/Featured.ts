@@ -35,7 +35,7 @@ export default class Featured extends BaseModel {
 	}
 
 	get url(): Firebase {
-		return new Firebase(`${FirebaseConfig.BaseURL}/featured/${this.type}`);
+		return new Firebase(`${FirebaseConfig.BaseURL}/featured/${this.type}s/0`);
 	}
 
 	defaults(): Backbone.ObjectHash {
