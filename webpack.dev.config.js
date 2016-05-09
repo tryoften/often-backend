@@ -39,7 +39,7 @@ var devConfigExtension = {
 			},
 			{ test: /\.css$/, exclude: /\.import\.css$/,  loader: "style!css", include: path.resolve(__dirname, "client") },
 			{ test: /\.import\.css$/,  loader: "style!css", include: path.resolve(__dirname, "client") },
-			{ test: /\.less$/, exclude: /\.woff2$/, loader: "style!css!less?{'sourceMap':'/css/index.css.map'}", include: path.resolve(__dirname, "client") },
+			{ test: /\.less$/, exclude: /\.woff2$/, loader: "style!css!less", include: path.resolve(__dirname, "client") },
 			{ test: /\.module\.less$/, loader: "style!css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!less", include: path.resolve(__dirname, "client") },
 			{ test: /\.(jpg|png|jpg|png|woff|eot|ttf|svg|gif)$/, loader: "file-loader?name=[name].[ext]" }
 		]
