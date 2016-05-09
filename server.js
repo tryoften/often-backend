@@ -3,6 +3,8 @@ var path = require('path');
 
 var app = express();
 
+app.use('/img/', express.static('client/img'));
+
 app.get('/js/vendors.js', (req, res) => {
 	res.sendFile(path.join(__dirname, 'client/js/vendors.js'));
 });
