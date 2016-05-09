@@ -8,8 +8,13 @@ import BaseModelType from './BaseModelType';
 import MediaItemSource from "./MediaItemSource";
 
 export interface UserAttributes {
+	name?: string;
 	firstName: string;
 	isAdmin: boolean;
+	image: {
+		small_url: string;
+		large_url: string;
+	};
 }
 
 /**
@@ -25,7 +30,11 @@ class User extends BaseModel {
 	defaults(): Backbone.ObjectHash {
 		return {
 			type: BaseModelType.user,
-			shareCount: 0
+			shareCount: 0,
+			image: {
+				small_url: 'http://placehold.it/200x200',
+				large_url: 'http://placehold.it/400x400'
+			}
 		};
 	}
 
@@ -102,8 +111,10 @@ class User extends BaseModel {
 
 	getTargetObjectProperties(): UserAttributes {
 		return {
+			name: this.get('name'),
 			firstName: this.firstName || "",
-			isAdmin: !!this.isAdmin
+			isAdmin: !!this.isAdmin,
+			image: this.get('image')
 		};
 	}
 

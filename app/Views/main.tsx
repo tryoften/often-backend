@@ -11,6 +11,8 @@ import PackItem from './Routes/PackItem';
 import CategoryItem from './Routes/CategoryItem';
 import Owners from './Routes/OwnersRoute';
 import OwnerItem from './Routes/OwnerItem';
+import Users from './Routes/UsersRoute';
+import UserItem from './Routes/UserItem';
 import Featured from './Routes/FeaturedRoute';
 import Login from './Routes/Login';
 import Logout from './Routes/Logout';
@@ -38,6 +40,9 @@ render((
 			</Route>
 			<Route path="/owners" component={Owners}>
 				<Route path="/owner(/:ownerId)" component={OwnerItem} />
+			</Route>
+			<Route path="/users" component={Users}>
+				<Route path="/user(/:userId)" component={UserItem} />
 			</Route>
 			<Route path="/featured" component={Featured} />
 			<Route path="/logout" component={Logout} />

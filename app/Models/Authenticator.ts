@@ -106,7 +106,7 @@ export default class Authenticator {
 
 			return {
 				token: user.token,
-				userData: userObj.getTargetObjectProperties()
+				userData: userObj.toJSON()
 			};
 
 
@@ -119,7 +119,7 @@ export default class Authenticator {
 	 */
 	private static setUserAuthData(authData: AuthData): void {
 		localStorage.setItem('token', authData.token);
-		localStorage.setItem('userData', authData.userData.toString());
+		localStorage.setItem('userData', JSON.stringify(authData.userData));
 	}
 
 	/**
