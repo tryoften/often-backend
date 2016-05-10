@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, Tabs, Tab, Button, Input } from 'react-bootstrap';
+import { Modal, Tabs, Tab, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import SearchPanel from '../Components/SearchPanel';
 import Owners from '../../Collections/Owners';
 import Owner from "../../Models/Owner";
@@ -9,6 +9,7 @@ import {IndexableObject} from "../../Interfaces/Indexable";
 interface AddItemToPackModalProps extends React.Props<AddItemToPackModal> {
 	show: boolean;
 	onSelectItem: (item: IndexableObject) => void;
+	onSaveChanges: (e: any) => void;
 }
 
 interface AddItemToPackModalState {
@@ -32,6 +33,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 		this.onSelectOwnerChange = this.onSelectOwnerChange.bind(this);
 		this.updateStateWithModel = this.updateStateWithModel.bind(this);
+		this.onSaveChanges = this.onSaveChanges.bind(this);
 		this.owners.on('update', this.updateStateWithModel);
 	}
 
@@ -65,9 +67,11 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	onSelectItem(item: IndexableObject) {
 		this.props.onSelectItem(item);
-		this.setState({
-			showModal: false
-		});
+	}
+
+	onSaveChanges(e: any) {
+		this.setState({showModal: false});
+		this.props.onSaveChanges(e);
 	}
 
 	close() {
@@ -76,7 +80,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	render() {
 		let ownersSelector = this.owners.models.map(model => {
-			return <option key={model.id} value={model.id}>{model.get('name')}</option>;
+			return <MenuItem key={model.id} value={model.id}>{model.get('name')}</MenuItem>;
 		});
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes') || []).map(key => {
@@ -89,18 +93,21 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 			return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
 		}) : "";
 
+		let ownerName = this.state.selectedOwner ? this.state.selectedOwner.get('name') : '';
+
 		return (
 			<Modal show={this.state.showModal} onHide={this.close.bind(this)} bsSize="large">
 				<Modal.Body>
-					<Tabs>
+					<Tabs id="uncontrolled-modal-tab">
 						<Tab eventKey={0} title="Add New Quote">
 							<div className="container-fluid">
-								<Input
-									type="select"
+								<DropdownButton
+									id="owner-dropdown"
+									title={ownerName}
 									label="Select Owner"
 									onChange={this.onSelectOwnerChange}>
 									{ownersSelector}
-								</Input>
+								</DropdownButton>
 								<div className="media-item-group">
 									<div className="items">{gifs}</div>
 									<div className="items">{ownerQuotes}</div>
@@ -114,7 +121,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 				</Modal.Body>
 				<Modal.Footer>
 					<Button onClick={this.close.bind(this)}>Close</Button>
-					<Button bsStyle="primary">Save changes</Button>
+					<Button onClick={this.onSaveChanges} bsStyle="primary">Save changes</Button>
 				</Modal.Footer>
 			</Modal>
 		);

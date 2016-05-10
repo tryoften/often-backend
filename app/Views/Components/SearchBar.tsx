@@ -1,6 +1,10 @@
 import * as React from 'react';
-import { Input } from 'react-bootstrap';
 import Element = JSX.Element;
+
+var Form = require('react-bootstrap/lib/Form');
+var FormGroup = require('react-bootstrap/lib/FormGroup');
+var FormControl = require('react-bootstrap/lib/FormControl');
+var ControlLabel = require('react-bootstrap/lib/ControlLabel');
 
 export interface SearchBarProps {
 	onChange: Function;
@@ -30,16 +34,17 @@ export default class SearchBar extends React.Component<SearchBarProps, SearchBar
 
 	render(): Element {
 		return (
-			<form className="searchBox" onSubmit={this.handleSubmit}>
-				<Input
-					type="text"
-					label="Search"
-					bsSize="normal"
-					placeholder="Search for lyrics, songs, artists or packs..."
-					value={this.state.query}
-					onChange={this.handleTextInputChange.bind(this)}
-				/>
-			</form>
+			<Form>
+				<FormGroup>
+					<ControlLabel>Search</ControlLabel>
+					<FormControl
+						type="text"
+						placeholder="Search for lyrics, songs, artists or packs..."
+						bsSize="normal"
+						value={this.state.query}
+						onChange={this.handleTextInputChange.bind(this)}/>
+				</FormGroup>
+			</Form>
 		);
 	}
 }

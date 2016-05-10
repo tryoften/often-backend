@@ -13,7 +13,7 @@ export interface OwnerAttributes extends MediaItemAttributes {
 }
 
 export default class Owner extends MediaItem {
-	constructor (attributes?: any, options?: any) {
+	constructor (attributes: any = {}, options: any = {}) {
 		attributes.type = MediaItemType.owner;
 		super(attributes, options);
 	}
