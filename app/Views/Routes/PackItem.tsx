@@ -9,6 +9,7 @@ import * as objectPath from 'object-path';
 import DeleteButton from '../Components/DeleteButton';
 import CategoryAssignmentList from '../Components/CategoryAssignmentList';
 var ReactPaginate = require('react-paginate');
+
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
 		packId: string;
@@ -26,7 +27,6 @@ export interface IndexRange {
 	start: number;
 	end: number;
 }
-
 
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
@@ -79,11 +79,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		this.togglePublish = this.togglePublish.bind(this);
 		this.onDelete = this.onDelete.bind(this);
-		this.calculateNumberOfPages = this.calculateNumberOfPages.bind(this);
-		this.getIndexRange = this.getIndexRange.bind(this);
+		//this.calculateNumberOfPages = this.calculateNumberOfPages.bind(this);
+		//this.getIndexRange = this.getIndexRange.bind(this);
 		this.handlePageClick = this.handlePageClick.bind(this);
 		this.getIndexRange = this.getIndexRange.bind(this);
-		this.onDropDownSelect = this.onDropDownSelect.bind(this);
+		this.onPageSizeChange = this.onPageSizeChange.bind(this);
 
 
 		pack.on('update', this.updateStateWithPack);
@@ -96,13 +96,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	calculateNumberOfPages(numItems: number, numItemsPerPage: number) {
-		var pageNum = Math.floor(numItems / numItemsPerPage);
-		return (numItems % numItemsPerPage) ? pageNum + 1 : pageNum;
-	}
-
 	updateStateWithPack(pack: Pack) {
-
 		let currentPagination = this.state.pagination;
 
 		this.setState({
@@ -144,11 +138,12 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		let items: IndexablePackItem[] = this.state.model.get('items');
 		items.push(item);
 
-		this.state.model.save({items, items_count: items.length});
+		let model = this.state.model;
+		model.save({items, items_count: items.length});
 
 		this.setState({
-			model: this.state.model,
-			form: this.state.model.toJSON(),
+			model: model,
+			form: model.toJSON(),
 			shouldShowSearchPanel: false
 		});
 	}
@@ -205,13 +200,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.context.router.push('/packs');
 	}
 
-	getIndexRange(pageIndex: number, numItemsPerPage: number) {
-		let start = (pageIndex) * numItemsPerPage;
-		return {
-			start: start,
-			end: start + numItemsPerPage - 1
-		};
-	}
 	handlePageClick(e) {
 		let currentPagination = this.state.pagination;
 		this.setState({
@@ -222,19 +210,32 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	onDropDownSelect(e: Event, eventKey: number) {
+	calculateNumberOfPages(numItems: number, numItemsPerPage: number) {
+		var pageNum = Math.floor(numItems / numItemsPerPage);
+		return (numItems % numItemsPerPage) ? pageNum + 1 : pageNum;
+	}
+
+	getIndexRange(pageIndex: number, numItemsPerPage: number) {
+		let start = (pageIndex) * numItemsPerPage;
+		return {
+			start: start,
+			end: start + numItemsPerPage - 1
+		};
+	}
+
+	onPageSizeChange(numItems: number, e: Event) {
 		let currentPagination = this.state.pagination;
+
 		this.setState({
 			pagination: _.extend(currentPagination, {
-				numItemsPerPage: eventKey,
-				numPages: this.calculateNumberOfPages(this.state.model.items.length, eventKey),
-				indexRange: this.getIndexRange(currentPagination.activePage, eventKey)
+				numItemsPerPage: numItems,
+				numPages: this.calculateNumberOfPages(this.state.model.items.length, numItems),
+				indexRange: this.getIndexRange(currentPagination.activePage, numItems)
 			})
 		});
 	}
 
 	render() {
-
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
 		let menuItems = perPageDefaults.map((pageDefault) => {
@@ -242,20 +243,21 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 
 		let numItemsPerPageToggle = (
-			<div>
-				Results Per Page:
+			<div className="page-size-select">
 				<ButtonToolbar>
 					<DropdownButton
 						title={this.state.pagination.numItemsPerPage}
 						id="dropdown-size-medium"
-						onSelect={this.onDropDownSelect}
+						onSelect={this.onPageSizeChange}
 						key="dropdown-size-medium"
-					>
+						dropup>
 						{menuItems}
 					</DropdownButton>
 				</ButtonToolbar>
 			</div>
 		);
+
+		console.log('pagination', this.state.pagination);
 
 		return (
 			<div className={classes}>
@@ -373,26 +375,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<Row>
 								<div className="media-item-group">
 									<h3>Items</h3>
-									<ReactPaginate
-										pageNum={this.state.pagination.numPages}
-										pageRangeDisplayed={5}
-										marginPagesDisplayed={1}
-										containerClassName={"pagination"}
-										subContainerClassName={"pages pagination"}
-										activeClassName={"active"}
-										previousLabel={"previous"}
-										nextLabel={"next"}
-										clickCallback={this.handlePageClick}
-									/>
-									{numItemsPerPageToggle}
 									<div className="items">
 										<CategoryAssignmentList
 											pack={this.state.model}
-											indexRange={this.state.pagination.indexRange}
-										/>
-										<div className="add-item pull-left" onClick={this.onClickAddItem}>
-											<span className="text"><Glyphicon glyph="plus-sign" /> Add Item</span>
-										</div>
+											indexRange={this.state.pagination.indexRange} />
 									</div>
 								</div>
 							</Row>
@@ -402,6 +388,22 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 						</Col>
 					</Row>
 				</Grid>
+
+				<div className="footer fixed">
+					<ReactPaginate
+						pageNum={this.state.pagination.numPages}
+						pageRangeDisplayed={5}
+						marginPagesDisplayed={1}
+						containerClassName={"pagination"}
+						subContainerClassName={"pages pagination"}
+						breakLabel={<a href="">...</a>}
+						activeClassName={"active"}
+						previousLabel={"previous"}
+						nextLabel={"next"}
+						clickCallback={this.handlePageClick}
+					/>
+					{numItemsPerPageToggle}
+				</div>
 			</div>
 		);
 	}
