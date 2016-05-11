@@ -13,15 +13,15 @@ import MediaItemType from '../../Models/MediaItemType';
 
 interface AddItemToPackModalProps extends React.Props<AddItemToPackModal> {
 	show: boolean;
-	form?: PackAttributes;
-	model?: Pack;
+	packItems?: IndexablePackItem[];
+	onUpdatePackItems?: (selectedItems: IndexablePackItem[]) => void;
 }
 
 interface AddItemToPackModalState {
 	showModal?: boolean;
 	owners?: Owners;
 	selectedOwner?: Owner;
-	form?: PackAttributes;
+	selectedItems?: IndexablePackItem[];
 }
 
 export default class AddItemToPackModal extends React.Component<AddItemToPackModalProps, AddItemToPackModalState> {
@@ -33,7 +33,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 		this.owners = new Owners();
 
 		this.state = {
-			form: props.form,
+			selectedItems: props.packItems || [],
 			showModal: props.show,
 			owners: this.owners
 		};
@@ -74,38 +74,28 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 	}
 
 	onSelectItem(item: IndexablePackItem) {
-		let currentForm = this.state.form;
-		let formItems: IndexablePackItem[] = currentForm.items;
-		let formItemIndex = _.findIndex(formItems, (formItem) => {
+		let selectedItems: IndexablePackItem[] = this.state.selectedItems;
+		let formItemIndex = _.findIndex(selectedItems, (formItem) => {
 			return (formItem.id === item.id);
 		});
 		if (formItemIndex > -1) {
 			/* Item already selected, so unselect it from the list */
-			delete formItems[formItemIndex];
-			formItems = _.compact(formItems);
+			selectedItems.splice(formItemIndex, 1);
 		} else {
 			/* Item not selected, so add it to the list */
-			formItems.push(item);
+			selectedItems.push(item);
 		}
 
-		currentForm.items = formItems;
-		currentForm.items_count = formItems.length;
-
 		this.setState({
-			form: currentForm
+			selectedItems: selectedItems
 		});
 	}
 
 
 	onSaveChanges(e) {
 		e.preventDefault();
-
-		let model = this.props.model;
-		let form = this.state.form;
-		model.save(form);
-
+		this.props.onUpdatePackItems(this.state.selectedItems);
 		this.setState({showModal: false});
-
 	}
 
 	close() {
@@ -119,31 +109,38 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes') || []).map(key => {
 			let quote = this.state.selectedOwner.get('quotes')[key];
-			let foundQuote = _.findWhere(this.state.form.items, {
+			let foundQuote = _.findWhere(this.state.selectedItems, {
 				id: quote.id,
 				type: MediaItemType.quote
 			});
 			if (!!foundQuote) {
-				return (<div className="media-item-selected">
+				return (<div className="media-item-selector selected" key={key}>
 					<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />
 				</div>);
+			} else {
+				return (<div className="media-item-selector unselected" key={key}>
+					<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />
+					</div>);
 			}
-			return (<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />);
 
 		}) : "";
 
 		let gifs =  this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('gifs') || []).map(key => {
 			let item = this.state.selectedOwner.get('gifs')[key];
-			let foundGif = _.findWhere(this.state.form.items, {
+			let foundGif = _.findWhere(this.state.selectedItems, {
 				id: item.id,
 				type: MediaItemType.gif
 			});
 			if (!!foundGif) {
-				return (<div className="media-item-selected">
+				return (<div className="media-item-selector selected">
 					<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />
 				</div>);
+			} else {
+				return (<div className="media-item-selector unselected">
+					return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
+				</div>);
 			}
-			return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
+
 		}) : "";
 
 		let ownerName = this.state.selectedOwner ? this.state.selectedOwner.get('name') : '';

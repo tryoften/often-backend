@@ -92,8 +92,9 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.handlePageClick = this.handlePageClick.bind(this);
 		this.getIndexRange = this.getIndexRange.bind(this);
 		this.onDropDownSelect = this.onDropDownSelect.bind(this);
-		this.onSelectItem = this.onSelectItem.bind(this);
+		this.onUpdatePackItems = this.onUpdatePackItems.bind(this);
 		this.handleUpdate = this.handleUpdate.bind(this);
+
 		pack.on('update', this.updateStateWithPack);
 		pack.syncData();
 	}
@@ -136,28 +137,16 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
+	onUpdatePackItems(packItems: IndexablePackItem[]) {
 
-
-	onSelectItem(item: IndexablePackItem) {
-		let currentForm = this.state.form;
-		let formItems: IndexablePackItem[] = currentForm.items;
-		let formItemIndex = _.findIndex(formItems, (formItem) => {
-			return (formItem.id === item.id);
+		let model = this.state.model;
+		model.save({
+			items: packItems
 		});
-		if (formItemIndex > -1) {
-			/* Item already selected, so unselect it from the list */
-			delete formItems[formItemIndex];
-			formItems = _.compact(formItems);
-		} else {
-			/* Item not selected, so add it to the list */
-			formItems.push(item);
-		}
-
-		currentForm.items = formItems;
-		currentForm.items_count = formItems.length;
-
 		this.setState({
-			form: currentForm
+			model: model,
+			form: model.toJSON(),
+			shouldShowSearchPanel: false
 		});
 	}
 
@@ -412,7 +401,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							</Row>
 						</Col>
 						<Col xs={6}>
-							<AddItemToPackModal show={this.state.shouldShowSearchPanel} form={this.state.form} model={this.state.model} />
+							<AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} />
 						</Col>
 					</Row>
 				</Grid>
