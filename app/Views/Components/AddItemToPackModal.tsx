@@ -1,21 +1,27 @@
 import * as React from 'react';
+import * as _ from 'underscore';
 import { Modal, Tabs, Tab, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import SearchPanel from '../Components/SearchPanel';
 import Owners from '../../Collections/Owners';
 import Owner from "../../Models/Owner";
 import MediaItemView from '../Components/MediaItemView';
 import {IndexableObject} from "../../Interfaces/Indexable";
+import {PackAttributes} from '../../Models/Pack';
+import Pack from '../../Models/Pack';
+import {IndexablePackItem} from '../../Models/Pack';
+import MediaItemType from '../../Models/MediaItemType';
 
 interface AddItemToPackModalProps extends React.Props<AddItemToPackModal> {
 	show: boolean;
-	onSelectItem: (item: IndexableObject) => void;
-	onSaveChanges: (e: any) => void;
+	form?: PackAttributes;
+	model?: Pack;
 }
 
 interface AddItemToPackModalState {
 	showModal?: boolean;
 	owners?: Owners;
 	selectedOwner?: Owner;
+	form?: PackAttributes;
 }
 
 export default class AddItemToPackModal extends React.Component<AddItemToPackModalProps, AddItemToPackModalState> {
@@ -27,6 +33,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 		this.owners = new Owners();
 
 		this.state = {
+			form: props.form,
 			showModal: props.show,
 			owners: this.owners
 		};
@@ -34,6 +41,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 		this.onSelectOwnerChange = this.onSelectOwnerChange.bind(this);
 		this.updateStateWithModel = this.updateStateWithModel.bind(this);
 		this.onSaveChanges = this.onSaveChanges.bind(this);
+		this.onSelectItem = this.onSelectItem.bind(this);
 		this.owners.on('update', this.updateStateWithModel);
 	}
 
@@ -65,13 +73,39 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 		this.setState({selectedOwner: owner});
 	}
 
-	onSelectItem(item: IndexableObject) {
-		this.props.onSelectItem(item);
+	onSelectItem(item: IndexablePackItem) {
+		let currentForm = this.state.form;
+		let formItems: IndexablePackItem[] = currentForm.items;
+		let formItemIndex = _.findIndex(formItems, (formItem) => {
+			return (formItem.id === item.id);
+		});
+		if (formItemIndex > -1) {
+			/* Item already selected, so unselect it from the list */
+			delete formItems[formItemIndex];
+			formItems = _.compact(formItems);
+		} else {
+			/* Item not selected, so add it to the list */
+			formItems.push(item);
+		}
+
+		currentForm.items = formItems;
+		currentForm.items_count = formItems.length;
+
+		this.setState({
+			form: currentForm
+		});
 	}
 
-	onSaveChanges(e: any) {
+
+	onSaveChanges(e) {
+		e.preventDefault();
+
+		let model = this.props.model;
+		let form = this.state.form;
+		model.save(form);
+
 		this.setState({showModal: false});
-		this.props.onSaveChanges(e);
+
 	}
 
 	close() {
@@ -85,11 +119,30 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes') || []).map(key => {
 			let quote = this.state.selectedOwner.get('quotes')[key];
-			return <MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />;
+			let foundQuote = _.findWhere(this.state.form.items, {
+				id: quote.id,
+				type: MediaItemType.quote
+			});
+			if (!!foundQuote) {
+				return (<div className="media-item-selected">
+					<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />
+				</div>);
+			}
+			return (<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />);
+
 		}) : "";
 
 		let gifs =  this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('gifs') || []).map(key => {
 			let item = this.state.selectedOwner.get('gifs')[key];
+			let foundGif = _.findWhere(this.state.form.items, {
+				id: item.id,
+				type: MediaItemType.gif
+			});
+			if (!!foundGif) {
+				return (<div className="media-item-selected">
+					<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />
+				</div>);
+			}
 			return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
 		}) : "";
 

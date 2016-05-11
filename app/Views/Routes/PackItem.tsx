@@ -136,18 +136,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	onClickRemoveItem(item: IndexablePackItem, e: Event) {
-		console.log(item);
-
-		let pack = this.state.model;
-		pack.removeItem(item);
-
-		this.setState({
-			model: pack,
-			form: pack.toJSON()
-		});
-	}
-
 
 
 	onSelectItem(item: IndexablePackItem) {
@@ -206,9 +194,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		if (diff) {
 			model.updateFeatured();
 		}
-		//this.setState({model: model, isNew: false});
+		this.setState({model: model, isNew: false, form: model.toJSON()});
 
 	}
+
 
 	togglePublish(e) {
 		let form = this.state.form;
@@ -423,7 +412,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							</Row>
 						</Col>
 						<Col xs={6}>
-							<AddItemToPackModal show={this.state.shouldShowSearchPanel} onSelectItem={this.onSelectItem} onSaveChanges={this.handleUpdate} />
+							<AddItemToPackModal show={this.state.shouldShowSearchPanel} form={this.state.form} model={this.state.model} />
 						</Col>
 					</Row>
 				</Grid>
