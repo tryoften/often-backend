@@ -6,6 +6,7 @@ import MediaItemView from '../Components/MediaItemView';
 import Categories from "../../Collections/Categories";
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
+
 //TODO(jakub): Define proper typing for lodash flowgi. Make sure it doesn't screw with uderscore methods
 var flow = require('lodash/function/flow');
 
@@ -158,4 +159,3 @@ export default flow(
 		connectDropTarget: connect.dropTarget()
 	}))
 )(CategoryAssignmentItem);
-

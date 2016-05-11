@@ -65,16 +65,14 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 		const dragCard = items[dragIndex];
 		items.splice(dragIndex, 1);
 		items.splice(hoverIndex, 0, dragCard);
+
 		pack.save({items : items});
 		this.setState({
 			pack: pack
 		});
-
-
 	}
 
 	render () {
-
 		var currentIndex = (this.props.indexRange) ? this.props.indexRange.start : 0;
 		var endIndex = (this.props.indexRange) ? Math.min(this.props.indexRange.end, this.props.pack.items.length - 1) : this.props.pack.items.length - 1;
 		let components = [];
@@ -83,7 +81,7 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 			components.push(
 				<CategoryAssignmentItem
 					item={item}
-					id = {item.id}
+					id={item.id}
 					categories={this.state.categories}
 					onClickCategory={this.onClickCategory}
 					onClickRemoveItem={this.onClickRemoveItem}
@@ -91,8 +89,7 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 					index={currentIndex}
 					key={currentIndex}
 				/>
-		);
-
+			);
 		}
 
 		return (
@@ -103,5 +100,5 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 	}
 
 }
-export default DragDropContext<CategoryAssignmentProps>(HTML5Backend)(CategoryAssignmentList);
 
+export default DragDropContext<CategoryAssignmentProps>(HTML5Backend)(CategoryAssignmentList);
