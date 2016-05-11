@@ -64,11 +64,12 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	componentWillReceiveProps(nextProps: AddItemToPackModalProps) {
 		this.setState({
+			selectedItems: nextProps.packItems,
 			showModal: nextProps.show
 		});
 	}
 
-	onSelectOwnerChange(e) {
+	onSelectOwnerChange(ownerKey: any, e: any) {
 		let owner = this.state.owners.get(e.target.value);
 		this.setState({selectedOwner: owner});
 	}
@@ -137,7 +138,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 				</div>);
 			} else {
 				return (<div className="media-item-selector unselected">
-					return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
+					<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />
 				</div>);
 			}
 
@@ -155,7 +156,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 									id="owner-dropdown"
 									title={ownerName}
 									label="Select Owner"
-									onChange={this.onSelectOwnerChange}>
+									onSelect={this.onSelectOwnerChange}>
 									{ownersSelector}
 								</DropdownButton>
 								<div className="media-item-group">
