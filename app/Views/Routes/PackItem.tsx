@@ -79,8 +79,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickAddItem = this.onClickAddItem.bind(this);
 		this.togglePublish = this.togglePublish.bind(this);
 		this.onDelete = this.onDelete.bind(this);
-		//this.calculateNumberOfPages = this.calculateNumberOfPages.bind(this);
-		//this.getIndexRange = this.getIndexRange.bind(this);
+		this.calculateNumberOfPages = this.calculateNumberOfPages.bind(this);
+		this.getIndexRange = this.getIndexRange.bind(this);
 		this.handlePageClick = this.handlePageClick.bind(this);
 		this.getIndexRange = this.getIndexRange.bind(this);
 		this.onPageSizeChange = this.onPageSizeChange.bind(this);
