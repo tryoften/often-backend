@@ -45,7 +45,6 @@ interface UserWorkerTask extends Task {
 	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes);
 }
 
-
 /* Adding / Removing Items from favorites and recents  */
 class UserWorker extends Worker {
 	constructor (opts = {}) {
