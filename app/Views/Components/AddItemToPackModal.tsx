@@ -114,15 +114,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 				id: quote.id,
 				type: MediaItemType.quote
 			});
-			if (!!foundQuote) {
-				return (<div className="media-item-selector selected" key={key}>
-					<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />
-				</div>);
-			} else {
-				return (<div className="media-item-selector unselected" key={key}>
-					<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />
-					</div>);
-			}
+			return (<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} selected={!!foundQuote} />);
 
 		}) : "";
 
@@ -132,15 +124,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 				id: item.id,
 				type: MediaItemType.gif
 			});
-			if (!!foundGif) {
-				return (<div className="media-item-selector selected">
-					<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />
-				</div>);
-			} else {
-				return (<div className="media-item-selector unselected">
-					<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />
-				</div>);
-			}
+			return (<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} selected={!!foundGif} />);
 
 		}) : "";
 

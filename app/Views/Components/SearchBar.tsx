@@ -1,10 +1,10 @@
 import * as React from 'react';
 import Element = JSX.Element;
 
-var Form = require('react-bootstrap/lib/Form');
-var FormGroup = require('react-bootstrap/lib/FormGroup');
-var FormControl = require('react-bootstrap/lib/FormControl');
-var ControlLabel = require('react-bootstrap/lib/ControlLabel');
+const Form = require('react-bootstrap/lib/Form');
+const FormGroup = require('react-bootstrap/lib/FormGroup');
+const FormControl = require('react-bootstrap/lib/FormControl');
+const ControlLabel = require('react-bootstrap/lib/ControlLabel');
 
 export interface SearchBarProps {
 	onChange: Function;

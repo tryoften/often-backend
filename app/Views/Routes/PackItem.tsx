@@ -2,11 +2,10 @@ import * as _ from 'underscore';
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
 import { Grid, Row, Col, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
-var Form = require('react-bootstrap/lib/Form');
-var FormGroup = require('react-bootstrap/lib/FormGroup');
-var FormControl = require('react-bootstrap/lib/FormControl');
-var ControlLabel = require('react-bootstrap/lib/ControlLabel');
-var InputGroup = require('react-bootstrap/lib/InputGroup');
+const FormGroup = require('react-bootstrap/lib/FormGroup');
+const FormControl = require('react-bootstrap/lib/FormControl');
+const ControlLabel = require('react-bootstrap/lib/ControlLabel');
+const InputGroup = require('react-bootstrap/lib/InputGroup');
 
 import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
 import AddItemToPackModal from '../Components/AddItemToPackModal';

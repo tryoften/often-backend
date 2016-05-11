@@ -10,6 +10,7 @@ import { GIFAttributes } from "../../Models/GIF";
 interface SearchResultItemViewProps {
 	item: IndexableObject;
 	onSelect?: (item: IndexableObject) => void;
+	selected?: boolean;
 }
 
 export default class MediaItemView extends React.Component<SearchResultItemViewProps, {}> {
@@ -20,7 +21,7 @@ export default class MediaItemView extends React.Component<SearchResultItemViewP
 	}
 
 	render() {
-		let classes = classNames("media-item pull-left", (this.props.item._type || '').toString());
+		let classes = classNames("media-item pull-left", (this.props.item._type || '').toString(), (this.props.selected) ? 'selected' : '');
 		switch (this.props.item._type) {
 			case MediaItemType.quote:
 			case MediaItemType.lyric:
