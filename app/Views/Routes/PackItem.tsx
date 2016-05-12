@@ -47,6 +47,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	context: {
 		router: ReactRouter.RouterOnContext;
 	};
+	paginationControls: React.ReactNode;
 
 	constructor(props: PackItemProps) {
 		super(props);
@@ -85,6 +86,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.getIndexRange = this.getIndexRange.bind(this);
 		this.onPageSizeChange = this.onPageSizeChange.bind(this);
 
+		this.paginationControls = this.getPaginationControls();
 
 		pack.on('update', this.updateStateWithPack);
 		pack.syncData();
@@ -223,6 +225,41 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		};
 	}
 
+	getPaginationControls(): React.ReactNode {
+		let menuItems = perPageDefaults.map((pageDefault) => {
+			return (<MenuItem eventKey={pageDefault} key={pageDefault}>{pageDefault}</MenuItem>);
+		});
+
+		return (
+			<div>
+				<ReactPaginate
+					pageNum={this.state.pagination.numPages}
+					pageRangeDisplayed={5}
+					marginPagesDisplayed={1}
+					containerClassName={"pagination"}
+					subContainerClassName={"pages pagination"}
+					breakLabel={<a href="">...</a>}
+					activeClassName={"active"}
+					previousLabel={"previous"}
+					nextLabel={"next"}
+					clickCallback={this.handlePageClick}
+				/>
+				<div className="page-size-select">
+					<ButtonToolbar>
+						<DropdownButton
+							title={this.state.pagination.numItemsPerPage}
+							id="dropdown-size-medium"
+							onSelect={this.onPageSizeChange}
+							key="dropdown-size-medium"
+							dropup>
+							{menuItems}
+						</DropdownButton>
+					</ButtonToolbar>
+				</div>
+			</div>
+		);
+	}
+
 	onPageSizeChange(numItems: number, e: Event) {
 		let currentPagination = this.state.pagination;
 
@@ -238,26 +275,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	render() {
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
-		let menuItems = perPageDefaults.map((pageDefault) => {
-			return (<MenuItem eventKey={pageDefault} key={pageDefault}>{pageDefault}</MenuItem>);
-		});
-
-		let numItemsPerPageToggle = (
-			<div className="page-size-select">
-				<ButtonToolbar>
-					<DropdownButton
-						title={this.state.pagination.numItemsPerPage}
-						id="dropdown-size-medium"
-						onSelect={this.onPageSizeChange}
-						key="dropdown-size-medium"
-						dropup>
-						{menuItems}
-					</DropdownButton>
-				</ButtonToolbar>
-			</div>
-		);
-
-		console.log('pagination', this.state.pagination);
 
 		return (
 			<div className={classes}>
@@ -349,7 +366,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 									/>
 								</Col>
 								<Col xs={4}>
-									<div class="image-upload pack-thumbnail">
+									<div className="image-upload pack-thumbnail">
 										<Thumbnail src={form.image.small_url} />
 									</div>
 								</Col>
@@ -390,19 +407,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				</Grid>
 
 				<div className="footer fixed">
-					<ReactPaginate
-						pageNum={this.state.pagination.numPages}
-						pageRangeDisplayed={5}
-						marginPagesDisplayed={1}
-						containerClassName={"pagination"}
-						subContainerClassName={"pages pagination"}
-						breakLabel={<a href="">...</a>}
-						activeClassName={"active"}
-						previousLabel={"previous"}
-						nextLabel={"next"}
-						clickCallback={this.handlePageClick}
-					/>
-					{numItemsPerPageToggle}
+					{this.getPaginationControls()}
 				</div>
 			</div>
 		);

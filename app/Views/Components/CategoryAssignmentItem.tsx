@@ -7,8 +7,8 @@ import Categories from "../../Collections/Categories";
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
 
-//TODO(jakub): Define proper typing for lodash flowgi. Make sure it doesn't screw with uderscore methods
-var flow = require('lodash/function/flow');
+const flow = require('lodash/function/flow');
+const shallowCompare = require('react-addons-shallow-compare');
 
 
 interface CategoryAssignmentItemProps extends React.Props<CategoryAssignmentItem> {
@@ -96,10 +96,6 @@ const cardTarget = {
 
 class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps, CategoryAssignmentItemState> {
 
-	constructor (props: CategoryAssignmentItemProps) {
-		super(props);
-	}
-
 	static propTypes = {
 		item: React.PropTypes.object.isRequired,
 		categories: React.PropTypes.object.isRequired,
@@ -111,21 +107,32 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 		isDragging: React.PropTypes.bool.isRequired,
 		id: React.PropTypes.any.isRequired,
 		moveCard: React.PropTypes.func.isRequired
+	};
+
+	categoryMenu: MenuItem[];
+
+	constructor (props: CategoryAssignmentItemProps) {
+		super(props);
+
+		this.categoryMenu = this.getCategoryMenu(this.props.item);
+	}
+
+	getCategoryMenu(item: IndexablePackItem): MenuItem[] {
+		return this.props.categories.map( category => {
+			return <MenuItem
+				key={category.id}
+				eventKey={category.id}
+				onClick={this.props.onClickCategory.bind(this, item._id, category)}>
+				{category.name}
+			</MenuItem>;
+		});
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
 	}
 
 	render() {
-		var categoryMenu = (item) => {
-			return this.props.categories.map( category => {
-				return <MenuItem
-					key={category.id}
-					eventKey={category.id}
-					onClick={this.props.onClickCategory.bind(this, item._id, category)}>
-					{category.name}
-				</MenuItem>;
-			});
-		};
-
-
 		const opacity = this.props.isDragging ? 0 : 1;
 		return this.props.connectDragSource(this.props.connectDropTarget(
 			<div key={this.props.item._id} className="clearfix well pack-item" style={{style, opacity}}>
@@ -139,7 +146,7 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 							title={ (this.props.item.category) ? this.props.item.category.name : "Unassigned"}
 							id={this.props.item._id}
 							block>
-							{categoryMenu(this.props.item)}
+							{this.categoryMenu}
 						</DropdownButton>
 						<Button onClick={this.props.onClickRemoveItem.bind(this, this.props.item)}>Remove</Button>
 					</ButtonGroup>

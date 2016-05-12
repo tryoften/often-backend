@@ -38,6 +38,13 @@ class CategoryAssignmentList extends React.Component<CategoryAssignmentProps, Ca
 		this.setState({categories});
 	}
 
+	shouldComponentUpdate(nextProps: CategoryAssignmentProps, nextState: CategoryAssignmentState) {
+		if (this.props.indexRange.start === nextProps.indexRange.start) {
+			return false;
+		}
+		return true;
+	}
+
 	onClickCategory(itemId: string, category: Category, e: Event) {
 		e.preventDefault();
 
