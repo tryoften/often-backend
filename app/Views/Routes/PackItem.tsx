@@ -1,7 +1,12 @@
 import * as _ from 'underscore';
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
-import { Grid, Row, Col, Input, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
+import { Grid, Row, Col, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
+const FormGroup = require('react-bootstrap/lib/FormGroup');
+const FormControl = require('react-bootstrap/lib/FormControl');
+const ControlLabel = require('react-bootstrap/lib/ControlLabel');
+const InputGroup = require('react-bootstrap/lib/InputGroup');
+
 import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
@@ -83,9 +88,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.getIndexRange = this.getIndexRange.bind(this);
 		this.handlePageClick = this.handlePageClick.bind(this);
 		this.getIndexRange = this.getIndexRange.bind(this);
+		this.onUpdatePackItems = this.onUpdatePackItems.bind(this);
 		this.onPageSizeChange = this.onPageSizeChange.bind(this);
-
-
 		pack.on('update', this.updateStateWithPack);
 		pack.syncData();
 	}
@@ -122,24 +126,12 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	onClickRemoveItem(item: IndexablePackItem, e: Event) {
-		console.log(item);
-
-		let pack = this.state.model;
-		pack.removeItem(item);
-
-		this.setState({
-			model: pack,
-			form: pack.toJSON()
-		});
-	}
-
-	onSelectItem(item: IndexablePackItem) {
-		let items: IndexablePackItem[] = this.state.model.get('items');
-		items.push(item);
+	onUpdatePackItems(packItems: IndexablePackItem[]) {
 
 		let model = this.state.model;
-		model.save({items, items_count: items.length});
+		model.save({
+			items: packItems
+		});
 
 		this.setState({
 			model: model,
@@ -181,9 +173,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		if (diff) {
 			model.updateFeatured();
 		}
-		this.setState({model: model, isNew: false});
+		this.setState({model: model, isNew: false, form: model.toJSON()});
 
 	}
+
 
 	togglePublish(e) {
 		let form = this.state.form;
@@ -270,83 +263,88 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 						<Col xs={12} md={8}>
 							<Row>
 								<Col xs={12} md={8}>
-									<Input
-										id="name"
-										type="text"
-										label="Name"
-										bsSize="medium"
-										placeholder="Enter Name"
-										value={form.name}
-										onChange={this.handlePropChange}
-									/>
-									<Input
-										id="description"
-										type="textarea"
-										label="Description"
-										placeholder="Description"
-										value={form.description}
-										onChange={this.handlePropChange}
-									/>
-
+									<FormGroup>
+										<ControlLabel>Name</ControlLabel>
+										<FormControl
+											id="name"
+											type="text"
+											placeholder="Enter Name"
+											value={form.name}
+											onChange={this.handlePropChange }/>
+									</FormGroup>
+									<FormGroup>
+										<ControlLabel>Description</ControlLabel>
+										<FormControl
+											id="description"
+											type="text"
+											placeholder="Description"
+											value={form.description}
+											onChange={this.handlePropChange }/>
+									</FormGroup>
 								</Col>
 							</Row>
 							<Row>
 								<Col xs={9} md={6}>
-									<Input
-										id="price"
-										type="number"
-										step="any"
-										min="0"
-										label="Price"
-										addonBefore="$"
-										value={this.state.form.price}
-										onChange={this.handlePropChange}
-										disabled={!form.premium}
-									/>
+									<FormGroup>
+										<ControlLabel>Price</ControlLabel>
+										<InputGroup>
+											<InputGroup.Addon>$</InputGroup.Addon>
+											<FormControl
+												id="price"
+												type="number"
+												placeholder="Price"
+												stop="any"
+												min="0"
+												addonBefore="$"
+												value={this.state.form.price}
+												disabled={!form.premium}
+												onChange={this.handlePropChange }/>
+										</InputGroup>
+									</FormGroup>
 								</Col>
 								<Col xs={2} md={2}>
-									<Input
-										id="premium"
-										type="checkbox"
-										bsSize="large"
-										label="Premium"
-										checked={form.premium}
-										onChange={this.handlePropChange}
-									/>
+									<FormGroup>
+										<ControlLabel>Premium</ControlLabel>
+										<FormControl
+											id="premium"
+											type="checkbox"
+											checked={form.premium}
+											onChange={this.handlePropChange }/>
+									</FormGroup>
 								</Col>
 								<Col xs={2} md={2}>
-									<Input
-										id="featured"
-										type="checkbox"
-										bsSize="large"
-										label="Featured"
-										checked={this.state.form.featured}
-										onChange={this.handlePropChange}
-									/>
+									<FormGroup>
+										<ControlLabel>Featured</ControlLabel>
+										<FormControl
+											id="featured"
+											type="checkbox"
+											checked={form.featured}
+											onChange={this.handlePropChange }/>
+									</FormGroup>
 								</Col>
 
 
 							</Row>
 							<Row>
 								<Col xs={8}>
-									<Input
-										id="image.small_url"
-										type="text"
-										label="Small Image"
-										bsSize="medium"
-										placeholder={form.image.small_url}
-										value={form.image.small_url}
-										onChange={this.handlePropChange}
-									/>
-									<Input
-										id="image.large_url"
-										type="text"
-										label="Large Image"
-										bsSize="medium"
-										placeholder={form.image.large_url}
-										value={form.image.large_url}
-										onChange={this.handlePropChange}
-									/>
+									<FormGroup>
+										<ControlLabel>Small Image</ControlLabel>
+										<FormControl
+											id="image.small_url"
+											type="text"
+											placeholder={form.image.small_url}
+											value={form.image.small_url}
+											onChange={this.handlePropChange }/>
+									</FormGroup>
+									<FormGroup>
+										<ControlLabel>Large Image</ControlLabel>
+										<FormControl
+											id="image.large_url"
+											type="text"
+											placeholder={form.image.large_url}
+											value={form.image.large_url}
+											onChange={this.handlePropChange }/>
+									</FormGroup>
 								</Col>
 								<Col xs={4}>
 									<div class="image-upload pack-thumbnail">
@@ -384,7 +382,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							</Row>
 						</Col>
 						<Col xs={6}>
-							<AddItemToPackModal show={this.state.shouldShowSearchPanel} onSelectItem={this.onSelectItem.bind(this)} />
+							<AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} />
 						</Col>
 					</Row>
 				</Grid>

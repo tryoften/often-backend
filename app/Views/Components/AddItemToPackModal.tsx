@@ -1,20 +1,27 @@
 import * as React from 'react';
-import { Modal, Tabs, Tab, Button, Input } from 'react-bootstrap';
+import * as _ from 'underscore';
+import { Modal, Tabs, Tab, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import SearchPanel from '../Components/SearchPanel';
 import Owners from '../../Collections/Owners';
 import Owner from "../../Models/Owner";
 import MediaItemView from '../Components/MediaItemView';
 import {IndexableObject} from "../../Interfaces/Indexable";
+import {PackAttributes} from '../../Models/Pack';
+import Pack from '../../Models/Pack';
+import {IndexablePackItem} from '../../Models/Pack';
+import MediaItemType from '../../Models/MediaItemType';
 
 interface AddItemToPackModalProps extends React.Props<AddItemToPackModal> {
 	show: boolean;
-	onSelectItem: (item: IndexableObject) => void;
+	packItems?: IndexablePackItem[];
+	onUpdatePackItems?: (selectedItems: IndexablePackItem[]) => void;
 }
 
 interface AddItemToPackModalState {
 	showModal?: boolean;
 	owners?: Owners;
 	selectedOwner?: Owner;
+	selectedItems?: IndexablePackItem[];
 }
 
 export default class AddItemToPackModal extends React.Component<AddItemToPackModalProps, AddItemToPackModalState> {
@@ -26,12 +33,15 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 		this.owners = new Owners();
 
 		this.state = {
+			selectedItems: props.packItems || [],
 			showModal: props.show,
 			owners: this.owners
 		};
 
 		this.onSelectOwnerChange = this.onSelectOwnerChange.bind(this);
 		this.updateStateWithModel = this.updateStateWithModel.bind(this);
+		this.onSaveChanges = this.onSaveChanges.bind(this);
+		this.onSelectItem = this.onSelectItem.bind(this);
 		this.owners.on('update', this.updateStateWithModel);
 	}
 
@@ -54,20 +64,39 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	componentWillReceiveProps(nextProps: AddItemToPackModalProps) {
 		this.setState({
+			selectedItems: nextProps.packItems,
 			showModal: nextProps.show
 		});
 	}
 
-	onSelectOwnerChange(e) {
+	onSelectOwnerChange(ownerKey: any, e: any) {
 		let owner = this.state.owners.get(e.target.value);
 		this.setState({selectedOwner: owner});
 	}
 
-	onSelectItem(item: IndexableObject) {
-		this.props.onSelectItem(item);
-		this.setState({
-			showModal: false
+	onSelectItem(item: IndexablePackItem) {
+		let selectedItems: IndexablePackItem[] = this.state.selectedItems;
+		let formItemIndex = _.findIndex(selectedItems, (formItem) => {
+			return (formItem.id === item.id);
 		});
+		if (formItemIndex > -1) {
+			/* Item already selected, so unselect it from the list */
+			selectedItems.splice(formItemIndex, 1);
+		} else {
+			/* Item not selected, so add it to the list */
+			selectedItems.push(item);
+		}
+
+		this.setState({
+			selectedItems: selectedItems
+		});
+	}
+
+
+	onSaveChanges(e) {
+		e.preventDefault();
+		this.props.onUpdatePackItems(this.state.selectedItems);
+		this.setState({showModal: false});
 	}
 
 	close() {
@@ -76,31 +105,44 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 
 	render() {
 		let ownersSelector = this.owners.models.map(model => {
-			return <option key={model.id} value={model.id}>{model.get('name')}</option>;
+			return <MenuItem key={model.id} value={model.id}>{model.get('name')}</MenuItem>;
 		});
 
 		let ownerQuotes = this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('quotes') || []).map(key => {
 			let quote = this.state.selectedOwner.get('quotes')[key];
-			return <MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} />;
+			let foundQuote = _.findWhere(this.state.selectedItems, {
+				id: quote.id,
+				type: MediaItemType.quote
+			});
+			return (<MediaItemView key={key} item={quote} onSelect={this.onSelectItem.bind(this)} selected={!!foundQuote} />);
+
 		}) : "";
 
 		let gifs =  this.state.selectedOwner ? Object.keys(this.state.selectedOwner.get('gifs') || []).map(key => {
 			let item = this.state.selectedOwner.get('gifs')[key];
-			return <MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} />;
+			let foundGif = _.findWhere(this.state.selectedItems, {
+				id: item.id,
+				type: MediaItemType.gif
+			});
+			return (<MediaItemView key={key} item={item} onSelect={this.onSelectItem.bind(this)} selected={!!foundGif} />);
+
 		}) : "";
+
+		let ownerName = this.state.selectedOwner ? this.state.selectedOwner.get('name') : '';
 
 		return (
 			<Modal show={this.state.showModal} onHide={this.close.bind(this)} bsSize="large">
 				<Modal.Body>
-					<Tabs>
+					<Tabs id="uncontrolled-modal-tab">
 						<Tab eventKey={0} title="Add New Quote">
 							<div className="container-fluid">
-								<Input
-									type="select"
+								<DropdownButton
+									id="owner-dropdown"
+									title={ownerName}
 									label="Select Owner"
-									onChange={this.onSelectOwnerChange}>
+									onSelect={this.onSelectOwnerChange}>
 									{ownersSelector}
-								</Input>
+								</DropdownButton>
 								<div className="media-item-group">
 									<div className="items">{gifs}</div>
 									<div className="items">{ownerQuotes}</div>
@@ -114,7 +156,7 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 				</Modal.Body>
 				<Modal.Footer>
 					<Button onClick={this.close.bind(this)}>Close</Button>
-					<Button bsStyle="primary">Save changes</Button>
+					<Button onClick={this.onSaveChanges} bsStyle="primary">Save changes</Button>
 				</Modal.Footer>
 			</Modal>
 		);

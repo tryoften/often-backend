@@ -40,11 +40,18 @@
 
 .media-item {
   background-color: #ffffff;
-  border-radius: 2px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.19);
   margin: 10px;
+  border: white 2px solid;
+
+  &.lyric, &.quote, &.gif {
+    &.selected {
+      border-color: @brand-primary
+    }
+  }
 
   &.lyric, &.quote {
+
     height: 100px;
     width: 320px;
     padding: 10px;
@@ -151,3 +158,4 @@
     }
   }
 }
+
