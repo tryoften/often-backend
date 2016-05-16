@@ -190,55 +190,43 @@ class Pack extends MediaItem {
 		});
 	}
 
-
 	assignCategoryToItem (itemId: string, category: Category) {
 
-		/* First figure out which item to change */
 		var currentItems = this.items;
-		var currentCategories = this.categories;
+		var oldCategories = this.categories;
 
-		var oldCategoryInfo, oldIndex;
-		for (let i = 0; i < currentItems.length; i++) {
-
-			if (currentItems[i].id === itemId) {
-				oldIndex = i;
-				oldCategoryInfo = currentItems[i].category;
-				currentItems[i].category = category.getTargetObjectProperties();
-				currentCategories[category.id] = category.getTargetObjectProperties();
-				category.setTarget(this, `/packs/${this.id}/categories/${category.id}`);
-				category.setTarget(this, `/packs/${this.id}/items/${oldIndex}/category`);
-				break;
-			}
-		}
-
-		/* Go through every category and check if the old category still exists, if it doesn't then unset it on the pack's category collection as well */
-		var removeCategoryFromPack = true;
 		for (let item of currentItems) {
-			if (item.category && oldCategoryInfo) {
-				if (item.category.id === oldCategoryInfo.id) {
-					removeCategoryFromPack = false;
-					break;
-
-				}
+			if (item.id === itemId) {
+				item.category = category.toJSON();
 			}
 		}
 
-		/* Remove category from pack's category collection */
-		if (oldCategoryInfo) {
-			var oldCategory = new Category({id: oldCategoryInfo.id});
-			oldCategory.syncData().then(() => {
-				oldCategory.unsetTarget(this, `/packs/${this.id}/items/${oldIndex}/category`);
-				if (removeCategoryFromPack) {
-					oldCategory.unsetTarget(this, `/packs/${this.id}/categories/${oldCategory.id}`);
-					currentCategories[oldCategory.id] = null;
-					/* Save all changes */
-					this.save({ items: currentItems, categories: currentCategories });
-				}
+		/* Recreate categories based on items */
+		let newCategories = _.chain(currentItems)
+			.map(item => item.category)
+			.compact()
+			.uniq(false, item => item.id)
+			.value();
+
+
+		let getCatIds = (arr) => {
+			return _.map(arr, (itm: any) => itm.id);
+		};
+		let oldCategoryIds = getCatIds(oldCategories);
+		let newCategoryIds = getCatIds(newCategories);
+
+		for (let removedCategoryId of _.difference(oldCategoryIds, newCategoryIds)) {
+			let oldCategory = new Category({ id: removedCategoryId });
+			oldCategory.syncData().then( (oc) => {
+				oldCategory.unsetTarget(this, `/packs/${this.id}/categories/${oldCategory.id}`);
 			});
-		} else {
-			/* Save all changes */
-			this.save({ items: currentItems, categories: currentCategories });
 		}
+
+		for (let addedCategoryId of _.difference(newCategoryIds, oldCategoryIds)) {
+			category.setTarget(this, `/packs/${this.id}/categories/${addedCategoryId}`);
+		}
+
+		this.save({ items: currentItems, categories: newCategories });
 
 	}
 
