@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as _ from 'underscore';
-import {ButtonGroup, Button, MenuItem, DropdownButton } from 'react-bootstrap';
-import {IndexablePackItem} from '../../Models/Pack';
+import { ButtonGroup, Button, MenuItem, DropdownButton } from 'react-bootstrap';
+import { IndexablePackItem } from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import Categories from "../../Collections/Categories";
 import { findDOMNode } from 'react-dom';
