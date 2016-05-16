@@ -203,14 +203,14 @@ class Pack extends MediaItem {
 
 		/* Recreate categories based on items */
 		let newCategories = _.chain(currentItems)
-			.map((item) => { return item.category; })
+			.map(item => item.category)
 			.compact()
-			.uniq(false, (item) => { return item.id; })
+			.uniq(false, item => item.id)
 			.value();
 
 
 		let getCatIds = (arr) => {
-			return _.map(arr, (itm: any) => { return itm.id; });
+			return _.map(arr, (itm: any) => itm.id);
 		};
 		let oldCategoryIds = getCatIds(oldCategories);
 		let newCategoryIds = getCatIds(newCategories);
