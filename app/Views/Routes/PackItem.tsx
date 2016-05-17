@@ -229,7 +229,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											type="text"
 											placeholder="Enter Name"
 											value={form.name}
-											onChange={this.handlePropChange }/>
+											onChange={this.handlePropChange}/>
 									</FormGroup>
 									<FormGroup>
 										<ControlLabel>Description</ControlLabel>
@@ -238,51 +238,9 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											type="text"
 											placeholder="Description"
 											value={form.description}
-											onChange={this.handlePropChange }/>
+											onChange={this.handlePropChange}/>
 									</FormGroup>
 								</Col>
-							</Row>
-							<Row>
-								<Col xs={9} md={6}>
-									<FormGroup>
-										<ControlLabel>Price</ControlLabel>
-										<InputGroup>
-											<InputGroup.Addon>$</InputGroup.Addon>
-											<FormControl
-												id="price"
-												type="number"
-												placeholder="Price"
-												stop="any"
-												min="0"
-												addonBefore="$"
-												value={this.state.form.price}
-												disabled={!form.premium}
-												onChange={this.handlePropChange }/>
-										</InputGroup>
-									</FormGroup>
-								</Col>
-								<Col xs={2} md={2}>
-									<FormGroup>
-										<ControlLabel>Premium</ControlLabel>
-										<FormControl
-											id="premium"
-											type="checkbox"
-											checked={form.premium}
-											onChange={this.handlePropChange }/>
-									</FormGroup>
-								</Col>
-								<Col xs={2} md={2}>
-									<FormGroup>
-										<ControlLabel>Featured</ControlLabel>
-										<FormControl
-											id="featured"
-											type="checkbox"
-											checked={form.featured}
-											onChange={this.handlePropChange }/>
-									</FormGroup>
-								</Col>
-
-
 							</Row>
 							<Row>
 								<Col xs={8}>
@@ -293,7 +251,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											type="text"
 											placeholder={form.image.small_url}
 											value={form.image.small_url}
-											onChange={this.handlePropChange }/>
+											onChange={this.handlePropChange}/>
 									</FormGroup>
 									<FormGroup>
 										<ControlLabel>Large Image</ControlLabel>
@@ -302,13 +260,25 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											type="text"
 											placeholder={form.image.large_url}
 											value={form.image.large_url}
-											onChange={this.handlePropChange }/>
+											onChange={this.handlePropChange}/>
 									</FormGroup>
 								</Col>
 								<Col xs={4}>
 									<div className="image-upload pack-thumbnail">
 										<Thumbnail src={form.image.small_url} />
 									</div>
+								</Col>
+							</Row>
+							<Row>
+								<Col xs={2} md={2}>
+									<FormGroup>
+										<ControlLabel>Featured</ControlLabel>
+										<FormControl
+											id="featured"
+											type="checkbox"
+											checked={form.featured}
+											onChange={this.handlePropChange}/>
+									</FormGroup>
 								</Col>
 							</Row>
 							<Row>

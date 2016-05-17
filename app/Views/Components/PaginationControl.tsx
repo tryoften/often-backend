@@ -2,6 +2,7 @@ import * as _ from 'underscore';
 import * as React from 'react';
 import { ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
 const ReactPaginate = require('react-paginate');
+const shallowCompare = require('react-addons-shallow-compare');
 
 export interface IndexRange {
 	start: number;
@@ -43,8 +44,6 @@ export default class PaginationControl extends React.Component<PaginationControl
 				end: 0
 			}
 		};
-
-		debugger;
 	}
 
 	componentDidMount() {
@@ -57,6 +56,10 @@ export default class PaginationControl extends React.Component<PaginationControl
 			numPages: this.calculateNumberOfPages(),
 			indexRange: this.getIndexRange(this.state.activePage)
 		});
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
 	}
 
 	calculateNumberOfPages(): number {
