@@ -1,6 +1,7 @@
 import * as _ from 'underscore';
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
+import Categories from '../../Collections/Categories';
 import { Grid, Row, Col, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
 const FormGroup = require('react-bootstrap/lib/FormGroup');
 const FormControl = require('react-bootstrap/lib/FormControl');
@@ -12,7 +13,8 @@ import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
 import DeleteButton from '../Components/DeleteButton';
-import CategoryAssignmentList from '../Components/CategoryAssignmentList';
+import Category from '../../Models/Category';
+import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
 var ReactPaginate = require('react-paginate');
 
 interface PackItemProps extends React.Props<PackItem> {
@@ -40,6 +42,7 @@ interface PackItemState extends React.Props<PackItem> {
 	isNew?: boolean;
 	form?: PackAttributes;
 	pagination?: Pagination;
+	categories?: Categories;
 }
 
 const perPageDefaults = [10, 50, 100, 1000];
@@ -61,8 +64,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			id: props.params.packId
 		});
 
+		let categories = new Categories();
+
 		this.state = {
 			model: pack,
+			categories: categories,
 			form: pack.toJSON(),
 			shouldShowSearchPanel: false,
 			display: false,
@@ -78,25 +84,46 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			}
 		};
 
-		this.updateStateWithPack = this.updateStateWithPack.bind(this);
-		this.handlePropChange = this.handlePropChange.bind(this);
-		this.handleUpdate = this.handleUpdate.bind(this);
-		this.onClickAddItem = this.onClickAddItem.bind(this);
-		this.togglePublish = this.togglePublish.bind(this);
-		this.onDelete = this.onDelete.bind(this);
-		this.calculateNumberOfPages = this.calculateNumberOfPages.bind(this);
-		this.getIndexRange = this.getIndexRange.bind(this);
-		this.handlePageClick = this.handlePageClick.bind(this);
-		this.getIndexRange = this.getIndexRange.bind(this);
-		this.onUpdatePackItems = this.onUpdatePackItems.bind(this);
-		this.onPageSizeChange = this.onPageSizeChange.bind(this);
+		_.bindAll(this, 'updateStateWithPack', 'handlePropChange', 'handleUpdate', 'onClickAddItem', 'togglePublish', 'onDelete',
+			'calculateNumberOfPages', 'getIndexRange', 'handlePageClick', 'getIndexRange', 'onUpdatePackItems', 'onPageSizeChange',
+			'updateStateWithCategories', 'onClickRemoveItem', 'onClickCategory');
 		pack.on('update', this.updateStateWithPack);
+		categories.on('update', this.updateStateWithCategories);
 		pack.syncData();
+		//categories.syncData();
+	}
+
+	onClickCategory(itemId: string, category: Category, e: Event) {
+		e.preventDefault();
+
+		var model = this.state.model;
+		model.assignCategoryToItem(itemId, category);
+		this.setState({
+			model: model
+		});
+
+	}
+	onClickRemoveItem(item: IndexablePackItem, e: Event) {
+		console.log(item);
+
+		let model = this.state.model;
+		model.removeItem(item);
+
+		this.setState({
+			model: model
+		});
+	}
+
+	updateStateWithCategories(categories: Categories) {
+		this.setState({categories});
 	}
 
 	componentDidMount() {
 		this.state.model.fetch({
 			success: this.updateStateWithPack
+		});
+		this.state.categories.fetch({
+			success: this.updateStateWithCategories
 		});
 	}
 
@@ -112,10 +139,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				indexRange: this.getIndexRange(currentPagination.activePage, currentPagination.numItemsPerPage)
 			})
 		});
-	}
-
-	componentWillReceiveProps() {
-		console.log('componentWillReceiveProps');
 	}
 
 	onClickAddItem(e: Event) {
@@ -252,6 +275,16 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		console.log('pagination', this.state.pagination);
 
+		let categoryAssignmentItems = this.state.model.items.map( (item, index) => <CategoryAssignmentItem
+			item={item}
+			categories={this.state.categories}
+			onClickCategory={this.onClickCategory}
+			onClickRemoveItem={this.onClickRemoveItem}
+			index={index}
+			key={index}
+		/>);
+
+
 		return (
 			<div className={classes}>
 				<header className="section-header">
@@ -374,9 +407,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<div className="media-item-group">
 									<h3>Items</h3>
 									<div className="items">
-										<CategoryAssignmentList
-											pack={this.state.model}
-											indexRange={this.state.pagination.indexRange} />
+										{categoryAssignmentItems}
 									</div>
 								</div>
 							</Row>
