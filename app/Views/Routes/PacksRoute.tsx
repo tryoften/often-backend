@@ -14,22 +14,25 @@ interface PacksState extends React.Props<PacksRoute> {
 }
 
 export default class PacksRoute extends React.Component<PacksProps, PacksState> {
-	packs: Packs;
-
 	constructor(props: PacksProps) {
 		super(props);
 
-		this.packs = new Packs();
-
 		this.state = {
-			packs: this.packs
+			packs: new Packs()
 		};
 
-		this.packs.on('update', () => {
-			this.setState({
-				packs: this.packs
-			});
+		this.updateCollection = this.updateCollection.bind(this);
+		this.state.packs.on('sync', this.updateCollection);
+	}
+
+	updateCollection(collection: Packs) {
+		this.setState({
+			packs: collection
 		});
+	}
+
+	componentWillUnmount() {
+		this.state.packs.off('sync', this.updateCollection);
 	}
 
 	render() {
