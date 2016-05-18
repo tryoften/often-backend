@@ -64,7 +64,7 @@ export default class PaginationControl extends React.Component<PaginationControl
 
 	calculateNumberOfPages(): number {
 		let numItems = this.props.items.length || 0;
-		let pageNum = this.state.pageSize == 0 ? 0 : Math.floor(numItems / this.state.pageSize);
+		let pageNum = this.state.pageSize === 0 ? 0 : Math.floor(numItems / this.state.pageSize);
 		console.log('pageNum', pageNum);
 		return pageNum;
 	}
@@ -78,6 +78,21 @@ export default class PaginationControl extends React.Component<PaginationControl
 		};
 	}
 
+	handlePageClick(e) {
+		this.setState({
+			activePage: e.selected,
+			indexRange: this.getIndexRange(e.selected)
+		});
+	}
+
+	onPageSizeChange(numItems: number, e: Event) {
+		this.setState({
+			pageSize: numItems,
+			numPages: this.calculateNumberOfPages(),
+			indexRange: this.getIndexRange(this.state.activePage)
+		});
+	}
+
 	getPaginationControls(): React.ReactNode {
 		let menuItems = PaginationControl.perPageDefaults.map((pageDefault) => {
 			return (<MenuItem eventKey={pageDefault} key={pageDefault}>{pageDefault}</MenuItem>);
@@ -87,7 +102,7 @@ export default class PaginationControl extends React.Component<PaginationControl
 			<div>
 				<ReactPaginate
 					pageNum={this.calculateNumberOfPages()}
-					pageRangeDisplayed={5}
+					pageRangeDisplayed={8}
 					marginPagesDisplayed={1}
 					containerClassName={"pagination"}
 					subContainerClassName={"pages pagination"}
@@ -113,21 +128,6 @@ export default class PaginationControl extends React.Component<PaginationControl
 		);
 	}
 
-	handlePageClick(e) {
-		this.setState({
-			activePage: e.selected,
-			indexRange: this.getIndexRange(e.selected)
-		});
-	}
-
-	onPageSizeChange(numItems: number, e: Event) {
-		this.setState({
-			pageSize: numItems,
-			numPages: this.calculateNumberOfPages(),
-			indexRange: this.getIndexRange(this.state.activePage)
-		});
-	}
-
 	render() {
 		let range = this.state.indexRange;
 		let components = this.props.items.slice(range.start, range.end);
@@ -138,18 +138,7 @@ export default class PaginationControl extends React.Component<PaginationControl
 					{components}
 				</div>
 				<div className="footer fixed">
-					<ReactPaginate
-						pageNum={this.calculateNumberOfPages()}
-						pageRangeDisplayed={5}
-						marginPagesDisplayed={1}
-						containerClassName={"pagination"}
-						subContainerClassName={"pages pagination"}
-						breakLabel={<a href="">...</a>}
-						activeClassName={"active"}
-						previousLabel={"previous"}
-						nextLabel={"next"}
-						clickCallback={this.handlePageClick}
-					/>
+					{this.getPaginationControls()}
 				</div>
 			</div>
 		);
