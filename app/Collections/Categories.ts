@@ -6,7 +6,7 @@ class Categories extends Firebase.Collection<Category> {
 	constructor () {
 		super([], {
 			model: Category,
-			autoSync: true
+			autoSync: false
 		});
 	}
 

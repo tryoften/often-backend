@@ -31,6 +31,7 @@ interface PackItemState extends React.Props<PackItem> {
 	isNew?: boolean;
 	form?: PackAttributes;
 	categories?: Categories;
+	loading?: boolean;
 }
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
@@ -46,16 +47,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		super(props);
 
 		let isNew = !props.params.packId;
-		let pack = isNew ? new Pack() : new Pack({
-			id: props.params.packId
-		});
-
-		let categories = new Categories();
 
 		this.state = {
-			model: pack,
-			categories: categories,
-			form: pack.toJSON(),
 			shouldShowSearchPanel: false,
 			display: false,
 			isNew: isNew
@@ -70,10 +63,49 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onUpdatePackItems = this.onUpdatePackItems.bind(this);
 		this.updateStateWithCategories = this.updateStateWithCategories.bind(this);
 		this.onClickRemoveItem = this.onClickRemoveItem.bind(this);
+	}
+
+	componentDidMount() {
+		let pack = this.state.isNew ? new Pack() : new Pack({
+			id: this.props.params.packId
+		});
+
+		let categories = new Categories();
+
+		let state = {
+			model: pack,
+			form: pack.toJSON(),
+			categories: categories
+		};
 
 		pack.on('update', this.updateStateWithPack);
 		categories.on('update', this.updateStateWithCategories);
-		pack.syncData();
+
+		this.setState(state);
+
+		pack.fetch({
+			success: this.updateStateWithPack
+		});
+		categories.fetch({
+			success: this.updateStateWithCategories
+		});
+	}
+
+	componentWillUnmount() {
+		this.state.model.off('update', this.updateStateWithPack);
+		this.state.categories.off('update', this.updateStateWithCategories);
+	}
+
+	updateStateWithPack(pack: Pack) {
+		this.setState({
+			model: pack,
+			form: pack.toJSON(),
+			display: true
+		});
+	}
+
+	updateStateWithCategories(categories: Categories) {
+		this.setState({categories});
 	}
 
 	onClickCategory(itemId: string, category: Category, e: Event) {
@@ -94,27 +126,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		this.setState({
 			model: model
-		});
-	}
-
-	updateStateWithCategories(categories: Categories) {
-		this.setState({categories});
-	}
-
-	componentDidMount() {
-		this.state.model.fetch({
-			success: this.updateStateWithPack
-		});
-		this.state.categories.fetch({
-			success: this.updateStateWithCategories
-		});
-	}
-
-	updateStateWithPack(pack: Pack) {
-		this.setState({
-			model: pack,
-			form: pack.toJSON(),
-			display: true
 		});
 	}
 
@@ -193,6 +204,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	render() {
+		if (!this.state.display) {
+			return <div>Loading...</div>;
+		}
+
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
 		let categoryMenu = <CategoryAssignmentMenu categories={this.state.categories.models}
@@ -207,7 +222,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 					onClickRemoveItem={this.onClickRemoveItem}
 					categoryMenu={categoryMenu}
 					index={index}
-					key={index}/>
+					key={index} />
 			);
 		});
 
@@ -309,7 +324,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							</Row>
 						</Col>
 						<Col xs={6}>
-							<AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} />
+							{(this.state.shouldShowSearchPanel) ? <AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} /> : ''}
 						</Col>
 					</Row>
 				</Grid>

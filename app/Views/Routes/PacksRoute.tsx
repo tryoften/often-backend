@@ -11,6 +11,7 @@ interface PacksProps extends React.Props<PacksRoute> {
 
 interface PacksState extends React.Props<PacksRoute> {
 	packs?: Packs;
+	loading?: boolean;
 }
 
 export default class PacksRoute extends React.Component<PacksProps, PacksState> {
@@ -18,17 +19,28 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 		super(props);
 
 		this.state = {
-			packs: new Packs()
+			loading: true
 		};
-
 		this.updateCollection = this.updateCollection.bind(this);
-		this.state.packs.on('sync', this.updateCollection);
 	}
 
 	updateCollection(collection: Packs) {
 		this.setState({
-			packs: collection
+			packs: collection,
+			loading: false
 		});
+	}
+
+	componentDidMount() {
+		let state = {
+			packs: new Packs(),
+			loading: true
+		};
+		state.packs.fetch({
+			success: this.updateCollection
+		});
+
+		this.setState(state);
 	}
 
 	componentWillUnmount() {
@@ -36,6 +48,10 @@ export default class PacksRoute extends React.Component<PacksProps, PacksState> 
 	}
 
 	render() {
+		if (this.state.loading) {
+			return <div>Loading...</div>;
+		}
+
 		let packComponents = this.state.packs
 			.filter(pack => !pack.isFavorites && !pack.isRecents && !pack.deleted)
 			.map(pack => {

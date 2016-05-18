@@ -63,9 +63,10 @@ export default class PaginationControl extends React.Component<PaginationControl
 	}
 
 	calculateNumberOfPages(): number {
-		let numItems = this.props.items.length;
-		var pageNum = Math.floor(numItems / this.state.pageSize);
-		return (numItems % this.state.pageSize) ? pageNum + 1 : pageNum;
+		let numItems = this.props.items.length || 0;
+		let pageNum = this.state.pageSize == 0 ? 0 : Math.floor(numItems / this.state.pageSize);
+		console.log('pageNum', pageNum);
+		return pageNum;
 	}
 
 	getIndexRange(pageIndex: number): IndexRange {
@@ -129,8 +130,6 @@ export default class PaginationControl extends React.Component<PaginationControl
 
 	render() {
 		let range = this.state.indexRange;
-		console.log('range', range);
-
 		let components = this.props.items.slice(range.start, range.end);
 
 		return (
@@ -139,7 +138,18 @@ export default class PaginationControl extends React.Component<PaginationControl
 					{components}
 				</div>
 				<div className="footer fixed">
-					{this.getPaginationControls()}
+					<ReactPaginate
+						pageNum={this.calculateNumberOfPages()}
+						pageRangeDisplayed={5}
+						marginPagesDisplayed={1}
+						containerClassName={"pagination"}
+						subContainerClassName={"pages pagination"}
+						breakLabel={<a href="">...</a>}
+						activeClassName={"active"}
+						previousLabel={"previous"}
+						nextLabel={"next"}
+						clickCallback={this.handlePageClick}
+					/>
 				</div>
 			</div>
 		);

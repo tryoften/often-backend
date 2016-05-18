@@ -19,7 +19,6 @@ interface CategoryAssignmentItemState extends React.Props<CategoryAssignmentItem
 
 }
 
-
 class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps, CategoryAssignmentItemState> {
 	constructor (props: CategoryAssignmentItemProps) {
 		super(props);
@@ -27,7 +26,7 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 
 	render() {
 		return (
-			<div key={this.props.item._id} className="clearfix well pack-item" >
+			<div key={this.props.item._id} className="clearfix well pack-item">
 				<div className="index-display">{this.props.index + 1}</div>
 				<MediaItemView key={this.props.item._id} item={this.props.item} />
 				<div className="media-item-buttons">

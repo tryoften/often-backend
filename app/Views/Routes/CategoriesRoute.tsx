@@ -10,34 +10,47 @@ interface CategoriesProps extends React.Props<CategoriesRoute> {
 
 interface CategoriesState extends React.Props<CategoriesRoute> {
 	categories?: Categories;
+	loading?: boolean;
 }
 
 export default class CategoriesRoute extends React.Component<CategoriesProps, CategoriesState> {
-	categories: Categories;
-
 	constructor(props: CategoriesProps) {
 		super(props);
 
-		this.categories = new Categories();
 		this.state = {
-			categories: this.categories
+			loading: true
 		};
-
 		this.updateCollection = this.updateCollection.bind(this);
-		this.categories.on('sync', this.updateCollection);
+
 	}
 
 	updateCollection(collection: Categories) {
 		this.setState({
-			categories: collection
+			categories: collection,
+			loading: false
+		});
+	}
+
+	componentDidMount() {
+		let state = {
+			categories: new Categories(),
+			loading: true
+		};
+
+		state.categories.fetch({
+			success: this.updateCollection
 		});
 	}
 
 	componentWillUnmount() {
-		this.categories.off('sync', this.updateCollection);
+		this.state.categories.off('sync', this.updateCollection);
 	}
 
 	render() {
+		if (this.state.loading) {
+			return <div>Loading...</div>;
+		}
+
 		let categoryComponents = (this.state.categories.models || []).map(category => {
 			return (
 				<Link key={category.id} to={`/category/${category.id}`}>
