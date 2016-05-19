@@ -1,10 +1,12 @@
 import * as React from 'react';
-import Category from '../../Models/Category';
-import { MenuItem } from 'react-bootstrap';
+import { MenuItem, DropdownButton, DropdownButtonProps } from 'react-bootstrap';
+import Categories from '../../Collections/Categories';
+import {} from "react-bootstrap";
 
-interface CategoryAssignmentMenuProps extends React.Props<CategoryAssignmentMenu> {
-	categories: Category[];
+interface CategoryAssignmentMenuProps extends React.Props<CategoryAssignmentMenu>, DropdownButtonProps {
+	categories: Categories;
 	onClickCategory: Function;
+	context: any;
 }
 
 export default class CategoryAssignmentMenu extends React.Component<CategoryAssignmentMenuProps, {}> {
@@ -12,22 +14,18 @@ export default class CategoryAssignmentMenu extends React.Component<CategoryAssi
 		super(props);
 	}
 
-	onClickCategory(category: Category, e: Event) {
-
-	}
-
 	render() {
-		let items = this.props.categories.map( category => {
+		let items = this.props.categories.sortBy('name').map( category => {
 			return <MenuItem
 				key={category.id}
 				eventKey={category.id}
-				onClick={this.props.onClickCategory.bind(this, category)}>
+				onClick={this.props.onClickCategory.bind(this.props.context, category)}>
 				{category.name}
 			</MenuItem>;
 		});
 
 		return (
-			<div>{items}</div>
+			<DropdownButton {...this.props}>{items}</DropdownButton>
 		);
 	}
 }

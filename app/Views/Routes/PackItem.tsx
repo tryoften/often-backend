@@ -16,7 +16,6 @@ import PaginationControl from '../Components/PaginationControl';
 const FormGroup = require('react-bootstrap/lib/FormGroup');
 const FormControl = require('react-bootstrap/lib/FormControl');
 const ControlLabel = require('react-bootstrap/lib/ControlLabel');
-const InputGroup = require('react-bootstrap/lib/InputGroup');
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
@@ -111,7 +110,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	onClickCategory(itemId: string, category: Category, e: Event) {
 		e.preventDefault();
 
-		var model = this.state.model;
+		let model = this.state.model;
 		model.assignCategoryToItem(itemId, category);
 		this.setState({
 			model: model
@@ -138,7 +137,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	onUpdatePackItems(packItems: IndexablePackItem[]) {
-
 		let model = this.state.model;
 		model.save({
 			items: packItems
@@ -210,8 +208,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
-		let categoryMenu = <CategoryAssignmentMenu categories={this.state.categories.models}
-			onClickCategory={this.onClickCategory} />;
+		let categoryMenu = <CategoryAssignmentMenu
+			categories={this.state.categories}
+			onClickCategory={this.onClickCategory}
+			context={this} />;
 
 		let items = this.state.model.items.map( (item, index) => {
 			return (
@@ -220,7 +220,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 					categories={this.state.categories}
 					onClickCategory={this.onClickCategory}
 					onClickRemoveItem={this.onClickRemoveItem}
-					categoryMenu={categoryMenu}
+					categoryMenu={React.cloneElement(categoryMenu, {id: item._id, onClickCategory: this.onClickCategory.bind(this, item._id)})}
 					index={index}
 					key={index} />
 			);

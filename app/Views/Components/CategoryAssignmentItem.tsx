@@ -4,6 +4,7 @@ import { ButtonGroup, Button, DropdownButton } from 'react-bootstrap';
 import { IndexablePackItem } from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import Categories from "../../Collections/Categories";
+import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
 
 interface CategoryAssignmentItemProps extends React.Props<CategoryAssignmentItem> {
 	item: IndexablePackItem;
@@ -26,19 +27,21 @@ class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps
 
 	render() {
 		return (
-			<div key={this.props.item._id} className="clearfix well pack-item">
+			<div key={this.props.item._id} id={this.props.item._id} className="clearfix well pack-item">
 				<div className="index-display">{this.props.index + 1}</div>
 				<MediaItemView key={this.props.item._id} item={this.props.item} />
 				<div className="media-item-buttons">
 					<ButtonGroup>
-						<DropdownButton
+						<CategoryAssignmentMenu
 							bsStyle="default"
 							className="category-picker"
+							categories={this.props.categories}
+							onClickCategory={this.props.onClickCategory}
+							context={this}
 							title={ (this.props.item.category) ? this.props.item.category.name : "Unassigned"}
 							id={this.props.item._id}
 							block>
-							{this.props.categoryMenu}
-						</DropdownButton>
+						</CategoryAssignmentMenu>
 						<Button onClick={this.props.onClickRemoveItem.bind(this, this.props.item)}>Remove</Button>
 					</ButtonGroup>
 				</div>
