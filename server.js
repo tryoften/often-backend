@@ -3,7 +3,8 @@ var path = require('path');
 
 var app = express();
 
-app.use('/img/', express.static('client/img'));
+app.use('/img/', express.static(path.join(__dirname, 'client/img')));
+app.use('/fonts/', express.static(path.join(__dirname, 'client/fonts')));
 
 app.get('/js/vendors.js', (req, res) => {
 	res.sendFile(path.join(__dirname, 'client/js/vendors.js'));
@@ -21,6 +22,6 @@ app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, 'client/index.html'));
 });
 
-app.listen(8080, 'localhost', function (err) {
+app.listen(80, function (err) {
 	console.log('Listening at http://localhost:8080');
 });

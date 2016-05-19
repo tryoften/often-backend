@@ -3,13 +3,12 @@ import * as _ from 'underscore';
 import { Modal, Tabs, Tab, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import SearchPanel from '../Components/SearchPanel';
 import Owners from '../../Collections/Owners';
-import Owner from "../../Models/Owner";
+import Owner from '../../Models/Owner';
 import MediaItemView from '../Components/MediaItemView';
-import {IndexableObject} from "../../Interfaces/Indexable";
-import {PackAttributes} from '../../Models/Pack';
-import Pack from '../../Models/Pack';
-import {IndexablePackItem} from '../../Models/Pack';
+import { IndexablePackItem } from '../../Models/Pack';
 import MediaItemType from '../../Models/MediaItemType';
+
+const shallowCompare = require('react-addons-shallow-compare');
 
 interface AddItemToPackModalProps extends React.Props<AddItemToPackModal> {
 	show: boolean;
@@ -43,6 +42,10 @@ export default class AddItemToPackModal extends React.Component<AddItemToPackMod
 		this.onSaveChanges = this.onSaveChanges.bind(this);
 		this.onSelectItem = this.onSelectItem.bind(this);
 		this.owners.on('update', this.updateStateWithModel);
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
 	}
 
 	updateStateWithModel(owners: Owners) {

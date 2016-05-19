@@ -3,6 +3,7 @@ import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import { Link } from 'react-router';
 import OwnerView from '../Components/OwnerView';
 import Owners from '../../Collections/Owners';
+import PaginationControl from '../Components/PaginationControl';
 
 interface OwnersProps extends React.Props<OwnersRoute> {
 	open?: boolean;
@@ -31,7 +32,7 @@ export default class OwnersRoute extends React.Component<OwnersProps, OwnersStat
 	}
 
 	render() {
-		let ownerComponents = this.state.owners.map(owner => {
+		let ownerComponents = this.state.owners.sortBy('name').map(owner => {
 			return (
 				<Link key={owner.id} to={`/owner/${owner.id}`}>
 					<OwnerView key={owner.id} model={owner}></OwnerView>
@@ -55,7 +56,7 @@ export default class OwnersRoute extends React.Component<OwnersProps, OwnersStat
 					<Row>
 						<Col sm={12}>
 							<div className="content">
-								{ownerComponents}
+								<PaginationControl items={ownerComponents} pageSize={20} />
 							</div>
 						</Col>
 					</Row>
