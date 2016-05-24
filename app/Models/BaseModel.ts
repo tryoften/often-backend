@@ -10,7 +10,6 @@ export interface BaseModelAttributes {
 }
 
 class BaseModel extends Firebase.Model {
-
 	objectMap: ObjectMap;
 
 	constructor (attributes?: BaseModelAttributes, options: any = {autoSync: false, setObjectMap: false}) {

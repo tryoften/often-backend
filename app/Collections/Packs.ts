@@ -7,7 +7,7 @@ export default class Packs extends Backbone.Firebase.Collection<Pack> {
 	constructor() {
 		super([], {
 			model: Pack,
-			autoSync: true
+			autoSync: false
 		});
 	}
 

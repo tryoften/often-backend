@@ -1,40 +1,28 @@
 import * as _ from 'underscore';
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
-import Categories from '../../Collections/Categories';
-import { Grid, Row, Col, Thumbnail, Glyphicon, ButtonGroup, Button, ButtonToolbar, DropdownButton, MenuItem } from 'react-bootstrap';
-const FormGroup = require('react-bootstrap/lib/FormGroup');
-const FormControl = require('react-bootstrap/lib/FormControl');
-const ControlLabel = require('react-bootstrap/lib/ControlLabel');
-const InputGroup = require('react-bootstrap/lib/InputGroup');
-
-import Pack, {PackAttributes, IndexablePackItem} from '../../Models/Pack';
-import AddItemToPackModal from '../Components/AddItemToPackModal';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
+import Categories from '../../Collections/Categories';
+import { Grid, Row, Col, Thumbnail, Glyphicon, ButtonGroup, Button } from 'react-bootstrap';
+import Pack, { PackAttributes, IndexablePackItem } from '../../Models/Pack';
+import AddItemToPackModal from '../Components/AddItemToPackModal';
 import DeleteButton from '../Components/DeleteButton';
 import Category from '../../Models/Category';
 import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
 import ImageSelectionModal from '../Components/ImageSelectionModal';
 import Image from '../../Models/Image';
+import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
+import PaginationControl from '../Components/PaginationControl';
 var ReactPaginate = require('react-paginate');
+const FormGroup = require('react-bootstrap/lib/FormGroup');
+const FormControl = require('react-bootstrap/lib/FormControl');
+const ControlLabel = require('react-bootstrap/lib/ControlLabel');
 
 interface PackItemProps extends React.Props<PackItem> {
 	params: {
 		packId: string;
 	};
-}
-
-interface Pagination {
-	numItemsPerPage?: number;
-	numPages?: number;
-	activePage?: number;
-	indexRange?: IndexRange;
-}
-
-export interface IndexRange {
-	start: number;
-	end: number;
 }
 
 interface PackItemState extends React.Props<PackItem> {
@@ -44,11 +32,9 @@ interface PackItemState extends React.Props<PackItem> {
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
-	pagination?: Pagination;
 	categories?: Categories;
+	loading?: boolean;
 }
-
-const perPageDefaults = [10, 50, 100, 1000];
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
 	static contextTypes: React.ValidationMap<any> = {
@@ -63,44 +49,73 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		super(props);
 
 		let isNew = !props.params.packId;
-		let pack = isNew ? new Pack() : new Pack({
-			id: props.params.packId
+
+		this.state = {
+			shouldShowSearchPanel: false,
+			display: false,
+			isNew: isNew
+		};
+
+		this.updateStateWithPack = this.updateStateWithPack.bind(this);
+		this.handlePropChange = this.handlePropChange.bind(this);
+		this.handleUpdate = this.handleUpdate.bind(this);
+		this.onClickAddItem = this.onClickAddItem.bind(this);
+		this.togglePublish = this.togglePublish.bind(this);
+		this.onDelete = this.onDelete.bind(this);
+		this.onUpdatePackItems = this.onUpdatePackItems.bind(this);
+		this.updateStateWithCategories = this.updateStateWithCategories.bind(this);
+		this.onClickRemoveItem = this.onClickRemoveItem.bind(this);
+		this.getResizedImage = this.getResizedImage.bind(this);
+		this.onClickSelectImage = this.onClickSelectImage.bind(this);
+	}
+
+	componentDidMount() {
+		let pack = this.state.isNew ? new Pack() : new Pack({
+			id: this.props.params.packId
 		});
 
 		let categories = new Categories();
 
-		this.state = {
+		let state = {
 			model: pack,
-			categories: categories,
 			form: pack.toJSON(),
-			shouldShowSearchPanel: false,
-			shouldShowImageSelectionPanel: false,
-			display: false,
-			isNew: isNew,
-			pagination: {
-				numItemsPerPage: 10,
-				numPages: 1,
-				activePage: 0,
-				indexRange: {
-					start: 0,
-					end: -1
-				}
-			}
+			categories: categories
 		};
 
-		_.bindAll(this, 'updateStateWithPack', 'handlePropChange', 'handleUpdate', 'onClickAddItem', 'togglePublish', 'onDelete',
-			'calculateNumberOfPages', 'getIndexRange', 'handlePageClick', 'getIndexRange', 'onUpdatePackItems', 'onPageSizeChange',
-			'updateStateWithCategories', 'onClickRemoveItem', 'onClickCategory', 'onClickSelectImage', 'getResizedImage');
 		pack.on('update', this.updateStateWithPack);
 		categories.on('update', this.updateStateWithCategories);
-		pack.syncData();
-		//categories.syncData();
+
+		this.setState(state);
+
+		pack.fetch({
+			success: this.updateStateWithPack
+		});
+		categories.fetch({
+			success: this.updateStateWithCategories
+		});
+	}
+
+	componentWillUnmount() {
+		this.state.model.off('update', this.updateStateWithPack);
+		this.state.categories.off('update', this.updateStateWithCategories);
+	}
+
+	updateStateWithPack(pack: Pack) {
+		this.setState({
+			model: pack,
+			form: pack.toJSON(),
+			display: true
+		});
+	}
+
+	updateStateWithCategories(categories: Categories) {
+		this.setState({categories});
 	}
 
 	onClickCategory(itemId: string, category: Category, e: Event) {
 		e.preventDefault();
 
-		var model = this.state.model;
+		let model = this.state.model;
 		model.assignCategoryToItem(itemId, category);
 		this.setState({
 			model: model
@@ -115,33 +130,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		this.setState({
 			model: model
-		});
-	}
-
-	updateStateWithCategories(categories: Categories) {
-		this.setState({categories});
-	}
-
-	componentDidMount() {
-		this.state.model.fetch({
-			success: this.updateStateWithPack
-		});
-		this.state.categories.fetch({
-			success: this.updateStateWithCategories
-		});
-	}
-
-	updateStateWithPack(pack: Pack) {
-		let currentPagination = this.state.pagination;
-
-		this.setState({
-			model: pack,
-			form: pack.toJSON(),
-			display: true,
-			pagination: _.extend(currentPagination, {
-				numPages: this.calculateNumberOfPages(pack.items.length, currentPagination.numItemsPerPage),
-				indexRange: this.getIndexRange(currentPagination.activePage, currentPagination.numItemsPerPage)
-			})
 		});
 	}
 
@@ -162,7 +150,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	onUpdatePackItems(packItems: IndexablePackItem[]) {
-
 		let model = this.state.model;
 		model.save({
 			items: packItems
@@ -212,7 +199,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 	}
 
-
 	togglePublish(e) {
 		let form = this.state.form;
 		form.published = !form.published;
@@ -228,41 +214,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.context.router.push('/packs');
 	}
 
-	handlePageClick(e) {
-		let currentPagination = this.state.pagination;
-		this.setState({
-			pagination: _.extend(currentPagination, {
-				activePage: e.selected,
-				indexRange: this.getIndexRange(e.selected, currentPagination.numItemsPerPage)
-			})
-		});
-	}
-
-	calculateNumberOfPages(numItems: number, numItemsPerPage: number) {
-		var pageNum = Math.floor(numItems / numItemsPerPage);
-		return (numItems % numItemsPerPage) ? pageNum + 1 : pageNum;
-	}
-
-	getIndexRange(pageIndex: number, numItemsPerPage: number) {
-		let start = (pageIndex) * numItemsPerPage;
-		return {
-			start: start,
-			end: start + numItemsPerPage - 1
-		};
-	}
-
-	onPageSizeChange(numItems: number, e: Event) {
-		let currentPagination = this.state.pagination;
-
-		this.setState({
-			pagination: _.extend(currentPagination, {
-				numItemsPerPage: numItems,
-				numPages: this.calculateNumberOfPages(this.state.model.items.length, numItems),
-				indexRange: this.getIndexRange(currentPagination.activePage, numItems)
-			})
-		});
-	}
-
 	getResizedImage(image: Image) {
 		let form = this.state.form;
 		form.image = {
@@ -276,38 +227,29 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	render() {
+		if (!this.state.display) {
+			return <div>Loading...</div>;
+		}
+
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
-		let menuItems = perPageDefaults.map((pageDefault) => {
-			return (<MenuItem eventKey={pageDefault} key={pageDefault}>{pageDefault}</MenuItem>);
-		});
-
-		let numItemsPerPageToggle = (
-			<div className="page-size-select">
-				<ButtonToolbar>
-					<DropdownButton
-						title={this.state.pagination.numItemsPerPage}
-						id="dropdown-size-medium"
-						onSelect={this.onPageSizeChange}
-						key="dropdown-size-medium"
-						dropup>
-						{menuItems}
-					</DropdownButton>
-				</ButtonToolbar>
-			</div>
-		);
-
-		console.log('pagination', this.state.pagination);
-
-		let categoryAssignmentItems = this.state.model.items.map( (item, index) => <CategoryAssignmentItem
-			item={item}
+		let categoryMenu = <CategoryAssignmentMenu
 			categories={this.state.categories}
 			onClickCategory={this.onClickCategory}
-			onClickRemoveItem={this.onClickRemoveItem}
-			index={index}
-			key={index}
-		/>);
+			context={this} />;
 
+		let items = this.state.model.items.map( (item, index) => {
+			return (
+				<CategoryAssignmentItem
+					item={item}
+					categories={this.state.categories}
+					onClickCategory={this.onClickCategory}
+					onClickRemoveItem={this.onClickRemoveItem}
+					categoryMenu={React.cloneElement(categoryMenu, {id: item._id, onClickCategory: this.onClickCategory.bind(this, item._id)})}
+					index={index}
+					key={index} />
+			);
+		});
 
 		return (
 			<div className={classes}>
@@ -327,7 +269,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											type="text"
 											placeholder="Enter Name"
 											value={form.name}
-											onChange={this.handlePropChange }/>
+											onChange={this.handlePropChange}/>
 									</FormGroup>
 									<FormGroup>
 										<ControlLabel>Description</ControlLabel>
@@ -336,29 +278,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											type="text"
 											placeholder="Description"
 											value={form.description}
-											onChange={this.handlePropChange }/>
+											onChange={this.handlePropChange}/>
 									</FormGroup>
 								</Col>
 							</Row>
 							<Row>
-								<Col xs={9} md={6}>
-									<FormGroup>
-										<ControlLabel>Price</ControlLabel>
-										<InputGroup>
-											<InputGroup.Addon>$</InputGroup.Addon>
-											<FormControl
-												id="price"
-												type="number"
-												placeholder="Price"
-												stop="any"
-												min="0"
-												addonBefore="$"
-												value={this.state.form.price}
-												disabled={!form.premium}
-												onChange={this.handlePropChange }/>
-										</InputGroup>
-									</FormGroup>
-								</Col>
 								<Col xs={2} md={2}>
 									<FormGroup>
 										<ControlLabel>Premium</ControlLabel>
@@ -409,13 +333,13 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								<div className="media-item-group">
 									<h3>Items</h3>
 									<div className="items">
-										{categoryAssignmentItems}
+										<PaginationControl items={items} />
 									</div>
 								</div>
 							</Row>
 						</Col>
 						<Col xs={6}>
-							<AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} />
+							{(this.state.shouldShowSearchPanel) ? <AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} /> : ''}
 						</Col>
 						<Col xs={6}>
 							<ImageSelectionModal show={this.state.shouldShowImageSelectionPanel} getResizedImage={this.getResizedImage} />
@@ -423,21 +347,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 					</Row>
 				</Grid>
 
-				<div className="footer fixed">
-					<ReactPaginate
-						pageNum={this.state.pagination.numPages}
-						pageRangeDisplayed={5}
-						marginPagesDisplayed={1}
-						containerClassName={"pagination"}
-						subContainerClassName={"pages pagination"}
-						breakLabel={<a href="">...</a>}
-						activeClassName={"active"}
-						previousLabel={"previous"}
-						nextLabel={"next"}
-						clickCallback={this.handlePageClick}
-					/>
-					{numItemsPerPageToggle}
-				</div>
 			</div>
 		);
 	}

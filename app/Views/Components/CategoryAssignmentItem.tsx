@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as _ from 'underscore';
-import {ButtonGroup, Button, MenuItem, DropdownButton } from 'react-bootstrap';
-import {IndexablePackItem} from '../../Models/Pack';
+import { ButtonGroup, Button, DropdownButton } from 'react-bootstrap';
+import { IndexablePackItem } from '../../Models/Pack';
 import MediaItemView from '../Components/MediaItemView';
 import Categories from "../../Collections/Categories";
-
+import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
 
 interface CategoryAssignmentItemProps extends React.Props<CategoryAssignmentItem> {
 	item: IndexablePackItem;
@@ -13,46 +13,35 @@ interface CategoryAssignmentItemProps extends React.Props<CategoryAssignmentItem
 	onClickRemoveItem: Function;
 	index: number;
 	key: number;
-
+	categoryMenu: React.ReactNode;
 }
 
 interface CategoryAssignmentItemState extends React.Props<CategoryAssignmentItem> {
 
 }
 
-
 class CategoryAssignmentItem extends React.Component<CategoryAssignmentItemProps, CategoryAssignmentItemState> {
-
 	constructor (props: CategoryAssignmentItemProps) {
 		super(props);
 	}
 
 	render() {
-		var categoryMenu = (item) => {
-			return this.props.categories.map( category => {
-				return <MenuItem
-					key={category.id}
-					eventKey={category.id}
-					onClick={this.props.onClickCategory.bind(this, item._id, category)}>
-					{category.name}
-				</MenuItem>;
-			});
-		};
-
 		return (
-			<div key={this.props.item._id} className="clearfix well pack-item" >
+			<div key={this.props.item._id} id={this.props.item._id} className="clearfix well pack-item">
 				<div className="index-display">{this.props.index + 1}</div>
 				<MediaItemView key={this.props.item._id} item={this.props.item} />
 				<div className="media-item-buttons">
 					<ButtonGroup>
-						<DropdownButton
+						<CategoryAssignmentMenu
 							bsStyle="default"
 							className="category-picker"
+							categories={this.props.categories}
+							onClickCategory={this.props.onClickCategory}
+							context={this}
 							title={ (this.props.item.category) ? this.props.item.category.name : "Unassigned"}
 							id={this.props.item._id}
 							block>
-							{categoryMenu(this.props.item)}
-						</DropdownButton>
+						</CategoryAssignmentMenu>
 						<Button onClick={this.props.onClickRemoveItem.bind(this, this.props.item)}>Remove</Button>
 					</ButtonGroup>
 				</div>

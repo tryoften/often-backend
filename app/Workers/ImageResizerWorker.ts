@@ -90,7 +90,7 @@ class ImageResizerWorker extends Worker {
 	private uploadImageToCloud (image: Image, resizedImages: ImageInfo[]): ImageTransformations {
 		var responseObj = {};
 		for (let resizedImg of resizedImages) {
-			var path = `/images/${image.id}/${image.id}~${resizedImg.transformation}.resizedImg.meta.format`;
+			var path = `/images/${image.id}/${image.id}~${resizedImg.transformation}.${resizedImg.meta.format}`;
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			let onError = (err) => {
 				console.error(err);
@@ -101,8 +101,8 @@ class ImageResizerWorker extends Worker {
 
 			// TODO(jakub): Create a format string and place inside of the configuration
 			let url = `https://www.googleapis.com/download/storage/v1/b/${GoogleStorageConfig.image_bucket}/o/${encodeURIComponent(path)}?alt=media`;
-
-			responseObj[resizedImg.transformation] = {
+			let tran = <string>resizedImg.transformation;
+			responseObj[tran] = {
 				type: resizedImg.transformation,
 				url: url,
 				height: resizedImg.meta.height,

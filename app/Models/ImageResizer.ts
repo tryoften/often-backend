@@ -1,7 +1,6 @@
-import * as sharp from 'sharp';
-import logger from '../logger';
+var sharp = require('sharp');
 
-export class TransformationType  {
+export class TransformationType extends String {
 	static rectangle: TransformationType = 'rectangle';
 	static original: TransformationType = 'original';
 	static square: TransformationType = 'square';
@@ -79,7 +78,7 @@ class ImageResizer {
 	 * @return {Promise<ImageInfo[]>} - Promise that resolves to an array of ImageInfo objects containing
 	 */
 	bulkResize (data: ImageBinary, transformations: TransformationType[]): Promise<ImageInfo[]> {
-		var promises: Promise<ImageInfo>[] = [];
+		var promises = [];
 		transformations.forEach((tran) => {
 			promises.push(this.resize(data, tran));
 		});
