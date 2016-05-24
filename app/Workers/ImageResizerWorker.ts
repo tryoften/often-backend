@@ -90,7 +90,7 @@ class ImageResizerWorker extends Worker {
 	private uploadImageToCloud (image: Image, resizedImages: ImageInfo[]): ImageTransformations {
 		var responseObj = {};
 		for (let resizedImg of resizedImages) {
-			var path = `/test/images/${image.id}/${image.id}~${resizedImg.transformation}.${resizedImg.meta.format}`;
+			var path = `/images/${image.id}/${image.id}~${resizedImg.transformation}.${resizedImg.meta.format}`;
 			var remoteWriteStream = this.bucket.file(path).createWriteStream();
 			let onError = (err) => {
 				console.error(err);
