@@ -118,15 +118,15 @@ export default class OwnerItem extends React.Component<OwnerItemProps, OwnerItem
 
 		var quoteForm = this.state.shouldShowQuoteForm ?
 			(<QuoteForm owner={this.state.model}
-						quoteId={this.state.currentQuoteId}
-						show={this.state.shouldShowQuoteForm}
-						onSaveChanges={this.close.bind(this)}/>) : "";
+				quoteId={this.state.currentQuoteId}
+				show={this.state.shouldShowQuoteForm}
+				onSaveChanges={this.close.bind(this)}/>) : "";
 
 		var gifForm = this.state.shouldShowGIFForm ?
 			(<GIFForm owner={this.state.model}
-					  gifId={this.state.currentGIFId}
-					  show={this.state.shouldShowGIFForm}
-					  onSaveChanges={this.close.bind(this)}/>) : "";
+				gifId={this.state.currentGIFId}
+				show={this.state.shouldShowGIFForm}
+				onSaveChanges={this.close.bind(this)}/>) : "";
 
 		return (
 			<div className="section">

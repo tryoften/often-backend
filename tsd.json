@@ -76,6 +76,9 @@
     },
     "react-dnd/react-dnd.d.ts": {
       "commit": "310c247694d7f31bd2e3198f71c55221f7c3a3c7"
+    },
+    "validator/validator.d.ts": {
+      "commit": "e69daec7f79c0c25c4653f866e5cadb5bb7a01ca"
     }
   }
 }

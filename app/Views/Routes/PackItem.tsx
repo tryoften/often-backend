@@ -15,6 +15,8 @@ import * as objectPath from 'object-path';
 import DeleteButton from '../Components/DeleteButton';
 import Category from '../../Models/Category';
 import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
+import ImageSelectionModal from '../Components/ImageSelectionModal';
+import Image from '../../Models/Image';
 var ReactPaginate = require('react-paginate');
 
 interface PackItemProps extends React.Props<PackItem> {
@@ -38,6 +40,7 @@ export interface IndexRange {
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
+	shouldShowImageSelectionPanel?: boolean;
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
@@ -71,6 +74,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 			categories: categories,
 			form: pack.toJSON(),
 			shouldShowSearchPanel: false,
+			shouldShowImageSelectionPanel: false,
 			display: false,
 			isNew: isNew,
 			pagination: {
@@ -86,7 +90,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		_.bindAll(this, 'updateStateWithPack', 'handlePropChange', 'handleUpdate', 'onClickAddItem', 'togglePublish', 'onDelete',
 			'calculateNumberOfPages', 'getIndexRange', 'handlePageClick', 'getIndexRange', 'onUpdatePackItems', 'onPageSizeChange',
-			'updateStateWithCategories', 'onClickRemoveItem', 'onClickCategory');
+			'updateStateWithCategories', 'onClickRemoveItem', 'onClickCategory', 'onClickSelectImage', 'getResizedImage');
 		pack.on('update', this.updateStateWithPack);
 		categories.on('update', this.updateStateWithCategories);
 		pack.syncData();
@@ -146,6 +150,14 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		this.setState({
 			shouldShowSearchPanel: true
+		});
+	}
+
+	onClickSelectImage(e: Event) {
+		e.preventDefault();
+
+		this.setState({
+			shouldShowImageSelectionPanel: true
 		});
 	}
 
@@ -248,6 +260,18 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 				numPages: this.calculateNumberOfPages(this.state.model.items.length, numItems),
 				indexRange: this.getIndexRange(currentPagination.activePage, numItems)
 			})
+		});
+	}
+
+	getResizedImage(image: Image) {
+		let form = this.state.form;
+		form.image = {
+			small_url: image.square_small_url,
+			large_url: image.large_url
+		};
+		this.setState({
+			form: form,
+			shouldShowImageSelectionPanel: false
 		});
 	}
 
@@ -355,33 +379,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											onChange={this.handlePropChange }/>
 									</FormGroup>
 								</Col>
-
-
 							</Row>
 							<Row>
-								<Col xs={8}>
-									<FormGroup>
-										<ControlLabel>Small Image</ControlLabel>
-										<FormControl
-											id="image.small_url"
-											type="text"
-											placeholder={form.image.small_url}
-											value={form.image.small_url}
-											onChange={this.handlePropChange }/>
-									</FormGroup>
-									<FormGroup>
-										<ControlLabel>Large Image</ControlLabel>
-										<FormControl
-											id="image.large_url"
-											type="text"
-											placeholder={form.image.large_url}
-											value={form.image.large_url}
-											onChange={this.handlePropChange }/>
-									</FormGroup>
-								</Col>
-								<Col xs={4}>
+								<Col md={4}>
 									<div class="image-upload pack-thumbnail">
-										<Thumbnail src={form.image.small_url} />
+										<Thumbnail src={form.image.large_url} onClick={this.onClickSelectImage} />
 									</div>
 								</Col>
 							</Row>
@@ -414,6 +416,9 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 						</Col>
 						<Col xs={6}>
 							<AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} />
+						</Col>
+						<Col xs={6}>
+							<ImageSelectionModal show={this.state.shouldShowImageSelectionPanel} getResizedImage={this.getResizedImage} />
 						</Col>
 					</Row>
 				</Grid>

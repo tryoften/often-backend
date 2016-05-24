@@ -5,8 +5,8 @@ export default class BaseModelType extends String {
 	static category: BaseModelType = 'category';
 	static subscription: BaseModelType = 'subscription';
 	static user: BaseModelType = 'user';
-
-	static allTypes: BaseModelType[] = _.union(MediaItemType.allTypes, BaseModelType.category, BaseModelType.subscription);
+	static image: BaseModelType = 'image';
+	static allTypes: BaseModelType[] = _.union(MediaItemType.allTypes, BaseModelType.category, BaseModelType.subscription, BaseModelType.image, BaseModelType.user);
 
 	private static mapping: any;
 	static get classMapping(): any {
@@ -14,7 +14,8 @@ export default class BaseModelType extends String {
 			BaseModelType.mapping = _.extend(MediaItemType.classMapping, {
 				category: require('./Category').default,
 				subscription: require('./Subscription').default,
-				user: require('./User').default
+				user: require('./User').default,
+				image: require('./Image').default
 			});
 		}
 		return BaseModelType.mapping;

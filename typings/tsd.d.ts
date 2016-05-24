@@ -24,6 +24,7 @@
 /// <reference path="object-path/object-path.d.ts" />
 /// <reference path="object-hash/object-hash.d.ts" />
 /// <reference path="react-dnd/react-dnd.d.ts" />
+/// <reference path="validator/validator.d.ts" />
 
 declare module "firebase-queue" {
 	class Queue {
