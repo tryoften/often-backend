@@ -21,7 +21,6 @@ interface ImageSelectionModalState {
 	images?: Images;
 	loading?: boolean;
 	image_url?: string;
-	newImage?: Image;
 	imageQueueRef?: Firebase;
 	errMessage?: string;
 	successMessage?: string;
@@ -47,13 +46,13 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 		this.onUploadImage = this.onUploadImage.bind(this);
 		this.onImageResize = this.onImageResize.bind(this);
 		this.onInitImageSync = this.onInitImageSync.bind(this);
+		this.onEnterViewImagesTab = this.onEnterViewImagesTab.bind(this);
 	}
 
 	close() {
 		this.setState({
 			errMessage: '',
 			successMessage: '',
-			newImage: null,
 			loadingImage: false,
 			image_url: '',
 			showModal: false
@@ -70,13 +69,6 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 			success: this.updateStateWithImages
 		});
 		this.setState(state);
-	}
-
-	componentWillUnmount() {
-		this.state.images.off('sync', this.updateStateWithImages);
-		if (this.state.newImage) {
-			this.state.newImage.off('sync');
-		}
 	}
 
 	updateStateWithImages(images: Images) {
@@ -116,10 +108,6 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 
 	onImageResize(image: Image) {
 		if (!!image.resize_datetime) {
-			console.log('resized image');
-			this.state.images.fetch({
-				success: this.updateStateWithImages
-			});
 			this.setState({
 				successMessage: "Successfully uploaded an image.",
 				loadingImage: false
@@ -167,10 +155,12 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 			success: this.onInitImageSync
 		});
 
-		this.setState({
-			newImage: newImage
-		});
+	}
 
+	onEnterViewImagesTab(eventKey: any, e: any) {
+		this.state.images.fetch({
+			success: this.updateStateWithImages
+		});
 	}
 
 
@@ -211,7 +201,10 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 
 		let tabulatedResults = (<Tabs
 				id = "uncontrolled-modal-tab" >
-				<Tab eventKey={0} title="Select Image">
+				<Tab
+					eventKey={0}
+					title="Select Image"
+					onEnter={this.onEnterViewImagesTab}>
 					<div className="container-fluid">
 						<div className="image-group">
 							{images}
@@ -219,8 +212,8 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 					</div>
 				</Tab>
 				<Tab
-					eventKey = {1}
-					title = "New Image" >
+					eventKey={1}
+					title="New Image" >
 					<FormGroup>
 						<ControlLabel>Url</ControlLabel>
 						<FormControl
