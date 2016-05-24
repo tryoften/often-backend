@@ -24,6 +24,8 @@ interface ImageSelectionModalState {
 	newImage?: Image;
 	imageQueueRef?: Firebase;
 	errMessage?: string;
+	successMessage?: string;
+	loadingImage?: boolean;
 }
 
 export default class ImageSelectionModal extends React.Component<ImageSelectionModalProps, ImageSelectionModalState> {
@@ -35,18 +37,25 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 			loading: true,
 			image_url: '',
 			showModal: props.show,
-			errMessage: ''
+			errMessage: '',
+			successMessage: '',
+			loadingImage: false
 		};
 		this.close = this.close.bind(this);
 		this.updateStateWithImages = this.updateStateWithImages.bind(this);
 		this.checkURLAndSetPreview = this.checkURLAndSetPreview.bind(this);
 		this.onUploadImage = this.onUploadImage.bind(this);
-		this.onImageChange = this.onImageChange.bind(this);
+		this.onImageResize = this.onImageResize.bind(this);
+		this.onInitImageSync = this.onInitImageSync.bind(this);
 	}
 
 	close() {
 		this.setState({
 			errMessage: '',
+			successMessage: '',
+			newImage: null,
+			loadingImage: false,
+			image_url: '',
 			showModal: false
 		});
 	}
@@ -66,7 +75,7 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 	componentWillUnmount() {
 		this.state.images.off('sync', this.updateStateWithImages);
 		if (this.state.newImage) {
-			this.state.newImage.off('change');
+			this.state.newImage.off('sync');
 		}
 	}
 
@@ -100,33 +109,68 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 		}
 		this.setState({
 			image_url: url,
-			errMessage: errMessage
+			errMessage: errMessage,
+			successMessage: ''
 		});
 	}
 
-	onImageChange (image: Image) {
-		//Check if update
-		this.state.images.fetch();
-		this.state.newImage.off('change');
-		this.setState({
-			showModal: false
-		});
+	onImageResize(image: Image) {
+		if (!!image.resize_datetime) {
+			console.log('resized image');
+			this.state.images.fetch({
+				success: this.updateStateWithImages
+			});
+			this.setState({
+				successMessage: "Successfully uploaded an image.",
+				loadingImage: false
+			});
+		} else {
+			if (this.state.loadingImage) {
+				this.setState(({
+					errMessage: "Image resizer is taking too long. Try again later.",
+					loadingImage: false
+				}));
+			}
+		}
+	}
+
+	onInitImageSync(image: Image) {
+		if (!!image.resize_datetime) {
+			this.setState({
+				errMessage: 'Image has been previously resized.'
+			});
+		} else {
+
+			this.state.imageQueueRef.push({
+				imageId: image.id,
+				url: this.state.image_url
+			});
+
+			setTimeout(() => {
+				image.fetch({
+					success: this.onImageResize
+				});
+			}, 3000);
+
+			this.setState({
+				loadingImage: true
+			});
+		}
 	}
 
 	onUploadImage() {
 		let newImage = new Image({
 			source_url: this.state.image_url
 		});
-		newImage.on('change', this.onImageChange);
-		this.state.imageQueueRef.push({
-			imageId: newImage.id,
-			url: this.state.image_url
+
+		newImage.fetch({
+			success: this.onInitImageSync
 		});
-		/* Check if changd after X number of seconds */
-		setTimeout(() => { newImage.fetch(); }, 1000);
+
 		this.setState({
 			newImage: newImage
 		});
+
 	}
 
 
@@ -152,13 +196,16 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 
 		let displayUploadButton = () => {
 			if (this.state.image_url) {
-				return (<Button bsStyle="primary" onClick={this.onUploadImage}>Upload Image</Button>);
+				return (<Button bsStyle="primary" onClick={this.onUploadImage} disabled={this.state.loadingImage}>{(this.state.loadingImage) ? "Uploading..." : "Upload Image"} </Button>);
 			}
 		};
 
-		let displayErrorMessage = () => {
+		let displayMessages = () => {
 			if (this.state.errMessage) {
 				return (<Alert bsStyle="danger">{this.state.errMessage}</Alert>);
+			}
+			if (this.state.successMessage) {
+				return (<Alert bsStyle="success">{this.state.successMessage}</Alert>);
 			}
 		};
 
@@ -184,6 +231,7 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 							onChange={this.checkURLAndSetPreview }/>
 					</FormGroup>
 					{displayPreview()}
+					{displayMessages()}
 				</Tab >
 			</Tabs>);
 
@@ -191,7 +239,6 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 			<Modal show={this.state.showModal} onHide={this.close} bsSize="large">
 				<Modal.Body>
 					{tabulatedResults}
-					{displayErrorMessage()}
 				</Modal.Body>
 				<Modal.Footer>
 					{displayUploadButton()}

@@ -307,7 +307,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<Row>
 								<Col md={4}>
 									<div class="image-upload pack-thumbnail">
-										<Thumbnail src={form.image.large_url} onClick={this.onClickSelectImage} />
+										<Thumbnail src={form.image.small_url} onClick={this.onClickSelectImage} />
 									</div>
 								</Col>
 							</Row>
