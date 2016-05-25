@@ -107,7 +107,6 @@ class ImageResizerWorker extends Worker {
 				url: url,
 				height: resizedImg.meta.height,
 				width: resizedImg.meta.width,
-				byte_size: 0,
 				format: resizedImg.meta.format
 			};
 		}
