@@ -6,7 +6,13 @@ export default class BaseModelType extends String {
 	static subscription: BaseModelType = 'subscription';
 	static user: BaseModelType = 'user';
 	static image: BaseModelType = 'image';
-	static allTypes: BaseModelType[] = _.union(MediaItemType.allTypes, BaseModelType.category, BaseModelType.subscription, BaseModelType.image, BaseModelType.user);
+	static allTypes: BaseModelType[] = _.union(
+		MediaItemType.allTypes,
+		BaseModelType.category,
+		BaseModelType.subscription,
+		BaseModelType.image,
+		BaseModelType.user
+	);
 
 	private static mapping: any;
 	static get classMapping(): any {
