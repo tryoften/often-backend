@@ -1,13 +1,14 @@
 import * as Firebase from 'firebase';
-import {firebase as FirebaseConfig} from '../config';
 let unirest = require('unirest');
 let allUserIds = [];
 
 let usersToRemoveObj = {};
 
+let baseUrl = 'https://jakub-test-4d7f6.firebaseio.com';
+
 function filterUser(uid): Promise<boolean> {
 	return new Promise((resolve, reject) => {
-		let userRef = new Firebase(`${FirebaseConfig.BaseURL}/users/${uid}`);
+		let userRef = new Firebase(`${baseUrl}/users/${uid}`);
 		userRef.once('value', (snap) => {
 			if (!snap) {
 				reject('Couldnt load user info');
@@ -22,16 +23,6 @@ function filterUser(uid): Promise<boolean> {
 	});
 }
 
-function filterUsersInSequence() {
-	let promise = Promise.resolve(true);
-
-	allUserIds.forEach((uid) => {
-		promise = promise.then(() =>  filterUser(uid));
-	});
-
-	return promise;
-}
-
 function filterUsers() {
 	let promises = [];
 	allUserIds.forEach((uid) => {
@@ -43,7 +34,7 @@ function filterUsers() {
 
 
 function removeOldUsers() {
-	let newUsers = new Firebase(`${FirebaseConfig.BaseURL}/users`);
+	let newUsers = new Firebase(`${baseUrl}/users`);
 	newUsers.update(usersToRemoveObj, (error) => {
 		if (error) {
 			console.log('Failed to remove old users', error);
@@ -55,10 +46,9 @@ function removeOldUsers() {
 
 function getUserIds() {
 	return new Promise((resolve, reject) => {
-		let request = unirest.get(`${FirebaseConfig.BaseURL}/users.json`)
+		let request = unirest.get(`${baseUrl}/users.json`)
 			.query('shallow=true');
 		request.header('Accept', 'application/json').end( (response) => {
-			//Response in here
 			if (response.error) {
 				console.log('Error fetching user ids', response.error);
 			}
@@ -71,8 +61,12 @@ function getUserIds() {
 getUserIds()
 	.then(() => filterUsers())
 	.then(() => {
-		console.log(usersToRemoveObj);
+		console.log("To be removed: " + Object.keys(usersToRemoveObj).length);
+		console.log("Total: " + allUserIds.length);
 		console.log('done');
+	})
+	.then(() => {
+		removeOldUsers();
 	});
-//filterUsersInSequence().then( () => removeOldUsers() );
+
 
