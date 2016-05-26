@@ -24,6 +24,7 @@ class ImageResizerWorker extends Worker {
 	private gcs: any;
 	private bucket: any;
 	private resizer: ImageResizer;
+	private maxCacheExpiry: number;
 
 	constructor (opts = {}) {
 
@@ -47,6 +48,7 @@ class ImageResizerWorker extends Worker {
 
 		this.resizer = new ImageResizer();
 		this.bucket = this.gcs.bucket(GoogleStorageConfig.image_bucket);
+		this.maxCacheExpiry = 86400; // 1 day in seconds
 	}
 
 	/**
@@ -91,7 +93,12 @@ class ImageResizerWorker extends Worker {
 		var responseObj = {};
 		for (let resizedImg of resizedImages) {
 			var path = `images/${image.id}/${image.id}~${resizedImg.transformation}.${resizedImg.meta.format}`;
-			var remoteWriteStream = this.bucket.file(path).createWriteStream();
+			var remoteWriteStream = this.bucket.file(path).createWriteStream({
+				metadata: {
+					contentType: `image/${resizedImg.meta.format}`,
+					cacheControl: `public,max-age=${this.maxCacheExpiry}`
+				}
+			});
 			let onError = (err) => {
 				console.error(err);
 			};
