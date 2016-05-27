@@ -14,7 +14,6 @@ import ImageSelectionModal from '../Components/ImageSelectionModal';
 import Image from '../../Models/Image';
 import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
 import PaginationControl from '../Components/PaginationControl';
-var ReactPaginate = require('react-paginate');
 const FormGroup = require('react-bootstrap/lib/FormGroup');
 const FormControl = require('react-bootstrap/lib/FormControl');
 const ControlLabel = require('react-bootstrap/lib/ControlLabel');

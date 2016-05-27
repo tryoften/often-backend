@@ -1,4 +1,4 @@
-var sharp = require('sharp');
+const sharp = require('sharp');
 
 export class TransformationType extends String {
 	static rectangle: TransformationType = 'rectangle';

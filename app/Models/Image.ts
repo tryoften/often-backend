@@ -19,24 +19,20 @@ export interface ImageTransform {
 	format: string;
 }
 
-interface Imageable {
-	id: string;
-	import_datetime?: Date;
-	source_url: string;
-	resize_datetime?: Date;
-	tags?: string[];
-	transforms: any;
-}
 
 interface ImageAttributes extends BaseModelAttributes {
 	id?: string;
 	source_url?: string;
+	transforms?: any;
+	tags?: string[];
+	resize_datetime?: Date;
+
 }
 
 /**
  * Model that represents a category which can be assigned to a lyric or medium (quotes)
  */
-class Image extends BaseModel implements Imageable {
+class Image extends BaseModel {
 
 	constructor(attributes: ImageAttributes = {}, opts: any = {autoSync: false, deepSync: false, setObjectMap: false}) {
 
