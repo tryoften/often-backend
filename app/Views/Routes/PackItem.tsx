@@ -10,9 +10,10 @@ import AddItemToPackModal from '../Components/AddItemToPackModal';
 import DeleteButton from '../Components/DeleteButton';
 import Category from '../../Models/Category';
 import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
+import ImageSelectionModal from '../Components/ImageSelectionModal';
+import Image from '../../Models/Image';
 import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
 import PaginationControl from '../Components/PaginationControl';
-
 const FormGroup = require('react-bootstrap/lib/FormGroup');
 const FormControl = require('react-bootstrap/lib/FormControl');
 const ControlLabel = require('react-bootstrap/lib/ControlLabel');
@@ -26,6 +27,7 @@ interface PackItemProps extends React.Props<PackItem> {
 interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
+	shouldShowImageSelectionPanel?: boolean;
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
@@ -62,6 +64,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onUpdatePackItems = this.onUpdatePackItems.bind(this);
 		this.updateStateWithCategories = this.updateStateWithCategories.bind(this);
 		this.onClickRemoveItem = this.onClickRemoveItem.bind(this);
+		this.getResizedImage = this.getResizedImage.bind(this);
+		this.onClickSelectImage = this.onClickSelectImage.bind(this);
 	}
 
 	componentDidMount() {
@@ -136,6 +140,14 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
+	onClickSelectImage(e: Event) {
+		e.preventDefault();
+
+		this.setState({
+			shouldShowImageSelectionPanel: true
+		});
+	}
+
 	onUpdatePackItems(packItems: IndexablePackItem[]) {
 		let model = this.state.model;
 		model.save({
@@ -201,6 +213,18 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.context.router.push('/packs');
 	}
 
+	getResizedImage(image: Image) {
+		let form = this.state.form;
+		form.image = {
+			small_url: image.square_small_url,
+			large_url: image.large_url
+		};
+		this.setState({
+			form: form,
+			shouldShowImageSelectionPanel: false
+		});
+	}
+
 	render() {
 		if (!this.state.display) {
 			return <div>Loading...</div>;
@@ -258,33 +282,16 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 								</Col>
 							</Row>
 							<Row>
-								<Col xs={8}>
+								<Col xs={2} md={2}>
 									<FormGroup>
-										<ControlLabel>Small Image</ControlLabel>
+										<ControlLabel>Premium</ControlLabel>
 										<FormControl
-											id="image.small_url"
-											type="text"
-											placeholder={form.image.small_url}
-											value={form.image.small_url}
-											onChange={this.handlePropChange}/>
-									</FormGroup>
-									<FormGroup>
-										<ControlLabel>Large Image</ControlLabel>
-										<FormControl
-											id="image.large_url"
-											type="text"
-											placeholder={form.image.large_url}
-											value={form.image.large_url}
-											onChange={this.handlePropChange}/>
+											id="premium"
+											type="checkbox"
+											checked={form.premium}
+											onChange={this.handlePropChange }/>
 									</FormGroup>
 								</Col>
-								<Col xs={4}>
-									<div className="image-upload pack-thumbnail">
-										<Thumbnail src={form.image.small_url} />
-									</div>
-								</Col>
-							</Row>
-							<Row>
 								<Col xs={2} md={2}>
 									<FormGroup>
 										<ControlLabel>Featured</ControlLabel>
@@ -292,8 +299,15 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 											id="featured"
 											type="checkbox"
 											checked={form.featured}
-											onChange={this.handlePropChange}/>
+											onChange={this.handlePropChange }/>
 									</FormGroup>
+								</Col>
+							</Row>
+							<Row>
+								<Col md={4}>
+									<div class="image-upload pack-thumbnail">
+										<Thumbnail src={form.image.small_url} onClick={this.onClickSelectImage} />
+									</div>
 								</Col>
 							</Row>
 							<Row>
@@ -325,6 +339,9 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 						</Col>
 						<Col xs={6}>
 							{(this.state.shouldShowSearchPanel) ? <AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} /> : ''}
+						</Col>
+						<Col xs={6}>
+							<ImageSelectionModal show={this.state.shouldShowImageSelectionPanel} getResizedImage={this.getResizedImage} />
 						</Col>
 					</Row>
 				</Grid>

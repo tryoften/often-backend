@@ -18,7 +18,7 @@ export default class PackView extends React.Component<PackViewProps, {}> {
 	render() {
 		return (
 			<div className="pack media-item" id={this.props.model.id} onClick={this.onClickEvent.bind(this)}>
-				<div className="image-container" style={{backgroundImage: `url(${this.props.model.get('image').small_url})`}}>
+				<div className="image-container" style={{backgroundImage: `url(${this.props.model.get('image').large_url})`}}>
 					<ImageBrandMask />
 					{ this.props.model.published ? <div className="published"><Glyphicon glyph="ok" /></div> : '' }
 				</div>
