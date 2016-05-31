@@ -17,8 +17,12 @@ export interface IndexablePackItem extends IndexableObject {
 export interface PackAttributes extends MediaItemAttributes {
 	id?: string;
 	name?: string;
+	imageId?: string;
 	image?: {
 		small_url?: string;
+		square_url?: string,
+		medium_url?: string,
+		original_url?: string,
 		large_url?: string;
 	};
 	price?: number;
