@@ -1,4 +1,3 @@
-import * as _ from 'underscore';
 import * as React from 'react';
 import * as ReactRouter from 'react-router';
 import * as classNames from 'classnames';
@@ -9,11 +8,12 @@ import Pack, { PackAttributes, IndexablePackItem } from '../../Models/Pack';
 import AddItemToPackModal from '../Components/AddItemToPackModal';
 import DeleteButton from '../Components/DeleteButton';
 import Category from '../../Models/Category';
-import CategoryAssignmentItem from '../Components/CategoryAssignmentItem';
+import MediaItemView from '../Components/MediaItemView';
 import ImageSelectionModal from '../Components/ImageSelectionModal';
+import EditMediaItemModal from '../Components/EditMediaItemModal';
 import Image from '../../Models/Image';
-import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
 import PaginationControl from '../Components/PaginationControl';
+import {IndexableObject} from '../../Interfaces/Indexable';
 const FormGroup = require('react-bootstrap/lib/FormGroup');
 const FormControl = require('react-bootstrap/lib/FormControl');
 const ControlLabel = require('react-bootstrap/lib/ControlLabel');
@@ -28,11 +28,13 @@ interface PackItemState extends React.Props<PackItem> {
 	model?: Pack;
 	shouldShowSearchPanel?: boolean;
 	shouldShowImageSelectionPanel?: boolean;
+	shouldShowEditMediaItemModal?: boolean;
 	display?: boolean;
 	isNew?: boolean;
 	form?: PackAttributes;
 	categories?: Categories;
 	loading?: boolean;
+	selectedItem?: IndexableObject;
 }
 
 export default class PackItem extends React.Component<PackItemProps, PackItemState> {
@@ -51,6 +53,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		this.state = {
 			shouldShowSearchPanel: false,
+			shouldShowEditMediaItemModal: false,
 			display: false,
 			isNew: isNew
 		};
@@ -121,13 +124,14 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 
 	}
-	onClickRemoveItem(item: IndexablePackItem, e: Event) {
+	onClickRemoveItem(item: IndexablePackItem) {
 		console.log(item);
 
 		let model = this.state.model;
 		model.removeItem(item);
 
 		this.setState({
+			shouldShowEditMediaItemModal: false,
 			model: model
 		});
 	}
@@ -213,15 +217,29 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.context.router.push('/packs');
 	}
 
+
+
 	getResizedImage(image: Image) {
 		let form = this.state.form;
+		form.imageId = image.id;
 		form.image = {
 			small_url: image.square_small_url,
+			square_url: image.square_url,
+			medium_url: image.medium_url,
+			original_url: image.original_url,
 			large_url: image.large_url
 		};
 		this.setState({
 			form: form,
 			shouldShowImageSelectionPanel: false
+		});
+	}
+
+	onClickEditMediaItem(item: IndexablePackItem) {
+
+		this.setState({
+			selectedItem: item,
+			shouldShowEditMediaItemModal: true
 		});
 	}
 
@@ -232,21 +250,16 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 
 		let classes = classNames("section pack-item", {hidden: !this.state.display});
 		let form = this.state.form;
-		let categoryMenu = <CategoryAssignmentMenu
-			categories={this.state.categories}
-			onClickCategory={this.onClickCategory}
-			context={this} />;
 
 		let items = this.state.model.items.map( (item, index) => {
 			return (
-				<CategoryAssignmentItem
-					item={item}
-					categories={this.state.categories}
-					onClickCategory={this.onClickCategory}
-					onClickRemoveItem={this.onClickRemoveItem}
-					categoryMenu={React.cloneElement(categoryMenu, {id: item._id, onClickCategory: this.onClickCategory.bind(this, item._id)})}
-					index={index}
-					key={index} />
+				<div key={item._id} id={item._id} className="clearfix well pack-item" onClick={this.onClickEditMediaItem.bind(this, item)}>
+					<div className="index-display">{index + 1}</div>
+					<MediaItemView
+						key={item._id}
+						item={item}
+					/>
+				</div>
 			);
 		});
 
@@ -342,6 +355,15 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 						</Col>
 						<Col xs={6}>
 							<ImageSelectionModal show={this.state.shouldShowImageSelectionPanel} getResizedImage={this.getResizedImage} />
+						</Col>
+						<Col xs={6}>
+							<EditMediaItemModal
+								show={this.state.shouldShowEditMediaItemModal}
+								item={this.state.selectedItem}
+								removeItemFromPack={this.onClickRemoveItem}
+								categories={this.state.categories}
+								onClickCategory={this.onClickCategory}
+							/>
 						</Col>
 					</Row>
 				</Grid>
