@@ -108,7 +108,7 @@ class ImageResizerWorker extends Worker {
 			remoteWriteStream.on('error', onError);
 
 			// TODO(jakub): Create a format string and place inside of the configuration
-			let url = `https://www.googleapis.com/download/storage/v1/b/${GoogleStorageConfig.image_bucket}/o/${encodeURIComponent(path)}?alt=media`;
+			let url = `https://storage.googleapis.com/${GoogleStorageConfig.image_bucket}/${path}`;
 			let tran = <string>resizedImg.transformation;
 			responseObj[tran] = {
 				type: resizedImg.transformation,
