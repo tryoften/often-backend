@@ -5,6 +5,7 @@ export class TransformationType extends String {
 	static original: TransformationType = 'original';
 	static square: TransformationType = 'square';
 	static square_small: TransformationType = 'square_small';
+	static square_medium: TransformationType = 'square_medium'
 	static medium: TransformationType = 'medium';
 	static large: TransformationType = 'large';
 }
@@ -56,11 +57,14 @@ class ImageResizer {
 			case TransformationType.original:
 				return sharp(data);
 
+			case TransformationType.square_small:
+				return sharp(data).resize(this.tiny_pixels, this.tiny_pixels);
+
 			case TransformationType.square:
 				return sharp(data).resize(this.small_pixels, this.small_pixels);
 
-			case TransformationType.square_small:
-				return sharp(data).resize(this.tiny_pixels, this.tiny_pixels);
+			case TransformationType.square_medium:
+				return sharp(data).resize(this.medium_pixels, this.medium_pixels);
 
 			case TransformationType.medium:
 				return (attr.height > attr.width) ? sharp(data).resize(this.medium_pixels, null) : sharp(data).resize(null, this.medium_pixels);

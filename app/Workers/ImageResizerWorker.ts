@@ -37,6 +37,7 @@ class ImageResizerWorker extends Worker {
 			TransformationType.original,
 			TransformationType.square,
 			TransformationType.square_small,
+			TransformationType.square_medium,
 			TransformationType.medium,
 			TransformationType.large
 		];
