@@ -20,6 +20,7 @@ export interface PackAttributes extends MediaItemAttributes {
 	imageId?: string;
 	image?: {
 		square_small_url?: string,
+		square_url?: string,
 		small_url?: string,
 		medium_url?: string,
 		original_url?: string,

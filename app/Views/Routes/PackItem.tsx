@@ -218,7 +218,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		form.imageId = image.id;
 		form.image = {
 			square_small_url: image.square_small_url,
-			small_url: image.square_url,
+			square_url: image.square_url,
+			small_url: image.square_medium_url,
 			medium_url: image.medium_url,
 			original_url: image.original_url,
 			large_url: image.large_url
