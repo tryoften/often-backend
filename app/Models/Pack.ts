@@ -19,11 +19,11 @@ export interface PackAttributes extends MediaItemAttributes {
 	name?: string;
 	imageId?: string;
 	image?: {
-		small_url?: string;
-		square_url?: string,
+		square_small_url?: string,
+		small_url?: string,
 		medium_url?: string,
 		original_url?: string,
-		large_url?: string;
+		large_url?: string
 	};
 	price?: number;
 	premium?: boolean;
