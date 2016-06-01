@@ -69,6 +69,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickRemoveItem = this.onClickRemoveItem.bind(this);
 		this.getResizedImage = this.getResizedImage.bind(this);
 		this.onClickSelectImage = this.onClickSelectImage.bind(this);
+		this.onSetItemCategory = this.onSetItemCategory.bind(this);
+		this.onSetItemPosition = this.onSetItemPosition.bind(this);
 	}
 
 	componentDidMount() {
@@ -114,8 +116,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.setState({categories});
 	}
 
-	onClickCategory(itemId: string, category: Category, e: Event) {
-		e.preventDefault();
+	onSetItemCategory(itemId: string, category: Category) {
 
 		let model = this.state.model;
 		model.assignCategoryToItem(itemId, category);
@@ -124,6 +125,16 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 
 	}
+
+	onSetItemPosition(itemId: string, newPosition: number) {
+		let model = this.state.model;
+		model.setItemPosition(itemId, newPosition);
+
+		this.setState({
+			model: model
+		});
+	}
+
 	onClickRemoveItem(item: IndexablePackItem) {
 		console.log(item);
 
@@ -216,8 +227,6 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 		this.context.router.push('/packs');
 	}
-
-
 
 	getResizedImage(image: Image) {
 		let form = this.state.form;
@@ -360,9 +369,11 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<EditMediaItemModal
 								show={this.state.shouldShowEditMediaItemModal}
 								item={this.state.selectedItem}
+								numItems={this.state.model.items.length}
 								removeItemFromPack={this.onClickRemoveItem}
 								categories={this.state.categories}
-								onClickCategory={this.onClickCategory}
+								onSetItemCategory={this.onSetItemCategory}
+								onSetItemPosition={this.onSetItemPosition}
 							/>
 						</Col>
 					</Row>

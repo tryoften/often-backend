@@ -194,6 +194,25 @@ class Pack extends MediaItem {
 		});
 	}
 
+	setItemPosition(itemId: string, newIndex: number) {
+
+		let items = this.items;
+		if (newIndex < 0 || newIndex >= items.length) {
+			/* If the new item position is invalid, then silently return */
+			return;
+		}
+		let oldIndex = _.findIndex(items, (itm) => itm.id === itemId);
+
+		let item = items[oldIndex];
+		items.splice(oldIndex, 1);
+		items.splice(newIndex, 0, item);
+
+		this.save({
+			items: items
+		});
+
+	}
+
 	assignCategoryToItem (itemId: string, category: Category) {
 
 		var currentItems = this.items;
