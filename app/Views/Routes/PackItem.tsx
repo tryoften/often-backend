@@ -252,6 +252,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
+	getSelectedItemPosition() {
+		this.state.selectedItemlet oldIndex = _.findIndex(items, (itm) => itm.id === this.state.selectedItem.id);
+	}
+
 	render() {
 		if (!this.state.display) {
 			return <div>Loading...</div>;
@@ -369,6 +373,7 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							<EditMediaItemModal
 								show={this.state.shouldShowEditMediaItemModal}
 								item={this.state.selectedItem}
+								itemPosition={this.getSelectedItemPosition()}
 								numItems={this.state.model.items.length}
 								removeItemFromPack={this.onClickRemoveItem}
 								categories={this.state.categories}
