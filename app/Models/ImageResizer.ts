@@ -5,7 +5,7 @@ export class TransformationType extends String {
 	static original: TransformationType = 'original';
 	static square: TransformationType = 'square';
 	static square_small: TransformationType = 'square_small';
-	static square_medium: TransformationType = 'square_medium'
+	static square_medium: TransformationType = 'square_medium';
 	static medium: TransformationType = 'medium';
 	static large: TransformationType = 'large';
 }
