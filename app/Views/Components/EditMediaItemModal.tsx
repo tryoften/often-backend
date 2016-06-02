@@ -6,6 +6,7 @@ import {IndexablePackItem} from '../../Models/Pack';
 import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
 import Categories from '../../Collections/Categories';
 import Category from '../../Models/Category';
+import DeleteButton from '../Components/DeleteButton';
 const FormGroup = require('react-bootstrap/lib/FormGroup');
 const FormControl = require('react-bootstrap/lib/FormControl');
 const ControlLabel = require('react-bootstrap/lib/ControlLabel');
@@ -14,10 +15,12 @@ interface EditMediaItemModalProps {
 	show?: boolean;
 	item?: IndexablePackItem;
 	numItems: number;
+	selectedItemPosition?: number;
 	removeItemFromPack?: (item: IndexablePackItem) => void;
 	categories?: Categories;
 	onSetItemCategory: (itemId: string, category: Category) => void;
 	onSetItemPosition: (itemId: string, newPosition: number) => void;
+	onCloseMediaItemModal?: () => void;
 }
 
 interface EditMediaItemModalState {
@@ -37,7 +40,6 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 			showModal: props.show,
 			selectedCategory: null,
 			categoryChanged: false,
-			currentPlacement: props.placement,
 			placementChanged: false
 		};
 		this.cancel = this.cancel.bind(this);
@@ -48,14 +50,15 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 	}
 
 	componentWillReceiveProps(nextProps: EditMediaItemModalProps) {
+		//TODO(jakub): use CategoryAttributes type throughout as opposed to Category model
 		this.setState({
-			//TODO(jakub): use CategoryAttributes type throughout as opposed to Category
-			selectedCategory: nextProps.item.category,
+			selectedCategory: (nextProps.item) ? (nextProps.item.category) : null,
 			showModal: nextProps.show
 		});
 	}
 
 	cancel() {
+		this.props.onCloseMediaItemModal();
 		this.setState({
 			showModal: false,
 			categoryChanged: false,
@@ -87,8 +90,7 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 	}
 
 	onSelectCategory(category: Category) {
-		//TODO(jakub): Explore the use of on change event
-		if (!this.state.selectedCategory || (category.id !== this.state.selectedCategory.id)){
+		if (!this.state.selectedCategory || (category.id !== this.state.selectedCategory.id)) {
 			this.setState({
 				selectedCategory: category,
 				categoryChanged: true
@@ -98,7 +100,6 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 
 	onSelectPosition(e: any) {
 		let newPosition = e.target.value;
-		console.log('position', newPosition);
 		this.setState({
 			currentPlacement: newPosition,
 			placementChanged: true
@@ -108,7 +109,7 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 	render() {
 
 		if (!this.props.item) {
-			return <div>Modal not loaded with proper media item</div>;
+			return null;
 		}
 
 		let showItem = () => {
@@ -119,13 +120,31 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 			}
 		};
 
-		let selectorOptions = _.range(0, this.props.numItems).map((i) => { return (<option value={i}>{i+1}</option>); })
+		let selectorOptions = _.range(0, this.props.numItems).map((i) => {
+			return (<option value={i} selected={(i === this.props.selectedItemPosition)}>{i + 1}</option>);
+		});
 		let positionSelector = (
-			<FormGroup controlId="formControlsSelect">
-				<ControlLabel>Select Placement</ControlLabel>
+			<FormGroup controlId="selectPlacement">
+				<ControlLabel>Placement</ControlLabel>
 				<FormControl componentClass="select" placeholder="select" onChange={this.onSelectPosition}>
 					{selectorOptions}
 				</FormControl>
+			</FormGroup>
+		);
+
+		let categoryAssignmentMenu = (
+			<FormGroup controlId="selectCategoryControl">
+				<ControlLabel>Select Category</ControlLabel>
+				<CategoryAssignmentMenu
+					bsStyle="default"
+					className="category-picker"
+					categories={this.props.categories}
+					onClickCategory={this.onSelectCategory}
+					context={this}
+					title={ (this.state.selectedCategory) ? this.state.selectedCategory.name : "Ex: Type, Celebration, Yes, Happy"}
+					id={ this.props.item._id}
+					block>
+				</CategoryAssignmentMenu>
 			</FormGroup>
 		);
 
@@ -141,21 +160,12 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 						<div className="media-item-content">
 							{showItem()}
 						</div>
-						<CategoryAssignmentMenu
-							bsStyle="default"
-							className="category-picker"
-							categories={this.props.categories}
-							onClickCategory={this.onSelectCategory}
-							context={this}
-							title={ (this.state.selectedCategory) ? this.state.selectedCategory.name : "Ex: Type, Celebration, Yes, Happy"}
-							id={ this.props.item._id}
-							block>
-						</CategoryAssignmentMenu>
+						{categoryAssignmentMenu}
 						{positionSelector}
 					</Modal.Body>
 					<Modal.Footer className="modal-footer">
 						<Button onClick={this.cancel}>Cancel</Button>
-						<Button onClick={this.onClickRemove}>Remove</Button>
+						<DeleteButton onConfirmation={this.onClickRemove}>Remove</DeleteButton>
 						<Button onClick={this.save} disabled={!(this.state.categoryChanged || this.state.placementChanged)}>Save</Button>
 					</Modal.Footer>
 				</Modal>

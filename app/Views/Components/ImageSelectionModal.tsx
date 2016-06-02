@@ -14,6 +14,7 @@ const ControlLabel = require('react-bootstrap/lib/ControlLabel');
 interface ImageSelectionModalProps {
 	show: boolean;
 	getResizedImage?: (image: Image) => void;
+	onCloseImageSelectionModal?: () => void;
 }
 
 interface ImageSelectionModalState {
@@ -50,6 +51,7 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 	}
 
 	close() {
+		this.props.onCloseImageSelectionModal();
 		this.setState({
 			errMessage: '',
 			successMessage: '',

@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as ReactRouter from 'react-router';
 import * as classNames from 'classnames';
 import * as objectPath from 'object-path';
+import * as _ from 'underscore';
 import Categories from '../../Collections/Categories';
 import { Grid, Row, Col, Thumbnail, Glyphicon, ButtonGroup, Button } from 'react-bootstrap';
 import Pack, { PackAttributes, IndexablePackItem } from '../../Models/Pack';
@@ -71,6 +72,8 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		this.onClickSelectImage = this.onClickSelectImage.bind(this);
 		this.onSetItemCategory = this.onSetItemCategory.bind(this);
 		this.onSetItemPosition = this.onSetItemPosition.bind(this);
+		this.onCloseEditMediaItemModal = this.onCloseEditMediaItemModal.bind(this);
+		this.onCloseImageSelectionModal = this.onCloseImageSelectionModal.bind(this);
 	}
 
 	componentDidMount() {
@@ -244,8 +247,20 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 		});
 	}
 
-	onClickEditMediaItem(item: IndexablePackItem) {
+	onCloseEditMediaItemModal() {
+		this.setState({
+			shouldShowEditMediaItemModal: false
+		});
+	}
 
+	onCloseImageSelectionModal() {
+		this.setState({
+			shouldShowImageSelectionPanel: false
+		});
+	}
+
+
+	onClickEditMediaItem(item: IndexablePackItem) {
 		this.setState({
 			selectedItem: item,
 			shouldShowEditMediaItemModal: true
@@ -253,7 +268,10 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 	}
 
 	getSelectedItemPosition() {
-		this.state.selectedItemlet oldIndex = _.findIndex(items, (itm) => itm.id === this.state.selectedItem.id);
+		if (this.state.selectedItem) {
+			return _.findIndex(this.state.model.items, (itm) => itm.id === this.state.selectedItem.id);
+		}
+		return -1;
 	}
 
 	render() {
@@ -367,18 +385,23 @@ export default class PackItem extends React.Component<PackItemProps, PackItemSta
 							{(this.state.shouldShowSearchPanel) ? <AddItemToPackModal show={this.state.shouldShowSearchPanel} packItems={this.state.model.get('items')} onUpdatePackItems={this.onUpdatePackItems} /> : ''}
 						</Col>
 						<Col xs={6}>
-							<ImageSelectionModal show={this.state.shouldShowImageSelectionPanel} getResizedImage={this.getResizedImage} />
+							<ImageSelectionModal
+								show={this.state.shouldShowImageSelectionPanel}
+								getResizedImage={this.getResizedImage}
+								onCloseImageSelectionModal={this.onCloseImageSelectionModal}
+							/>
 						</Col>
 						<Col xs={6}>
 							<EditMediaItemModal
 								show={this.state.shouldShowEditMediaItemModal}
 								item={this.state.selectedItem}
-								itemPosition={this.getSelectedItemPosition()}
+								selectedItemPosition={this.getSelectedItemPosition()}
 								numItems={this.state.model.items.length}
 								removeItemFromPack={this.onClickRemoveItem}
 								categories={this.state.categories}
 								onSetItemCategory={this.onSetItemCategory}
 								onSetItemPosition={this.onSetItemPosition}
+								onCloseMediaItemModal={this.onCloseEditMediaItemModal}
 							/>
 						</Col>
 					</Row>
