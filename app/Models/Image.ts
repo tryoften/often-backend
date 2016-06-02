@@ -68,6 +68,10 @@ class Image extends BaseModel {
 		return this.get('transforms').square.url || '';
 	}
 
+	get square_medium_url(): string {
+		return this.get('transforms').square_medium.url || '';
+	}
+
 	get square_small_url(): string {
 		return this.get('transforms').square_small.url || '';
 	}
