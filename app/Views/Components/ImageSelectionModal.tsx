@@ -174,7 +174,7 @@ export default class ImageSelectionModal extends React.Component<ImageSelectionM
 
 		let images = this.state.images.map(image => {
 			return (
-				<div className="image">
+				<div className="image" key={image.id}>
 					<Thumbnail src={image.transforms.square.url} key={image.id} onClick={this.onClickThumbnail.bind(this, image)} />
 				</div>
 			);

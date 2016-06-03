@@ -199,8 +199,7 @@ class Pack extends MediaItem {
 
 		let items = this.items;
 		if (newIndex < 0 || newIndex >= items.length) {
-			/* If the new item position is invalid, then silently return */
-			return;
+			return false;
 		}
 		let oldIndex = _.findIndex(items, (itm) => itm.id === itemId);
 
