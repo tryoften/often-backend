@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as _ from 'underscore';
-import { Modal, Button} from 'react-bootstrap';
+import { Modal, Button, Alert} from 'react-bootstrap';
 import MediaItemView from '../Components/MediaItemView';
 import {IndexablePackItem} from '../../Models/Pack';
 import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
@@ -29,6 +29,7 @@ interface EditMediaItemModalState {
 	categoryChanged?: boolean;
 	currentPlacement?: number;
 	placementChanged?: boolean;
+	acknowledgement?: string;
 }
 
 export default class EditMediaItemModal extends React.Component<EditMediaItemModalProps, EditMediaItemModalState> {
@@ -40,7 +41,8 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 			showModal: props.show,
 			selectedCategory: null,
 			categoryChanged: false,
-			placementChanged: false
+			placementChanged: false,
+			acknowledgement: ''
 		};
 		this.cancel = this.cancel.bind(this);
 		this.save = this.save.bind(this);
@@ -62,7 +64,8 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 		this.setState({
 			showModal: false,
 			categoryChanged: false,
-			selectedCategory: null
+			selectedCategory: null,
+			acknowledgement: ''
 		});
 	}
 
@@ -77,6 +80,7 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 		}
 
 		this.setState({
+			acknowledgement: "Successfully saved changes!",
 			categoryChanged: false,
 			placementChanged: false
 		});
@@ -121,12 +125,12 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 		};
 
 		let selectorOptions = _.range(0, this.props.numItems).map((i) => {
-			return (<option value={i} selected={(i === this.props.selectedItemPosition)}>{i + 1}</option>);
+			return (<option value={i} key={i}>{i + 1}</option>);
 		});
 		let positionSelector = (
 			<FormGroup controlId="selectPlacement">
 				<ControlLabel>Placement</ControlLabel>
-				<FormControl componentClass="select" placeholder="select" onChange={this.onSelectPosition}>
+				<FormControl componentClass="select" placeholder="select" onChange={this.onSelectPosition} defaultValue={this.props.selectedItemPosition}>
 					{selectorOptions}
 				</FormControl>
 			</FormGroup>
@@ -148,6 +152,11 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 			</FormGroup>
 		);
 
+		let displayAcknowledgement = () => {
+			if (this.state.acknowledgement) {
+				return <Alert bsSize="small" bsStyle="success">{this.state.acknowledgement}</Alert>;
+			}
+		};
 
 		return (
 
@@ -162,6 +171,7 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 						</div>
 						{categoryAssignmentMenu}
 						{positionSelector}
+						{displayAcknowledgement()}
 					</Modal.Body>
 					<Modal.Footer className="modal-footer">
 						<Button onClick={this.cancel}>Cancel</Button>
