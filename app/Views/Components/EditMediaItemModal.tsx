@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as _ from 'underscore';
-import { Modal, Button, Alert} from 'react-bootstrap';
+import { Modal, Button, Alert, Grid, Row, Col} from 'react-bootstrap';
 import MediaItemView from '../Components/MediaItemView';
 import {IndexablePackItem} from '../../Models/Pack';
 import CategoryAssignmentMenu from '../Components/CategoryAssignmentMenu';
@@ -64,6 +64,7 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 		this.setState({
 			showModal: false,
 			categoryChanged: false,
+			placementChanged: false,
 			selectedCategory: null,
 			acknowledgement: ''
 		});
@@ -158,6 +159,24 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 			}
 		};
 
+		let modalFooter = (
+			<Modal.Footer className="modal-footer">
+				<Grid fluid>
+					<Row>
+						<Col md={1}>
+							<Button onClick={this.cancel}>Cancel</Button>
+						</Col>
+						<Col md={1} mdOffset={7}>
+							<DeleteButton bsStyle="default" onConfirmation={this.onClickRemove} text="Remove"/>
+						</Col>
+						<Col md={1} mdOffset={1} className="column-right-tilt">
+							<Button className="save-button" onClick={this.save} disabled={!(this.state.categoryChanged || this.state.placementChanged)}>Save</Button>
+						</Col>
+					</Row>
+				</Grid>
+			</Modal.Footer>
+		);
+
 		return (
 
 			<div className="modal-container">
@@ -173,11 +192,7 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 						{positionSelector}
 						{displayAcknowledgement()}
 					</Modal.Body>
-					<Modal.Footer className="modal-footer">
-						<Button onClick={this.cancel}>Cancel</Button>
-						<DeleteButton onConfirmation={this.onClickRemove}>Remove</DeleteButton>
-						<Button onClick={this.save} disabled={!(this.state.categoryChanged || this.state.placementChanged)}>Save</Button>
-					</Modal.Footer>
+					{modalFooter}
 				</Modal>
 			</div>
 		);
