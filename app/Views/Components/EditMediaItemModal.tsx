@@ -138,11 +138,11 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 		);
 
 		let categoryAssignmentMenu = (
-			<FormGroup controlId="selectCategoryControl">
+			<FormGroup controlId="selectCategoryControl" className="category-select">
 				<ControlLabel>Select Category</ControlLabel>
 				<CategoryAssignmentMenu
 					bsStyle="default"
-					className="category-picker"
+					className="category-dropdown"
 					categories={this.props.categories}
 					onClickCategory={this.onSelectCategory}
 					context={this}
@@ -158,6 +158,36 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 				return <Alert bsSize="small" bsStyle="success">{this.state.acknowledgement}</Alert>;
 			}
 		};
+
+		let modalHeader = (
+			<Modal.Header className="modal-header">
+				<h2>Edit Item</h2>
+			</Modal.Header>
+		);
+
+		let modalBody = (
+			<Modal.Body className="modal-body">
+
+				<Grid fluid>
+					<Row>
+						<Col md={4} mdOffset={2}>
+							<div className="media-item-content">
+								{showItem()}
+							</div>
+						</Col>
+					</Row>
+					<Row>
+						<Col md={8}>
+							{categoryAssignmentMenu}
+						</Col>
+						<Col md={3} mdOffset={1}>
+							{positionSelector}
+						</Col>
+					</Row>
+				</Grid>
+				{displayAcknowledgement()}
+			</Modal.Body>
+		);
 
 		let modalFooter = (
 			<Modal.Footer className="modal-footer">
@@ -181,17 +211,8 @@ export default class EditMediaItemModal extends React.Component<EditMediaItemMod
 
 			<div className="modal-container">
 				<Modal show={this.state.showModal} onHide={this.cancel} className="modal-panel">
-					<Modal.Header className="modal-header">
-						<h2>Edit Item</h2>
-					</Modal.Header>
-					<Modal.Body className="modal-body">
-						<div className="media-item-content">
-							{showItem()}
-						</div>
-						{categoryAssignmentMenu}
-						{positionSelector}
-						{displayAcknowledgement()}
-					</Modal.Body>
+					{modalHeader}
+					{modalBody}
 					{modalFooter}
 				</Modal>
 			</div>
