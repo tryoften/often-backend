@@ -32,6 +32,12 @@ if (_.contains(argv._, 'user')) {
 	new UserWorker().start();
 }
 
+if (_.contains(argv._, 'notification')) {
+	let NotificationWorker = require('./Workers/NotificationWorker').default;
+	console.log('starting notification worker');
+	new NotificationWorker().start();
+}
+
 if (_.contains(argv._, 'link-redirector')) {
 	let URIConverterService = require('./Utilities/URIConverterService').default;
 	console.log('starting link-redirector');

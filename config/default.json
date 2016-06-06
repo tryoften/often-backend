@@ -65,6 +65,12 @@
 				"numWorkers": 2,
 				"sanitize": false,
 				"suppressStack": true
+			},
+			"notification": {
+				"url": "/queues/notification",
+				"numWorkers": 2,
+				"sanitize": false,
+				"suppressStack": true
 			}
 		}
 	},
