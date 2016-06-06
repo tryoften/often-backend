@@ -4,6 +4,8 @@ import { Button } from 'react-bootstrap';
 interface DeleteButtonProps extends React.Props<DeleteButton> {
 	showConfirmMessage?: boolean;
 	onConfirmation?: (boolean) => void;
+	bsStyle?: string;
+	text?: string;
 }
 
 export default class DeleteButton extends React.Component<DeleteButtonProps, {}> {
@@ -15,7 +17,7 @@ export default class DeleteButton extends React.Component<DeleteButtonProps, {}>
 
 	render() {
 		return (
-			<Button {...this.props} bsStyle="danger" onClick={this.onClick.bind(this)}>Delete</Button>
+			<Button {...this.props} bsStyle={this.props.bsStyle || "danger"} onClick={this.onClick.bind(this)}>{this.props.text || "Delete"}</Button>
 		);
 	}
 }
