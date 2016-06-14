@@ -56,5 +56,11 @@ if (_.contains(argv._, 'image-resizer')) {
 	new ImageResizerWorker().start();
 }
 
+if (_.contains(argv._, 'notification')) {
+	let NotificationWorker = require('./Workers/NotificationWorker').default;
+	console.log('starting the notification-worker');
+	new NotificationWorker().start();
+}
+
 console.log('firebase root URL: ', config.firebase.BaseURL);
 console.log('elasticsearch root URL: ', config.elasticsearch.BaseURL);

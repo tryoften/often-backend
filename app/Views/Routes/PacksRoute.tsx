@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Row, Col, Grid, ButtonToolbar, Button } from 'react-bootstrap';
 import { Link } from 'react-router';
 import PackView from '../Components/PackView';
-import Packs from '../../Collections/Packs';
+import { Packs } from '@often/often-core';
 import * as ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 interface PacksProps extends React.Props<PacksRoute> {

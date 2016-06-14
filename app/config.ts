@@ -17,3 +17,4 @@ export var url_redirector = config.url_redirector;
 export var url_shortener = config.url_shortener;
 export var gcloud = config.gcloud;
 export var port = config.port;
+export var parse = config.parse;

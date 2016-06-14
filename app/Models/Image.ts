@@ -19,14 +19,12 @@ export interface ImageTransform {
 	format: string;
 }
 
-
-interface ImageAttributes extends BaseModelAttributes {
+export interface ImageAttributes extends BaseModelAttributes {
 	id?: string;
 	source_url?: string;
 	transforms?: any;
 	tags?: string[];
 	resize_datetime?: Date;
-
 }
 
 /**

@@ -1,0 +1,5 @@
+{
+  "globalDependencies": {
+    "restler": "registry:dt/restler#3.1.0+20160509152514"
+  }
+}
