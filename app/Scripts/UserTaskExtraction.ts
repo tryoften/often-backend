@@ -26,7 +26,7 @@ function processTask(taskId: string, buffer: any) {
 
 function processSubsetInSequence(taskIds: string[], fileNum: number) {
 
-	var promise = Promise.resolve(true);
+	let promise = Promise.resolve(true);
 
 	let buffer = {};
 	for (let i = 0; i < taskIds.length; i++) {
@@ -53,9 +53,9 @@ function spliceArrayIntoChunks(arr: any, chunkSize: number) {
 }
 
 function processAllTasks() {
-	let subsets = spliceArrayIntoChunks(allTaskIds.splice(0, 100), chunkSize);
+	let subsets = spliceArrayIntoChunks(allTaskIds, chunkSize);
 
-	let promise = Promise.resolve(true);
+	let promise = Promise.resolve();
 	for (let i = 0; i < subsets.length; i++) {
 		promise = promise.then( () => { return processSubsetInSequence(subsets[i], i); });
 	}
