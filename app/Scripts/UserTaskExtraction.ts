@@ -7,7 +7,7 @@ interface TaskContents {
 }
 
 // Load input File
-let inputFileContents = fs.readFileSync('/Users/jakubcichon/Desktop/userqueuecountprod.json');
+let inputFileContents = fs.readFileSync('/Users/jakubcichon/Desktop/newCount.json');
 
 let allTaskIds = Object.keys(JSON.parse(inputFileContents.toString()));
 let chunkSize = 500;
@@ -41,9 +41,11 @@ function processSubsetInSequence(taskIds: string[], fileNum: number) {
 }
 
 function spliceArrayIntoChunks(arr: any, chunkSize: number) {
+	console.log('Splitting array into chunks...');
 	let doubleArr = [];
 	let start = 0;
 	while (start + chunkSize < arr.length) {
+		console.log(`New Start ${start}`);
 		doubleArr.push(arr.slice(start, start + chunkSize));
 		start += chunkSize;
 	}
@@ -54,7 +56,7 @@ function spliceArrayIntoChunks(arr: any, chunkSize: number) {
 
 function processAllTasks() {
 	let subsets = spliceArrayIntoChunks(allTaskIds, chunkSize);
-
+	console.log('Done chunking');
 	let promise = Promise.resolve();
 	for (let i = 0; i < subsets.length; i++) {
 		promise = promise.then( () => { return processSubsetInSequence(subsets[i], i); });
@@ -62,4 +64,32 @@ function processAllTasks() {
 	return promise;
 }
 
-processAllTasks().then(() => console.log('done'));
+//processAllTasks().then(() => console.log('done'));
+
+function deleteTask(taskId: string, index: number) {
+	return new Promise((resolve, reject) => {
+		let ref = new Firebase(`https://often-prod.firebaseio.com/queues/user/tasks/${taskId}`);
+		ref.set(null, (err) => {
+			if (err) {
+				console.log('rejecting ' + err);
+				reject(err);
+			} else {
+				console.log(`Resolving ${index} of ${allTaskIds.length}`);
+				setTimeout(resolve(true), 500);
+			}
+		});
+	});
+}
+
+function deleteAllTasks() {
+	let promise = Promise.resolve();
+	for (let i = 0; i < allTaskIds.length; i++) {
+		promise = promise.then( () => { return deleteTask(allTaskIds[i], i); });
+	}
+	return promise;
+}
+
+deleteAllTasks()
+	.then( () => console.log('Removed all tasks'))
+	.catch( err => console.log(err));
+
