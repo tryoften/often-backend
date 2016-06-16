@@ -1,11 +1,9 @@
 import BaseModel from './BaseModel';
 import User from './User';
 import { firebase as FirebaseConfig } from '../config';
-// import { generateURIfromGuid  } from '../Utilities/generateURI';
+import { generate as generateId } from 'shortid';
 import BaseModelType from './BaseModelType';
 import { BaseModelAttributes } from './BaseModel';
-
-// const sha1 = require('sha1');
 
 interface NotificationAttributes extends BaseModelAttributes {
 	id?: string;
@@ -24,7 +22,7 @@ interface FirebaseAttributes {
 class Notification extends BaseModel {
 	constructor(attributes: NotificationAttributes = {}, opts: any = {autoSync: false, deepSync: false, setObjectMap: false}) {
 		if (!attributes.id) {
-			// attributes.id = generateURIfromGuid(sha1(attributes.url)).substring(0, 9); /* Need to change */
+			attributes.id = generateId();
 		}
 		attributes.type = BaseModelType.notification;
 		super(attributes, opts);
