@@ -1,7 +1,7 @@
-import { firebase as FirebaseConfig } from '../config';
+import { firebase as FirebaseConfig } from '../../config';
 import * as _ from 'underscore';
-import UserTokenGenerator from '../Auth/UserTokenGenerator';
-import Worker, { Task } from './Worker';
+import UserTokenGenerator from '../../Auth/UserTokenGenerator';
+import Worker, { Task } from '../Worker';
 import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User } from '@often/often-core';
 
 class UserWorkerTaskType extends String {
@@ -53,7 +53,8 @@ class UserWorker extends Worker {
 		user.syncData().then(() => {
 			switch (task.type) {
 				case UserWorkerTaskType.EditUserPackItems:
-					return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
+					return true;
+					//return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
 
 				case UserWorkerTaskType.EditUserPackSubscription:
 					return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
@@ -178,7 +179,11 @@ class UserWorker extends Worker {
 	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
 	 */
 	private initiatePacks (user: User): Promise<string> {
-		return Promise.all([user.initFavoritesPack(), user.initDefaultPack(), user.initRecentsPack()]).then(() => {
+		return Promise.all([
+			user.initDefaultPack()
+			//user.initFavoritesPack(),
+			//user.initRecentsPack()
+		]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}
