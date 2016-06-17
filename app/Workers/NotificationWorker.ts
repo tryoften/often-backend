@@ -31,18 +31,18 @@ export default class NotificationWorker extends Worker {
 			switch (firebaseOn) {
 				case false:
 					// Sample Drake topic
-					push.sendToChannels(["41Wx5GIJZ"], {
+					push.sendToChannels([`${notification.packId}`], {
 						aps: {
 							badge: "Increment",
-							alert: "This is from Parse",
+							alert: `${notification.text}`,
 							sound: "default"
 						},
 						"content-available": 1
 					}, function(error, data) {
 						if (error) {
-							console.error("Oh no it went wrong!: " + error.message);
+							console.error("Error: " + error.message);
 						} else {
-							console.log("It went well! ", data);
+							console.log("Notification Successfully delivered ", data);
 						}
 					});
 					break;
@@ -56,7 +56,7 @@ export default class NotificationWorker extends Worker {
 						to: `/topics/${notification.packId}`,
 						notification: {
 							badge: "Increment",
-							body: "This was sent at 2:23pm",
+							body: `${notification.text}`,
 							sound: "default",
 							title: "Often",
 							p: `${notification.packId}`
