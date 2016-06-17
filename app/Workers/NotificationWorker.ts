@@ -1,7 +1,6 @@
 import * as _ from 'underscore';
 import * as rest from 'restler';
-import { firebase as FirebaseConfig } from '../config';
-import { parse as ParseConfig } from '../config';
+import { firebase as FirebaseConfig, parse as ParseConfig } from '../config';
 import Worker, { Task } from './Worker';
 import Notification from '../Models/Notification';
 
@@ -48,7 +47,7 @@ export default class NotificationWorker extends Worker {
 					break;
 				case true:
 					let notificationHeader = {
-						"Authorization": "key=AIzaSyDzLC9dhfwC7wdfEdVcRyFH75bYDUha3Ms",
+						"Authorization": `key=${FirebaseConfig.Authorization}`,
 						"Content-Type": "application/json"
 					};
 
