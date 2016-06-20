@@ -49,7 +49,7 @@ class UserWorker extends Worker {
 	}
 
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
-		console.log('UserWorker.process(): ', JSON.stringify(task));
+		console.log('UserWorker.process(): ', task._id);
 		let user = new User({id: task.userId});
 		user.syncData().then(() => {
 			switch (task.type) {
