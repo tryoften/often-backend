@@ -5,6 +5,8 @@ cat >~/.npmrc << EOF
 scope=often
 EOF
 
+SERVER_TYPE=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/server-type" -H "Metadata-Flavor: Google")
+
 # Install logging monitor. The monitor will automatically pick up logs sent to
 # syslog.
 curl -s "https://storage.googleapis.com/signals-agents/logging/google-fluentd-install.sh" | bash
@@ -21,7 +23,7 @@ apt-get install -yq ca-certificates git nodejs build-essential supervisor
 # git requires $HOME and it's not set during the startup script.
 export HOME=/root
 git config --global credential.helper gcloud.sh
-git clone https://source.developers.google.com/p/acoustic-rider-104419/r/often-site /opt/app
+git clone https://source.developers.google.com/p/acoustic-rider-104419/r/default /opt/app
 
 echo "Installing npm dependencies"
 npm install -g tsd typescript
@@ -45,13 +47,14 @@ chown -R nodeapp:nodeapp /opt/app
 cat >/etc/supervisor/conf.d/node-app.conf << EOF
 [program:nodeapp]
 directory=/opt/app
-command=npm start
+command=node build/app.js $SERVER_TYPE
 autostart=true
 autorestart=true
 user=nodeapp
 environment=HOME="/home/nodeapp",USER="nodeapp",NODE_ENV="production"
-stdout_logfile=syslog
-stderr_logfile=syslog
+stdout_logfile_maxbytes=50MB   
+stderr_logfile_maxbytes=50MB 
+stderr_events_enabled=true 
 EOF
 
 supervisorctl reread

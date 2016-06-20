@@ -82,7 +82,7 @@
     "typescript": "^1.8.9"
   },
   "scripts": {
-    "start": "node build/app.js",
+    "start": "node build/app.js"
   },
   "jshintConfig": {
     "esnext": true
