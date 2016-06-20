@@ -82,10 +82,7 @@
     "typescript": "^1.8.9"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel/register",
-    "start": "node server.js",
-    "start-dev": "node server-dev.js",
-    "build": "webpack --config webpack.config.js  -p"
+    "start": "node build/app.js",
   },
   "jshintConfig": {
     "esnext": true
