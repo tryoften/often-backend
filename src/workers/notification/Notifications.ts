@@ -1,5 +1,5 @@
 import { Firebase } from 'backbone';
-import Notification from '../Models/Notification';
+import Notification from './Notification';
 
 class Notifications extends Firebase.Collection<Notification> {
 	constructor (models = [], opts = { model: Notification, autoSync: false}) {

@@ -21,44 +21,8 @@ if (_.contains(argv._, 'image-resizer')) {
 	new ImageResizerWorker().start();
 }
 
-if (_.contains(argv._, 'search')) {
-	let SearchWorker = require('./Workers/SearchWorker').default;
-	console.log('starting search\n');
-	new SearchWorker().start();
-}
-
-if (_.contains(argv._, 'feed-ingestor')) {
-	let FeedIngestorWorker = require('./Workers/FeedIngestorWorker').default;
-	console.log('starting feed ingestor\n');
-	new FeedIngestorWorker().start();
-}
-
-if (_.contains(argv._, 'feedpage-parser')) {
-	let FeedPageWorker = require('./Workers/FeedPageWorker').default;
-	console.log('starting feed page parser');
-	new FeedPageWorker().start();
-}
-
-if (_.contains(argv._, 'link-redirector')) {
-	let URIConverterService = require('./utilities/URIConverterService').default;
-	console.log('starting link-redirector');
-	new URIConverterService().start();
-}
-
-if (_.contains(argv._, 'ingestion')) {
-	let IngestionWorker = require('./Workers/IngestionWorker').default;
-	console.log('starting ingestion-worker');
-	new IngestionWorker().start();
-}
-
-if (_.contains(argv._, 'track-task-scheduler')) {
-	let TrackTaskScheduler = require('./Schedulers/TrackTaskScheduler').default;
-	console.log('starting track-task-scheduler');
-	new TrackTaskScheduler().start();
-}
-
 if (_.contains(argv._, 'notification')) {
-	let NotificationWorker = require('./Workers/NotificationWorker').default;
+	let NotificationWorker = require('./workers/notification/NotificationWorker').default;
 	console.log('starting the notification-worker');
 	new NotificationWorker().start();
 }
