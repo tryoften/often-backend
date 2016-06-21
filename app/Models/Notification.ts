@@ -21,7 +21,9 @@ interface FirebaseAttributes {
 
 class Notification extends BaseModel {
 	constructor(attributes: NotificationAttributes = {}, opts: any = {autoSync: false, deepSync: false, setObjectMap: false}) {
-		attributes.id = generateId();
+		if (!attributes.id) {
+			attributes.id = generateId();
+		}
 		attributes.type = BaseModelType.notification;
 		super(attributes, opts);
 	}

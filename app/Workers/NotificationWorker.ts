@@ -23,13 +23,12 @@ export default class NotificationWorker extends Worker {
 	}
 
 	public process(task: NotificationTask, progress: Function, resolve: Function, reject: Function) {
-		let firebaseOn = false;
+		let firebaseOn = true;
 		let notification = new Notification({id: task.notificationId});
 		console.log(FirebaseConfig.Secret);
 		notification.syncModel().then(() => {
 			switch (firebaseOn) {
 				case false:
-					// Sample Drake topic
 					push.sendToChannels([`${notification.packId}`], {
 						aps: {
 							badge: "Increment",
@@ -54,13 +53,13 @@ export default class NotificationWorker extends Worker {
 					let notificationBody = {
 						to: `/topics/${notification.packId}`,
 						notification: {
-							badge: "Increment",
-							body: `${notification.text}`,
-							sound: "default",
-							title: "Often",
-							p: `${notification.packId}`
+							title: notification.title,
+							body: notification.text,
+							badge: "1"
 						},
-						"content-available": 1,
+						data: {
+							p: notification.packId
+						},
 						priority: 10
 					};
 
