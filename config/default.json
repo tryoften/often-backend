@@ -15,6 +15,7 @@
 	"firebase": {
 		"BaseURL": "https://often-dev.firebaseio.com",
 		"Secret": "kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2",
+		"Authorization": "AIzaSyDzLC9dhfwC7wdfEdVcRyFH75bYDUha3Ms",
 		"queues": {
 			"default": {
 				"url": "/queues/default",
@@ -65,8 +66,18 @@
 				"numWorkers": 2,
 				"sanitize": false,
 				"suppressStack": true
+			},
+			"notification": {
+				"url": "/queues/notification",
+				"numWorkers": 2,
+				"sanitize": false,
+				"suppressStack": true
 			}
 		}
+	},
+	"parse": {
+		"applicationId": "TEnbb61NmEGK3kYz0IqP8CUSZhKSF6HU31QQBXe0",
+		"restApiKey": "kqHAFY4CEXRsrcGirKUqxpk5kszcsj37Kvtab0Ki"
 	},
 	"bitly": {
 		"clientId": "22a6e134c49f8ccc283660563fb3d4e9d86d42db",
