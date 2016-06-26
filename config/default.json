@@ -13,6 +13,14 @@
 		"BaseURL": "http://localhost:9200"
 	},
 	"firebase": {
+		"credentials" : {
+			"serviceAccount": {
+				"projectId": "firebase-often-dev",
+				"clientEmail": "often-workers-dev@firebase-often-dev.iam.gserviceaccount.com",
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCNtGTY/X5ZQdw2\nYYmyJ8bZ/NXouRN9xu+AcLjVGftcLDe5C/UFWCB2teLPkpf15zEEQHYnYU8PrDm1\nV9mjUd+ytvpzc1kicSVkrghgle51vJcHeoBG5ocCZAyYNH6UqhhwDqQrukzUMCei\nVU9AcKqnqLfxmlqGpTB5fF5EtRRsElJTyQ556pXAUu3QX5H+MXf1fSmC3eCziRyU\nWGkg22sBL2k3dVmfScDmp3M40BK/+eSTanX760jwP/TNJHo2m3DVr/sJ6Xio/uzz\nUF/aaI34i6/7s3+iIgvOBKGmgbDLrnwnVNQqkUBmp9SYCpzEwC4QyZ1Wpbp57unS\nUOXUJD01AgMBAAECggEAVMYR+vqUJwPOoT3y6YEAZpLqycJHFdz4lUdaXCqiBL9z\nSqILoHnbWglwOiwB+xunaFrEFMUTTlYDZCi9TAaEJF9xL7ZXIdK8wyGWY2nu8cK0\nO8YejcwGAvkly7zD6V5lJkysDHj005BHdcdBlVSR06GNAd4MwDZ87IDpyILoR8o3\nTCxXYdrSVqIf00LFEsO37/HubdPfoykNB5G+MaqBty2gMbwBKL0NFFplgKkL4ZqY\nOScuWvj7LLTwcF1mF3A54A06S+h5xP+jPgB+zNy5cHLJsJoMxychSyZILMp1YoXW\n6yKN1s2lGkHQlgFLo5mRK2z02EJrGwMcY0p1ZcejQQKBgQDz9ItGDAEzMc2d5zx5\n3DMfzWZlDWMj/rxSbjGijNXjQD+EPDJZS1zqnHOBDkdED9D71G6BCgWNOoSJs829\np4GuxnRL957xSlIGqQHzBO63Y7+tH1InOowNCISSj7P6V9eReiVQnixSefVWyriE\nVSCKU6Oop0Y9bXMdt1bT8kCQxQKBgQCUs3XjB25AXZYH9CRQJuYEgOdADMIZ15CU\nk9CkCpJ6nKhB6anfl0MPQbLOuVRuX+I49kDaKqmGNatZMyTtTWfhfY3ScMlpPWe7\nSHyBNb/K8CfLcWJIeLGURj589afs94sjvM0LH5329/EEtvHunZiYiM0F4dgKDKHh\nhPNka2fhsQKBgHcitKU3lZpvtu9nDqSgQaNFRr0QxZq9ezByOfEdABMjvCES2K+8\n2xqD3vBmja0SYEerXW/M+hsXOcSZt17oH6+/oOm8erVxSw+Pl7Ebdoy+vMuJ4S/h\nKqXuw/djEEywe0jDMtfk9tYsUwDYrTWK8QI8iE8DqYy0F6SqdU+6HYfVAoGAQBiO\n8vor+tCcL/d7g5UQxtYtV71oGS2C45hHcb4g33sRR8AJehhATp46DcNy8lSgNX9n\n+uIyymft4PgbrbIU2ex9qjz1hEh0oxSeni9l6XrVHGtWOvjTSp9wpfpZlNoq/o+O\nLoJFW8QJ/sdAx2Lk+LLW9PchYUuKp6PgKePmFjECgYA/+bvAHI63NKeYxco4LkY/\nRyT9b19mjUOl3UgM5OTf3ugpQSbj369kMJjYGzvtJso8NVw9cCRcB8kTFrJ4eXlk\nyZdxJ6aWMWd46I6d7myXoYVHFMe/rrlgMfhtrjS7m80VjHnV/g9kWe2RGUO628Jh\n7oXlJWJAQVjTPugyWIEEqg==\n-----END PRIVATE KEY-----\n"
+			},
+			"databaseURL": "https://often-dev.firebaseio.com"
+		},
 		"BaseURL": "https://often-dev.firebaseio.com",
 		"Secret": "kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2",
 		"queues": {
