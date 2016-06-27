@@ -1,8 +1,11 @@
 import Queue = require('firebase-queue');
-import UserTokenGenerator from '../Auth/UserTokenGenerator';
 import { firebase as FirebaseConfig, port } from '../config';
 import * as _ from 'underscore';
 import { createServer } from 'http';
+
+const firebase = require('firebase');
+firebase.initializeApp(FirebaseConfig.credentials);
+console.log('Initialized Firebase in Worker');
 
 /**
  * Internal Firebase queue task
@@ -24,7 +27,6 @@ interface WorkerOptions {
  */
 export default class Worker {
 	options: any;
-	ref: any;
 	queue: Queue;
 
 	/**
@@ -34,10 +36,6 @@ export default class Worker {
 	 * @return {void}
 	 */
 	constructor (opts) {
-		if (opts.url.substring(0, 1) === '/')  {
-			opts.url = FirebaseConfig.BaseURL + opts.url;
-		}
-		FirebaseConfig.queues.default.url = FirebaseConfig.BaseURL + FirebaseConfig.queues.default.url;
 		this.options = _.defaults(opts, FirebaseConfig.queues.default);
 	}
 
@@ -47,8 +45,9 @@ export default class Worker {
 	 * @return {void}
 	 */
 	start () {
-		this.ref = UserTokenGenerator.getAdminReference(this.options.url);
-		this.queue = new Queue(this.ref, this.options, this.process.bind(this));
+		console.log('starting');
+		let ref = firebase.database().ref(this.options.url);
+		this.queue = new Queue(ref, this.options, this.process.bind(this));
 		this.setupHealthCheckServer();
 	}
 

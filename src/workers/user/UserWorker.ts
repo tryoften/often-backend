@@ -49,7 +49,7 @@ class UserWorker extends Worker {
 	}
 
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
-		console.log('UserWorker.process(): ', task._id);
+		console.log('UserWorker.process(): ', task._id, task.data.operation);
 		let user = new User({id: task.userId});
 		user.syncData().then(() => {
 			switch (task.type) {
@@ -71,8 +71,10 @@ class UserWorker extends Worker {
 
 			}
 		}).then( (results) => {
+			console.log("Resolving results for ", task._id, task.data.operation);
 			resolve(results);
 		}).catch( (err: Error) => {
+			console.log('Err, ',err.stack, task._id );
 			reject(err);
 		});
 	}
