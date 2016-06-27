@@ -1,9 +1,9 @@
-var firebase = require('firebase');
 import Queue = require('firebase-queue');
 import { firebase as FirebaseConfig, port } from '../config';
 import * as _ from 'underscore';
 import { createServer } from 'http';
 
+const firebase = require('firebase');
 firebase.initializeApp(FirebaseConfig.credentials);
 console.log('Initialized Firebase in Worker');
 
