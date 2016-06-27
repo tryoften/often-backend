@@ -1,15 +1,24 @@
-import Pack from '../Models/Pack';
-import MediaItemSource from "../Models/MediaItemSource";
-import MediaItemType from "../Models/MediaItemType";
-import Categories from '../Collections/Categories';
+import { Packs } from '@often/often-core';
 
-var pack = new Pack({id : 'test_pack'});
+let packs = new Packs();
+function updatePacks(results: any){
+	console.log('results');
+}
+packs.fetch({
+	success: updatePacks
+});
 
-var categories = new Categories();
 
-pack.assignCategoryToItem('41_-aTqhe', categories[0]);
+//let pack = new Pack({
+//	id: 'VknZlt2WW'
+//}, {
+//	autoSync: false,
+//	setObjectMap: true,
+//	rootURL: 'https://jakub-test-4d7f6.firebaseio.com'
+//});
+//
+//pack.syncData().then(synced => {
+//	console.log('did the sync');
+//	console.log(pack.url.toString());
+//});
 
-var pacman = Pack.fromType(MediaItemSource.Often, MediaItemType.pack, '321');
-var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.artist, '321');
-var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.track, '321');
-var pacman = Pack.fromType(MediaItemSource.Genius, MediaItemType.lyric, '321');
