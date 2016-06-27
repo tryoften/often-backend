@@ -4,8 +4,9 @@ import * as _ from 'underscore';
 import { createServer } from 'http';
 
 const firebase = require('firebase');
+console.log(FirebaseConfig.credentials);
 firebase.initializeApp(FirebaseConfig.credentials);
-console.log('Initialized Firebase in Worker');
+console.log('Initialized Firebase in Worker', FirebaseConfig.credentials.databaseURL);
 
 /**
  * Internal Firebase queue task
