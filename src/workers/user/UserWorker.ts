@@ -49,9 +49,10 @@ class UserWorker extends Worker {
 	}
 
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
-		console.log('UserWorker.process(): ', task._id, task.data.operation);
-		let user = new User({id: task.userId});
-		user.syncData().then(() => {
+		console.log('UserWorker.process(): ', task._id);
+		new User({id: task.userId})
+			.syncData()
+			.then( (user) => {
 			switch (task.type) {
 				case UserWorkerTaskType.EditUserPackItems:
 					return true;
@@ -71,7 +72,7 @@ class UserWorker extends Worker {
 
 			}
 		}).then( (results) => {
-			console.log("Resolving results for ", task._id, task.data.operation);
+			console.log("Resolving results for ", task._id);
 			resolve(results);
 		}).catch( (err: Error) => {
 			console.log('Err, ',err.stack, task._id );
