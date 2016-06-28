@@ -50,6 +50,10 @@ class UserWorker extends Worker {
 
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
 		console.log('UserWorker.process(): ', task._id);
+		if (!task.userId) {
+			reject("User Id not defined");
+			return;
+		}
 		new User({id: task.userId})
 			.syncData()
 			.then( (user) => {
