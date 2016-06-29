@@ -1,10 +1,10 @@
 /// <reference path="../typings/tsd.d.ts" />
-
-import * as _ from 'underscore';
+let _ = require('underscore');
 let minimist = require('minimist');
 let config = require('./config');
-
 let argv = minimist(process.argv.slice(2));
+let db = require('./db');
+
 console.dir(argv);
 config.workers = argv._;
 
