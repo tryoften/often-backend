@@ -1,8 +1,8 @@
 import * as _ from 'underscore';
 import * as rest from 'restler';
-import { firebase as FirebaseConfig, parse as ParseConfig } from '../config';
+import { firebase as FirebaseConfig, parse as ParseConfig } from '../../config';
 import Worker, { Task } from '../Worker';
-import Notification from './Notification';
+import { Notification } from '@often/often-core';
 
 var Push = require("parse-push");
 var push = new Push({
