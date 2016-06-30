@@ -1,7 +1,7 @@
 import * as unirest from 'unirest';
 import * as fs from 'fs';
 
-let taskNum = 0;
+let taskNum = 129;
 let maxTaskNum = 229;
 let url = 'https://often-prod.firebaseio.com/queues/user/tasks.json';
 let userTasksRoot = '/Users/jakubcichon/Desktop/userTasks';
@@ -11,9 +11,12 @@ let prevNumItemsOnQueue = 0;
 
 function enqueueBatch() {
 
-	console.log(`Enqueueing batch number ${taskNum}`);
-
 	/* Read in a task file synchronously */
+	if (taskNum < maxTaskNum) {
+		taskNum++;
+		console.log(`Enqueueing batch number ${taskNum}`);
+	}
+
 	let inputFileContents = fs.readFileSync(`${userTasksRoot}/task-${taskNum}.json`);
 	let tasksJson = JSON.parse(inputFileContents.toString());
 	unirest
@@ -21,9 +24,6 @@ function enqueueBatch() {
 		.type('json')
 		.send(tasksJson)
 		.end((response) => {
-			if (taskNum < maxTaskNum) {
-				taskNum++;
-			}
 			let numNewItems = Object.keys(tasksJson).length;
 			prevNumItemsOnQueue += numNewItems;
 			setCheckQueueInterval();
