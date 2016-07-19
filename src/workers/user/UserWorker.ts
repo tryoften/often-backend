@@ -9,6 +9,7 @@ class UserWorkerTaskType extends String {
 	static EditUserPackSubscription: UserWorkerTaskType = 'editPackSubscription';
 	static InitiatePacks: UserWorkerTaskType = 'initiatePacks';
 	static CreateToken: UserWorkerTaskType = 'createToken';
+	static SharePackItem: UserWorkerTaskType = 'sharePackItem';
 }
 
 class UserPackOperation extends String {
@@ -35,10 +36,16 @@ interface EditUserPackSubscriptionAttributes {
 
 interface CreateTokenAttributes {}
 
+interface SharePackItemAttributes {
+	packId: string;
+	itemId: string;
+	itemType: MediaItemType;
+}
+
 interface UserWorkerTask extends Task {
 	userId: string;
 	type: UserWorkerTaskType;
-	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes);
+	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes | SharePackItemAttributes);
 }
 
 /* Adding / Removing Items from favorites and recents  */
@@ -70,6 +77,9 @@ class UserWorker extends Worker {
 
 				case UserWorkerTaskType.CreateToken:
 					return this.createToken(user, <CreateTokenAttributes>task.data);
+
+				case UserWorkerTaskType.SharePackItem:
+					return this.sharePackItem(user, <SharePackItemAttributes>task.data);
 
 				default:
 					throw new Error('Invalid task type.');
@@ -181,6 +191,24 @@ class UserWorker extends Worker {
 
 	}
 
+	private sharePackItem (user: User, data: SharePackItemAttributes): Promise<any> {
+		user.incrementShareCount();
+		user.save();
+
+		let updatedPack = new Pack({ id: data.packId }).syncModel().then((syncedPack: Pack) => {
+			syncedPack.incrementShareCount();
+			syncedPack.save();
+		});
+
+		let ItemClass = MediaItemType.toClass(data.itemType);
+		let updatedItem = new ItemClass({ id: data.itemId }).syncData().then((syncedItem: any) => {
+			syncedItem.incrementShareCount();
+			syncedItem.save();
+		});
+
+		return Promise.all([updatedPack, updatedItem]);
+	}
+
 	/**
 	 * Wrapper for initiating user favorites, default and recents packs
 	 * @param {User} user - object representing the user model
@@ -195,6 +223,7 @@ class UserWorker extends Worker {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}
+
 
 
 	/**
