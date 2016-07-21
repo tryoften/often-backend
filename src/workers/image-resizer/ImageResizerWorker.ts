@@ -13,7 +13,7 @@ import { Image } from '@often/often-core';
 type Url = string;
 interface ImageResizeTask extends Task {
 	url: Url;
-	imageId: string;
+	imageId?: string;
 }
 type ImageTransformations = any;
 
