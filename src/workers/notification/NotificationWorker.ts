@@ -51,7 +51,7 @@ export default class NotificationWorker extends Worker {
 					};
 
 					let notificationBody = {
-						to: `/topics/${notification.packId}`,
+						to: `/topics/${notification.target}`,
 						notification: {
 							title: notification.title,
 							body: notification.text,
