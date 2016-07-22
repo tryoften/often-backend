@@ -66,8 +66,7 @@ class UserWorker extends Worker {
 			.then( (user) => {
 			switch (task.type) {
 				case UserWorkerTaskType.EditUserPackItems:
-					return true;
-					//return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
+					return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
 
 				case UserWorkerTaskType.EditUserPackSubscription:
 					return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
@@ -127,16 +126,14 @@ class UserWorker extends Worker {
 		}
 
 		let pack = new Pack({id: packId});
-		return pack.syncData().then(() => {
-			var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
-			var mediaItem = new MediaItemClass(data.mediaItem);
-			return mediaItem.syncModel();
+		var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
+		var mediaItem = new MediaItemClass(data.mediaItem);
 
-		}).then((syncedMediaItem) => {
+		return Promise.all([ pack.syncData(), mediaItem.syncModel() ]).then( ([syncedPack, syncedMediaItem]) => {
 
 			switch (data.operation) {
 				case UserPackOperation.add:
-					pack.addItem(syncedMediaItem);
+					syncedPack.addItem(syncedMediaItem.toJSON());
 
 					if (data.packType === UserPackType.recent) {
 						let count = user.shareCount + 1;
@@ -146,7 +143,7 @@ class UserWorker extends Worker {
 					return `Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`;
 
 				case UserPackOperation.remove:
-					pack.removeItem(syncedMediaItem);
+					syncedPack.removeItem(syncedMediaItem.toJSON());
 					return `Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`;
 
 				default:
@@ -195,7 +192,7 @@ class UserWorker extends Worker {
 		user.incrementShareCount();
 		user.save();
 
-		let updatedPack = new Pack({ id: data.packId }).syncModel().then((syncedPack: Pack) => {
+		let updatedPack = new Pack({ id: data.packId }).syncData().then((syncedPack: Pack) => {
 			syncedPack.incrementShareCount();
 			syncedPack.save();
 		});
@@ -216,8 +213,8 @@ class UserWorker extends Worker {
 	 */
 	private initiatePacks (user: User): Promise<string> {
 		return Promise.all([
-			user.initDefaultPack()
-			//user.initFavoritesPack(),
+			user.initDefaultPack(),
+			user.initFavoritesPack()
 			//user.initRecentsPack()
 		]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
