@@ -10,3 +10,4 @@ try {
 }
 
 export default main;
+export var production = firebase.initializeApp(FirebaseConfig.prod, "production");

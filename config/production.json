@@ -9,7 +9,8 @@
 			"databaseURL": "https://often-prod.firebaseio.com"
 		},
 		"BaseURL": "https://often-prod.firebaseio.com",
-		"Secret": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY"
+		"Secret": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY",
+		"Authorization": "AIzaSyAodf6OBeTZy1lhXKeM_G8t9c-HmwhG27k"
 	},
 	"elasticsearch": {
 		"BaseURL": "http://search1-elasticsearch-1-vm:9200"
