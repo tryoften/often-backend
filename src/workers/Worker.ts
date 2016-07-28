@@ -9,6 +9,7 @@ const firebase = require('firebase');
  * Internal Firebase queue task
  */
 export interface Task {
+	_id?: string;
 	_state?: string;
 	_state_changed?: string;
 	_owner?: string;

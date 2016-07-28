@@ -63,34 +63,36 @@ class UserWorker extends Worker {
 		}
 		new User({id: task.userId})
 			.syncData()
-			.then( (user) => {
-			switch (task.type) {
-				case UserWorkerTaskType.EditUserPackItems:
-					return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
+			.then( (model) => {
+				let user = model as User;
 
-				case UserWorkerTaskType.EditUserPackSubscription:
-					return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
+				switch (task.type) {
+					case UserWorkerTaskType.EditUserPackItems:
+						return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
 
-				case UserWorkerTaskType.InitiatePacks:
-					return this.initiatePacks(user);
+					case UserWorkerTaskType.EditUserPackSubscription:
+						return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
 
-				case UserWorkerTaskType.CreateToken:
-					return this.createToken(user, <CreateTokenAttributes>task.data);
+					case UserWorkerTaskType.InitiatePacks:
+						return this.initiatePacks(user);
 
-				case UserWorkerTaskType.SharePackItem:
-					return this.sharePackItem(user, <SharePackItemAttributes>task.data);
+					case UserWorkerTaskType.CreateToken:
+						return this.createToken(user, <CreateTokenAttributes>task.data);
 
-				default:
-					throw new Error('Invalid task type.');
+					case UserWorkerTaskType.SharePackItem:
+						return this.sharePackItem(user, <SharePackItemAttributes>task.data);
 
-			}
-		}).then( (results) => {
-			console.log("Resolving results for ", task._id);
-			resolve(results);
-		}).catch( (err: Error) => {
-			console.log('Err, ',err.stack, task._id );
-			reject(err);
-		});
+					default:
+						throw new Error('Invalid task type.');
+
+				}
+			}).then( (results) => {
+				console.log("Resolving results for ", task._id);
+				resolve(results);
+			}).catch( (err: Error) => {
+				console.log('Err, ',err.stack, task._id );
+				reject(err);
+			});
 	}
 
 	/**
@@ -214,8 +216,8 @@ class UserWorker extends Worker {
 	private initiatePacks (user: User): Promise<string> {
 		return Promise.all([
 			user.initDefaultPack(),
-			user.initFavoritesPack()
-			//user.initRecentsPack()
+			user.initFavoritesPack(),
+			user.initRecentsPack()
 		]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
