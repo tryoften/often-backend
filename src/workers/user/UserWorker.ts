@@ -9,6 +9,7 @@ class UserWorkerTaskType extends String {
 	static EditUserPackSubscription: UserWorkerTaskType = 'editPackSubscription';
 	static InitiatePacks: UserWorkerTaskType = 'initiatePacks';
 	static CreateToken: UserWorkerTaskType = 'createToken';
+	static SharePackItem: UserWorkerTaskType = 'sharePackItem';
 }
 
 class UserPackOperation extends String {
@@ -35,10 +36,16 @@ interface EditUserPackSubscriptionAttributes {
 
 interface CreateTokenAttributes {}
 
+interface SharePackItemAttributes {
+	packId: string;
+	itemId: string;
+	itemType: MediaItemType;
+}
+
 interface UserWorkerTask extends Task {
 	userId: string;
 	type: UserWorkerTaskType;
-	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes);
+	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes | SharePackItemAttributes);
 }
 
 /* Adding / Removing Items from favorites and recents  */
@@ -59,8 +66,7 @@ class UserWorker extends Worker {
 			.then( (user) => {
 			switch (task.type) {
 				case UserWorkerTaskType.EditUserPackItems:
-					return true;
-					//return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
+					return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
 
 				case UserWorkerTaskType.EditUserPackSubscription:
 					return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
@@ -70,6 +76,9 @@ class UserWorker extends Worker {
 
 				case UserWorkerTaskType.CreateToken:
 					return this.createToken(user, <CreateTokenAttributes>task.data);
+
+				case UserWorkerTaskType.SharePackItem:
+					return this.sharePackItem(user, <SharePackItemAttributes>task.data);
 
 				default:
 					throw new Error('Invalid task type.');
@@ -117,16 +126,14 @@ class UserWorker extends Worker {
 		}
 
 		let pack = new Pack({id: packId});
-		return pack.syncData().then(() => {
-			var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
-			var mediaItem = new MediaItemClass(data.mediaItem);
-			return mediaItem.syncModel();
+		var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
+		var mediaItem = new MediaItemClass(data.mediaItem);
 
-		}).then((syncedMediaItem) => {
+		return Promise.all([ pack.syncData(), mediaItem.syncModel() ]).then( ([syncedPack, syncedMediaItem]) => {
 
 			switch (data.operation) {
 				case UserPackOperation.add:
-					pack.addItem(syncedMediaItem);
+					syncedPack.addItem(syncedMediaItem.toJSON());
 
 					if (data.packType === UserPackType.recent) {
 						let count = user.shareCount + 1;
@@ -136,7 +143,7 @@ class UserWorker extends Worker {
 					return `Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`;
 
 				case UserPackOperation.remove:
-					pack.removeItem(syncedMediaItem);
+					syncedPack.removeItem(syncedMediaItem.toJSON());
 					return `Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`;
 
 				default:
@@ -181,6 +188,24 @@ class UserWorker extends Worker {
 
 	}
 
+	private sharePackItem (user: User, data: SharePackItemAttributes): Promise<any> {
+		user.incrementShareCount();
+		user.save();
+
+		let updatedPack = new Pack({ id: data.packId }).syncData().then((syncedPack: Pack) => {
+			syncedPack.incrementShareCount();
+			syncedPack.save();
+		});
+
+		let ItemClass = MediaItemType.toClass(data.itemType);
+		let updatedItem = new ItemClass({ id: data.itemId }).syncData().then((syncedItem: any) => {
+			syncedItem.incrementShareCount();
+			syncedItem.save();
+		});
+
+		return Promise.all([updatedPack, updatedItem]);
+	}
+
 	/**
 	 * Wrapper for initiating user favorites, default and recents packs
 	 * @param {User} user - object representing the user model
@@ -188,13 +213,14 @@ class UserWorker extends Worker {
 	 */
 	private initiatePacks (user: User): Promise<string> {
 		return Promise.all([
-			user.initDefaultPack()
-			//user.initFavoritesPack(),
+			user.initDefaultPack(),
+			user.initFavoritesPack()
 			//user.initRecentsPack()
 		]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}
+
 
 
 	/**
