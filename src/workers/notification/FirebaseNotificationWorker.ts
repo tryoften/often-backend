@@ -36,8 +36,9 @@ export default class FirebaseNotificationWorker extends NotificationWorker {
 
 			rest.post('https://fcm.googleapis.com/fcm/send', restlerOptions).on('complete', (result) => {
 				if (result instanceof Error) {
-					console.error(result);
-					reject(`Error sending notification for notification id ${notification.id} with error ${result.message}`);
+					let message = `Error sending notification for notification id ${notification.id} with error ${result.message}`;
+					console.error(message);
+					reject(message);
 				} else {
 					let message = 'Successfully pushed notification ' + notification.id;
 					console.log(message, result);

@@ -15,6 +15,10 @@
 	"elasticsearch": {
 		"BaseURL": "http://search1-elasticsearch-1-vm:9200"
 	},
+	"parse": {
+		"applicationId": "zOkdtEf6pbq3wHN7aTWVGe6tH236I6n934Wsr59g",
+		"restApiKey": "PPPWjedWWPkSEMP7WIW8LLsAGYjRBUmRAb8cVFXy"
+	},
 	"winston": {
 		"transports": [
 			{
