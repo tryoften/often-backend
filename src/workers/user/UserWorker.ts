@@ -2,7 +2,8 @@ import { firebase as FirebaseConfig } from '../../config';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../../Auth/UserTokenGenerator';
 import Worker, { Task } from '../Worker';
-import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User } from '@often/often-core';
+import GraphModel from '../../Utilities/GraphModel';
+import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User, IndexableObject } from '@often/often-core';
 
 class UserWorkerTaskType extends String {
 	static EditUserPackItems: UserWorkerTaskType = 'editUserPackItems';
@@ -43,8 +44,12 @@ interface UserWorkerTask extends Task {
 
 /* Adding / Removing Items from favorites and recents  */
 class UserWorker extends Worker {
+
+	graph: GraphModel;
+
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.user);
+		this.graph = new GraphModel();
 		super(options);
 	}
 
@@ -127,21 +132,24 @@ class UserWorker extends Worker {
 			switch (data.operation) {
 				case UserPackOperation.add:
 					pack.addItem(syncedMediaItem);
+					//merge pack here
 
 					if (data.packType === UserPackType.recent) {
 						let count = user.shareCount + 1;
 						user.save({shareCount: count});
 					}
-
-					return `Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`;
+					console.log(`Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`);
+					return pack.addItem(syncedMediaItem);
 
 				case UserPackOperation.remove:
-					pack.removeItem(syncedMediaItem);
-					return `Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`;
+					console.log(`Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`);
+					return pack.removeItem(syncedMediaItem);
 
 				default:
 					throw new Error('Invalid pack type');
 			}
+		}).then((updatedPack: Pack) => {
+			return this.graph.updateNode(updatedPack.getTargetGraphProperties());
 		});
 	}
 
@@ -169,17 +177,42 @@ class UserWorker extends Worker {
 				break;
 
 			case UserPackOperation.remove:
+
 				packPromise = user.removePack(data.packId);
 				break;
 
 			default:
 				throw new Error('Invalid operation.');
 		}
-		return packPromise.then(() => {
-			return `Succesfully ${data.operation}ed new pack ${data.packId} to / from user.`;
+		return packPromise.then((packData) => {
+
+			if (data.operation === UserPackOperation.add) {
+				return this.updateGraphRelationships(user, packData);
+			} else {
+				return this.removeGraphRelationships(user, packData);
+			}
 		});
 
 	}
+
+	private updateGraphRelationships(user: User, pack: Pack) {
+		let prom1, prom2;
+		if (user.id === pack.ownerId) {
+			/* If this user owns pack, then (user) -[:OWNS]-> (pack) */
+			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "OWNS"});
+		} else {
+			/* Otherwise, the (user) -[:FOLLOWS]-> (pack's owner) */
+			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.ownerId, type: pack.type}, {name: "FOLLOWS"});
+		}
+		/* User follows pack */
+		prom2 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "FOLLOWS"});
+		return Promise.all([prom1, prom2]);
+	}
+
+	private removeGraphRelationships(user: User, pack: Pack) {
+		return null;
+	}
+
 
 	/**
 	 * Wrapper for initiating user favorites, default and recents packs
@@ -188,8 +221,8 @@ class UserWorker extends Worker {
 	 */
 	private initiatePacks (user: User): Promise<string> {
 		return Promise.all([
-			user.initDefaultPack()
-			//user.initFavoritesPack(),
+			user.initDefaultPack(),
+			user.initFavoritesPack(),
 			//user.initRecentsPack()
 		]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
