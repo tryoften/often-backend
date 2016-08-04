@@ -10,6 +10,7 @@ class UserWorkerTaskType extends String {
 	static EditUserPackSubscription: UserWorkerTaskType = 'editPackSubscription';
 	static InitiatePacks: UserWorkerTaskType = 'initiatePacks';
 	static CreateToken: UserWorkerTaskType = 'createToken';
+	static SharePackItem: UserWorkerTaskType = 'sharePackItem';
 }
 
 class UserPackOperation extends String {
@@ -36,10 +37,16 @@ interface EditUserPackSubscriptionAttributes {
 
 interface CreateTokenAttributes {}
 
+interface SharePackItemAttributes {
+	packId: string;
+	itemId: string;
+	itemType: MediaItemType;
+}
+
 interface UserWorkerTask extends Task {
 	userId: string;
 	type: UserWorkerTaskType;
-	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes);
+	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes | SharePackItemAttributes);
 }
 
 /* Adding / Removing Items from favorites and recents  */
@@ -61,32 +68,36 @@ class UserWorker extends Worker {
 		}
 		new User({id: task.userId})
 			.syncData()
-			.then( (user) => {
-			switch (task.type) {
-				case UserWorkerTaskType.EditUserPackItems:
-					return true;
-					//return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
+			.then( (model) => {
+				let user = model as User;
 
-				case UserWorkerTaskType.EditUserPackSubscription:
-					return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
+				switch (task.type) {
+					case UserWorkerTaskType.EditUserPackItems:
+						return this.editUserPackItems(user, <EditUserPackItemsAttributes>task.data);
 
-				case UserWorkerTaskType.InitiatePacks:
-					return this.initiatePacks(user);
+					case UserWorkerTaskType.EditUserPackSubscription:
+						return this.editUserPackSubscription(user, <EditUserPackSubscriptionAttributes>task.data);
 
-				case UserWorkerTaskType.CreateToken:
-					return this.createToken(user, <CreateTokenAttributes>task.data);
+					case UserWorkerTaskType.InitiatePacks:
+						return this.initiatePacks(user);
 
-				default:
-					throw new Error('Invalid task type.');
+					case UserWorkerTaskType.CreateToken:
+						return this.createToken(user, <CreateTokenAttributes>task.data);
 
-			}
-		}).then( (results) => {
-			console.log("Resolving results for ", task._id);
-			resolve(results);
-		}).catch( (err: Error) => {
-			console.log('Err, ',err.stack, task._id );
-			reject(err);
-		});
+					case UserWorkerTaskType.SharePackItem:
+						return this.sharePackItem(user, <SharePackItemAttributes>task.data);
+
+					default:
+						throw new Error('Invalid task type.');
+
+				}
+			}).then( (results) => {
+				console.log("Resolving results for ", task._id);
+				resolve(results);
+			}).catch( (err: Error) => {
+				console.log('Err, ',err.stack, task._id );
+				reject(err);
+			});
 	}
 
 	/**
@@ -122,18 +133,14 @@ class UserWorker extends Worker {
 		}
 
 		let pack = new Pack({id: packId});
-		return pack.syncData().then(() => {
-			var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
-			var mediaItem = new MediaItemClass(data.mediaItem);
-			return mediaItem.syncModel();
+		var MediaItemClass = MediaItemType.toClass(data.mediaItem.type);
+		var mediaItem = new MediaItemClass(data.mediaItem);
 
-		}).then((syncedMediaItem) => {
+		return Promise.all([ pack.syncData(), mediaItem.syncModel() ]).then( ([syncedPack, syncedMediaItem]) => {
 
 			switch (data.operation) {
 				case UserPackOperation.add:
-					pack.addItem(syncedMediaItem);
-					//merge pack here
-
+					syncedPack.addItem(syncedMediaItem.toJSON());
 					if (data.packType === UserPackType.recent) {
 						let count = user.shareCount + 1;
 						user.save({shareCount: count});
@@ -142,8 +149,8 @@ class UserWorker extends Worker {
 					return pack.addItem(syncedMediaItem);
 
 				case UserPackOperation.remove:
-					console.log(`Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`);
-					return pack.removeItem(syncedMediaItem);
+					syncedPack.removeItem(syncedMediaItem.toJSON());
+					return `Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`;
 
 				default:
 					throw new Error('Invalid pack type');
@@ -213,6 +220,24 @@ class UserWorker extends Worker {
 		return null;
 	}
 
+	private sharePackItem (user: User, data: SharePackItemAttributes): Promise<any> {
+		user.incrementShareCount();
+		user.save();
+
+		let updatedPack = new Pack({ id: data.packId }).syncData().then((syncedPack: Pack) => {
+			syncedPack.incrementShareCount();
+			syncedPack.save();
+		});
+
+		let ItemClass = MediaItemType.toClass(data.itemType);
+		let updatedItem = new ItemClass({ id: data.itemId }).syncData().then((syncedItem: any) => {
+			syncedItem.incrementShareCount();
+			syncedItem.save();
+		});
+
+		return Promise.all([updatedPack, updatedItem]);
+	}
+
 
 	/**
 	 * Wrapper for initiating user favorites, default and recents packs
@@ -228,6 +253,7 @@ class UserWorker extends Worker {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}
+
 
 
 	/**
