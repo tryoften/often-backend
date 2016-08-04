@@ -49,8 +49,8 @@ class UserWorker extends Worker {
 
 	constructor (opts = {}) {
 		let options = _.defaults(opts, FirebaseConfig.queues.user);
-		this.graph = new GraphModel();
 		super(options);
+		this.graph = new GraphModel();
 	}
 
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
@@ -187,15 +187,15 @@ class UserWorker extends Worker {
 		return packPromise.then((packData) => {
 
 			if (data.operation === UserPackOperation.add) {
-				return this.updateGraphRelationships(user, packData);
+				return this.updatePackRelationships(user, packData);
 			} else {
-				return this.removeGraphRelationships(user, packData);
+				return this.removePackRelationships(user, packData);
 			}
 		});
 
 	}
 
-	private updateGraphRelationships(user: User, pack: Pack) {
+	private updatePackRelationships(user: User, pack: Pack) {
 		let prom1, prom2;
 		if (user.id === pack.ownerId) {
 			/* If this user owns pack, then (user) -[:OWNS]-> (pack) */
@@ -209,7 +209,7 @@ class UserWorker extends Worker {
 		return Promise.all([prom1, prom2]);
 	}
 
-	private removeGraphRelationships(user: User, pack: Pack) {
+	private removePackRelationships(user: User, pack: Pack) {
 		return null;
 	}
 
@@ -223,7 +223,7 @@ class UserWorker extends Worker {
 		return Promise.all([
 			user.initDefaultPack(),
 			user.initFavoritesPack(),
-			//user.initRecentsPack()
+			user.initRecentsPack()
 		]).then(() => {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
