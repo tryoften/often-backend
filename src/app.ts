@@ -1,5 +1,5 @@
 /// <reference path="../typings/tsd.d.ts" />
-let _ = require('underscore');
+//let _ = require('underscore');
 let minimist = require('minimist');
 let config = require('./config');
 let argv = minimist(process.argv.slice(2));

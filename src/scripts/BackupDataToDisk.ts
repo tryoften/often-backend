@@ -1,12 +1,11 @@
-var Firebase = require('firebase');
+var Firebase: FirebaseStatic = require('firebase');
 var fs = require('fs');
 var dateformat = require('dateformat');
 var mkdirp = require('mkdirp');
 var path = require('path');
-var os = require('os');
 
 function getUserHome() {
-	return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+	return process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
 }
 
 function backupFirebaseLocation(rootURL: string, relativeObjectPath: string, max_count = 5000) {
@@ -66,7 +65,7 @@ function backupFirebaseLocation(rootURL: string, relativeObjectPath: string, max
 			throw err;
 		}
 		fetchChunk();
-	})
+	});
 }
 
 backupFirebaseLocation('https://often-prod.firebaseio.com/', 'tracks/', 500);

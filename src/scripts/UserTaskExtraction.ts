@@ -66,7 +66,7 @@ function processAllTasks() {
 
 //processAllTasks().then(() => console.log('done'));
 
-function deleteTask(taskId: string, index: number) {
+function deleteTask(taskId: string, index: number): Promise<any> {
 	return new Promise((resolve, reject) => {
 		let ref = new Firebase(`https://often-prod.firebaseio.com/queues/user/tasks/${taskId}`);
 		ref.set(null, (err) => {

@@ -2,8 +2,8 @@ import { firebase as FirebaseConfig } from '../../config';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../../Auth/UserTokenGenerator';
 import Worker, { Task } from '../Worker';
-import GraphModel from '../../Utilities/GraphModel';
-import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User, IndexableObject } from '@often/often-core';
+import GraphModel, {UserNodeAttributes, PackNodeAttributes} from '../../Utilities/GraphModel';
+import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User, IndexableObject, UserAttributes } from '@often/often-core';
 
 class UserWorkerTaskType extends String {
 	static EditUserPackItems: UserWorkerTaskType = 'editUserPackItems';
@@ -184,20 +184,29 @@ class UserWorker extends Worker {
 				break;
 
 			case UserPackOperation.remove:
-
 				packPromise = user.removePack(data.packId);
 				break;
 
 			default:
 				throw new Error('Invalid operation.');
 		}
-		return packPromise.then((packData) => {
+		return packPromise.then((pack) => {
 
+			//Update user & pack models in graph to ensure that all data is set.
+			let packUpdate = this.graph.updateNode(pack.getTargetGraphProperties());
+			let userUpdate = this.graph.updateNode(user.getTargetGraphProperties());
+
+			let relUpdate;
 			if (data.operation === UserPackOperation.add) {
-				return this.updatePackRelationships(user, packData);
+				relUpdate = this.updatePackRelationships(user, pack);
 			} else {
-				return this.removePackRelationships(user, packData);
+				relUpdate = this.removePackRelationships(user, pack);
 			}
+
+			return Promise.all([packUpdate, userUpdate]).then(() => {
+				return relUpdate;
+			});
+
 		});
 
 	}
@@ -209,7 +218,7 @@ class UserWorker extends Worker {
 			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "OWNS"});
 		} else {
 			/* Otherwise, the (user) -[:FOLLOWS]-> (pack's owner) */
-			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.ownerId, type: pack.type}, {name: "FOLLOWS"});
+			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.ownerId, type: user.type}, {name: "FOLLOWS"});
 		}
 		/* User follows pack */
 		prom2 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "FOLLOWS"});
@@ -217,7 +226,9 @@ class UserWorker extends Worker {
 	}
 
 	private removePackRelationships(user: User, pack: Pack) {
-		return null;
+		let prom1 = this.graph.removeRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "FOLLOWS"});
+		let prom2 = this.graph.removeRelationship({id: user.id, type: user.type}, {id: pack.ownerId, type: user.type}, {name: "FOLLOWS"});
+		return Promise.all([prom1, prom2]);
 	}
 
 	private sharePackItem (user: User, data: SharePackItemAttributes): Promise<any> {
@@ -244,17 +255,54 @@ class UserWorker extends Worker {
 	 * @param {User} user - object representing the user model
 	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
 	 */
-	private initiatePacks (user: User): Promise<string> {
-		return Promise.all([
+	private initiatePacks (user: User): Promise<any> {
+		let userProps = user.getTargetObjectProperties();
+		let graphUser =  this.graph.updateNode(this.getUserNodeAttributes(userProps));
+
+		let packPromises =  Promise.all([
 			user.initDefaultPack(),
 			user.initFavoritesPack(),
 			user.initRecentsPack()
-		]).then(() => {
-			return 'Successfully initiated favorites, default and recents packs';
+		]);
+
+		return graphUser.then(() => { return packPromises; }).then( (packArr: Pack[]) => {
+
+			let defPack = packArr[0];
+			let favPack = packArr[1];
+			let recPack = packArr[2];
+
+			/* Update relationships for default pack */
+			let defProm = this.updatePackRelationships(user, defPack);
+
+			/* Create graph object for favorite pack & then establish a relationship relationship */
+			let favProm = this.graph.updateNode(this.getPackNodeAttributes(favPack.toIndexingFormat()))
+				.then(() => {
+					return this.updatePackRelationships(user, favPack);
+				});
+
+			/* Create graph object for recent pack & create relationship */
+			let recProm =  this.graph.updateNode(this.getPackNodeAttributes(recPack.toIndexingFormat()))
+				.then(() => {
+					return this.updatePackRelationships(user, recPack);
+				});
+
+			return Promise.all([ favProm, recProm]);
 		});
 	}
 
+	private getUserNodeAttributes(user: UserAttributes): UserNodeAttributes {
+		return {
+			id: user.id,
+			type: user.type
+		};
+	}
 
+	private getPackNodeAttributes(pack: IndexableObject): PackNodeAttributes {
+		return {
+			id: pack.id,
+			type: pack.type
+		};
+	}
 
 	/**
 	 * Wrapper for creating and setting a token on a user

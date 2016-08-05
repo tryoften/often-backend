@@ -1,7 +1,7 @@
 import { firebase as FirebaseConfig } from '../config';
 import { url_shortener } from '../config';
-import ShortenedURL from '../Models/ShortenedURL';
-import { generateURIfromGuid } from '/generateURI';
+import { ShortenedURL } from '@often/often-core';
+import { generateURIfromGuid } from './generateURI';
 import * as _ from 'underscore';
 import logger from '../logger';
 import sha1 from 'sha1';

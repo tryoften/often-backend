@@ -1,4 +1,4 @@
-import ShortenedURL from '../Models/ShortenedURL';
+import { ShortenedURL } from '@often/often-core';
 import { url_redirector } from '../config';
 import * as express from 'express';
 import * as _ from 'underscore';

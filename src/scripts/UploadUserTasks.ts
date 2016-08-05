@@ -1,4 +1,4 @@
-import * as unirest from 'unirest';
+let unirest = require('unirest');
 import * as fs from 'fs';
 
 let taskNum = 129;
