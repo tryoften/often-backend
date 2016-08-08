@@ -2,8 +2,8 @@ import { firebase as FirebaseConfig } from '../../config';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../../Auth/UserTokenGenerator';
 import Worker, { Task } from '../Worker';
-import GraphModel, {UserNodeAttributes, PackNodeAttributes} from '../../Utilities/GraphModel';
-import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User, IndexableObject, UserAttributes } from '@often/often-core';
+import GraphModel, { UserNodeAttributes, PackNodeAttributes, RelationshipAttributes } from '../../Utilities/GraphModel';
+import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User, UserAttributes, PackAttributes } from '@often/often-core';
 
 class UserWorkerTaskType extends String {
 	static EditUserPackItems: UserWorkerTaskType = 'editUserPackItems';
@@ -49,7 +49,6 @@ interface UserWorkerTask extends Task {
 	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes | SharePackItemAttributes);
 }
 
-/* Adding / Removing Items from favorites and recents  */
 class UserWorker extends Worker {
 
 	graph: GraphModel;
@@ -156,7 +155,8 @@ class UserWorker extends Worker {
 					throw new Error('Invalid pack type');
 			}
 		}).then((updatedPack: Pack) => {
-			return this.graph.updateNode(updatedPack.getTargetGraphProperties());
+			let packAttrs = this.getPackNodeAttributes(updatedPack.toIndexingFormat());
+			return this.graph.updateNode(packAttrs);
 		});
 	}
 
@@ -190,17 +190,19 @@ class UserWorker extends Worker {
 			default:
 				throw new Error('Invalid operation.');
 		}
-		return packPromise.then((pack) => {
+		return packPromise.then((packAttributes) => {
 
-			//Update user & pack models in graph to ensure that all data is set.
-			let packUpdate = this.graph.updateNode(pack.getTargetGraphProperties());
-			let userUpdate = this.graph.updateNode(user.getTargetGraphProperties());
+			let userGraphProps = this.getUserNodeAttributes(user.getTargetObjectProperties());
+			let packGraphProps = this.getPackNodeAttributes(packAttributes);
+
+			let packUpdate = this.graph.updateNode(packGraphProps);
+			let userUpdate = this.graph.updateNode(userGraphProps);
 
 			let relUpdate;
 			if (data.operation === UserPackOperation.add) {
-				relUpdate = this.updatePackRelationships(user, pack);
+				relUpdate = this.updatePackRelationships(userGraphProps, packGraphProps);
 			} else {
-				relUpdate = this.removePackRelationships(user, pack);
+				relUpdate = this.removePackRelationships(userGraphProps, packGraphProps);
 			}
 
 			return Promise.all([packUpdate, userUpdate]).then(() => {
@@ -211,25 +213,40 @@ class UserWorker extends Worker {
 
 	}
 
-	private updatePackRelationships(user: User, pack: Pack) {
+	private updatePackRelationships(userGraphAttrs: UserNodeAttributes, packGraphAttrs: PackNodeAttributes) {
+
+		let followsRelationshipAttributes = this.getRelationshipAttributes("FOLLOWS");
+
 		let prom1, prom2;
-		if (user.id === pack.ownerId) {
+		if (userGraphAttrs.id === packGraphAttrs.ownerId) {
 			/* If this user owns pack, then (user) -[:OWNS]-> (pack) */
-			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "OWNS"});
+			prom1 = this.graph.updateRelationship(userGraphAttrs, packGraphAttrs, this.getRelationshipAttributes("OWNS"));
 		} else {
 			/* Otherwise, the (user) -[:FOLLOWS]-> (pack's owner) */
-			prom1 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.ownerId, type: user.type}, {name: "FOLLOWS"});
+			prom1 = this.graph.updateRelationship(userGraphAttrs, packGraphAttrs, followsRelationshipAttributes);
 		}
 		/* User follows pack */
-		prom2 = this.graph.updateRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "FOLLOWS"});
+		prom2 = this.graph.updateRelationship(userGraphAttrs, packGraphAttrs, followsRelationshipAttributes);
 		return Promise.all([prom1, prom2]);
 	}
 
-	private removePackRelationships(user: User, pack: Pack) {
-		let prom1 = this.graph.removeRelationship({id: user.id, type: user.type}, {id: pack.id, type: pack.type}, {name: "FOLLOWS"});
-		let prom2 = this.graph.removeRelationship({id: user.id, type: user.type}, {id: pack.ownerId, type: user.type}, {name: "FOLLOWS"});
-		return Promise.all([prom1, prom2]);
+	private removePackRelationships(userGraphAttrs: UserNodeAttributes, packGraphAttrs: PackNodeAttributes) {
+		let followsRelationshipAttributes = this.getRelationshipAttributes("FOLLOWS");
+
+		let getFollowerPromise =  this.graph.removeRelationship(userGraphAttrs, packGraphAttrs, followsRelationshipAttributes).then( () => {
+			/* Check if the user is subscribed to anymore packs by the owner */
+			return this.graph.getFollowCountPacksByOwnerId(userGraphAttrs, packGraphAttrs,  followsRelationshipAttributes);
+		});
+
+		return getFollowerPromise.then( (followCount) => {
+			if (followCount === 0) {
+				this.graph.removeRelationship(userGraphAttrs, {id: packGraphAttrs.ownerId, type: userGraphAttrs.type}, followsRelationshipAttributes);
+			} else {
+				return followCount;
+			}
+		});
 	}
+
 
 	private sharePackItem (user: User, data: SharePackItemAttributes): Promise<any> {
 		user.incrementShareCount();
@@ -256,8 +273,8 @@ class UserWorker extends Worker {
 	 * @returns {Promise<string>} - Promise that resolves to a success message or an error
 	 */
 	private initiatePacks (user: User): Promise<any> {
-		let userProps = user.getTargetObjectProperties();
-		let graphUser =  this.graph.updateNode(this.getUserNodeAttributes(userProps));
+		let userGraphAttrs = this.getUserNodeAttributes(user.getTargetObjectProperties());
+		let graphUser =  this.graph.updateNode(userGraphAttrs);
 
 		let packPromises =  Promise.all([
 			user.initDefaultPack(),
@@ -265,28 +282,28 @@ class UserWorker extends Worker {
 			user.initRecentsPack()
 		]);
 
-		return graphUser.then(() => { return packPromises; }).then( (packArr: Pack[]) => {
+		return graphUser.then(() => { return packPromises; }).then( (packArr: PackAttributes[]) => {
 
-			let defPack = packArr[0];
-			let favPack = packArr[1];
-			let recPack = packArr[2];
+			let defPack = this.getPackNodeAttributes(packArr[0]);
+			let favPack = this.getPackNodeAttributes(packArr[1]);
+			let recPack = this.getPackNodeAttributes(packArr[2]);
 
 			/* Update relationships for default pack */
-			let defProm = this.updatePackRelationships(user, defPack);
+			let defProm = this.updatePackRelationships(userGraphAttrs, defPack);
 
 			/* Create graph object for favorite pack & then establish a relationship relationship */
-			let favProm = this.graph.updateNode(this.getPackNodeAttributes(favPack.toIndexingFormat()))
+			let favProm = this.graph.updateNode(favPack)
 				.then(() => {
-					return this.updatePackRelationships(user, favPack);
+					return this.updatePackRelationships(userGraphAttrs, favPack);
 				});
 
 			/* Create graph object for recent pack & create relationship */
-			let recProm =  this.graph.updateNode(this.getPackNodeAttributes(recPack.toIndexingFormat()))
+			let recProm =  this.graph.updateNode(recPack)
 				.then(() => {
-					return this.updatePackRelationships(user, recPack);
+					return this.updatePackRelationships(userGraphAttrs, recPack);
 				});
 
-			return Promise.all([ favProm, recProm]);
+			return Promise.all([defProm, favProm, recProm]);
 		});
 	}
 
@@ -297,10 +314,18 @@ class UserWorker extends Worker {
 		};
 	}
 
-	private getPackNodeAttributes(pack: IndexableObject): PackNodeAttributes {
+	private getPackNodeAttributes(pack: PackAttributes): PackNodeAttributes {
 		return {
 			id: pack.id,
-			type: pack.type
+			type: pack.type,
+			ownerId: pack.ownerId
+		};
+	}
+
+	private getRelationshipAttributes(name: string): RelationshipAttributes {
+		return {
+			name: name,
+			time_updated: new Date().toLocaleString()
 		};
 	}
 
