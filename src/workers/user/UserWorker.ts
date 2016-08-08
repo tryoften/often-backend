@@ -318,7 +318,7 @@ class UserWorker extends Worker {
 		return {
 			id: pack.id,
 			type: pack.type,
-			ownerId: pack.ownerId
+			ownerId: pack.owner.id
 		};
 	}
 
