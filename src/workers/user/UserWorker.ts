@@ -10,6 +10,7 @@ class UserWorkerTaskType extends String {
 	static InitiatePacks: UserWorkerTaskType = 'initiatePacks';
 	static CreateToken: UserWorkerTaskType = 'createToken';
 	static SharePackItem: UserWorkerTaskType = 'sharePackItem';
+	static UpdatePack: UserWorkerTaskType = 'updatePack';
 }
 
 class UserPackOperation extends String {
@@ -38,14 +39,21 @@ interface CreateTokenAttributes {}
 
 interface SharePackItemAttributes {
 	packId: string;
-	itemId: string;
-	itemType: MediaItemType;
+	item: {
+		id: string;
+		owner_id: string;
+		type: MediaItemType;
+	};
+}
+
+interface UpdatePackAttributes {
+	packId: string;
 }
 
 interface UserWorkerTask extends Task {
 	userId: string;
 	type: UserWorkerTaskType;
-	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes | SharePackItemAttributes);
+	data?: (EditUserPackItemsAttributes | EditUserPackSubscriptionAttributes | CreateTokenAttributes | SharePackItemAttributes | UpdatePackAttributes);
 }
 
 /* Adding / Removing Items from favorites and recents  */
@@ -58,7 +66,7 @@ class UserWorker extends Worker {
 	public process (task: UserWorkerTask, progress: Function, resolve: Function, reject: Function) {
 		console.log('UserWorker.process(): ', task._id);
 		if (!task.userId) {
-			reject("User Id not defined");
+			resolve("User Id not defined");
 			return;
 		}
 		new User({id: task.userId})
@@ -82,6 +90,9 @@ class UserWorker extends Worker {
 					case UserWorkerTaskType.SharePackItem:
 						return this.sharePackItem(user, <SharePackItemAttributes>task.data);
 
+					case UserWorkerTaskType.UpdatePack:
+						return this.updatePack(<UpdatePackAttributes>task.data);
+
 					default:
 						throw new Error('Invalid task type.');
 
@@ -93,6 +104,13 @@ class UserWorker extends Worker {
 				console.log('Err, ',err.stack, task._id );
 				reject(err);
 			});
+	}
+
+	private updatePack (data: UpdatePackAttributes): Promise<string> {
+		return new Pack({ id: data.packId }).syncData().then((syncedPack) => {
+			syncedPack.save();
+			return "Updating pack";
+		});
 	}
 
 	/**
@@ -199,8 +217,9 @@ class UserWorker extends Worker {
 			syncedPack.save();
 		});
 
-		let ItemClass = MediaItemType.toClass(data.itemType);
-		let updatedItem = new ItemClass({ id: data.itemId }).syncData().then((syncedItem: any) => {
+		let ItemClass = MediaItemType.toClass(data.item.type);
+		let updatedItem = new ItemClass({ id: data.item.id, owner_id: data.item.owner_id }).syncData().then((syncedItem: any) => {
+			console.log('sharing count');
 			syncedItem.incrementShareCount();
 			syncedItem.save();
 		});
@@ -222,7 +241,6 @@ class UserWorker extends Worker {
 			return 'Successfully initiated favorites, default and recents packs';
 		});
 	}
-
 
 
 	/**
