@@ -219,7 +219,6 @@ class UserWorker extends Worker {
 
 		let ItemClass = MediaItemType.toClass(data.item.type);
 		let updatedItem = new ItemClass({ id: data.item.id, owner_id: data.item.owner_id }).syncData().then((syncedItem: any) => {
-			console.log('sharing count');
 			syncedItem.incrementShareCount();
 			syncedItem.save();
 		});
