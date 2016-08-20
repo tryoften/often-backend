@@ -2,7 +2,7 @@ import { firebase as FirebaseConfig } from '../../config';
 import * as _ from 'underscore';
 import UserTokenGenerator from '../../Auth/UserTokenGenerator';
 import Worker, { Task } from '../Worker';
-import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, User } from '@often/often-core';
+import { SubscriptionAttributes, MediaItemType, MediaItemAttributes, Pack, PackAttributes, User } from '@often/often-core';
 
 class UserWorkerTaskType extends String {
 	static EditUserPackItems: UserWorkerTaskType = 'editUserPackItems';
@@ -48,6 +48,7 @@ interface SharePackItemAttributes {
 
 interface UpdatePackAttributes {
 	packId: string;
+	attributes: PackAttributes;
 }
 
 interface UserWorkerTask extends Task {
@@ -112,7 +113,7 @@ class UserWorker extends Worker {
 
 	private updatePack (data: UpdatePackAttributes): Promise<string> {
 		return new Pack({ id: data.packId }).syncData().then((syncedPack) => {
-			syncedPack.save();
+			syncedPack.save(data.attributes);
 			return "Updating pack";
 		});
 	}
@@ -165,11 +166,9 @@ class UserWorker extends Worker {
 					}
 
 					return `Added item ${syncedMediaItem.id} of type ${syncedMediaItem.type} to ${data.packType}`;
-
 				case UserPackOperation.remove:
 					syncedPack.removeItem(syncedMediaItem.toJSON());
 					return `Removed item ${syncedMediaItem.id} of type ${syncedMediaItem.type} from ${data.packType}`;
-
 				default:
 					throw new Error('Invalid pack type');
 			}
