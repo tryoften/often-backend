@@ -69,6 +69,7 @@ class UserWorker extends Worker {
 			resolve("User Id not defined");
 			return;
 		}
+
 		new User({id: task.userId})
 			.syncData()
 			.then( (model) => {
@@ -91,6 +92,9 @@ class UserWorker extends Worker {
 						return this.sharePackItem(user, <SharePackItemAttributes>task.data);
 
 					case UserWorkerTaskType.UpdatePack:
+						if (!task.data.packId) {
+							reject('Invalid pack id');
+						}
 						return this.updatePack(<UpdatePackAttributes>task.data);
 
 					default:
