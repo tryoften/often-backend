@@ -22,7 +22,7 @@ if (_.contains(argv._, 'image-resizer')) {
 }
 
 if (_.contains(argv._, 'notification')) {
-	let NotificationWorker = require('./workers/notification/NotificationWorker').default;
+	let NotificationWorker = require('./workers/notification/FirebaseNotificationWorker').default;
 	console.log('starting the notification-worker');
 	new NotificationWorker().start();
 }

@@ -9,10 +9,15 @@
 			"databaseURL": "https://often-prod.firebaseio.com"
 		},
 		"BaseURL": "https://often-prod.firebaseio.com",
-		"Secret": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY"
+		"Secret": "BM71BSNlBH3zRvzq5Kuku6Pw3WQzP4CgHa282JEY",
+		"Authorization": "AIzaSyAodf6OBeTZy1lhXKeM_G8t9c-HmwhG27k"
 	},
 	"elasticsearch": {
 		"BaseURL": "http://search1-elasticsearch-1-vm:9200"
+	},
+	"parse": {
+		"applicationId": "zOkdtEf6pbq3wHN7aTWVGe6tH236I6n934Wsr59g",
+		"restApiKey": "PPPWjedWWPkSEMP7WIW8LLsAGYjRBUmRAb8cVFXy"
 	},
 	"winston": {
 		"transports": [

@@ -21,6 +21,14 @@
 			},
 			"databaseURL": "https://often-dev.firebaseio.com"
 		},
+		"prod" : {
+			"serviceAccount": {
+				"projectId": "firebase-often-prod",
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCZ8FNCBHIZCLrd\nf7pO3Udi55eGpjViOGF35NcwSHZ/Xb3grDuJ3mxGTIHsgNuP3xgJyps6NNXZZ805\nnuwI2vmw/I9fnZqARxiXkwh9CiMTbkwVLZognkIcYMtbVKXeK9QAwpZZKZVXagK5\nfMw2QohTKjjO5hTavpzWrptCa47gr3Pc0qSYKsKYNGU6xmpiRi4kCwAObDzdI/ZW\niTNrBtzE6qNF81grMP8kU/NV27IghoiAhtTQ5LBRXyLRKN9HlXG+FCnc2T5UTBbr\nLLf/jfxAOAX83/UTwR8aiyqsVOs/6YIPlETiE2YGU6V9B30q9jvWTHLmSfczRAlW\nB7VNZAizAgMBAAECggEAM2fCldAgPeXhaOgnUgCovwlxW0CToRoMylm71l7MW1n1\nd1psg2yoIY2Y8V5Sc6ffQh3LWlOcef4k1TIRxh9BtG2Sfy6FEoMrXip2cjL5ZZq2\ng3f3+R6AGzPjlLserKNcJ2jThjDRsyAuirx3AUOUfJkj4UuJ+UYf37ztEfATBUpt\nPKY3uzisOJdQLD2C6g8urN0bIlWoktLhE9FLs1i+vuGooMp6N9zEiCzBuw433za4\nM8Jl/ohPaZhdM9xt3BRqmmZqrD2xrvPTwC42yeqn9qhybxDO1CZl2PH4iY7UfHbm\n6FJrCYjNCbZUiHKoplg/xl/htCoj0eB0mqNJjBvUcQKBgQDKsNxZtavQPVD31CgE\nIlURLoi1CIbiM6HAk23PveK0IGYwGDGOyPh2Rik67BLRs3LFWCO/qciVfENIVFOn\n/6o8oybOuLxmgl5/YccpgVuThVhlkUXzGpKUnfEOWOIugA6Oq90dzpWX8GSr7Z8A\nifT6bMXmC0/PRseOTjBAHrEeywKBgQDCbP6y1dub9EKH5qPWQinKaL5iGNkqmmbf\nw/3b2VpFNltxthcYs1TfgxA0BeN3SKfrCmk3CpB16Q5Aasa23BaA7jsSy8TO+BpQ\no1SbdsaGPTbOnpaU4gSg+h5PbRu1EopZvXd0m5gGLlGJAmR2NPrGEP28N9J3a3ue\n/Njk9Y1YuQKBgQCQfO83TBhEg9E6OZSlDcxSSTfOxVtR2LiPzQjUtGntOcNeuYBq\nZr0novA1PqBTuHYyU5h4QpHobgKQhvxzn/885pj9eBdlg73VVGBjKAGd8cqH7L1O\nhTzEkKqMLbRerY6zCbTAUMm22/kHzoYwHifydKPGT33/JlePDBG9Q6PDbQKBgAZL\nlSuhNQ0lqYnQ8/kaB1Rgc9mlSFLS0QXpyKx3qy6Whft2k+Te2Z6rFbk5f5X7KkS3\n/5QiqW7H7wgy7OA63BesnwkKxAKXkfKOd0zZWbA7By1FgUas0s2Li7OyqrUANq6V\nLer+prt8gHNZOnuBV6VWI4EWpZ/sQQJy2WsAcGUxAoGAamZ4+/ne1P0EiURwdopJ\ntzUc45K1Bz7T4qlb6cDfAA7MnD1s8t7V1aAINvmnQZ2Bpz5iSfUEVuUJsmPXBE6d\nYZfoDvkPiZInizQLGUQdwOw8GgiLNyQpWzKzIfYbN6N0gx60XbSoPg79MmPwBpNJ\nt9I4Z0mit3vciRnfMzWTZ6Q=\n-----END PRIVATE KEY-----\n",
+				"clientEmail": "often-prod-workers@firebase-often-prod.iam.gserviceaccount.com"
+			},
+			"databaseURL": "https://often-prod.firebaseio.com"
+		},
 		"BaseURL": "https://often-dev.firebaseio.com",
 		"Secret": "kOgz3FhY0HfxeE35HCDOKB9v5BSJ1QWWqje7Yid2",
 		"Authorization": "AIzaSyDzLC9dhfwC7wdfEdVcRyFH75bYDUha3Ms",
